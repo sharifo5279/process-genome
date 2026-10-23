@@ -1,0 +1,16 @@
+{
+  "name": "process-genome",
+  "private": true,
+  "type": "module",
+  "description": "Business Network Process Genome on Render: static site (site/) and the visitor stats service (server/), the same model as the Trading Grid Innovation Guide.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.mjs",
+    "test": "node --test server/visits.test.mjs"
+  },
+  "dependencies": {
+    "@ip-location-db/dbip-city-mmdb": "2.3.2026060513",
+    "maxmind": "5.0.7",
+    "pg": "8.23.1"
+  }
+}
