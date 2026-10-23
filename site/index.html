@@ -686,6 +686,11 @@
   .om-lpl { margin: 10px 0 0; padding-left: 20px; font-size: 12.5px; line-height: 17px; color: var(--pmu); }
   .om-lpl li { margin-bottom: 5px; } .om-lpl li::marker { font-weight: 800; color: var(--pai); }
   .om-s text { font-size: 11.5px; }
+
+  .om-exs { margin: 0; display: grid; gap: 8px; }
+  .om-exs div { background: var(--pcl); border-radius: 10px; padding: 9px 12px; }
+  .om-exs dt { font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--pai); }
+  .om-exs dd { margin: 3px 0 0; font-size: 12.5px; line-height: 17px; }
   /* Solution overview (retail) */
   .tgr {
     --bg: #FFFFFF; --fg: #101C2F; --muted: #3F4D62; --faint: #6B7689; --line: #E7EAEF; --line-2: #D5DCE6; --cloud: #F6F7F7; --card: #FFFFFF;
@@ -991,7 +996,7 @@
         <div>
           <h2 tabindex="-1">About the Process Genome</h2>
           <p class="sec-note">A reference model of B2B operations by industry. Use it to see how the work, the business processes, and the documents connect.</p>
-          <ol class="gx-ls"><li><a href="#" data-gv="om"><span class="gx-no">1</span><span class="gx-tx"><b>Operations map</b><span>Work areas, failure points, and stakeholders.</span></span><span class="gx-a">Open operations map</span></a></li><li><a href="#" data-gv="map"><span class="gx-no">2</span><span class="gx-tx"><b>Process Genome</b><span>Business processes and their documents, by industry.</span></span><span class="gx-a">Open Process Genome</span></a></li><li><a href="#" data-gv="sol"><span class="gx-no">3</span><span class="gx-tx"><b>Solution overview</b><span>Trading Grid capabilities mapped to each process.</span></span><span class="gx-a">View solution overview</span></a></li></ol>
+          <ol class="gx-ls"><li><a href="#" data-gv="om"><span class="gx-no">1</span><span class="gx-tx"><b>Operations map</b><span>Work areas, failure points, and stakeholders, common to all industries.</span></span><span class="gx-a">Open operations map</span></a></li><li><a href="#" data-gv="map"><span class="gx-no">2</span><span class="gx-tx"><b>Process Genome</b><span>Business processes and their documents, by industry.</span></span><span class="gx-a">Open Process Genome</span></a></li><li><a href="#" data-gv="sol"><span class="gx-no">3</span><span class="gx-tx"><b>Solution overview</b><span>Trading Grid capabilities mapped to each process.</span></span><span class="gx-a">View solution overview</span></a></li></ol>
         </div>
         <div class="gx-pv" id="gx-pv">
           <div class="gx-pvh"><div><p class="gx-e">Retail and CPG</p><b>Process Genome</b></div><div class="gx-chips" id="gx-chips" role="group" aria-label="Highlight a process"></div></div>
@@ -1003,11 +1008,11 @@
 
     <section class="sec std gx-ind" id="gx-ind">
       <h2 tabindex="-1">Industries</h2>
-      <p class="sec-note">Views available for each industry.</p>
+      <p class="sec-note">Views available for each industry. The operations map is common to all industries.</p>
       <div class="tbl">
         <table>
-          <thead><tr><th scope="col">Industry</th><th scope="col">Operations</th><th scope="col">Process Genome</th><th scope="col">Solution</th></tr></thead>
-          <tbody><tr data-k="retail"><td><a href="#retail" data-k="retail">Retail and CPG</a></td><td><a href="#retail/opsmap" data-gv="om" data-gk="retail">Operations map</a></td><td><a href="#retail/map" data-gv="map" data-gk="retail">Process Genome</a></td><td><a href="#retail/solution" data-gv="sol" data-gk="retail">Solution overview</a></td></tr><tr data-k="automotive"><td><a href="#automotive" data-k="automotive">Automotive</a></td><td><a href="#automotive/opsmap" data-gv="om" data-gk="automotive">Operations map</a></td><td><a href="#automotive/map" data-gv="map" data-gk="automotive">Process Genome</a></td><td><span class="gx-na">Not yet available</span></td></tr><tr data-k="manufacturing"><td><a href="#manufacturing" data-k="manufacturing">Manufacturing</a></td><td><a href="#manufacturing/opsmap" data-gv="om" data-gk="manufacturing">Operations map</a></td><td><a href="#manufacturing/processes" data-gv="proc" data-gk="manufacturing">Process Genome</a> <span class="gx-na">Process list</span></td><td><span class="gx-na">Not yet available</span></td></tr><tr data-k="banking"><td><a href="#banking" data-k="banking">Banking and treasury</a></td><td><a href="#banking/opsmap" data-gv="om" data-gk="banking">Operations map</a></td><td><a href="#banking/processes" data-gv="proc" data-gk="banking">Process Genome</a> <span class="gx-na">Process list</span></td><td><span class="gx-na">Not yet available</span></td></tr><tr data-k="healthcare"><td><a href="#healthcare" data-k="healthcare">Healthcare and pharma</a></td><td><a href="#healthcare/opsmap" data-gv="om" data-gk="healthcare">Operations map</a></td><td><a href="#healthcare/processes" data-gv="proc" data-gk="healthcare">Process Genome</a> <span class="gx-na">Process list</span></td><td><span class="gx-na">Not yet available</span></td></tr><tr data-k="logistics"><td><a href="#logistics" data-k="logistics">Transportation and logistics</a></td><td><a href="#logistics/opsmap" data-gv="om" data-gk="logistics">Operations map</a></td><td><a href="#logistics/processes" data-gv="proc" data-gk="logistics">Process Genome</a> <span class="gx-na">Process list</span></td><td><span class="gx-na">Not yet available</span></td></tr></tbody>
+          <thead><tr><th scope="col">Industry</th><th scope="col">Process Genome</th><th scope="col">Solution</th></tr></thead>
+          <tbody><tr data-k="retail"><td><a href="#retail" data-k="retail">Retail and CPG</a></td><td><a href="#retail/map" data-gv="map" data-gk="retail">Process Genome</a></td><td><a href="#retail/solution" data-gv="sol" data-gk="retail">Solution overview</a></td></tr><tr data-k="automotive"><td><a href="#automotive" data-k="automotive">Automotive</a></td><td><a href="#automotive/map" data-gv="map" data-gk="automotive">Process Genome</a></td><td><span class="gx-na">Not yet available</span></td></tr><tr data-k="manufacturing"><td><a href="#manufacturing" data-k="manufacturing">Manufacturing</a></td><td><a href="#manufacturing/processes" data-gv="proc" data-gk="manufacturing">Process Genome</a> <span class="gx-na">Process list</span></td><td><span class="gx-na">Not yet available</span></td></tr><tr data-k="banking"><td><a href="#banking" data-k="banking">Banking and treasury</a></td><td><a href="#banking/processes" data-gv="proc" data-gk="banking">Process Genome</a> <span class="gx-na">Process list</span></td><td><span class="gx-na">Not yet available</span></td></tr><tr data-k="healthcare"><td><a href="#healthcare" data-k="healthcare">Healthcare and pharma</a></td><td><a href="#healthcare/processes" data-gv="proc" data-gk="healthcare">Process Genome</a> <span class="gx-na">Process list</span></td><td><span class="gx-na">Not yet available</span></td></tr><tr data-k="logistics"><td><a href="#logistics" data-k="logistics">Transportation and logistics</a></td><td><a href="#logistics/processes" data-gv="proc" data-gk="logistics">Process Genome</a> <span class="gx-na">Process list</span></td><td><span class="gx-na">Not yet available</span></td></tr></tbody>
         </table>
       </div>
     </section>
@@ -1144,7 +1149,7 @@
   <div class="pm-frame" id="om-frame">
   <div class="pm-stage" id="om-stage">
     <div class="pm-top">
-      <div class="pm-ttl"><p id="om-ind">All industries</p><h2 id="om-h">Operations map</h2></div>
+      <div class="pm-ttl"><p>All industries</p><h2 id="om-h">Operations map</h2></div>
       <div class="pm-seg" role="group" aria-label="Operations view">
         <button type="button" data-om="map" aria-pressed="true">Work areas</button>
         <button type="button" data-om="st" aria-pressed="false">Stakeholders</button>
@@ -1596,7 +1601,7 @@ var TRANSLATE = [
     if (k === "pharma") k = "healthcare";
     if (k === "processes") return { k: "all", v: "proc" };
     if (KEYS.indexOf(k) === -1) return null;
-    return { k: k, v: { processes: "proc", solution: "sol", map: "map", opsmap: "om" }[parts[1]] || "ops" };
+    var v = { processes: "proc", solution: "sol", map: "map", opsmap: "om" }[parts[1]] || "ops"; return { k: v === "om" ? "all" : k, v: v };
   }
   document.addEventListener("click", function (e) {
     var a = e.target.closest("a[data-k]"); if (!a) return;
@@ -2139,6 +2144,7 @@ var TRANSLATE = [
     var sl = areas.querySelector("a[data-sol]"); if (sl) sl.hidden = k !== "retail";
     var pl = areas.querySelector('a[data-v="proc"]'); if (pl) pl.hidden = !!GENOME[k];
     var fl = document.querySelector('footer a[data-target="processes"]'); if (fl) fl.parentNode.hidden = !!GENOME[k];
+    var om = areas.querySelector("a[data-om]"); if (om) om.hidden = k !== "all";
     var n = [].filter.call(areas.querySelectorAll("a"), function (x) { return !x.hidden; }).length;
     areas.style.setProperty("--n", n);
   }
@@ -2449,15 +2455,15 @@ var TRANSLATE = [
     return '<ul class="pp-list om-who">' + x.map(function (l) { return '<li><button type="button" data-s="' + esc(l.s) + '"><span class="om-rl r-' + l.role + '"></span><span>' + esc(l.s) + ' <em>' + OMROLE[l.role] + '</em><small>' + esc(l.why) + '</small></span></button></li>'; }).join("") + '</ul>';
   }
   function omPanel() {
-    var h, ind = curK !== "all" ? data(curK).label : "";
+    var h;
     if (omA >= 0) {
-      var a = AREAS[omA], k = omGroup(omA), ex = ind && EXAMPLES[a.n] ? EXAMPLES[a.n][curK] : "", L = omL(omA);
+      var a = AREAS[omA], k = omGroup(omA), L = omL(omA), exs = KEYS.filter(function (x) { return x !== "all" && EXAMPLES[a.n] && EXAMPLES[a.n][x]; });
       h = '<p class="pp-e">Work area ' + (omA + 1) + ' · ' + esc(GROUPS[k].name) + '</p><h3>' + esc(a.n) + '</h3><p class="pp-lead">' + esc(a.line) + '</p>' +
         '<h4>Activities</h4><ul class="om-ul">' + a.does.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join("") + '</ul>' +
         (OMLOOP[a.n] ? '<h4>Testing and certification lifecycle</h4>' + omLoop(OMLOOP[a.n]) : '') +
         '<h4>Failure point</h4><div class="om-fp">' + esc(a.breaks) + '</div>' +
         '<h4>Inside the company</h4>' + omWho(L, "in") + '<h4>Outside the company</h4>' + omWho(L, "ex") +
-        (ex ? '<h4>' + esc(ind) + ' example</h4><div class="om-ex">' + esc(ex) + '</div>' : '');
+        (exs.length ? '<h4>Industry examples</h4><dl class="om-exs">' + exs.map(function (x) { return '<div><dt>' + esc(data(x).label) + '</dt><dd>' + esc(EXAMPLES[a.n][x]) + '</dd></div>'; }).join("") + '</dl>' : '');
     } else if (omS) {
       var side = omSide(omS), Lt = omLit(), by = { owner: [], contributor: [], affected: [] };
       AREAS.forEach(function (x, i) { omL(i).forEach(function (l) { if (l.s === omS) by[l.role].push([i, l.why]); }); });
@@ -2469,7 +2475,7 @@ var TRANSLATE = [
         }).join("") +
         (other.length ? '<h4>' + (side === "in" ? "Outside parties in these areas" : "Internal teams in these areas") + '</h4><ul class="pp-list om-who">' + other.map(function (t) { return '<li><button type="button" data-s="' + esc(t) + '"><span class="om-rl"></span><span>' + esc(t) + '<small>' + esc(OMDESC[t]) + '</small></span></button></li>'; }).join("") + '</ul>' : '');
     } else {
-      h = '<p class="pp-e">' + esc(ind || "All industries") + '</p><h3>' + (omMode === "map" ? "Work areas" : "Stakeholders") + '</h3><p class="pp-lead">' +
+      h = '<p class="pp-e">All industries</p><h3>' + (omMode === "map" ? "Work areas" : "Stakeholders") + '</h3><p class="pp-lead">' +
         (omMode === "map" ? "The recurring work of a B2B and EDI operations team, grouped by purpose. Select a work area to see its activities, stakeholders, and failure point."
           : "Lines connect each work area to the teams inside the company and the parties outside it. Select any item to trace it across all three columns.") + '</p>' +
         (omMode === "st" ? '<h4>Line roles</h4><ul class="om-key"><li><span class="om-rl r-owner"></span><span><b>Owner</b> Accountable for the business outcome</span></li><li><span class="om-rl r-contributor"></span><span><b>Contributor</b> Supplies inputs or does part of the work</span></li><li><span class="om-rl r-affected"></span><span><b>Affected</b> Bears the impact and is kept informed</span></li></ul><p class="om-note">The EDI team runs every work area and is not shown as a stakeholder.</p>' : '') +
@@ -2485,7 +2491,6 @@ var TRANSLATE = [
   }
   function omOpen() {
     if (!omBuilt) omBuild();
-    document.getElementById("om-ind").textContent = curK !== "all" ? data(curK).label : "All industries";
     omEl.hidden = false; omFit(); omApply();
   }
   function omClose() {
@@ -2519,6 +2524,7 @@ var TRANSLATE = [
     var c = e.target.closest("[data-gv]"); if (!c) return;
     e.preventDefault();
     var v = c.getAttribute("data-gv"), k = c.getAttribute("data-gk") || curK;
+    if (v === "om") k = "all";
     if (v === "map" && !GENOME[k]) v = "proc";
     if (v === "sol" && k !== "retail") k = "retail";
     if (v === "proc" && GENOME[k]) v = "map";
