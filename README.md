@@ -7,6 +7,9 @@
 
 Master copy: the claude.ai artifact build. `site/index.html` is generated from it, never edited by hand.
 
+Command Center (Retail and CPG console and Product overlay) is not in the master yet. Until it is, apply it to each build with
+`python3 tools/command-center/apply.py site/index.html`.
+
 ## Visitor stats (on hold)
 Same model as the Trading Grid Innovation Guide (sharifo5279/tg-innovation-guide), so the Process Genome can join the
 2027 H1 guide without changing how it is counted:

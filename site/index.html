@@ -926,6 +926,100 @@
   #soon.on { opacity: 1; transform: translate(-50%, 0); }
   @media (max-width: 1100px) { .gx-sp { grid-template-columns: 1fr; gap: 28px; } .gx-sp h2 { white-space: normal; } }
   @media (max-width: 560px) { .gx-ls a { grid-template-columns: 34px minmax(0, 1fr); } .gx-a { grid-column: 2; } }
+  /* Product overlay */
+  .pm-act .pm-ov[hidden] { display: none; }
+  .pv-lad { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pv-lad button { display: grid; gap: 2px; text-align: left; padding: 8px 10px; }
+  .pv-lad button[aria-pressed="true"] { padding: 7px 9px; }
+  .pv-def { margin-top: 10px; font-size: 13px; line-height: 19px; color: var(--pmu); }
+  .pv-key { margin-top: 8px; }
+  .oc.pv .pm-more { margin-top: 12px; }
+  .pp-list.pv-list button { grid-template-columns: 34px minmax(0, 1fr); }
+  .pv-t { display: grid; place-items: center; height: 22px; border: 1px solid var(--pl2); border-radius: 6px; font-size: 10.5px; font-weight: 800; color: var(--pai); }
+  .pv-t.pv-n { width: 22px; border: 2px solid var(--pa); border-radius: 999px; }
+  .pm.pv .pt .odp:not(:empty) { font-size: 9.5px; letter-spacing: 0.02em; }
+
+  /* Command Center console */
+  .cc { --ok: #156615; --wn: #FAAD1F; --cr: #B11206; --okt: #D9EFD9; --wnt: #FDE7C0; --crt: #F6D7D4; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cc { --ok: #5CC45C; --cr: #FF7A6E; --okt: rgba(92, 196, 92, 0.16); --wnt: rgba(250, 173, 31, 0.20); --crt: rgba(255, 122, 110, 0.18); } }
+  :root[data-theme="dark"] .cc { --ok: #5CC45C; --cr: #FF7A6E; --okt: rgba(92, 196, 92, 0.16); --wnt: rgba(250, 173, 31, 0.20); --crt: rgba(255, 122, 110, 0.18); }
+  .cc-asof { position: absolute; right: 24px; top: 88px; margin: 0; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pfa); }
+  .cc-mods { font-size: 12px; font-weight: 600; color: var(--pmu); white-space: nowrap; }
+  .cc-main { position: absolute; left: 24px; top: 128px; width: 1040px; height: 666px; display: flex; flex-direction: column; gap: 12px; }
+  .cc-kpi { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+  .cc-k { padding: 10px 14px; border: 1px solid var(--pl); border-radius: 12px; background: var(--pc); min-width: 0; }
+  .cc-k.hi { border: 2px solid var(--pa); padding: 9px 13px; }
+  .cc-k span { display: block; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--pmu); }
+  .cc-k b { display: block; margin-top: 2px; font-size: 24px; line-height: 28px; font-weight: 800; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+  .cc-k small { display: block; font-size: 11.5px; line-height: 15px; color: var(--pmu); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-bd { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--pl); border-radius: 14px; background: var(--pc); overflow: hidden; }
+  .cc-hd, .cc-r { display: grid; align-items: center; gap: 12px; padding: 0 16px; }
+  .cc-bd.ops .cc-hd, .cc-bd.ops .cc-r { grid-template-columns: 12px 232px minmax(0, 1fr) 64px 76px 64px; }
+  .cc-bd.biz .cc-hd, .cc-bd.biz .cc-r { grid-template-columns: 12px 232px minmax(0, 1fr) 92px 150px; }
+  .cc-hd { flex: none; height: 30px; border-bottom: 1px solid var(--pl); background: var(--pcl); font-size: 10.5px; line-height: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pmu); }
+  .cc-hd .r, .cc-n { text-align: right; }
+  .cc-rows { flex: 1 1 0; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .cc-g { padding: 6px 16px 1px; font-size: 10.5px; line-height: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pa); }
+  .cc-r { width: 100%; height: 38px; border: 0; border-top: 1px solid var(--pl); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .cc-g + .cc-r { border-top: 0; }
+  .cc-r:hover { background: var(--psel); }
+  .cc-r[aria-pressed="true"] { background: var(--pc); box-shadow: inset 0 0 0 2px var(--pa); }
+  .cc-r.dim { opacity: 0.35; }
+  .cc-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); }
+  .s-w .cc-dot { background: var(--wn); }
+  .s-c .cc-dot { background: var(--cr); box-shadow: 0 0 0 4px var(--crt); animation: ccPulse 1.6s ease-in-out infinite; }
+  @keyframes ccPulse { 50% { box-shadow: 0 0 0 7px var(--crt); } }
+  .cc-pn { min-width: 0; }
+  .cc-pn b { display: block; font-size: 13px; line-height: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-pn small { display: block; font-size: 11px; line-height: 14px; color: var(--pmu); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-trk { display: flex; gap: 4px; min-width: 0; }
+  .cc-sg { flex: 1 1 0; min-width: 0; height: 24px; display: block; line-height: 22px; text-align: center; padding: 0 4px; border: 1px solid transparent; border-radius: 6px; background: var(--okt); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-sg.w { background: var(--wnt); border-color: var(--wn); }
+  .cc-sg.c { background: var(--crt); border-color: var(--cr); color: var(--cr); }
+  .cc-sg.na { background: transparent; border: 1px dashed var(--pl2); color: var(--pfa); font-weight: 600; }
+  .cc-n { font-size: 13px; line-height: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cc-n em { font-style: normal; font-weight: 500; color: var(--pfa); }
+  .cc-ms small { display: block; font-size: 11px; line-height: 14px; font-weight: 500; color: var(--pmu); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-lg { flex: none; display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 16px; border-top: 1px solid var(--pl); font-size: 11.5px; line-height: 16px; color: var(--pmu); }
+  .cc-lg span { display: inline-flex; align-items: center; gap: 6px; }
+  .cc-lg i { width: 18px; height: 10px; border-radius: 3px; border: 1px solid transparent; }
+  .cc-lg i.ok { background: var(--okt); }
+  .cc-lg i.w { background: var(--wnt); border-color: var(--wn); }
+  .cc-lg i.c { background: var(--crt); border-color: var(--cr); }
+  .cc-lg i.na { border: 1px dashed var(--pl2); }
+  .pp-list.cc-q button { grid-template-columns: 4px minmax(0, 1fr) auto; align-items: stretch; gap: 10px; }
+  .cc-q i { border-radius: 2px; background: var(--wn); }
+  .cc-q .s-c i { background: var(--cr); }
+  .cc-q .s-ok i { background: var(--ok); }
+  .cc-q .s-ok > span { color: var(--pmu); }
+  .cc-q em { align-self: center; font-style: normal; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cc-e { display: inline-flex; align-items: center; gap: 6px; }
+  .cc-e i, .cc-st i, .cc-steps i { width: 8px; height: 8px; border-radius: 50%; background: var(--wn); flex: none; }
+  .cc-e.s-c i, .cc-st.s-c i, .cc-steps .s-c i { background: var(--cr); }
+  .cc-e.s-ok i, .cc-st.s-ok i, .cc-steps .s-ok i { background: var(--ok); }
+  .cc-steps .s-na i { background: transparent; border: 1px dashed var(--pfa); }
+  .cc-e.s-c { color: var(--cr); }
+  .cc-st { display: inline-flex; align-items: center; gap: 6px; }
+  .cc-code { margin-left: 4px; font-size: 12px; font-weight: 700; color: var(--pai); }
+  .cc-ev { list-style: none; margin: 0; padding: 0 0 0 10px; border-left: 2px solid var(--pl); display: grid; gap: 8px; }
+  .cc-ev li { display: grid; gap: 1px; font-size: 13px; line-height: 18px; }
+  .cc-ev time { font-size: 11.5px; font-weight: 700; color: var(--pmu); font-variant-numeric: tabular-nums; }
+  .cc-tx { margin: 0; font-size: 13px; line-height: 19px; }
+  .cc-act { padding: 12px; border: 2px solid var(--pa); border-radius: 12px; background: var(--pc); }
+  .cc-act p { margin: 0; font-size: 13px; line-height: 19px; }
+  .cc-act .pp-key { margin-top: 6px; }
+  .cc-act.done { border-color: var(--ok); }
+  .cc-btns { display: flex; gap: 8px; margin-top: 10px; }
+  .cc-ok { background: var(--pa); border-color: var(--pa); color: var(--pc); }
+  .cc-ok:hover { background: var(--pai); border-color: var(--pai); color: var(--pc); }
+  .pp a[data-gv] { color: var(--pai); font-weight: 600; }
+  .cc-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .cc-steps li { display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 10px; align-items: start; }
+  .cc-steps li i { margin-top: 5px; }
+  .cc-steps b { display: block; font-size: 13px; line-height: 18px; }
+  .cc-steps small { display: block; font-size: 12px; line-height: 16px; color: var(--pmu); }
+  @media (prefers-reduced-motion: reduce) { .s-c .cc-dot { animation: none; } }
+  .pm .pm-ill { display: none; }
 </style>
 
 <a class="skip" href="#content">Skip to content</a>
@@ -1022,6 +1116,7 @@
       <a href="#all/opsmap" data-v="om" data-om><b>Operations map</b><span>Work areas and stakeholders on one screen. Desktop only.</span></a>
       <a href="#all/processes" data-v="proc"><b>Process Genome</b><span>Business processes and the documents behind each step</span></a>
       <a href="#retail/map" data-v="map" data-map hidden><b>Process Genome</b><span>Processes and documents on one interactive map. Desktop only.</span></a>
+      <a href="#retail/command" data-v="cc" data-cc hidden><b>Command Center</b><span>Process health, findings and actions. Desktop only.</span></a>
       <a href="#retail/solution" data-v="sol" data-sol hidden><b>Solution overview</b><span>Trading Grid for Retail and CPG</span></a>
     </nav>
     <div id="v-ops">
@@ -1153,6 +1248,7 @@
       </div>
       <div class="pm-act">
 <button type="button" class="pm-btn pm-ov" id="pm-ovt" aria-pressed="false"><span class="sw" aria-hidden="true"></span><span>Strategy overlay</span></button>
+<button type="button" class="pm-btn pm-ov" id="pm-pvt" aria-pressed="false" hidden><span class="sw" aria-hidden="true"></span><span>Product overlay</span></button>
         <button type="button" class="pm-btn ic" id="pm-fs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
       </div>
     </div>
@@ -1183,6 +1279,38 @@
 </div>
 </div>
 
+<div class="vmap" id="v-cc" hidden>
+<div class="wrap map-areas" id="cc-areas"></div>
+<div class="pm cc" id="cc" tabindex="-1" lang="en" role="region" aria-labelledby="cc-h" hidden>
+  <div class="pm-frame" id="cc-frame">
+  <div class="pm-stage" id="cc-stage">
+    <div class="pm-top">
+      <div class="pm-ttl"><p>Retail and CPG</p><h2 id="cc-h">Command Center</h2></div>
+      <div class="pm-seg" role="group" aria-label="View for">
+        <button type="button" data-per="ops" aria-pressed="true">Operations</button>
+        <button type="button" data-per="biz" aria-pressed="false">Business</button>
+      </div>
+      <div class="pm-act">
+        <span class="cc-mods">Integration Monitor · Performance Monitor</span>
+        <button type="button" class="pm-btn" data-gv="map" data-gk="retail">Open Process Genome</button>
+        <button type="button" class="pm-btn ic" id="cc-fs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      </div>
+    </div>
+    <div class="pm-chips" id="cc-chips" role="group" aria-label="Lifecycle stage"></div>
+    <p class="cc-asof">Illustrative data · As of 08:40</p>
+    <div class="cc-main" id="cc-main"></div>
+    <aside class="pm-panel" aria-live="polite"><div class="pp" id="cc-pp"></div></aside>
+  </div>
+  </div>
+  <div class="pm-small">
+    <div>
+      <h2>Desktop screen required</h2>
+      <p>Command Center is available on desktop and laptop screens. Open this page on a larger screen to use it.</p>
+      <button type="button" class="pm-btn" id="cc-back">View overview</button>
+    </div>
+  </div>
+</div>
+</div>
 <div class="vmap" id="v-om" hidden>
 <div class="wrap map-areas" id="om-areas"></div>
 <div class="pm om" id="om" tabindex="-1" lang="en" role="region" aria-labelledby="om-h" hidden>
@@ -1475,23 +1603,24 @@ var TRANSLATE = [
 
   /* Views */
   var vOps = document.getElementById("v-ops"), vProc = document.getElementById("v-proc"), areas = document.getElementById("areas");
-  function setHash() { try { history.replaceState(history.state, "", "#" + curK + ({ proc: "/processes", sol: "/solution", map: "/map", om: "/opsmap" }[curV] || "")); } catch (err) {} }
-  var vSol = document.getElementById("v-sol"), vMap = document.getElementById("v-map"), gHero = document.getElementById("overview"), gLayout = document.querySelector(".wrap.layout"), mkAreas = document.getElementById("mk-areas"), mapAreas = document.getElementById("map-areas"), vOm = document.getElementById("v-om"), omAreas = document.getElementById("om-areas"), gContent = document.getElementById("content");
+  function setHash() { try { history.replaceState(history.state, "", "#" + curK + ({ proc: "/processes", sol: "/solution", map: "/map", om: "/opsmap", cc: "/command" }[curV] || "")); } catch (err) {} }
+  var vSol = document.getElementById("v-sol"), vMap = document.getElementById("v-map"), gHero = document.getElementById("overview"), gLayout = document.querySelector(".wrap.layout"), mkAreas = document.getElementById("mk-areas"), mapAreas = document.getElementById("map-areas"), vOm = document.getElementById("v-om"), omAreas = document.getElementById("om-areas"), vCc = document.getElementById("v-cc"), ccAreas = document.getElementById("cc-areas"), gContent = document.getElementById("content");
   function setView(v) {
-    if ((v === "sol" && curK !== "retail" && curK !== "automotive" && curK !== "banking") || (v === "map" && !GENOME[curK])) v = "ops";
+    if ((v === "sol" && curK !== "retail" && curK !== "automotive" && curK !== "banking") || (v === "map" && !GENOME[curK]) || (v === "cc" && curK !== "retail")) v = "ops";
     if (v === "proc" && GENOME[curK]) v = "ops";
     if (curK !== "all" && (v === "ops" || v === "om")) v = GENOME[curK] ? "map" : "proc";
-    var prev = curV, full = v === "sol" || v === "map" || v === "om";
+    var prev = curV, full = v === "sol" || v === "map" || v === "om" || v === "cc";
     curV = v;
     toc.querySelector(".tt-m").textContent = v === "proc" ? "Process Genome" : "Overview";
     vOps.hidden = v !== "ops"; vProc.hidden = v !== "proc";
     if (v === "sol") { window.TGR_K = curK; if (window.TGR_RENDER) window.TGR_RENDER(curK); }
-    vSol.hidden = v !== "sol"; vMap.hidden = v !== "map"; vOm.hidden = v !== "om"; gHero.hidden = full; gLayout.hidden = full;
-    var host = v === "sol" ? mkAreas : v === "map" ? mapAreas : v === "om" ? omAreas : gContent;
+    vSol.hidden = v !== "sol"; vMap.hidden = v !== "map"; vOm.hidden = v !== "om"; vCc.hidden = v !== "cc"; gHero.hidden = full; gLayout.hidden = full;
+    var host = v === "sol" ? mkAreas : v === "map" ? mapAreas : v === "om" ? omAreas : v === "cc" ? ccAreas : gContent;
     if (areas.parentNode !== host) { if (host === gContent) gContent.insertBefore(areas, gContent.firstChild); else host.appendChild(areas); }
     if (full && prev !== v) window.scrollTo({ top: 0 });
     if (v === "map") pmOpen(); else pmClose();
     if (v === "om") omOpen(); else omClose();
+    if (v === "cc") ccOpen(); else ccClose();
     areas.querySelectorAll("a[data-v]").forEach(function (a) { if (a.getAttribute("data-v") === v) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
     setHash(); drawFlows(); refreshSpy();
   }
@@ -1655,7 +1784,7 @@ var TRANSLATE = [
     if (k === "processes") return { k: "all", v: "proc" };
     if (KEYS.indexOf(k) === -1) return null;
     if (SOON[k]) return { k: "all", v: "ops" };
-    var v = { processes: "proc", solution: "sol", map: "map", opsmap: "om" }[parts[1]] || "ops"; return { k: v === "om" ? "all" : k, v: v };
+    var v = { processes: "proc", solution: "sol", map: "map", opsmap: "om", command: "cc" }[parts[1]] || "ops"; return { k: v === "om" ? "all" : k, v: v };
   }
   document.addEventListener("click", function (e) {
     var a = e.target.closest("a[data-k]"); if (!a) return;
@@ -2032,7 +2161,7 @@ var TRANSLATE = [
           return '<li' + (on ? ' class="on"' : '') + '><button type="button" data-ps="' + (k + 1) + '" aria-expanded="' + on + '"><i>' + (k + 1) + '</i><span><b>' + esc(s[0]) + '</b><span>' + esc(s[1]) + ' from ' + esc(lc(p.lanes[s[2]])) + '</span></span></button>' +
             (on ? '<div class="pp-sd"><p><b>What happens</b>' + esc(s[3]) + '</p><p><b>Rules that bite</b>' + esc(s[4]) + '</p><p><b>EDI team work</b>' + esc(s[5]) + '</p><p><b>If it fails</b>' + esc(s[6]) + '</p></div>' : '') + '</li>';
         }).join("") + '</ol><p class="pp-hint">Left and right arrow keys move between steps. Select All to leave this process.</p>';
-    } else if (pmOv !== "off" && pmMode === "pt") {
+    } else if ((pmOv !== "off" || pmPvOn()) && pmMode === "pt") {
       h = "";
     } else {
       var t = { pt: ["Document types", "Each tile is one document type, grouped by family in flow order. Select a process to light up its documents. Select a tile to open it."],
@@ -2049,7 +2178,7 @@ var TRANSLATE = [
         }).join("") + '</ul>';
       }
     }
-    pmPP.innerHTML = (pmOv !== "off" && pmMode === "pt" ? pmOvCard() : "") + h;
+    pmPP.innerHTML = (pmPvOn() ? pmPvCard() : pmOv !== "off" && pmMode === "pt" ? pmOvCard() : "") + h;
     pmLift();
   }
 
@@ -2091,7 +2220,7 @@ var TRANSLATE = [
     var G = GENOME[k]; if (!G || pmK === k) return;
     pmK = k; PMLABEL = G.label; PMCODEKEY = G.codeKey; PMFAM = G.fam; PMEL = G.el; PMELC = {}; PMEL.forEach(function (e) { PMELC[e[1]] = e; });
     PMROWS = G.rows; PMSHORT = G.short; PMSENDER = G.sender; PMHUB = G.hub; PMNET = G.net; PMLINE = G.line; PMOV = G.ov; PMSK = G.sk || {}; PMP = PROCESSES[k]; PMSTDF = G.stdf || null; PMTOKF = G.tok || null; PMKEY2 = G.lineKey || "EDIFACT message";
-    pmP = null; pmE = null; pmOv = "off"; pmOvLast = "connect"; pmBuilt = false; pmPos = {};
+    pmP = null; pmE = null; pmOv = "off"; pmOvLast = "connect"; pmPv = "off"; pmBuilt = false; pmPos = {};
   }
   function pmBand(c) {
     var o = PMOV[pmOv]; if (!o) return "";
@@ -2157,17 +2286,163 @@ var TRANSLATE = [
       '<div class="oc-k"><b>Shading: ' + esc(o.key.toLowerCase()) + '</b><span>' + pmBars("h", true) + '</span><span>' + pmBars("m", true) + '</span><span>' + pmBars("l", true) + '</span></div>' +
       (pmOv === "extend" ? '<p class="pp-key">Numbers on tiles mark decision points.</p>' : '') + '</div>';
   }
+  /* Command Center data for Retail and CPG. Illustrative values for the concept preview. */
+  var CCF = [
+    { id: "f1", p: 0, st: 2, sev: "c", mod: "Performance Monitor", how: "Rule and prediction", pil: "Extend", dp: 2, partner: "Northfield Stores", n: 14, val: 8400, at: "07:10",
+      ot: "Ship notices not sent for 14 shipments", os: "Carrier pickup confirmed at 06:10. No 856 sent, and the loads arrive at the DC in about 5 hours.",
+      bt: "14 shipments at risk of chargebacks", bs: "Northfield Stores charges for each shipment that arrives before its ship notice.",
+      ev: [["06:10", "Carrier pickup confirmed for 14 loads"], ["06:12", "Shipments closed in the ERP"], ["07:10", "Rule breached: no 856 within 1 hour of pickup"], ["08:05", "Predicted arrival before ship notice for all 14 loads"]],
+      cause: "The ERP shipment export stopped after a release at 05:45. Orders and invoices are unaffected.",
+      act: "Build the 14 ship notices from carrier pickup and pack data, then send them to Northfield Stores.", appr: "EDI operations lead",
+      area: "Missing documents", who: ["Supply chain", "IT and ERP", "Customer service"] },
+    { id: "f2", p: 0, st: 0, sev: "c", mod: "Integration Monitor", how: "Anomaly", pil: "Optimize", partner: "Harbor Grocers", n: 74, val: 182000, at: "06:30",
+      ot: "Order volume 64% below projection", os: "Harbor Grocers sent 41 purchase orders since 05:00 against 115 projected. Last interchange at 05:52.",
+      bt: "Harbor Grocers orders down 64% this morning", bs: "About $182,000 in expected orders has not arrived in this window.",
+      ev: [["05:52", "Last 850 interchange received"], ["06:30", "Volume fell below the projected band"], ["06:41", "AS2 receipts from the partner failing signature checks"], ["07:15", "Anomaly confirmed across two order windows"]],
+      cause: "The partner rotated its AS2 signing certificate. Messages fail signature checks at the connection.",
+      act: "Request the new certificate from Harbor Grocers, load it, and ask the partner to resend orders since 05:52.", appr: "EDI operations lead",
+      area: "Certificate management", who: ["Customer service", "Information security", "Sales and key accounts"] },
+    { id: "f3", p: 0, st: 1, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Westline Home", n: 37, val: 3700, at: "05:00",
+      ot: "37 acknowledgments past the 24-hour window", os: "Purchase orders received yesterday have no 855. The retailer fines late acknowledgments.",
+      bt: "37 orders not confirmed with Westline Home", bs: "Unconfirmed orders risk cancellation and a $100 late-acknowledgment fine each.",
+      ev: [["Yesterday 04:58", "37 purchase orders received and loaded"], ["05:00", "24-hour acknowledgment window closed"], ["05:05", "Orders found on credit hold in the ERP"]],
+      cause: "The orders sit in ERP credit review. Acknowledgments are generated only after release.",
+      act: "Ask order management to release the orders, or send acknowledgments with a hold status.", appr: "Customer service lead",
+      area: "Fix routing", who: ["Customer service", "Finance and treasury"] },
+    { id: "f4", p: 0, st: 4, sev: "c", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Northfield Stores", n: 112, val: 46200, at: "04:20",
+      ot: "112 invoices rejected on unit price", os: "824 application advice cites a price mismatch on 9 items since Monday's cost change.",
+      bt: "$46,200 in invoices held for price mismatch", bs: "Northfield Stores will not pay the invoices until prices match the order.",
+      ev: [["Monday", "New costs sent in the 832 price catalog"], ["04:20", "First 824 rejection on unit price"], ["07:30", "112 rejections on the same 9 items"]],
+      cause: "The new costs were sent to the retailer but not loaded into billing.",
+      act: "Correct the billing cost for 9 items and resend the 112 invoices.", appr: "Billing and pricing",
+      area: "Rejections", who: ["Finance and treasury", "Master data"] },
+    { id: "f5", p: 3, st: 1, sev: "w", mod: "Performance Monitor", how: "Prediction", pil: "Extend", dp: 3, partner: "Northfield Stores", n: 23, val: 12750, at: "Yesterday",
+      ot: "23 debit memos without backup", os: "Debit memos cite late ship notices. Proof of delivery is not attached to 17 of them.",
+      bt: "$12,750 in deductions open, 8 days to dispute", bs: "17 deductions have delivery evidence and can be disputed. 6 are valid.",
+      ev: [["Yesterday", "23 debit memos received in the 812"], ["Yesterday", "Matched to 23 shipments and their 856 timestamps"], ["06:00", "Delivery evidence found for 17 shipments"]],
+      cause: "The retailer counted the ship notice time from the original order, not the revised one.",
+      act: "Dispute 17 deductions with proof of delivery attached and accept the other 6.", appr: "Deductions analyst",
+      area: "Chargebacks and deductions management", who: ["Finance and treasury", "Sales and key accounts"] },
+    { id: "f6", p: 2, st: 4, sev: "w", mod: "Performance Monitor", how: "Rule and prediction", pil: "Extend", dp: 6, partner: "Ridgeway Freight", n: 9, val: 2700, at: "07:45",
+      ot: "Delivery status missing for 9 loads", os: "No 214 events since pickup. Three loads have DC appointments before noon.",
+      bt: "3 delivery appointments at risk", bs: "Missed appointments lead to rebooking fees and late deliveries to stores.",
+      ev: [["Yesterday 18:00", "9 loads tendered and accepted in the 990"], ["Yesterday 21:30", "Pickup events received"], ["07:45", "No status for 10 hours on all 9 loads"]],
+      cause: "The carrier's status feed has not sent events since 21:30.",
+      act: "Request status from Ridgeway Freight and rebook the 3 appointments if the loads are late.", appr: "Transportation planner",
+      area: "Partner follow-up", who: ["Supply chain"] },
+    { id: "f7", p: 10, st: 1, sev: "w", mod: "Integration Monitor", how: "Missing document", pil: "Optimize", partner: "Harbor Grocers", n: 1, val: 0, at: "06:00",
+      ot: "Weekly sales feed not received", os: "The 852 was due at 06:00 Monday. The last feed arrived 7 days ago.",
+      bt: "This week's sell-through data is missing", bs: "Replenishment plans for Harbor Grocers use last week's data.",
+      ev: [["Last Monday 05:40", "Last 852 received"], ["06:00", "Expected feed window closed"]],
+      cause: "Same certificate change as the order volume finding for Harbor Grocers.",
+      act: "Ask Harbor Grocers to resend the 852 after the certificate is updated.", appr: "EDI operations lead",
+      area: "Missing documents", who: ["Supply chain", "Sales and key accounts"] },
+    { id: "f8", p: 8, st: 3, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Crestline Logistics", n: 6, val: 9800, at: "07:20",
+      ot: "Shipping advice missing for 6 warehouse orders", os: "Shipping orders sent in the 940 yesterday have no 945 from the 3PL.",
+      bt: "6 retailer orders without shipment confirmation", bs: "Ship notices and invoices cannot go out until the 3PL confirms shipment.",
+      ev: [["Yesterday 14:10", "6 shipping orders sent in the 940"], ["07:20", "No 945 after 17 hours"]],
+      cause: "Unknown. The 3PL's other orders are confirming normally.",
+      act: "Request shipping advice for the 6 orders from Crestline Logistics.", appr: "Logistics coordinator",
+      area: "Partner follow-up", who: ["Supply chain", "Customer service"] },
+    { id: "f9", p: 4, st: 4, sev: "w", mod: "Performance Monitor", how: "Prediction", pil: "Extend", dp: 1, partner: "Northfield Stores", n: 61, val: 28400, at: "07:50",
+      ot: "Cost change not applied to 61 open orders", os: "Open orders still carry the old cost for 9 items. Invoices from these orders will reject.",
+      bt: "$28,400 in invoices likely to reject", bs: "The same price mismatch will hit 61 orders that have not been invoiced yet.",
+      ev: [["Monday", "832 cost change sent for 9 items"], ["07:50", "61 open orders found with the old cost"]],
+      cause: "The cost change did not update open orders in the ERP.",
+      act: "Update the cost on the 61 open orders before invoicing.", appr: "Pricing analyst",
+      area: "Cross-references and master data", who: ["Master data", "Finance and treasury"] },
+    { id: "f10", p: 7, st: 0, sev: "w", mod: "Integration Monitor", how: "Anomaly", pil: "Optimize", partner: "Brightway Marketplace", n: 1, val: 5200, at: "08:10",
+      ot: "Inventory feed 3 hours late", os: "The hourly 846 to the marketplace stopped at 05:00.",
+      bt: "240 listed items may oversell", bs: "The marketplace shows stock from 05:00 for items that sold out since.",
+      ev: [["05:00", "Last 846 sent"], ["06:00", "Hourly feed missed"], ["08:10", "Three feeds missed in a row"]],
+      cause: "The inventory extract job failed on a database timeout.",
+      act: "Rerun the inventory extract and send a full 846 to Brightway Marketplace.", appr: "E-commerce operations",
+      area: "Monitoring", who: ["IT and ERP", "Sales and key accounts"] },
+    { id: "f11", p: 1, st: 0, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Westline Home", n: 4, val: 1000, at: "06:55",
+      ot: "4 ship notices fail carton validation", os: "Carton labels in 4 inbound 856s are missing serial shipping container codes.",
+      bt: "4 shipments will be received by hand", bs: "Manual receiving delays stock to shelf and costs $250 per shipment.",
+      ev: [["06:40", "4 ship notices received from the supplier"], ["06:55", "Validation failed on carton serial codes"]],
+      cause: "A new packing station prints labels without serial codes.",
+      act: "Return the 824 to the supplier with the missing codes listed.", appr: "Receiving supervisor",
+      area: "Rejections", who: ["Supply chain", "Procurement"] }
+  ];
+  var CCSTG = [["Plan and synchronize", [4, 10, 6]], ["Order and fulfill", [0, 7, 8]], ["Ship and receive", [2, 1, 5]], ["Settle and recover", [3, 9]]];
+  /* Key measure per process: index into the process measures, illustrative value */
+  var CCM = [[0, "96.4%"], [0, "93.8%"], [2, "91.5%"], [0, "2.1%"], [2, "98.6%"], [0, "0.9%"], [0, "97.2%"], [0, "95.1%"], [2, "99.1%"], [2, "6.5 days"], [0, "88.0%"]];
+  /* Product overlay coverage for the retail genome */
+  var PMPV = { retail: {
+    im: [["Order volume against projection", ["850"]], ["Functional acknowledgments returned", ["997"]], ["Application advice rejections", ["824"]],
+      ["Inventory feed on schedule", ["846"]], ["Sales feed on schedule", ["852"]], ["Remittance volume against projection", ["820"]]],
+    pm: [["Acknowledgment within 24 hours", ["855"]], ["Ship notice within 1 hour of pickup", ["856"]], ["Invoice matches order price and quantity", ["810"]],
+      ["Item confirmed before the first order", ["CIC", "CIN"]], ["Cost change loaded before invoicing", ["832", "879"]], ["Delivery events for every tendered load", ["214", "204"]],
+      ["Shipping advice for every warehouse order", ["945", "940"]], ["Deduction backup inside the dispute window", ["812"]], ["Return credit matches an authorization", ["180"]]],
+    /* Recommended action and approver for each Extend decision point, in decision point order */
+    ag: [["Hold invoices and correct the cost on open orders", "Pricing analyst"], ["Build and send the ship notice from pickup data", "EDI operations lead"],
+      ["Dispute with backup attached, or accept", "Deductions analyst"], ["Adjust the proposed order quantity", "Demand planner"],
+      ["Correct master data and resend", "Master data analyst"], ["Rebook the appointment or retender the load", "Transportation planner"],
+      ["Flag items for check-in review", "Route sales manager"], ["Open a reconciliation with the 3PL", "Logistics coordinator"],
+      ["Match the credit or dispute the deduction", "Accounts receivable"]]
+  } };
+  /* Product overlay: Command Center coverage on the genome. Optimize shows monitors and findings now; Extend shows agents at decision points. */
+  var pmPv = "off", pmPvLast = "optimize";
+  function pmPvOn() { return pmPv !== "off" && pmMode === "pt" && !!PMPV[pmK]; }
+  function pmPvMods(c) {
+    var P = PMPV[pmK], m = [];
+    if (P.im.some(function (x) { return x[1].indexOf(c) >= 0; })) m.push("IM");
+    if (P.pm.some(function (x) { return x[1].indexOf(c) >= 0; })) m.push("PM");
+    return m;
+  }
+  function pmPvSev(c) {
+    var s = "";
+    CCF.forEach(function (f) { if (ccDone[f.id]) return; var st = PROCESSES.retail[f.p].steps[f.st]; if (ccToks(st[1]).indexOf(c) >= 0) s = f.sev === "c" || s === "c" ? "c" : "w"; });
+    return s;
+  }
+  function pmPvBand(c) {
+    if (!PMELC[c]) return "";
+    if (pmPv === "extend") { var o = PMOV.extend; for (var i = 0; i < o.dp.length; i++) if (o.dp[i][1].indexOf(c) >= 0) return o.dp[i][2]; return ""; }
+    var s = pmPvSev(c);
+    return s === "c" ? "h" : s === "w" ? "m" : pmPvMods(c).length ? "l" : "";
+  }
+  function pmPvCard() {
+    var P = PMPV[pmK], ex = pmPv === "extend";
+    function list(rows, tag) {
+      return '<ul class="pp-list pv-list">' + rows.map(function (r) { return '<li><button type="button" data-pe="' + esc(r[1][0]) + '"><span class="pv-t">' + tag + '</span><span>' + esc(r[0]) + '<small>' + esc(r[1].join(", ")) + '</small></span></button></li>'; }).join("") + '</ul>';
+    }
+    var h = '<div class="oc pv"><div class="oc-h"><p class="pp-e">Product overlay</p><span class="oc-ill">Illustrative</span></div>' +
+      '<p class="oc-q">Command Center</p><p class="oc-def">Monitors each business process on the network and recommends the next action.</p>' +
+      '<ol class="oc-lad pv-lad"><li><button type="button" data-pvp="optimize" aria-pressed="' + !ex + '"><b>Optimize</b><span>Integration Monitor and Performance Monitor</span></button></li>' +
+      '<li><button type="button" data-pvp="extend" aria-pressed="' + ex + '"><b>Extend</b><span>Performance Monitor agents</span></button></li></ol>' +
+      '<p class="oc-def pv-def">' + (ex ? "Agents predict a problem at a decision point, recommend an action and wait for a person to approve it."
+        : "Integration Monitor watches volume, timing and acknowledgments. Performance Monitor checks business rules across documents.") + '</p>' +
+      '<div class="oc-k"><b>' + (ex ? "Shading: value at stake" : "Shading: findings now") + '</b>' +
+      (ex ? '<span>' + pmBars("h", true) + '</span><span>' + pmBars("m", true) + '</span><span>' + pmBars("l", true) + '</span>'
+        : '<span>' + pmBars("h") + '<span class="obw">Critical</span></span><span>' + pmBars("m") + '<span class="obw">Warning</span></span><span>' + pmBars("l") + '<span class="obw">Monitored</span></span>') + '</div>' +
+      '<p class="pp-key pv-key">' + (ex ? "Numbers on tiles mark agent decision points." : "<b>IM</b> Integration Monitor · <b>PM</b> Performance Monitor rule") + '</p>' +
+      '<button type="button" class="pm-btn pm-more" data-gv="cc" data-gk="retail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>Open Command Center</button></div>';
+    if (ex) {
+      h += '<h4>Performance Monitor agents</h4><ul class="pp-list pv-list">' + PMOV.extend.dp.map(function (d, i) {
+        var a = P.ag[i] || ["", ""];
+        return '<li><button type="button" data-pe="' + esc(d[1][0]) + '"><span class="pv-t pv-n">' + (i + 1) + '</span><span>' + esc(d[0]) + '<small>' + esc(a[0]) + '. Approved by ' + esc(lc(a[1])) + '.</small></span></button></li>';
+      }).join("") + '</ul>';
+    } else h += '<h4>Integration Monitor</h4>' + list(P.im, "IM") + '<h4>Performance Monitor rules</h4>' + list(P.pm, "PM");
+    return h;
+  }
   function pmApplyOv() {
-    var on = pmOv !== "off" && pmMode === "pt";
+    var pv = pmPvOn(), on = (pmOv !== "off" && pmMode === "pt") || pv;
     pmEl.classList.toggle("ov", on);
+    pmEl.classList.toggle("pv", pv);
     document.getElementById("pm-ill").hidden = !on;
     document.getElementById("pm-ovt").setAttribute("aria-pressed", pmOv !== "off" ? "true" : "false");
+    var pvt = document.getElementById("pm-pvt");
+    pvt.hidden = !PMPV[pmK]; pvt.setAttribute("aria-pressed", pmPv !== "off" ? "true" : "false");
     document.querySelectorAll("#pm-pt .pt[data-code]").forEach(function (t) {
-      var c = t.getAttribute("data-code"), b = on ? pmBand(c) : "", d = on && pmOv === "extend" ? pmDPs([c]) : [];
+      var c = t.getAttribute("data-code"), b = "", d = "";
+      if (pv) { b = pmPvBand(c); d = pmPv === "extend" ? pmDPs([c]).join(" · ") : pmPvMods(c).join(" "); }
+      else if (on) { b = pmBand(c); d = pmOv === "extend" ? pmDPs([c]).join(" · ") : ""; }
       if (b === "x") b = "";
       t.setAttribute("data-ob", b);
       t.querySelector(".ob").innerHTML = b ? pmBars(b) : "";
-      t.querySelector(".odp").textContent = d.join(" · ");
+      t.querySelector(".odp").textContent = d;
     });
   }
 
@@ -2208,6 +2483,7 @@ var TRANSLATE = [
   function pmLink(k) {
     var a = areas.querySelector("a[data-map]"); if (a) { a.hidden = !GENOME[k]; a.setAttribute("href", "#" + k + "/map"); }
     var sl = areas.querySelector("a[data-sol]"); if (sl) { sl.hidden = k !== "retail" && k !== "automotive" && k !== "banking"; sl.setAttribute("href", "#" + k + "/solution"); sl.querySelector("span").textContent = { automotive: "Trading Grid for Automotive", banking: "Trading Grid for Financial Services" }[k] || "Trading Grid for Retail and CPG"; }
+    var cl = areas.querySelector("a[data-cc]"); if (cl) cl.hidden = k !== "retail";
     var pl = areas.querySelector('a[data-v="proc"]'); if (pl) pl.hidden = !!GENOME[k];
     var fl = document.querySelector('footer a[data-target="processes"]'); if (fl) fl.parentNode.hidden = !!GENOME[k];
     var om = areas.querySelector("a[data-om]"); if (om) om.hidden = k !== "all";
@@ -2242,7 +2518,8 @@ var TRANSLATE = [
   if (!pmEl.requestFullscreen) pmFs.hidden = true;
   pmFs.addEventListener("click", function () { if (document.fullscreenElement) document.exitFullscreen(); else pmEl.requestFullscreen().catch(function () {}); });
   document.addEventListener("fullscreenchange", function () { var t = document.fullscreenElement ? "Exit full screen" : "Full screen"; pmFs.setAttribute("aria-label", t); pmFs.title = t; setTimeout(pmFit, 50); });
-  document.getElementById("pm-ovt").addEventListener("click", function () { pmOv = pmOv === "off" ? pmOvLast : "off"; pmApply(); pmPP.scrollTop = 0; });
+  document.getElementById("pm-ovt").addEventListener("click", function () { pmOv = pmOv === "off" ? pmOvLast : "off"; if (pmOv !== "off") pmPv = "off"; pmApply(); pmPP.scrollTop = 0; });
+  document.getElementById("pm-pvt").addEventListener("click", function () { pmPv = pmPv === "off" ? pmPvLast : "off"; if (pmPv !== "off") { pmOv = "off"; if (pmMode !== "pt") pmSetMode("pt"); } pmApply(); pmPP.scrollTop = 0; });
   window.addEventListener("resize", function () { if (!pmEl.hidden) pmFit(); });
   pmEl.querySelector(".pm-seg").addEventListener("click", function (e) { var b = e.target.closest("button[data-m]"); if (b) pmSetMode(b.getAttribute("data-m")); });
   document.getElementById("pm-chips").addEventListener("click", function (e) {
@@ -2277,6 +2554,7 @@ var TRANSLATE = [
     var b = e.target.closest("button"); if (!b) return;
     if (b.hasAttribute("data-md")) { pmMdOpen(+b.getAttribute("data-md")); return; }
     if (b.hasAttribute("data-ovp")) { pmOv = pmOvLast = b.getAttribute("data-ovp"); pmApply(); return; }
+    if (b.hasAttribute("data-pvp")) { pmPv = pmPvLast = b.getAttribute("data-pvp"); pmApply(); return; }
     if (b.hasAttribute("data-clear")) { pmSet(pmP, null); return; }
     if (b.hasAttribute("data-pe")) { pmSet(null, b.getAttribute("data-pe")); return; }
     if (b.hasAttribute("data-pl")) { pmSet({ l: [+b.getAttribute("data-pl")], s: +(b.getAttribute("data-ps") || 0) }, null); pmPP.scrollTop = 0; return; }
@@ -2640,6 +2918,7 @@ var TRANSLATE = [
     if (v === "map" && !GENOME[k]) v = "proc";
     if (v === "sol" && k !== "retail" && k !== "automotive" && k !== "banking") k = "retail";
     if (v === "proc" && GENOME[k]) v = "map";
+    if (v === "cc") k = "retail";
     if (k !== curK) { curV = v; render(k); } else setView(v);
     window.scrollTo({ top: 0 });
   });
@@ -2660,6 +2939,154 @@ var TRANSLATE = [
     chips.addEventListener("click", function (e) { var b = e.target.closest("button[data-p]"); if (!b) return; sel = +b.getAttribute("data-p"); draw(); });
     draw();
   })();
+  /* Command Center: process continuity console for Retail and CPG */
+  var ccEl = document.getElementById("cc"), ccFrame = document.getElementById("cc-frame"), ccPP = document.getElementById("cc-pp"), ccMain = document.getElementById("cc-main");
+  var ccPer = "ops", ccStg = -1, ccProc = -1, ccF = null, ccDone = {};
+  var CCNET = /^(\d{3}|GDSN)/;
+  function ccToks(lbl) { return lbl.split(" / ")[0].replace(/^GDSN /, "").split(/,\s*| or /); }
+  function ccNet(lbl) { return CCNET.test(lbl); }
+  function ccOpen_(f) { return !ccDone[f.id]; }
+  function ccFind(id) { return CCF.filter(function (f) { return f.id === id; })[0]; }
+  function ccFor(i, k) { return CCF.filter(function (f) { return f.p === i && (k === undefined || f.st === k) && ccOpen_(f); }); }
+  function ccSev(list) { return list.some(function (f) { return f.sev === "c"; }) ? "c" : list.length ? "w" : "ok"; }
+  function ccStageOf(i) { for (var g = 0; g < CCSTG.length; g++) if (CCSTG[g][1].indexOf(i) >= 0) return g; return -1; }
+  function ccMoney(v) { return "$" + Math.round(v).toLocaleString("en-US"); }
+  var CCSEV = { c: "Critical", w: "Warning", ok: "Healthy" };
+  function ccTitle(f) { return ccPer === "biz" ? f.bt : f.ot; }
+  function ccSum(f) { return ccPer === "biz" ? f.bs : f.os; }
+
+  function ccKpis() {
+    var P = PROCESSES.retail, open = CCF.filter(ccOpen_), crit = open.filter(function (f) { return f.sev === "c"; }).length;
+    var st = P.map(function (p, i) { return ccSev(ccFor(i)); }), healthy = st.filter(function (s) { return s === "ok"; }).length;
+    var stTxt = st.filter(function (s) { return s === "c"; }).length + " critical, " + st.filter(function (s) { return s === "w"; }).length + " warning";
+    var partners = {}; open.forEach(function (f) { partners[f.partner] = 1; });
+    function held(id) { var f = ccFind(id); return f && ccOpen_(f) ? ccMoney(f.val) : "$0"; }
+    var k = ccPer === "biz" ? [
+      ["Value at risk", ccMoney(open.reduce(function (s, f) { return s + f.val; }, 0)), "Across " + open.length + " open findings", crit > 0],
+      ["Invoices held", held("f4"), "Price mismatch with Northfield Stores"],
+      ["Deductions open", held("f5"), "8 days left to dispute"],
+      ["OTIF this week", "94.2%", "Target 97%"],
+      ["Processes healthy", healthy + " of " + P.length, stTxt]
+    ] : [
+      ["Open findings", String(open.length), crit + " critical", crit > 0],
+      ["Documents affected", String(open.reduce(function (s, f) { return s + f.n; }, 0)), "Across " + Object.keys(partners).length + " partners"],
+      ["First-pass acceptance", "97.8%", "Last 24 hours"],
+      ["Triaged on time", "92%", "Within 15 minutes of detection"],
+      ["Processes healthy", healthy + " of " + P.length, stTxt]
+    ];
+    return '<div class="cc-kpi">' + k.map(function (x) { return '<div class="cc-k' + (x[3] ? ' hi' : '') + '"><span>' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b><small>' + esc(x[2]) + '</small></div>'; }).join("") + '</div>';
+  }
+  function ccRow(i) {
+    var p = PROCESSES.retail[i], fl = ccFor(i), sev = ccSev(fl), m = CCM[i];
+    var trk = p.steps.map(function (s, k) {
+      var lbl = s[1].split(" / ")[0], net = ccNet(lbl), sv = net ? ccSev(ccFor(i, k)) : "na";
+      return '<span class="cc-sg ' + sv + '" title="' + esc(s[0] + ": " + (net ? CCSEV[sv] : "Outside the network")) + '">' + esc(lbl.replace(/^GDSN /, "")) + '</span>';
+    }).join("");
+    var cols = ccPer === "biz"
+      ? '<span class="cc-n">' + (function (v) { return v ? ccMoney(v) : '<em>None</em>'; })(fl.reduce(function (s, f) { return s + f.val; }, 0)) + '</span><span class="cc-n cc-ms">' + esc(m[1]) + '<small>' + esc(p.measures[m[0]]) + '</small></span>'
+      : '<span class="cc-n">' + (fl.length || '<em>0</em>') + '</span><span class="cc-n">' + (fl.reduce(function (s, f) { return s + f.n; }, 0) || '<em>0</em>') + '</span><span class="cc-n">' + (fl.length ? Object.keys(fl.reduce(function (o, f) { o[f.partner] = 1; return o; }, {})).length : '<em>0</em>') + '</span>';
+    var dim = ccStg >= 0 && CCSTG[ccStg][1].indexOf(i) < 0;
+    return '<button type="button" class="cc-r s-' + sev + (dim ? ' dim' : '') + '" data-p="' + i + '" aria-pressed="' + (ccProc === i) + '"><span class="cc-dot" role="img" aria-label="' + CCSEV[sev] + '"></span>' +
+      '<span class="cc-pn"><b>' + esc(p.n) + '</b><small>' + esc(p.owner) + '</small></span><span class="cc-trk">' + trk + '</span>' + cols + '</button>';
+  }
+  function ccBoard() {
+    var hd = ccPer === "biz" ? '<span class="r">Value at risk</span><span class="r">Key measure</span>' : '<span class="r">Findings</span><span class="r">Documents</span><span class="r">Partners</span>';
+    var rows = CCSTG.map(function (g) { return '<div class="cc-g">' + esc(g[0]) + '</div>' + g[1].map(ccRow).join(""); }).join("");
+    return '<div class="cc-bd ' + ccPer + '"><div class="cc-hd"><span></span><span>Process</span><span>Steps and documents</span>' + hd + '</div><div class="cc-rows">' + rows + '</div>' +
+      '<div class="cc-lg"><span><i class="ok"></i>Healthy</span><span><i class="w"></i>Warning</span><span><i class="c"></i>Critical</span><span><i class="na"></i>Outside the network: ERP, portal, warehouse and store systems</span></div></div>';
+  }
+  function ccQueue(list) {
+    if (!list.length) return '<p class="pp-key">No open findings.</p>';
+    return '<ul class="pp-list cc-q">' + list.map(function (f) {
+      var done = !!ccDone[f.id];
+      return '<li><button type="button" data-f="' + f.id + '" class="s-' + (done ? "ok" : f.sev) + '"><i></i><span>' + esc(ccTitle(f)) +
+        '<small>' + (done ? "Action approved at " + ccDone[f.id] : esc(PROCESSES.retail[f.p].n) + " · " + esc(f.partner) + " · " + esc(f.at)) + '</small></span>' +
+        (ccPer === "biz" && f.val && !done ? '<em>' + ccMoney(f.val) + '</em>' : '') + '</button></li>';
+    }).join("") + '</ul>';
+  }
+  function ccSorted(list) {
+    return list.slice().sort(function (a, b) {
+      var da = ccDone[a.id] ? 1 : 0, db = ccDone[b.id] ? 1 : 0;
+      if (da !== db) return da - db;
+      if (ccPer === "biz") return b.val - a.val;
+      return (a.sev === "c" ? 0 : 1) - (b.sev === "c" ? 0 : 1);
+    });
+  }
+  function ccPanel() {
+    var h, P = PROCESSES.retail;
+    if (ccF) {
+      var f = ccFind(ccF), p = P[f.p], s = p.steps[f.st], done = ccDone[f.id];
+      h = '<button type="button" class="pp-x" data-back aria-label="Back to findings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>' +
+        '<p class="pp-e cc-e s-' + (done ? "ok" : f.sev) + '"><i></i>' + (done ? "Action approved" : CCSEV[f.sev] + " finding") + '</p><h3>' + esc(ccTitle(f)) + '</h3><p class="pp-lead">' + esc(ccSum(f)) + '</p>' +
+        '<dl class="pp-dl"><div><dt>Process</dt><dd>' + esc(p.n) + '</dd></div><div><dt>Step</dt><dd>' + (f.st + 1) + '. ' + esc(s[0]) + ' <span class="cc-code">' + esc(s[1].split(" / ")[0]) + '</span></dd></div>' +
+        '<div><dt>Partner</dt><dd>' + esc(f.partner) + '</dd></div><div><dt>Detected by</dt><dd>' + esc(f.mod) + ', ' + esc(lc(f.how)) + '</dd></div>' +
+        '<div><dt>Strategy</dt><dd>' + esc(f.pil) + (f.dp ? ', decision point ' + f.dp : '') + '</dd></div>' +
+        '<div><dt>Documents</dt><dd>' + f.n + '</dd></div>' + (f.val ? '<div><dt>Value at risk</dt><dd>' + ccMoney(f.val) + '</dd></div>' : '') + '</dl>' +
+        '<h4>Evidence</h4><ol class="cc-ev">' + f.ev.map(function (e) { return '<li><time>' + esc(e[0]) + '</time><span>' + esc(e[1]) + '</span></li>'; }).join("") + '</ol>' +
+        '<h4>Probable cause</h4><p class="cc-tx">' + esc(f.cause) + '</p>' +
+        '<h4>Recommended action</h4><div class="cc-act' + (done ? ' done' : '') + '"><p>' + esc(f.act) + '</p>' +
+        (done ? '<p class="pp-key"><b>Approved at ' + esc(done) + '.</b> Command Center confirms when the partner accepts the documents.</p>'
+          : '<p class="pp-key">Approval required: ' + esc(lc(f.appr)) + '</p><div class="cc-btns"><button type="button" class="pm-btn cc-ok" data-ok="' + f.id + '">Approve action</button></div>') + '</div>' +
+        '<h4>Operations impact</h4><dl class="pp-dl"><div><dt>Work area</dt><dd><a href="#all/opsmap" data-gv="om">' + esc(f.area) + '</a></dd></div><div><dt>Stakeholders</dt><dd>' + esc(f.who.join(", ")) + '</dd></div></dl>' +
+        '<button type="button" class="pm-btn pm-more" data-pg="' + f.p + '" data-ps="' + (f.st + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>Open step in Process Genome</button>';
+    } else if (ccProc >= 0) {
+      var q = P[ccProc], fl = CCF.filter(function (x) { return x.p === ccProc; }), sv = ccSev(ccFor(ccProc)), m = CCM[ccProc];
+      h = '<button type="button" class="pp-x" data-back aria-label="Back to findings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>' +
+        '<p class="pp-e">Process ' + (ccProc + 1) + ' · ' + esc(CCSTG[ccStageOf(ccProc)][0]) + '</p><h3>' + esc(q.n) + '</h3><p class="pp-lead">' + esc(q.outcome) + '</p>' +
+        '<dl class="pp-dl"><div><dt>Status</dt><dd><span class="cc-st s-' + sv + '"><i></i>' + CCSEV[sv] + '</span></dd></div><div><dt>Business owner</dt><dd>' + esc(q.owner) + '</dd></div>' +
+        '<div><dt>' + esc(q.measures[m[0]]) + '</dt><dd>' + esc(m[1]) + '</dd></div></dl>' +
+        '<h4>Steps</h4><ol class="cc-steps">' + q.steps.map(function (s, k) {
+          var lbl = s[1].split(" / ")[0], net = ccNet(lbl), n = ccFor(ccProc, k).length, v = net ? ccSev(ccFor(ccProc, k)) : "na";
+          return '<li class="s-' + v + '"><i></i><span><b>' + esc(s[0]) + '</b><small>' + esc(lbl) + ' · ' + (net ? (n ? n + (n > 1 ? " findings" : " finding") : "Healthy") : "Outside the network") + '</small></span></li>';
+        }).join("") + '</ol>' +
+        '<h4>Findings</h4>' + ccQueue(ccSorted(fl)) +
+        '<button type="button" class="pm-btn pm-more" data-pg="' + ccProc + '" data-ps="0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>Open in Process Genome</button>';
+    } else {
+      var list = CCF.filter(function (x) { return ccStg < 0 || CCSTG[ccStg][1].indexOf(x.p) >= 0; }), open = list.filter(ccOpen_);
+      h = '<p class="pp-e">' + (ccStg < 0 ? "All processes" : esc(CCSTG[ccStg][0])) + '</p><h3>Findings</h3><p class="pp-lead">' + open.length + ' open, ' + open.filter(function (x) { return x.sev === "c"; }).length +
+        ' critical. Select a finding for evidence and the recommended action.</p>' + ccQueue(ccSorted(list));
+    }
+    ccPP.innerHTML = h;
+  }
+  function ccRender() {
+    ccMain.innerHTML = ccKpis() + ccBoard();
+    ccEl.querySelectorAll(".pm-seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-per") === ccPer ? "true" : "false"); });
+    ccEl.querySelectorAll("#cc-chips button").forEach(function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-g") === ccStg ? "true" : "false"); });
+    ccPanel();
+  }
+  function ccFit() {
+    var fs = document.fullscreenElement === ccEl;
+    ccEl.classList.toggle("small", !fs && (window.innerWidth < 1024 || window.innerHeight < 560));
+    var w = fs ? window.innerWidth : ccFrame.clientWidth, hh = fs ? window.innerHeight : window.innerHeight - 81;
+    if (w) ccEl.style.setProperty("--s", Math.min(w / 1440, hh / 810));
+  }
+  function ccOpen() { ccEl.hidden = false; ccFit(); ccRender(); }
+  function ccClose() {
+    if (ccEl.hidden) return;
+    if (document.fullscreenElement === ccEl) { try { document.exitFullscreen(); } catch (err) {} }
+    ccEl.hidden = true;
+  }
+  document.getElementById("cc-chips").innerHTML = '<button type="button" data-g="-1" aria-pressed="true">All processes</button>' + CCSTG.map(function (g, k) { return '<button type="button" data-g="' + k + '" aria-pressed="false">' + esc(g[0]) + '</button>'; }).join("");
+  document.getElementById("cc-chips").addEventListener("click", function (e) { var b = e.target.closest("button[data-g]"); if (!b) return; ccStg = +b.getAttribute("data-g"); ccProc = -1; ccF = null; ccRender(); });
+  ccEl.querySelector(".pm-seg").addEventListener("click", function (e) { var b = e.target.closest("button[data-per]"); if (!b) return; ccPer = b.getAttribute("data-per"); ccRender(); });
+  ccMain.addEventListener("click", function (e) {
+    var r = e.target.closest(".cc-r"); if (!r) return;
+    var i = +r.getAttribute("data-p"); ccProc = ccProc === i ? -1 : i; ccF = null; ccRender(); ccPP.scrollTop = 0;
+  });
+  ccPP.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-f")) { ccF = b.getAttribute("data-f"); ccRender(); ccPP.scrollTop = 0; }
+    else if (b.hasAttribute("data-back")) { if (ccF && ccProc >= 0) ccF = null; else { ccF = null; ccProc = -1; } ccRender(); }
+    else if (b.hasAttribute("data-ok")) { ccDone[b.getAttribute("data-ok")] = "08:41"; ccRender(); }
+    else if (b.hasAttribute("data-pg")) { var pi = +b.getAttribute("data-pg"), ps = +b.getAttribute("data-ps"); setView("map"); pmSet({ l: [pi], s: ps }, null); }
+  });
+  document.getElementById("cc-back").addEventListener("click", function () { curV = "ops"; render("all"); window.scrollTo({ top: 0 }); });
+  var ccFs = document.getElementById("cc-fs");
+  if (!ccEl.requestFullscreen) ccFs.hidden = true;
+  ccFs.addEventListener("click", function () { if (document.fullscreenElement) document.exitFullscreen(); else ccEl.requestFullscreen().catch(function () {}); });
+  document.addEventListener("fullscreenchange", function () { if (!ccEl.hidden) setTimeout(ccFit, 50); });
+  window.addEventListener("resize", function () { if (!ccEl.hidden) ccFit(); });
+  document.addEventListener("keydown", function (e) { if (ccEl.hidden || e.key !== "Escape") return; if (ccF || ccProc >= 0 || ccStg >= 0) { e.preventDefault(); if (ccF) ccF = null; else if (ccProc >= 0) ccProc = -1; else ccStg = -1; ccRender(); } });
   window.addEventListener("hashchange", function () { var h = fromHash(); if (h && (h.k !== curK || h.v !== curV)) { curV = h.v; render(h.k); } });
   var h0 = fromHash() || { k: "all", v: "ops" };
   var pmAtStart = /^#retail\/map$/.test(location.hash);
