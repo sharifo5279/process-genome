@@ -612,6 +612,48 @@
   html, html * { cursor: default !important; -webkit-tap-highlight-color: transparent; }
   .pm, .pm *, .areas, .areas *, .tabs, .tabs *, .tgr .idx-g, .tgr .idx-g *, button, button * { -webkit-user-select: none; user-select: none; }
   :focus:not(:focus-visible) { outline: none; }
+
+  /* Operations map */
+  .om .pm-chips i { width: 12px; height: 0; border-top: 4px solid var(--c); border-radius: 2px; }
+  .om-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; height: 100%; }
+  .om-col header { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; line-height: 16px; }
+  .om-col header b { font-weight: 800; color: var(--pf); }
+  .om-col header span { font-size: 11px; font-weight: 600; color: var(--pfa); }
+  .om-br { height: 10px; margin: 6px 0 10px; border: 2px solid var(--c); border-bottom: 0; border-radius: 3px 3px 0 0; }
+  .om-t { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); column-gap: 9px; align-content: start; align-items: center; width: 100%; height: 98px; margin-bottom: 6px; padding: 9px 10px; border: 1px solid var(--pl); border-radius: 9px; background: var(--pc); text-align: left; transition: opacity .2s, border-color .15s; }
+  .om-t:hover { border-color: var(--pa); }
+  .om-t.sel { border: 2px solid var(--pa); padding: 8px 9px; background: var(--psel); }
+  .om-t.dim, .om-n.dim, .om-s.dim { opacity: .3; }
+  .om-ic { grid-row: span 1; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--psel); color: var(--c, var(--pa)); }
+  .om-col .om-ic { color: var(--c); }
+  .om-ic svg.i, .om-li svg.i { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .om-t b { font-size: 12.5px; line-height: 14px; font-weight: 800; color: var(--pf); }
+  .om-l, .om-f { grid-column: 1 / -1; font-size: 10.5px; line-height: 13px; overflow: hidden; }
+  .om-l { margin-top: 6px; color: var(--pmu); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .om-f { margin-top: 3px; font-weight: 700; color: var(--pai); white-space: nowrap; text-overflow: ellipsis; }
+  .om-sv text { font-family: var(--font); }
+  .om-hd { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; fill: var(--pfa); }
+  .om-hd.in { fill: var(--pai); } .om-hd.ex { fill: var(--pmu); }
+  .om-e { fill: none; stroke: var(--pl2); stroke-width: 1.2; transition: opacity .2s, stroke .2s; }
+  .om-e.on { stroke: var(--pa); stroke-width: 2.5; }
+  .om-e.dim { opacity: .25; }
+  .om-n rect { fill: var(--pc); stroke: var(--c); stroke-width: 1; }
+  .om-n text { font-size: 11px; font-weight: 700; fill: var(--pf); }
+  .om-gi { fill: none; stroke: var(--c); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .om-n.sel rect { fill: var(--psel); stroke: var(--pa); stroke-width: 2; }
+  .om-s rect { fill: var(--pc); stroke-width: 1.5; }
+  .om-s.in rect { stroke: var(--pai); } .om-s.ex rect { stroke: var(--pmu); }
+  .om-s text { font-size: 12px; font-weight: 700; } .om-s.in text { fill: var(--pai); } .om-s.ex text { fill: var(--pmu); }
+  .om-s.sel rect { fill: var(--psel); stroke: var(--pa); stroke-width: 2.5; }
+  .om-n, .om-s { transition: opacity .2s; }
+  .om-ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 19px; } .om-ul li { margin-bottom: 4px; }
+  .om-fp { border: 2px solid var(--pa); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 18px; }
+  .om-ex { background: var(--pcl); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 18px; }
+  .om-li { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; background: var(--psel); color: var(--c); }
+  .om-li svg.i { width: 15px; height: 15px; }
+  .om-sw { width: 14px; height: 4px; border-radius: 2px; background: var(--c); justify-self: center; }
+  .areas { grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); }
+  @media (max-width: 699px) { .areas, .areas.three { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   /* Solution overview (retail) */
   .tgr {
     --bg: #FFFFFF; --fg: #101C2F; --muted: #3F4D62; --faint: #6B7689; --line: #E7EAEF; --line-2: #D5DCE6; --cloud: #F6F7F7; --card: #FFFFFF;
@@ -860,6 +902,7 @@
   <main class="content" id="content" tabindex="-1">
     <nav class="areas" id="areas" aria-label="Guide area">
       <a href="#all" data-v="ops"><b>Operations</b><span>Work areas, standards, and reference</span></a>
+      <a href="#all/opsmap" data-v="om" data-om><b>Operations map</b><span>Work areas and stakeholders on one screen. Desktop only.</span></a>
       <a href="#all/processes" data-v="proc"><b>Business processes</b><span>Processes by industry and the documents behind each step</span></a>
       <a href="#retail/map" data-v="map" data-map hidden><b>Genome map</b><span>Documents and processes on one interactive map. Desktop only.</span></a>
       <a href="#retail/solution" data-v="sol" data-sol hidden><b>Solution overview</b><span>Trading Grid for Retail and CPG</span></a>
@@ -992,6 +1035,39 @@
     <div class="pm-md-b" id="pm-md-b" tabindex="0"></div>
   </div>
 </div>
+</div>
+</div>
+
+<div class="vmap" id="v-om" hidden>
+<div class="wrap map-areas" id="om-areas"></div>
+<div class="pm om" id="om" tabindex="-1" lang="en" role="region" aria-labelledby="om-h" hidden>
+  <div class="pm-frame" id="om-frame">
+  <div class="pm-stage" id="om-stage">
+    <div class="pm-top">
+      <div class="pm-ttl"><p id="om-ind">All industries</p><h2 id="om-h">Operations map</h2></div>
+      <div class="pm-seg" role="group" aria-label="Operations view">
+        <button type="button" data-om="map" aria-pressed="true">Work areas</button>
+        <button type="button" data-om="st" aria-pressed="false">Stakeholders</button>
+      </div>
+      <div class="pm-act">
+        <button type="button" class="pm-btn ic" id="om-fs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      </div>
+    </div>
+    <div class="pm-chips" id="om-chips" role="group" aria-label="Work area group"></div>
+    <div class="pm-views">
+      <div class="pm-view on" id="om-map" data-om="map"></div>
+      <div class="pm-view" id="om-st" data-om="st"></div>
+    </div>
+    <aside class="pm-panel" aria-live="polite"><div class="pp" id="om-pp"></div></aside>
+  </div>
+  </div>
+  <div class="pm-small">
+    <div>
+      <h2>Desktop screen required</h2>
+      <p>The operations map is available on desktop and laptop screens. Open this page on a larger screen to use it.</p>
+      <button type="button" class="pm-btn" id="om-back">View operations</button>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -1240,20 +1316,21 @@ var TRANSLATE = [
 
   /* Views */
   var vOps = document.getElementById("v-ops"), vProc = document.getElementById("v-proc"), areas = document.getElementById("areas");
-  function setHash() { try { history.replaceState(history.state, "", "#" + curK + ({ proc: "/processes", sol: "/solution", map: "/map" }[curV] || "")); } catch (err) {} }
-  var vSol = document.getElementById("v-sol"), vMap = document.getElementById("v-map"), gHero = document.getElementById("overview"), gLayout = document.querySelector(".wrap.layout"), mkAreas = document.getElementById("mk-areas"), mapAreas = document.getElementById("map-areas"), gContent = document.getElementById("content");
+  function setHash() { try { history.replaceState(history.state, "", "#" + curK + ({ proc: "/processes", sol: "/solution", map: "/map", om: "/opsmap" }[curV] || "")); } catch (err) {} }
+  var vSol = document.getElementById("v-sol"), vMap = document.getElementById("v-map"), gHero = document.getElementById("overview"), gLayout = document.querySelector(".wrap.layout"), mkAreas = document.getElementById("mk-areas"), mapAreas = document.getElementById("map-areas"), vOm = document.getElementById("v-om"), omAreas = document.getElementById("om-areas"), gContent = document.getElementById("content");
   function setView(v) {
     if ((v === "sol" && curK !== "retail") || (v === "map" && !GENOME[curK])) v = "ops";
     if (v === "proc" && GENOME[curK]) v = "ops";
-    var prev = curV, full = v === "sol" || v === "map";
+    var prev = curV, full = v === "sol" || v === "map" || v === "om";
     curV = v;
     toc.querySelector(".tt-m").textContent = v === "ops" ? "Operations" : "Business processes";
     vOps.hidden = v !== "ops"; vProc.hidden = v !== "proc";
-    vSol.hidden = v !== "sol"; vMap.hidden = v !== "map"; gHero.hidden = full; gLayout.hidden = full;
-    var host = v === "sol" ? mkAreas : v === "map" ? mapAreas : gContent;
+    vSol.hidden = v !== "sol"; vMap.hidden = v !== "map"; vOm.hidden = v !== "om"; gHero.hidden = full; gLayout.hidden = full;
+    var host = v === "sol" ? mkAreas : v === "map" ? mapAreas : v === "om" ? omAreas : gContent;
     if (areas.parentNode !== host) { if (host === gContent) gContent.insertBefore(areas, gContent.firstChild); else host.appendChild(areas); }
     if (full && prev !== v) window.scrollTo({ top: 0 });
     if (v === "map") pmOpen(); else pmClose();
+    if (v === "om") omOpen(); else omClose();
     areas.querySelectorAll("a[data-v]").forEach(function (a) { if (a.getAttribute("data-v") === v) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
     setHash(); drawFlows(); refreshSpy();
   }
@@ -1416,7 +1493,7 @@ var TRANSLATE = [
     if (k === "pharma") k = "healthcare";
     if (k === "processes") return { k: "all", v: "proc" };
     if (KEYS.indexOf(k) === -1) return null;
-    return { k: k, v: { processes: "proc", solution: "sol", map: "map" }[parts[1]] || "ops" };
+    return { k: k, v: { processes: "proc", solution: "sol", map: "map", opsmap: "om" }[parts[1]] || "ops" };
   }
   document.addEventListener("click", function (e) {
     var a = e.target.closest("a[data-k]"); if (!a) return;
@@ -1959,7 +2036,8 @@ var TRANSLATE = [
     var sl = areas.querySelector("a[data-sol]"); if (sl) sl.hidden = k !== "retail";
     var pl = areas.querySelector('a[data-v="proc"]'); if (pl) pl.hidden = !!GENOME[k];
     var fl = document.querySelector('footer a[data-target="processes"]'); if (fl) fl.parentNode.hidden = !!GENOME[k];
-    areas.classList.toggle("three", k === "retail");
+    var n = [].filter.call(areas.querySelectorAll("a"), function (x) { return !x.hidden; }).length;
+    areas.style.setProperty("--n", n);
   }
   document.getElementById("pm-back").addEventListener("click", function () { setView("ops"); });
 
@@ -2153,6 +2231,140 @@ var TRANSLATE = [
     Object.keys(G.hub).forEach(function (k) { G.hub[k].r[1] += dy; });
     G.net.forEach(function (L) { L.p.forEach(function (q) { q[1] += dy; }); L.st.forEach(function (st) { if (st.y != null) st.y += dy; }); });
   })();
+  /* Operations map: work areas and stakeholders on one screen */
+  var omEl = document.getElementById("om"), omStage = document.getElementById("om-stage"), omFrame = document.getElementById("om-frame"), omPP = document.getElementById("om-pp");
+  var OMG = ["var(--pm-blue)", "var(--pm-cobalt)", "var(--pm-gold)", "var(--pm-slate)"];
+  var OMIN = ["Customer service", "Finance", "Supply chain", "Master data", "Compliance", "ERP and IT", "Leadership"];
+  var OMEX = ["Trading partners", "Hubs and customers", "EDI provider", "Networks and banks", "Regulators"];
+  /* Derived from each work area's stakeholders */
+  var OMLINK = { "Monitoring": [["Customer service", "Finance", "Supply chain"], ["EDI provider"]], "Support desk and on-call": [["Customer service"], ["Trading partners", "EDI provider"]],
+    "Rejections": [["Customer service", "Finance"], ["Trading partners"]], "Fix routing": [["Master data", "Finance"], ["Trading partners"]],
+    "Missing documents": [["Supply chain", "Finance"], ["Trading partners"]], "Cross-references and master data": [["Master data", "Finance"], ["Trading partners"]],
+    "Partner onboarding": [["Leadership"], ["Trading partners", "EDI provider"]], "Map build and maintenance": [["ERP and IT"], ["EDI provider", "Trading partners"]],
+    "Partner follow-up": [[], ["Trading partners", "EDI provider"]], "Connections and protocols": [["ERP and IT"], ["Networks and banks", "Trading partners"]],
+    "Certificate management": [["ERP and IT"], ["Networks and banks", "Trading partners"]], "Document and version changes": [["Supply chain"], ["Hubs and customers", "EDI provider"]],
+    "Business programs": [["Supply chain", "Customer service"], ["Hubs and customers", "EDI provider"]], "Regulatory mandates": [["Compliance", "Finance"], ["Regulators", "Trading partners"]],
+    "Chargebacks and deductions management": [["Finance"], ["Hubs and customers", "Trading partners"]], "Outages and recovery": [["ERP and IT"], ["EDI provider", "Networks and banks"]],
+    "Platform and ERP upgrades": [["ERP and IT"], ["EDI provider", "Trading partners"]], "Mergers and consolidations": [["Leadership", "Finance", "ERP and IT"], ["Trading partners"]],
+    "Provider management": [["Finance", "Leadership"], ["EDI provider"]], "Governance and change control": [["ERP and IT", "Compliance"], []], "Reporting and documentation": [["Leadership"], []] };
+  var omMode = "map", omG = -1, omA = -1, omS = null, omBuilt = false;
+  function omGroup(i) { return groupOf(AREAS[i].n); }
+  function omLinks(i) { var l = OMLINK[AREAS[i].n] || [[], []]; return l[0].concat(l[1]); }
+  function omBuild() {
+    document.getElementById("om-chips").innerHTML = '<button type="button" data-g="-1" aria-pressed="true">All</button>' + GROUPS.map(function (g, k) {
+      return '<button type="button" data-g="' + k + '" aria-pressed="false"><i style="--c:' + OMG[k] + '"></i>' + esc(g.name) + '</button>';
+    }).join("");
+    var h = '<div class="om-cols">';
+    GROUPS.forEach(function (g, k) {
+      var idx = AREAS.map(function (a, i) { return i; }).filter(function (i) { return omGroup(i) === k; });
+      h += '<section class="om-col" data-g="' + k + '" style="--c:' + OMG[k] + '"><header><b>' + esc(g.name) + '</b><span>' + idx.length + ' areas</span></header><div class="om-br"></div>' +
+        idx.map(function (i) { var a = AREAS[i];
+          return '<button type="button" class="om-t" data-a="' + i + '"><span class="om-ic">' + icon(a.i) + '</span><b>' + esc(a.n) + '</b><span class="om-l">' + esc(a.line) + '</span><span class="om-f">Fails: ' + esc(a.breaks) + '</span></button>';
+        }).join("") + '</section>';
+    });
+    document.getElementById("om-map").innerHTML = h + '</div>';
+    var yl = {}, yr = {}, ym = {}, xl = 120, xr = 920, xm = 520;
+    OMIN.forEach(function (n, k) { yl[n] = 70 + k * 84; }); OMEX.forEach(function (n, k) { yr[n] = 110 + k * 104; });
+    AREAS.forEach(function (a, i) { ym[i] = 32 + i * 30.2; });
+    var s = '<svg class="om-sv" viewBox="0 0 1040 666" width="100%" height="100%" role="img" aria-label="Work areas and stakeholders">';
+    s += '<text class="om-hd in" x="50" y="14">INSIDE THE COMPANY</text><text class="om-hd" x="' + xm + '" y="14" text-anchor="middle">WORK AREAS</text><text class="om-hd ex" x="840" y="14">OUTSIDE THE COMPANY</text>';
+    AREAS.forEach(function (a, i) {
+      var l = OMLINK[a.n] || [[], []];
+      l[0].forEach(function (t) { s += '<path class="om-e" data-a="' + i + '" data-s="' + esc(t) + '" d="M' + (xl + 70) + ' ' + yl[t] + ' C300 ' + yl[t] + ' 330 ' + ym[i] + ' ' + (xm - 110) + ' ' + ym[i] + '"/>'; });
+      l[1].forEach(function (t) { s += '<path class="om-e" data-a="' + i + '" data-s="' + esc(t) + '" d="M' + (xm + 110) + ' ' + ym[i] + ' C720 ' + ym[i] + ' 740 ' + yr[t] + ' ' + (xr - 80) + ' ' + yr[t] + '"/>'; });
+    });
+    AREAS.forEach(function (a, i) {
+      var y = ym[i];
+      s += '<g class="om-n" data-a="' + i + '" style="--c:' + OMG[omGroup(i)] + '"><rect x="' + (xm - 110) + '" y="' + (y - 12) + '" width="220" height="24" rx="6"/>' +
+        '<g transform="translate(' + (xm - 103) + ' ' + (y - 7) + ') scale(.583)" class="om-gi">' + ICONS[a.i] + '</g><text x="' + (xm - 82) + '" y="' + (y + 4) + '">' + esc(a.n === "Chargebacks and deductions management" ? "Chargebacks and deductions" : a.n) + '</text></g>';
+    });
+    OMIN.forEach(function (t) { s += '<g class="om-s in" data-s="' + esc(t) + '"><rect x="' + (xl - 70) + '" y="' + (yl[t] - 17) + '" width="140" height="34" rx="17"/><text x="' + xl + '" y="' + (yl[t] + 4) + '" text-anchor="middle">' + esc(t) + '</text></g>'; });
+    OMEX.forEach(function (t) { s += '<g class="om-s ex" data-s="' + esc(t) + '"><rect x="' + (xr - 80) + '" y="' + (yr[t] - 17) + '" width="160" height="34" rx="17"/><text x="' + xr + '" y="' + (yr[t] + 4) + '" text-anchor="middle">' + esc(t) + '</text></g>'; });
+    document.getElementById("om-st").innerHTML = s + '</svg>';
+    omBuilt = true;
+  }
+  function omApply() {
+    var lit = {};
+    if (omS) AREAS.forEach(function (a, i) { if (omLinks(i).indexOf(omS) >= 0) lit[i] = 1; });
+    omEl.querySelectorAll(".om-t, .om-n").forEach(function (t) {
+      var i = +t.getAttribute("data-a"), g = omGroup(i);
+      t.classList.toggle("sel", i === omA);
+      t.classList.toggle("dim", (omG >= 0 && g !== omG) || (!!omS && !lit[i]) || (omA >= 0 && i !== omA && omMode === "st"));
+    });
+    omEl.querySelectorAll(".om-e").forEach(function (e) {
+      var i = +e.getAttribute("data-a"), s = e.getAttribute("data-s");
+      var on = (omA >= 0 && i === omA) || (!!omS && s === omS && omA < 0);
+      e.classList.toggle("on", on);
+      e.classList.toggle("dim", (omA >= 0 || !!omS || omG >= 0) && !on && !(omG >= 0 && omA < 0 && !omS && omGroup(i) === omG));
+    });
+    omEl.querySelectorAll(".om-s").forEach(function (n) {
+      var s = n.getAttribute("data-s");
+      n.classList.toggle("sel", s === omS);
+      n.classList.toggle("dim", omA >= 0 ? omLinks(omA).indexOf(s) < 0 : (!!omS && s !== omS));
+    });
+    omEl.querySelectorAll("#om-chips button").forEach(function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-g") === omG ? "true" : "false"); });
+    omEl.querySelectorAll(".pm-seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-om") === omMode ? "true" : "false"); });
+    omEl.querySelectorAll(".pm-view").forEach(function (v) { v.classList.toggle("on", v.getAttribute("data-om") === omMode); });
+    omPanel();
+  }
+  function omPanel() {
+    var h, ind = curK !== "all" ? data(curK).label : "";
+    if (omA >= 0) {
+      var a = AREAS[omA], k = omGroup(omA), ex = ind && EXAMPLES[a.n] ? EXAMPLES[a.n][curK] : "";
+      h = '<p class="pp-e">Work area ' + (omA + 1) + ' · ' + esc(GROUPS[k].name) + '</p><h3>' + esc(a.n) + '</h3><p class="pp-lead">' + esc(a.line) + '</p>' +
+        '<h4>Activities</h4><ul class="om-ul">' + a.does.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join("") + '</ul>' +
+        '<h4>Failure point</h4><div class="om-fp">' + esc(a.breaks) + '</div>' +
+        '<h4>Stakeholders</h4><p class="pp-lead" style="margin:0">' + esc(a.who) + '</p>' +
+        (ex ? '<h4>' + esc(ind) + ' example</h4><div class="om-ex">' + esc(ex) + '</div>' : '');
+    } else if (omS) {
+      var ids = AREAS.map(function (x, i) { return i; }).filter(function (i) { return omLinks(i).indexOf(omS) >= 0; });
+      h = '<p class="pp-e">' + (OMIN.indexOf(omS) >= 0 ? "Inside the company" : "Outside the company") + '</p><h3>' + esc(omS) + '</h3><p class="pp-lead">Work areas that serve or depend on this stakeholder.</p>' +
+        '<h4>Work areas</h4><ul class="pp-list">' + ids.map(function (i) { return '<li><button type="button" data-a="' + i + '"><span class="om-li" style="--c:' + OMG[omGroup(i)] + '">' + icon(AREAS[i].i) + '</span><span>' + esc(AREAS[i].n) + '<small>' + esc(GROUPS[omGroup(i)].name) + '</small></span></button></li>'; }).join("") + '</ul>';
+    } else {
+      h = '<p class="pp-e">' + esc(ind || "All industries") + '</p><h3>' + (omMode === "map" ? "Work areas" : "Stakeholders") + '</h3><p class="pp-lead">' +
+        (omMode === "map" ? "The recurring work of a B2B and EDI operations team, grouped by purpose. Select a work area to see its activities and failure point."
+          : "Each line connects a work area to the teams inside the company and the parties outside it. Select a work area or a stakeholder.") + '</p>' +
+        '<h4>Groups</h4><ul class="pp-list">' + GROUPS.map(function (g, k) { return '<li><button type="button" data-g="' + k + '"><span class="om-sw" style="--c:' + OMG[k] + '"></span><span>' + esc(g.name) + '</span></button></li>'; }).join("") + '</ul>';
+    }
+    omPP.innerHTML = h;
+  }
+  function omFit() {
+    var fs = document.fullscreenElement === omEl;
+    omEl.classList.toggle("small", !fs && (window.innerWidth < 1024 || window.innerHeight < 560));
+    var w = fs ? window.innerWidth : omFrame.clientWidth, hh = fs ? window.innerHeight : window.innerHeight - 81;
+    if (w) omEl.style.setProperty("--s", Math.min(w / 1440, hh / 810));
+  }
+  function omOpen() {
+    if (!omBuilt) omBuild();
+    document.getElementById("om-ind").textContent = curK !== "all" ? data(curK).label : "All industries";
+    omEl.hidden = false; omFit(); omApply();
+  }
+  function omClose() {
+    if (omEl.hidden) return;
+    if (document.fullscreenElement === omEl) { try { document.exitFullscreen(); } catch (err) {} }
+    omEl.hidden = true;
+  }
+  omEl.querySelector(".pm-seg").addEventListener("click", function (e) { var b = e.target.closest("button[data-om]"); if (!b) return; omMode = b.getAttribute("data-om"); omApply(); });
+  document.getElementById("om-chips").addEventListener("click", function (e) { var b = e.target.closest("button[data-g]"); if (!b) return; omG = +b.getAttribute("data-g"); omA = -1; omS = null; omApply(); });
+  omEl.querySelector(".pm-views").addEventListener("click", function (e) {
+    var t = e.target.closest("[data-a]:not(.om-e), .om-s");
+    if (!t) { if (omA >= 0 || omS) { omA = -1; omS = null; omApply(); } return; }
+    if (t.classList.contains("om-s")) { var s = t.getAttribute("data-s"); omS = omS === s ? null : s; omA = -1; }
+    else { var i = +t.getAttribute("data-a"); omA = omA === i ? -1 : i; omS = null; }
+    omApply();
+  });
+  omPP.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-a")) { omA = +b.getAttribute("data-a"); omS = null; omApply(); }
+    else if (b.hasAttribute("data-g")) { omG = +b.getAttribute("data-g"); omApply(); }
+  });
+  document.getElementById("om-back").addEventListener("click", function () { setView("ops"); });
+  var omFs = document.getElementById("om-fs");
+  if (!omEl.requestFullscreen) omFs.hidden = true;
+  omFs.addEventListener("click", function () { if (document.fullscreenElement) document.exitFullscreen(); else omEl.requestFullscreen().catch(function () {}); });
+  document.addEventListener("fullscreenchange", function () { if (!omEl.hidden) setTimeout(omFit, 50); });
+  window.addEventListener("resize", function () { if (!omEl.hidden) omFit(); });
+  document.addEventListener("keydown", function (e) { if (omEl.hidden || e.key !== "Escape") return; if (omA >= 0 || omS || omG >= 0) { e.preventDefault(); omA = -1; omS = null; omG = -1; omApply(); } });
   window.addEventListener("hashchange", function () { var h = fromHash(); if (h && (h.k !== curK || h.v !== curV)) { curV = h.v; render(h.k); } });
   var h0 = fromHash() || { k: "all", v: "ops" };
   var pmAtStart = /^#retail\/map$/.test(location.hash);
