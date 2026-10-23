@@ -1410,7 +1410,7 @@ var TRANSLATE = [
   var toc = document.getElementById("toc"), tocHead = toc.querySelector(".toc-head"), cur = document.getElementById("toccur");
   function buildToc(k) {
     tocBody.innerHTML = '<ul class="toc-l1">' +
-      top("ops", "Overview", sub("about", "About the Process Genome") + sub("gx-ind", "Industries") + sub("standards", "Standards by region") + sub("reference", "Reference")) +
+      (k === "all" ? top("ops", "Overview", sub("about", "About the Process Genome") + sub("gx-ind", "Industries") + sub("standards", "Standards by region") + sub("reference", "Reference")) : "") +
       (GENOME[k] ? "" : top("proc", "Process Genome", k === "all" ? '<li class="toc-note">Select an industry to see its business processes.</li>' : PROCESSES[k].map(function (p) { return sub(pslug(k, p.n), p.n); }).join(""))) + '</ul>';
   }
   function closeToc() { toc.classList.remove("open"); tocHead.setAttribute("aria-expanded", "false"); }
@@ -1429,6 +1429,7 @@ var TRANSLATE = [
   function setView(v) {
     if ((v === "sol" && curK !== "retail") || (v === "map" && !GENOME[curK])) v = "ops";
     if (v === "proc" && GENOME[curK]) v = "ops";
+    if (curK !== "all" && (v === "ops" || v === "om")) v = GENOME[curK] ? "map" : "proc";
     var prev = curV, full = v === "sol" || v === "map" || v === "om";
     curV = v;
     toc.querySelector(".tt-m").textContent = v === "proc" ? "Process Genome" : "Overview";
@@ -1451,7 +1452,7 @@ var TRANSLATE = [
 
   function go(id) {
     var t = document.getElementById(id); if (!t) return;
-    if (viewOf(t) !== curV) setView(viewOf(t));
+    if (viewOf(t) === "ops" && curK !== "all") { curV = "ops"; render("all"); } else if (viewOf(t) !== curV) setView(viewOf(t));
     t.scrollIntoView({ block: "start" });
     var h = t.matches('[tabindex="-1"]') ? t : t.querySelector('h2[tabindex], h3[tabindex]');
     if (h) h.focus({ preventScroll: true });
@@ -1612,7 +1613,7 @@ var TRANSLATE = [
       var els = pane.querySelectorAll(".card, .grp, .proc, #standards, #reference");
       for (var i = 0; i < els.length; i++) { var r = els[i].getBoundingClientRect(); if (r.bottom > off + 40) { keep = { id: els[i].id, d: r.top, pi: [].indexOf.call(vProc.querySelectorAll(".proc"), els[i]) }; break; } }
     }
-    if (a.classList.contains("home")) curV = "ops";
+    if (a.classList.contains("home") || a.getAttribute("data-k") === "all") curV = "ops";
     render(a.getAttribute("data-k"));
     if (keep && keep.id) {
       var t = keep.pi >= 0 ? vProc.querySelectorAll(".proc")[keep.pi] : document.getElementById(keep.id);
@@ -2145,10 +2146,12 @@ var TRANSLATE = [
     var pl = areas.querySelector('a[data-v="proc"]'); if (pl) pl.hidden = !!GENOME[k];
     var fl = document.querySelector('footer a[data-target="processes"]'); if (fl) fl.parentNode.hidden = !!GENOME[k];
     var om = areas.querySelector("a[data-om]"); if (om) om.hidden = k !== "all";
+    var ov = areas.querySelector('a[data-v="ops"]'); if (ov) ov.hidden = k !== "all";
     var n = [].filter.call(areas.querySelectorAll("a"), function (x) { return !x.hidden; }).length;
     areas.style.setProperty("--n", n);
+    areas.hidden = k === "all" || n < 2;
   }
-  document.getElementById("pm-back").addEventListener("click", function () { setView("ops"); });
+  document.getElementById("pm-back").addEventListener("click", function () { curV = "ops"; render("all"); window.scrollTo({ top: 0 }); });
 
   /* Process details: the full business process in a modal */
   var pmMd = document.getElementById("pm-md"), pmMdB = document.getElementById("pm-md-b"), pmMdX = document.getElementById("pm-md-x"), pmMdFrom = null;
@@ -2513,7 +2516,7 @@ var TRANSLATE = [
     else if (b.hasAttribute("data-s")) { omS = b.getAttribute("data-s"); omA = -1; omApply(); }
     else if (b.hasAttribute("data-g")) { omG = +b.getAttribute("data-g"); omApply(); }
   });
-  document.getElementById("om-back").addEventListener("click", function () { setView("ops"); });
+  document.getElementById("om-back").addEventListener("click", function () { curV = "ops"; render("all"); window.scrollTo({ top: 0 }); });
   var omFs = document.getElementById("om-fs");
   if (!omEl.requestFullscreen) omFs.hidden = true;
   omFs.addEventListener("click", function () { if (document.fullscreenElement) document.exitFullscreen(); else omEl.requestFullscreen().catch(function () {}); });
