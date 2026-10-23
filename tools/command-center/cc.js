@@ -14,45 +14,49 @@
   function ccTitle(f) { return ccPer === "biz" ? f.bt : f.ot; }
   function ccSum(f) { return ccPer === "biz" ? f.bs : f.os; }
 
-  function ccKpis() {
-    var P = PROCESSES.retail, open = CCF.filter(ccOpen_), crit = open.filter(function (f) { return f.sev === "c"; }).length;
-    var st = P.map(function (p, i) { return ccSev(ccFor(i)); }), healthy = st.filter(function (s) { return s === "ok"; }).length;
-    var stTxt = st.filter(function (s) { return s === "c"; }).length + " critical, " + st.filter(function (s) { return s === "w"; }).length + " warning";
-    var partners = {}; open.forEach(function (f) { partners[f.partner] = 1; });
-    function held(id) { var f = ccFind(id); return f && ccOpen_(f) ? ccMoney(f.val) : "$0"; }
-    var k = ccPer === "biz" ? [
-      ["Value at risk", ccMoney(open.reduce(function (s, f) { return s + f.val; }, 0)), "Across " + open.length + " open findings", crit > 0],
-      ["Invoices held", held("f4"), "Price mismatch with Northfield Stores"],
-      ["Deductions open", held("f5"), "8 days left to dispute"],
-      ["OTIF this week", "94.2%", "Target 97%"],
-      ["Processes healthy", healthy + " of " + P.length, stTxt]
-    ] : [
-      ["Open findings", String(open.length), crit + " critical", crit > 0],
-      ["Documents affected", String(open.reduce(function (s, f) { return s + f.n; }, 0)), "Across " + Object.keys(partners).length + " partners"],
-      ["First-pass acceptance", "97.8%", "Last 24 hours"],
-      ["Triaged on time", "92%", "Within 15 minutes of detection"],
-      ["Processes healthy", healthy + " of " + P.length, stTxt]
-    ];
-    return '<div class="cc-kpi">' + k.map(function (x) { return '<div class="cc-k' + (x[3] ? ' hi' : '') + '"><span>' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b><small>' + esc(x[2]) + '</small></div>'; }).join("") + '</div>';
-  }
-  function ccRow(i) {
-    var p = PROCESSES.retail[i], fl = ccFor(i), sev = ccSev(fl), m = CCM[i];
-    var trk = p.steps.map(function (s, k) {
-      var lbl = s[1].split(" / ")[0], net = ccNet(lbl), sv = net ? ccSev(ccFor(i, k)) : "na";
-      return '<span class="cc-sg ' + sv + '" title="' + esc(s[0] + ": " + (net ? CCSEV[sv] : "Outside the network")) + '">' + esc(lbl.replace(/^GDSN /, "")) + '</span>';
-    }).join("");
-    var cols = ccPer === "biz"
-      ? '<span class="cc-n">' + (function (v) { return v ? ccMoney(v) : '<em>None</em>'; })(fl.reduce(function (s, f) { return s + f.val; }, 0)) + '</span><span class="cc-n cc-ms">' + esc(m[1]) + '<small>' + esc(p.measures[m[0]]) + '</small></span>'
-      : '<span class="cc-n">' + (fl.length || '<em>0</em>') + '</span><span class="cc-n">' + (fl.reduce(function (s, f) { return s + f.n; }, 0) || '<em>0</em>') + '</span><span class="cc-n">' + (fl.length ? Object.keys(fl.reduce(function (o, f) { o[f.partner] = 1; return o; }, {})).length : '<em>0</em>') + '</span>';
-    var dim = ccStg >= 0 && CCSTG[ccStg][1].indexOf(i) < 0;
-    return '<button type="button" class="cc-r s-' + sev + (dim ? ' dim' : '') + '" data-p="' + i + '" aria-pressed="' + (ccProc === i) + '"><span class="cc-dot" role="img" aria-label="' + CCSEV[sev] + '"></span>' +
-      '<span class="cc-pn"><b>' + esc(p.n) + '</b><small>' + esc(p.owner) + '</small></span><span class="cc-trk">' + trk + '</span>' + cols + '</button>';
-  }
-  function ccBoard() {
-    var hd = ccPer === "biz" ? '<span class="r">Value at risk</span><span class="r">Key measure</span>' : '<span class="r">Findings</span><span class="r">Documents</span><span class="r">Partners</span>';
-    var rows = CCSTG.map(function (g) { return '<div class="cc-g">' + esc(g[0]) + '</div>' + g[1].map(ccRow).join(""); }).join("");
-    return '<div class="cc-bd ' + ccPer + '"><div class="cc-hd"><span></span><span>Process</span><span>Steps and documents</span>' + hd + '</div><div class="cc-rows">' + rows + '</div>' +
-      '<div class="cc-lg"><span><i class="ok"></i>Healthy</span><span><i class="w"></i>Warning</span><span><i class="c"></i>Critical</span><span><i class="na"></i>Outside the network: ERP, portal, warehouse and store systems</span></div></div>';
+  /* Live process network: one line per process, a station per step, flow pulses between stations */
+  var CCSH = { f1: ["14 ASNs not sent", "$8.4K chargeback risk"], f2: ["Volume 64% low", "$182K orders missing"], f3: ["37 acks late", "37 orders unconfirmed"],
+    f4: ["112 invoices rejected", "$46.2K invoices held"], f5: ["23 without backup", "$12.8K to dispute"], f6: ["9 loads without status", "3 appointments at risk"],
+    f7: ["Weekly feed missing", "Sell-through data missing"], f8: ["6 advices missing", "6 orders unconfirmed"], f9: ["Old cost on 61 orders", "$28.4K likely to reject"],
+    f10: ["Feed 3 hours late", "240 items may oversell"], f11: ["4 ASNs rejected", "4 manual receipts"] };
+  var CCV = [320, 95, 180, 40, 60, 210, 150, 540, 130, 35, 25];
+  function ccMap() {
+    var P = PROCESSES.retail, S = GENOME.retail.short, W = 1040, x0 = 246, x1 = 948, y = 0, h = "";
+    CCSTG.forEach(function (g, gi) {
+      y += gi ? 20 : 14;
+      h += '<text class="cc-gl" x="0" y="' + y + '">' + esc(g[0].toUpperCase()) + '</text>';
+      y += 6;
+      g[1].forEach(function (i) {
+        var p = P[i], fl = ccFor(i), sev = ccSev(fl), n = p.steps.length, cy = y + 24, dim = (ccStg >= 0 && ccStg !== gi) || (ccProc >= 0 && ccProc !== i);
+        var xs = p.steps.map(function (s, k) { return x0 + k * (x1 - x0) / (n - 1); });
+        var st = p.steps.map(function (s, k) { var lbl = s[1].split(" / ")[0]; return ccNet(lbl) ? ccSev(ccFor(i, k)) : "na"; });
+        var all = CCF.filter(function (f) { return f.p === i; }), val = fl.reduce(function (a, f) { return a + f.val; }, 0);
+        h += '<g class="cc-ln s-' + sev + (dim ? ' dim' : '') + (ccProc === i ? ' sel' : '') + '" data-p="' + i + '">' +
+          '<rect class="cc-hit" x="0" y="' + (cy - 24) + '" width="' + W + '" height="48"/>' +
+          '<circle class="cc-sd" cx="6" cy="' + cy + '" r="5"/><text class="cc-pn" x="20" y="' + (cy + 4.5) + '">' + esc(S[i]) + '</text>' +
+          '<path class="cc-base" d="M' + (x0 - 24) + ' ' + cy + 'H' + (x1 + 24) + '"/>';
+        for (var k = 0; k < n - 1; k++) {
+          var a = xs[k] + 11, b = xs[k + 1] - 11, d = 'M' + a + ' ' + cy + 'H' + b, sg = st[k + 1] === "na" || st[k] === "na" ? "na" : st[k + 1];
+          h += '<path class="cc-fl ' + sg + '" d="' + d + '" style="--sp:' + (0.6 + 300 / CCV[i]).toFixed(2) + 's"/>';
+        }
+        p.steps.forEach(function (s, k) {
+          var lbl = s[1].split(" / ")[0], v = st[k], code = lbl.replace(/^GDSN /, "");
+          h += '<g class="cc-stn ' + v + '"><title>' + esc(s[0] + ": " + (v === "na" ? "Outside the network" : CCSEV[v])) + '</title>' +
+            (v === "w" || v === "c" ? '<circle class="cc-halo" cx="' + xs[k] + '" cy="' + cy + '" r="11"/>' : '') +
+            '<circle class="cc-dotc" cx="' + xs[k] + '" cy="' + cy + '" r="' + (v === "na" ? 5 : 7.5) + '"/>' +
+            '<text class="cc-code" x="' + xs[k] + '" y="' + (cy - 13) + '" text-anchor="middle">' + esc(code.length > 12 ? code.slice(0, 11) + "…" : code) + '</text></g>';
+          all.filter(function (f) { return f.st === k; }).forEach(function (f) {
+            var done = !!ccDone[f.id];
+            h += '<text class="cc-co s-' + (done ? "ok" : f.sev) + (ccF === f.id ? ' on' : '') + '" data-f="' + f.id + '" x="' + xs[k] + '" y="' + (cy + 20) + '" text-anchor="middle">' +
+              esc(done ? "Action approved" : CCSH[f.id][ccPer === "biz" ? 1 : 0]) + '</text>';
+          });
+        });
+        h += '<text class="cc-rm" x="' + W + '" y="' + (cy - 1) + '" text-anchor="end">' + (ccPer === "biz" ? (val ? ccMoney(val) : "None") : CCV[i] + "/h") + '</text>' +
+          '<text class="cc-rs" x="' + W + '" y="' + (cy + 13) + '" text-anchor="end">' + (ccPer === "biz" ? "at risk" : "documents") + '</text></g>';
+        y += 48;
+      });
+    });
+    return '<svg class="cc-net" viewBox="0 0 ' + W + ' ' + (y + 4) + '" width="100%" role="img" aria-label="Retail and CPG processes with live document flow and open findings">' + h + '</svg>';
   }
   function ccQueue(list) {
     if (!list.length) return '<p class="pp-key">No open findings.</p>';
@@ -102,13 +106,17 @@
         '<button type="button" class="pm-btn pm-more" data-pg="' + ccProc + '" data-ps="0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>Open in Process Genome</button>';
     } else {
       var list = CCF.filter(function (x) { return ccStg < 0 || CCSTG[ccStg][1].indexOf(x.p) >= 0; }), open = list.filter(ccOpen_);
-      h = '<p class="pp-e">' + (ccStg < 0 ? "All processes" : esc(CCSTG[ccStg][0])) + '</p><h3>Findings</h3><p class="pp-lead">' + open.length + ' open, ' + open.filter(function (x) { return x.sev === "c"; }).length +
-        ' critical. Select a finding for evidence and the recommended action.</p>' + ccQueue(ccSorted(list));
+      var pt = {}; open.forEach(function (x) { pt[x.partner] = 1; });
+      h = '<p class="pp-e">' + (ccStg < 0 ? "All processes" : esc(CCSTG[ccStg][0])) + '</p><h3>Findings</h3>' +
+        '<dl class="pp-dl cc-sum"><div><dt>Open</dt><dd>' + open.length + ', ' + open.filter(function (x) { return x.sev === "c"; }).length + ' critical</dd></div>' +
+        (ccPer === "biz" ? '<div><dt>Value at risk</dt><dd>' + ccMoney(open.reduce(function (a, x) { return a + x.val; }, 0)) + '</dd></div>'
+          : '<div><dt>Documents</dt><dd>' + open.reduce(function (a, x) { return a + x.n; }, 0) + ' across ' + Object.keys(pt).length + ' partners</dd></div>') + '</dl>' +
+        '<h4>' + (ccPer === "biz" ? "By value at risk" : "By severity") + '</h4>' + ccQueue(ccSorted(list));
     }
     ccPP.innerHTML = h;
   }
   function ccRender() {
-    ccMain.innerHTML = ccKpis() + ccBoard();
+    ccMain.innerHTML = ccMap();
     ccEl.querySelectorAll(".pm-seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-per") === ccPer ? "true" : "false"); });
     ccEl.querySelectorAll("#cc-chips button").forEach(function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-g") === ccStg ? "true" : "false"); });
     ccPanel();
@@ -129,7 +137,9 @@
   document.getElementById("cc-chips").addEventListener("click", function (e) { var b = e.target.closest("button[data-g]"); if (!b) return; ccStg = +b.getAttribute("data-g"); ccProc = -1; ccF = null; ccRender(); });
   ccEl.querySelector(".pm-seg").addEventListener("click", function (e) { var b = e.target.closest("button[data-per]"); if (!b) return; ccPer = b.getAttribute("data-per"); ccRender(); });
   ccMain.addEventListener("click", function (e) {
-    var r = e.target.closest(".cc-r"); if (!r) return;
+    var c = e.target.closest("[data-f]");
+    if (c) { ccF = c.getAttribute("data-f"); ccProc = ccFind(ccF).p; ccRender(); ccPP.scrollTop = 0; return; }
+    var r = e.target.closest(".cc-ln"); if (!r) { if (ccProc >= 0 || ccF) { ccProc = -1; ccF = null; ccRender(); } return; }
     var i = +r.getAttribute("data-p"); ccProc = ccProc === i ? -1 : i; ccF = null; ccRender(); ccPP.scrollTop = 0;
   });
   ccPP.addEventListener("click", function (e) {

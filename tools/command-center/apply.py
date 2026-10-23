@@ -46,7 +46,7 @@ cc_html = '''<div class="vmap" id="v-cc" hidden>
       </div>
     </div>
     <div class="pm-chips" id="cc-chips" role="group" aria-label="Lifecycle stage"></div>
-    <p class="cc-asof">Illustrative data · As of 08:40</p>
+    <p class="cc-asof"><span class="cc-lgd"><span><b></b>Document flow</span><span><i></i>Healthy</span><span><i class="w"></i>Warning</span><span><i class="c"></i>Critical</span><span><i class="na"></i>Outside the network</span></span>Illustrative · 08:40</p>
     <div class="cc-main" id="cc-main"></div>
     <aside class="pm-panel" aria-live="polite"><div class="pp" id="cc-pp"></div></aside>
   </div>
