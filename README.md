@@ -38,10 +38,12 @@ Process Genome page. All checks run before anything is written.
 
 - One dashboard, one findings list and one action queue. Every dashboard component, finding and action
   names its module: Integration Monitor, Performance Monitor or Retail add-on. A module filter narrows all three.
-- Integration Monitor and Performance Monitor screens: trading partners, community, projections and anomalies,
-  document mapping, configuration; business processes, agents, rules and analytics.
+- Root: Overview, Findings, Action queue, Workspace (all agents) and Configuration (Rules & Policies, partner settings).
+- Integration Monitor: Partners, Community, Projections and anomalies. Performance Monitor: Business processes
+  (with the Solution tab, the client's documents mapped to EDI and ERP), Performance Analytics.
+- Demo data covers one client solution of three processes: Order to cash; Receive, match and pay; Deductions.
 - Retail add-on (`retail-data.js`, `retail.js`): partner participation, orders and commitments, ASNs and
-  readiness, invoices and deductions, and retail policy templates. It registers its cases with `CXITEMS`,
+  readiness, invoices and deductions; its policy templates appear under Configuration (`CXCFG`). It registers its cases with `CXITEMS`,
   its dashboard components with `CXDASH`, its Aviator questions with `CXQ` and its navigation group with
   `CXNAV`. Other industries can add modules the same way.
 

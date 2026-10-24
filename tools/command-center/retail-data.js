@@ -26,10 +26,10 @@
       }
     },
     workflows: [
-      { id: "partners", title: "Partner readiness", subtitle: "Required feeds, configuration and connection health", icon: "users", processes: [0, 4, 10] },
-      { id: "orders", title: "Order commitments", subtitle: "Acknowledgments, accepted changes and fulfillment instructions", icon: "flow", processes: [0, 7, 8] },
-      { id: "shipments", title: "Shipment readiness", subtitle: "Notice conformance, routing sequence and receiving evidence", icon: "net", processes: [1, 2, 8] },
-      { id: "invoices", title: "Invoice and deduction control", subtitle: "Price matching, settlement evidence and review ownership", icon: "check", processes: [0, 1, 3, 9] }
+      { id: "partners", title: "Partner readiness", subtitle: "Required feeds, configuration and connection health", icon: "users", processes: [0, 1] },
+      { id: "orders", title: "Order commitments", subtitle: "Acknowledgments, accepted changes and fulfillment instructions", icon: "flow", processes: [0] },
+      { id: "shipments", title: "Shipment readiness", subtitle: "Notice conformance, routing sequence and receiving evidence", icon: "net", processes: [0, 1] },
+      { id: "invoices", title: "Invoice and deduction control", subtitle: "Price matching, settlement evidence and review ownership", icon: "check", processes: [0, 1, 3] }
     ],
     cases: [
       {
@@ -131,7 +131,7 @@
       },
       {
         id: "rt-order-change", workflow: "orders", title: "Warehouse release uses the superseded quantity",
-        source: "PM", agent: "Reese", severity: "critical", process: 8,
+        source: "PM", agent: "Reese", severity: "critical", process: 0,
         ruleId: "rt-rule-order-change", partnerId: "pt-tidewell", owner: "Sam Lee · Fulfillment coordination",
         reference: "PO-78288 / WH-45018", amount: null, unit: "units above accepted change", value: 200,
         policy: "Fulfillment rule REV-01: the latest accepted order revision governs the quantity released to the warehouse; no quantity tolerance is configured for this account.",
@@ -204,7 +204,7 @@
       },
       {
         id: "rt-shipment-sequence", workflow: "shipments", title: "Warehouse release preceded routing approval",
-        source: "PM", agent: "Liz", severity: "attention", process: 2,
+        source: "PM", agent: "Liz", severity: "attention", process: 0,
         ruleId: "rt-rule-routing", partnerId: "pt-fieldstone", owner: "Taylor Chen · Transportation planning",
         reference: "ROUTE-38106 / WH-45022", amount: null, unit: "minutes before approval", value: 50,
         policy: "Collect-freight program COLLECT-03: retailer routing instructions must be recorded before a warehouse shipping order is released for this program.",

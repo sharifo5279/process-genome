@@ -276,3 +276,4 @@
   .cx-cust { flex: none; }
   .cx-dc .cx-kpi > span { white-space: normal; overflow: visible; }
   .cx-dc .cx-dn .dv { font-size: 18px; } .cx-dc .cx-bars li { grid-template-columns: 190px minmax(0, 1fr) 32px; }
+  .cx .cx-card > header.cx-agh > div { margin-left: 0; }

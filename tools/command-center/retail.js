@@ -68,7 +68,7 @@
     return { total: req.length, healthy: ok.length, percent: req.length ? Math.round(ok.length / req.length * 100) : 0 };
   }
   function rtMatrix(partners) {
-    var types = ["850", "855", "856", "810", "846", "852"];
+    var types = ["850", "855", "856", "810", "820", "997"];
     return '<div class="rt-table-wrap"><table class="rt-table rt-matrix"><thead><tr><th>' + rte(rtProfile().partnerLabel || "Trading partner") + '</th>' + types.map(function (t) { return '<th>' + t + '</th>'; }).join('') + '<th>Other</th><th>Coverage</th><th>Watch</th></tr></thead><tbody>' + partners.map(function (p) {
       var cv = rtCoverage(p);
       return '<tr><td><button type="button" class="rt-link rt-cell-title" data-rt-partner="' + rte(p.id) + '">' + rte(p.names[rtRole]) + '</button><span class="rt-cell-sub">' + rte((p.status === 'onboarding' ? 'Onboarding test · ' : '') + p.lastActivity) + '</span></td>' + types.map(function (t) {
@@ -162,12 +162,13 @@
     var body = '<div class="rt-evidence-layout"><div>' + rtKV([["Agent", rule.agent], ["Partner / process scope", rule.scope], ["Condition", rule.condition], ["Required evidence", rule.evidence]]) + '<label class="rt-field">' + (numeric ? 'Policy threshold' : 'Policy requirement') + '<input data-rt-threshold ' + (numeric ? 'type="number" min="0" step="any"' : 'type="text"') + ' value="' + rte(rtRuleDraft.threshold) + '"><span>' + rte(rule.unit || "Configured for this demo partner") + '</span></label><div class="rt-callout"><b>Evidence gate</b><p>' + rte(rule.guardrail) + '</p></div></div><aside class="rt-panel"><h3>Test before activation</h3><p>Run the configured policy against two illustrative fixtures.</p>' + rtKV([[rule.test.passLabel || "Fixture A", rule.test.pass], [rule.test.failLabel || "Fixture B", rule.test.fail]]) + rtButton("Run policy test", 'data-rt-test-rule="' + rule.id + '"', true) + results + '</aside></div>';
     return rtDialog(rule.name, "Retail policy · " + rule.agent + (saved && saved.active ? " · Active in demo" : " · Template"), body, '<span class="rt-note">Activation records a demo configuration for this perspective.</span>' + rtButton("Close", "data-rt-close") + '<button type="button" class="rt-button primary" data-rt-activate-rule="' + rule.id + '"' + (!rtRuleDraft.tested ? ' disabled' : '') + '>Activate in demo</button>');
   }
-  CXS["rt-rules"] = function () {
-    return '<div class="rt-page">' + rtHeading("Retail policy templates", "Inspect the partner scope, required evidence, and policy test before activation.", rtNavButton("All rules", "pm-rules"), "Templates for Performance Monitor agents") + '<div class="rt-grid">' + RTDATA.rules.map(function (r) { var saved = rtBag().rules[r.id]; return '<section class="rt-panel rt-rule"><div class="rt-section-head"><span class="rt-source ' + (r.agent === "Ivy" ? "im" : "pm") + '">' + (r.agent === "Ivy" ? "IM" : "PM") + ' · ' + rte(r.agent) + '</span>' + rtChip(saved && saved.active ? "Active in demo" : "Template", saved && saved.active ? "info" : "neutral") + '</div><h3>' + rte(r.name) + '</h3><p>' + rte(r.condition) + '</p><p class="rt-note">' + rte(r.scope) + '</p>' + rtButton("Inspect and test", 'data-rt-rule="' + r.id + '"') + '</section>'; }).join('') + '</div>' + rtSnapshot() + '</div>';
-  };
+  /* Retail policy templates sit with the rules in Configuration */
+  CXCFG.push(function () {
+    return cxCard("Retail policies", '<p class="cx-sub">Inspect the partner scope, required evidence and policy test before activation.</p><div class="rt-grid">' + RTDATA.rules.map(function (r) { var saved = rtBag().rules[r.id]; return '<section class="rt-panel rt-rule"><div class="rt-section-head"><span class="rt-source ' + (r.agent === "Ivy" ? "im" : "pm") + '">' + (r.agent === "Ivy" ? "IM" : "PM") + ' · ' + rte(r.agent) + '</span>' + rtChip(saved && saved.active ? "Active in demo" : "Template", saved && saved.active ? "info" : "neutral") + '</div><h3>' + rte(r.name) + '</h3><p>' + rte(r.condition) + '</p><p class="rt-note">' + rte(r.scope) + '</p>' + rtButton("Inspect and test", 'data-rt-rule="' + r.id + '"') + '</section>'; }).join('') + '</div>', "", cxTag("RT"));
+  });
 
   /* The Retail add-on: its workspaces in the navigation, its cases in the shared findings and action queue, its components on the dashboard. */
-  CXNAV.push(["rt", "Retail add-on", "flow", [["rt-partners", "Partner participation", "users"], ["rt-orders", "Orders and commitments", "doc"], ["rt-shipments", "ASNs and readiness", "box"], ["rt-invoices", "Invoices and deductions", "chart"], ["rt-rules", "Retail policies", "rules"]]]);
+  CXNAV.push(["rt", "Retail add-on", "flow", [["rt-partners", "Partner participation", "users"], ["rt-orders", "Orders and commitments", "doc"], ["rt-shipments", "ASNs and readiness", "box"], ["rt-invoices", "Invoices and deductions", "chart"]]]);
   function rtAt(c) { var t = String((c.timeline[c.timeline.length - 1] || {}).time || ""), m = /(\d\d:\d\d)$/.exec(t); return m && (t === m[1] || t.indexOf(RTDATA.snapshot.date.slice(8) + " Oct") === 0) ? "Today, " + m[1] : t; }
   CXITEMS.push(function () {
     return RTDATA.cases.map(function (c) {
@@ -213,7 +214,6 @@
     var toolbar = cx.querySelector(".cx-tb");
     if (toolbar) toolbar.insertAdjacentHTML("beforebegin", '<div class="rt-role" role="group" aria-label="Demo perspective"><span>Demo perspective</span><button type="button" class="' + (rtRole === "retailer" ? 'on' : '') + '" data-rt-role="retailer" aria-pressed="' + (rtRole === "retailer") + '">Retailer</button><button type="button" class="' + (rtRole === "supplier" ? 'on' : '') + '" data-rt-role="supplier" aria-pressed="' + (rtRole === "supplier") + '">CPG supplier</button></div>');
     var help = cx.querySelector("[data-cxhelp]"); if (help) help.setAttribute("data-rt-help", "");
-    if (ccScr === "pm-rules") { var create = cx.querySelector(".cx-ph .cx-btn"); if (create) create.setAttribute("data-cxgo", "rt-rules"); }
     var main = cx.querySelector(".cx-main"); if (main) main.scrollTop = scroll;
     if (rtToastText) cx.insertAdjacentHTML("beforeend", '<div class="rt-toast" role="status">' + ci("ok") + '<span>' + rte(rtToastText) + '</span></div>');
     var dialog = cx.querySelector(".rt-dialog");

@@ -4,7 +4,7 @@
      Two perspectives of the same network: a retailer (Northfield Stores) and a CPG supplier (Nuvori Beauty). */
   var ccEl = document.getElementById("cc"), cx = document.getElementById("cx");
   var ccScr = "dash", ccGrp = { im: true, pm: true, rt: true }, ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccTpt = "Customer", ccPj = 0, ccAvLog = [];
-  var ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "open";
+  var ccCfgTab = "rp", ccProcTab = "pr", ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "open";
   var CC_GENOME = "../#retail/map";
   function ccRole() { return typeof rtRole === "string" ? rtRole : "supplier"; }
   function ccCompany() { return ccRole() === "retailer" ? "Northfield Stores" : "Nuvori Beauty"; }
@@ -33,33 +33,32 @@
 
   /* Agents: four from the prototype, plus a volume agent that turns Integration Monitor anomalies into findings */
   var CXA = [
-    { id: "lex", n: "Lex", r: "Timing and SLA agent", d: "Watches every document clock: acknowledgment windows, ship notice timing, delivery events and shipping advice.", f: ["f1", "f3", "f6", "f8"] },
+    { id: "lex", n: "Lex", r: "Timing and SLA agent", d: "Watches every document clock: acknowledgment windows and ship notice timing.", f: ["f1", "f3"] },
     { id: "nora", n: "Nora", r: "Conformance agent", d: "Checks documents against partner rules before and after they are sent: price, quantity, labels and required fields.", f: ["f4", "f11"] },
     { id: "liz", n: "Liz", r: "Process agent", d: "Follows each business process across documents and systems, and flags steps that will fail later in the process.", f: ["f9"] },
     { id: "reese", n: "Reese", r: "Reconciliation agent", d: "Matches deductions, credits and remittances to orders, shipments and invoices, and builds dispute backup.", f: ["f5"] },
-    { id: "ivy", n: "Ivy", r: "Volume agent", d: "Compares document volume with its projection by partner and hour, and raises missing feeds and volume drops as findings.", f: ["f2", "f7", "f10"], nw: true }
+    { id: "ivy", n: "Ivy", r: "Volume agent", d: "Compares document volume with its projection by partner and hour, and raises missing documents and volume drops as findings.", f: ["f2", "f7", "f10"], nw: true }
   ];
   var CXAF = {}; CXA.forEach(function (a) { a.f.forEach(function (id) { CXAF[id] = a; }); });
-  var CXST = { f1: "New", f2: "New", f3: "Acknowledged", f4: "New", f5: "Acknowledged", f6: "New", f7: "New", f8: "Acknowledged", f9: "New", f10: "New", f11: "Acknowledged" };
-  var CXAS = { f3: "Dana Ortiz", f5: "Priya Nair", f8: "Sam Lee", f4: "Dana Ortiz" };
-  var CXDOC = { f1: "Ship notice (856)", f2: "Purchase order (850)", f3: "Order acknowledgment (855)", f4: "Invoice (810)", f5: "Debit memo (812)", f6: "Shipment status (214)", f7: "Product activity (852)", f8: "Warehouse shipping advice (945)", f9: "Price catalog (832)", f10: "Inventory advice (846)", f11: "Ship notice (856)" };
+  var CXST = { f1: "New", f2: "New", f3: "Acknowledged", f4: "New", f5: "Acknowledged", f7: "New", f9: "New", f10: "New", f11: "Acknowledged" };
+  var CXAS = { f3: "Dana Ortiz", f5: "Priya Nair", f4: "Dana Ortiz" };
+  var CXDOC = { f1: "Ship notice (856)", f2: "Purchase order (850)", f3: "Order acknowledgment (855)", f4: "Invoice (810)", f5: "Debit memo (812)", f7: "Remittance advice (820)", f9: "Price catalog (832)", f10: "Functional acknowledgment (997)", f11: "Ship notice (856)" };
   var CXRULE = { f1: "Ship notice within 1 hour of pickup", f2: "Order volume against projection", f3: "Acknowledgment within 24 hours", f4: "Invoice matches order price", f5: "Deduction backup inside the dispute window",
-    f6: "Delivery events for every tendered load", f7: "Sales feed on schedule", f8: "Shipping advice for every warehouse order", f9: "Cost change loaded before invoicing", f10: "Inventory feed on schedule", f11: "Carton labels carry serial codes" };
+    f7: "Remittance advice on schedule", f9: "Cost change applied to open orders", f10: "Functional acknowledgments on time", f11: "Carton labels carry serial codes" };
+  /* Demo client solution: Order to cash, Receive, match and pay, and Deductions */
   var CXR = [
     ["lex", "Ship notice within 1 hour of pickup", "Ship notice (856)", "Order to cash", 97.1, 31, "1 minute ago", "Active"],
     ["lex", "Acknowledgment within 24 hours", "Order acknowledgment (855)", "Order to cash", 95.8, 44, "3 minutes ago", "Active"],
-    ["lex", "Delivery events for every tendered load", "Shipment status (214)", "Routing and delivery", 92.4, 27, "6 minutes ago", "Active"],
-    ["lex", "Shipping advice for every warehouse order", "Warehouse shipping advice (945)", "3PL fulfillment", 98.2, 12, "9 minutes ago", "Active"],
     ["nora", "Invoice matches order price", "Invoice (810)", "Order to cash", 96.6, 38, "2 minutes ago", "Active"],
     ["nora", "Carton labels carry serial codes", "Ship notice (856)", "Receive, match and pay", 99.0, 9, "4 minutes ago", "Active"],
-    ["nora", "Required fields by partner guide", "All outbound documents", "All processes", 99.4, 6, "5 minutes ago", "Over budget"],
-    ["liz", "Cost change loaded before invoicing", "Price catalog (832)", "Item and price synchronization", 94.1, 17, "8 minutes ago", "Active"],
+    ["nora", "Required fields by partner guide", "All outbound documents", "All three processes", 99.4, 6, "5 minutes ago", "Over budget"],
+    ["liz", "Cost change applied to open orders", "Price catalog (832)", "Order to cash", 94.1, 17, "8 minutes ago", "Active"],
     ["liz", "Ship notice before invoice", "Ship notice (856), Invoice (810)", "Order to cash", 99.3, 4, "7 minutes ago", "Active"],
     ["reese", "Deduction backup inside the dispute window", "Debit memo (812)", "Deductions", 88.5, 23, "14 minutes ago", "Active"],
-    ["reese", "Return credit matches an authorization", "Return authorization (180)", "Returns", 97.9, 5, "19 minutes ago", "Paused"],
+    ["reese", "Remittance matches open invoices", "Remittance advice (820)", "Deductions", 97.9, 5, "19 minutes ago", "Paused"],
     ["ivy", "Order volume against projection", "Purchase order (850)", "Order to cash", 93.2, 11, "1 minute ago", "Active"],
-    ["ivy", "Inventory feed on schedule", "Inventory advice (846)", "Drop ship and marketplaces", 96.0, 8, "2 minutes ago", "Active"],
-    ["ivy", "Sales feed on schedule", "Product activity (852)", "Sales reporting", 98.7, 3, "11 minutes ago", "Active"]
+    ["ivy", "Remittance advice on schedule", "Remittance advice (820)", "Order to cash", 98.7, 3, "11 minutes ago", "Active"],
+    ["ivy", "Functional acknowledgments on time", "Functional acknowledgment (997)", "Receive, match and pay", 96.0, 8, "2 minutes ago", "Active"]
   ];
   var CXP = [["Northfield Stores", "NFS-RT-0112", "Active", "BU-0451", "Mar 4, 2021", "Today, 08:42"], ["Harbor Grocers", "HBG-RT-0207", "Active", "BU-0367", "Jun 18, 2020", "Today, 05:52"],
     ["Westline Home", "WLH-RT-0331", "Active", "BU-0442", "Jan 9, 2022", "Today, 08:31"], ["Brightway Marketplace", "BWM-MP-0415", "Active", "BU-0249", "Sep 27, 2023", "Today, 05:00"],
@@ -157,13 +156,12 @@
   var CXCAT = [["Order and fulfillment", "850 PO · 855 PO Ack · 856 ASN", 85, [["PO acknowledgment rate", "855 PO acknowledgment", "96.5%", "≥ 98%", 98, 5, 0], ["PO acknowledgment cycle time", "850 PO to 855 PO acknowledgment", "5.5 hrs", "≤ 4 hrs", 73, 4, 1], ["Order accuracy", "850 PO and 855 PO acknowledgment", "98.2%", "≥ 99%", 99, 5, 0], ["Order fill rate", "855 PO acknowledgment", "95.5%", "≥ 98%", 97, 5, 0], ["Backorder rate", "855 PO acknowledgment", "3.5%", "≤ 2%", 57, 4, 1]]],
     ["Shipping and delivery", "856 ASN · 214 Shipment status", 94, [["Ship notice timeliness", "856 before arrival", "97.1%", "≥ 98%", 96, 6, 0], ["On-time in-full (OTIF)", "850, 856 and 214", "91.5%", "≥ 95%", 96, 8, 1], ["ASN accuracy", "856 against receipt", "98.8%", "≥ 99%", 98, 5, 0]]],
     ["Invoicing and financial", "810 Invoice · 820 Remittance", 90, [["Invoice accuracy rate", "810 against 850 and 856", "96.6%", "≥ 98%", 92, 6, 1], ["Chargeback and deduction rate", "812 against 810", "2.1%", "≤ 1.5%", 64, 5, 1]]],
-    ["Inventory and planning", "846 Inventory advice · 852 Product activity", 83, [["Inventory feed timeliness", "846 hourly", "96.0%", "≥ 99%", 81, 4, 1], ["Sales feed completeness", "852 weekly", "98.7%", "≥ 99%", 95, 3, 0]]],
     ["Partner compliance and EDI health", "997 Functional acknowledgments", 92, [["First-pass acceptance", "997 and 824", "97.4%", "≥ 98%", 94, 5, 0], ["Transaction rejection rate", "824 rejections", "1.8%", "≤ 1%", 70, 4, 1]]]];
   CXS["an"] = function () {
-    var h = cxHead("Analytics") + '<nav class="cx-tabs"><button type="button" data-cxtab="sc" aria-pressed="' + (ccTab === "sc") + '">Trading partner scorecard</button><button type="button" data-cxtab="km" aria-pressed="' + (ccTab === "km") + '">Key metrics</button></nav>' +
-      '<div class="cx-bar"><span class="cx-lb">Trading partner type</span>' + cxSeg("tpt", ["Customer", "Supplier", "Logistics"], ccTpt) + '</div>';
+    var h = cxHead("Performance Analytics") + '<nav class="cx-tabs"><button type="button" data-cxtab="sc" aria-pressed="' + (ccTab === "sc") + '">Partner scorecard</button><button type="button" data-cxtab="km" aria-pressed="' + (ccTab === "km") + '">Key metrics</button></nav>' +
+      '<div class="cx-bar"><span class="cx-lb">Partner type</span>' + cxSeg("tpt", ["Customer", "Supplier", "Logistics"], ccTpt) + '</div>';
     if (ccTab === "sc") {
-      h += '<section class="cx-hero"><div class="cx-ov"><span>Overall trading partner score</span><b>91.3</b><small>/100 · Grade B</small><em>' + ci("warn") + 'Performance requires watching</em></div>' +
+      h += '<section class="cx-hero"><div class="cx-ov"><span>Overall partner score</span><b>91.3</b><small>/100 · Grade B</small><em>' + ci("warn") + 'Performance requires watching</em></div>' +
         [["On-time in-full (OTIF)", "850/856/214", "91.5%", "score 96", "Target ≥ 95%", "3.5 pts"], ["Perfect order rate", "850-856-810", "90%", "score 95", "Target ≥ 95%", "5.0 pts"], ["PO acknowledgment rate", "855", "96.5%", "score 98", "Target ≥ 98%", "1.5 pts"]].map(function (k) {
           return '<div class="cx-kc"><header><b>' + k[0] + '</b><code>' + k[1] + '</code></header><strong>' + k[2] + '<small>' + k[3] + '</small></strong><span class="cx-pb"><i style="width:92%"></i><u style="left:96%"></u></span><div class="cx-ft"><span>' + k[4] + '</span><em>' + ci("warn") + '↓ ' + k[5] + '</em></div></div>';
         }).join("") + '</section><h4 class="cx-sh">Performance by category</h4>' +
@@ -173,27 +171,27 @@
           }).join("") + '</details>';
         }).join("");
     } else {
-      h += '<div class="cx-g2">' + cxCard("Where to focus", '<p class="cx-sub">Lowest-scoring KPIs pulling the rating down</p>' + cxBars([["Backorder rate", 57, "", "r"], ["Chargeback and deduction rate", 64, "", "y"], ["Transaction rejection rate", 70, "", "y"], ["PO acknowledgment cycle time", 73, "", "y"], ["Inventory feed timeliness", 81, "", "y"], ["Perfect order rate", 95, "", "g"]], {})) +
+      h += '<div class="cx-g2">' + cxCard("Where to focus", '<p class="cx-sub">Lowest-scoring KPIs pulling the rating down</p>' + cxBars([["Backorder rate", 57, "", "r"], ["Chargeback and deduction rate", 64, "", "y"], ["Transaction rejection rate", 70, "", "y"], ["PO acknowledgment cycle time", 73, "", "y"], ["Acknowledgment timeliness", 81, "", "y"], ["Perfect order rate", 95, "", "g"]], {})) +
         cxCard("Category health", '<p class="cx-sub">Average score by KPI group</p><div class="cx-dw">' + cxDonut(CXCAT.map(function (c, i) { return [c[0], c[2], ["#0066FF", "#001889", "#5B8DEF", "#9DB7F2", "#3F4D62"][i]]; }), 80, "89", "avg score") + '<ul class="cx-lg">' + CXCAT.map(function (c, i) { return '<li><i style="background:' + ["#0066FF", "#001889", "#5B8DEF", "#9DB7F2", "#3F4D62"][i] + '"></i>' + c[0] + '<b>' + c[2] + '</b></li>'; }).join("") + '</ul></div>') + '</div>' +
-        '<div class="cx-g2">' + cxCard("Weighted trading partner score trend", cxLine([{ v: [86.2, 87.1, 87.0, 88.4, 89.9, 91.3], area: true }], { w: 600, h: 220, min: 80, max: 100, xl: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Score trend" })) +
+        '<div class="cx-g2">' + cxCard("Weighted partner score trend", cxLine([{ v: [86.2, 87.1, 87.0, 88.4, 89.9, 91.3], area: true }], { w: 600, h: 220, min: 80, max: 100, xl: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Score trend" })) +
         cxCard("Score contribution by KPI", '<p class="cx-sub">Weighted points contributed to the 91.3 overall score</p>' + cxBars([["On-time in-full (OTIF)", 7.7, "", "g"], ["Ship notice timeliness", 5.8, "", "g"], ["Invoice accuracy rate", 5.5, "", "y"], ["ASN accuracy", 4.9, "", "y"], ["Chargeback and deduction rate", 3.2, "", "y"]], { max: 8, fmt: function (v) { return v.toFixed(1); } })) + '</div>';
     }
     return h;
   };
   CXS["im-tp"] = function () {
-    return cxHead("Trading partners") + cxCard("Partner integration analysis", '<div class="cx-k3">' + cxKpi("Total partners", "208", "78% active") + cxKpi("Active partners", "163", "Sent or received in 30 days") + cxKpi("Inactive partners", "45", "No activity in 30 days") + '</div>') +
-      cxCard("Trading partner stats", cxLine([{ v: [172, 176, 179, 183, 186, 190, 193, 196, 199, 203, 205, 208] }, { v: [3, 4, 3, 4, 3, 4, 3, 3, 3, 4, 2, 3], c: "b2" }], { w: 1060, h: 230, max: 240, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Partners over 12 months" }) + '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>Total partners</li><li><i style="background:#001889"></i>Onboarded</li></ul>', "", cxSeg("rng", ["24M", "12M", "6M", "3M", "1M"], "12M"));
+    return cxHead("Partners") + cxCard("Partner integration analysis", '<div class="cx-k3">' + cxKpi("Total partners", "208", "78% active") + cxKpi("Active partners", "163", "Sent or received in 30 days") + cxKpi("Inactive partners", "45", "No activity in 30 days") + '</div>') +
+      cxCard("Partner stats", cxLine([{ v: [172, 176, 179, 183, 186, 190, 193, 196, 199, 203, 205, 208] }, { v: [3, 4, 3, 4, 3, 4, 3, 3, 3, 4, 2, 3], c: "b2" }], { w: 1060, h: 230, max: 240, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Partners over 12 months" }) + '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>Total partners</li><li><i style="background:#001889"></i>Onboarded</li></ul>', "", cxSeg("rng", ["24M", "12M", "6M", "3M", "1M"], "12M"));
   };
   CXS["im-com"] = function () {
-    return cxHead("Trading community") + '<div class="cx-k4">' + cxKpi("Total partners", "208") + cxKpi("Added this month", "3") + cxKpi("Added last month", "4") + cxKpi("Added this year", "21") + '</div>' +
+    return cxHead("Community") + '<div class="cx-k4">' + cxKpi("Total partners", "208") + cxKpi("Added this month", "3") + cxKpi("Added last month", "4") + cxKpi("Added this year", "21") + '</div>' +
       cxCard("Partners", '<table class="cx-tbl"><thead><tr><th>Partner name</th><th>Partner alias</th><th>Status</th><th>BUID</th><th>Onboarding date</th><th>Last activity</th></tr></thead><tbody>' +
         cxPartners().map(function (p) { return '<tr><td><b>' + p[0] + '</b></td><td><code>' + p[1] + '</code></td><td><span class="cx-st s-' + (p[2] === "Active" ? "resolved" : "known") + '"><i></i>' + p[2] + '</span></td><td>' + p[3] + '</td><td>' + p[4] + '</td><td>' + p[5] + '</td></tr>'; }).join("") + '</tbody></table>', "", '<span class="cx-note">Showing 10 of 208</span>');
   };
-  var CXPJ = [["Harbor Grocers orders", "Order volume drop", 5, "Inbound", "Purchase order (850)", "X12", "Harbor Grocers", "f2"], ["Brightway inventory feed", "Feed late", 3, "Outbound", "Inventory advice (846)", "X12", "Brightway Marketplace", "f10"],
-    ["Harbor Grocers sales feed", "Feed missing", 1, "Inbound", "Product activity (852)", "X12", "Harbor Grocers", "f7"], ["Northfield Stores invoices", "Within projection", 0, "Outbound", "Invoice (810)", "X12", "Northfield Stores", null],
+  var CXPJ = [["Harbor Grocers orders", "Order volume drop", 5, "Inbound", "Purchase order (850)", "X12", "Harbor Grocers", "f2"], ["Westline Home acknowledgments", "Volume drop", 3, "Inbound", "Functional acknowledgment (997)", "X12", "Westline Home", "f10"],
+    ["Harbor Grocers remittances", "Document missing", 1, "Inbound", "Remittance advice (820)", "X12", "Harbor Grocers", "f7"], ["Northfield Stores invoices", "Within projection", 0, "Outbound", "Invoice (810)", "X12", "Northfield Stores", null],
     ["Westline Home orders", "Within projection", 0, "Inbound", "Purchase order (850)", "X12", "Westline Home", null]];
-  var CXPJR = [["Meadowline Care orders", "Order volume drop", 5, "Outbound", "Purchase order (850)", "X12", "Meadowline Care", "f2"], ["Tidewell Home inventory feed", "Feed late", 3, "Inbound", "Inventory advice (846)", "X12", "Tidewell Home", "f10"],
-    ["Meadowline Care sales feed", "Feed missing", 1, "Outbound", "Product activity (852)", "X12", "Meadowline Care", "f7"], ["Nuvori Beauty invoices", "Within projection", 0, "Inbound", "Invoice (810)", "X12", "Nuvori Beauty", null],
+  var CXPJR = [["Meadowline Care orders", "Order volume drop", 5, "Outbound", "Purchase order (850)", "X12", "Meadowline Care", "f2"], ["Tidewell Home acknowledgments", "Volume drop", 3, "Outbound", "Functional acknowledgment (997)", "X12", "Tidewell Home", "f10"],
+    ["Meadowline Care remittances", "Document missing", 1, "Outbound", "Remittance advice (820)", "X12", "Meadowline Care", "f7"], ["Nuvori Beauty invoices", "Within projection", 0, "Inbound", "Invoice (810)", "X12", "Nuvori Beauty", null],
     ["Copperleaf Living orders", "Within projection", 0, "Outbound", "Purchase order (850)", "X12", "Copperleaf Living", null]];
   function cxProj() { return ccRole() === "retailer" ? CXPJR : CXPJ; }
   CXS["im-proj"] = function () {
@@ -201,23 +199,35 @@
     return cxHead("Projections and anomalies") + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
       return '<button type="button" data-cxpj="' + i + '" aria-pressed="' + (i === ccPj) + '"><b>' + x[0] + '</b><small>' + x[1] + ' · Executed today, 08:00</small>' + (x[2] ? '<em>' + x[2] + ci("warn") + '</em>' : '') + '</button>';
     }).join("") + '</nav><section class="cx-pjd"><header><h3>' + p[0] + '</h3>' + (p[7] ? '<button type="button" class="cx-btn" data-cxf="' + p[7] + '">Open finding</button>' : '') + '</header>' +
-      '<div class="cx-chips">' + [["D", "Direction", p[3]], ["D", "Document type", p[4]], ["S", "Document standard", p[5]], ["T", "Trading partner", p[6]]].map(function (c) { return '<div><i>' + c[0] + '</i><span>' + c[1] + '<b>' + c[2] + '</b></span></div>'; }).join("") + '</div>' +
+      '<div class="cx-chips">' + [["D", "Direction", p[3]], ["D", "Document type", p[4]], ["S", "Document standard", p[5]], ["P", "Partner", p[6]]].map(function (c) { return '<div><i>' + c[0] + '</i><span>' + c[1] + '<b>' + c[2] + '</b></span></div>'; }).join("") + '</div>' +
       '<div class="cx-bar"><span class="cx-lb">Projection for</span>' + cxSeg("pjr", ["7d", "30d"], "7d") + '</div>' +
       cxLine([{ v: act, c: "act" }, { v: prj, c: "prj" }], { w: 840, h: 210, max: 140, xl: ["Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29"], now: 3, band: prj.map(function (v) { return v == null ? null : [v - 16, v + 16]; }), label: "Projection and actual" }) +
       '<ul class="cx-lg row"><li><i class="bd"></i>Projected range</li><li><i style="background:#5B8DEF"></i>Projection</li><li><i style="background:#E8590C"></i>Actual</li></ul><h4 class="cx-sh">Heat map: hourly activity projection</h4>' + cxHeat() + '</section></div>';
   };
-  CXS["im-map"] = function () {
-    return cxHead("Document mapping") + cxCard("Business documents", '<table class="cx-tbl"><thead><tr><th>Business document</th><th>EDI documents</th><th>ERP document</th><th>Processes</th></tr></thead><tbody>' +
-      [["Purchase order", "850, 860", "Sales order", "Order to cash, Drop ship, 3PL"], ["Order acknowledgment", "855, 865", "Order confirmation", "Order to cash"], ["Ship notice", "856", "Outbound delivery", "Order to cash, Receive, match and pay"], ["Invoice", "810", "Billing document", "Order to cash"],
-        ["Remittance", "820", "Incoming payment", "Order to cash, Deductions"], ["Debit memo", "812", "Dispute case", "Deductions"], ["Inventory advice", "846", "Stock report", "Drop ship, VMI"], ["Product activity", "852", "Sales report", "VMI, Sales reporting"]].map(function (r) {
-        return '<tr><td><b>' + r[0] + '</b></td><td><code>' + r[1] + '</code></td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>'; }).join("") + '</tbody></table>');
-  };
-  CXS["im-cfg"] = function () {
-    return cxHead("System configuration") + cxCard("Trading partner settings", '<p class="cx-sub">Days without activity before a trading partner is marked inactive.</p><label class="cx-fl">Threshold (days)<input type="number" value="30" min="1"></label><button type="button" class="cx-btn p">Save</button>');
+  /* Solution: the business documents behind the client's three processes */
+  var CXSOL = [["Purchase order", "850, 860", "Sales order", "Order to cash"], ["Order acknowledgment", "855, 865", "Order confirmation", "Order to cash"], ["Price catalog", "832", "Condition record", "Order to cash"],
+    ["Ship notice", "856", "Outbound delivery", "Order to cash, Receive, match and pay"], ["Application advice", "824", "Rejection message", "Order to cash, Receive, match and pay"], ["Invoice", "810", "Billing document", "Order to cash, Receive, match and pay"],
+    ["Functional acknowledgment", "997", "Transmission status", "All three processes"], ["Remittance advice", "820", "Incoming payment", "Order to cash, Deductions"], ["Debit memo", "812", "Dispute case", "Deductions"]];
+  var CXCFG = [];
+  CXS["cfg"] = function () {
+    var tab = ccCfgTab === "ps" ? "ps" : "rp";
+    var h = cxHead("Configuration") + '<nav class="cx-tabs"><button type="button" data-cxcfg="rp" aria-pressed="' + (tab === "rp") + '">Rules &amp; Policies</button><button type="button" data-cxcfg="ps" aria-pressed="' + (tab === "ps") + '">Partner settings</button></nav>';
+    if (tab === "ps") return h + cxCard("Partner activity", '<p class="cx-sub">Days without activity before a partner is marked inactive.</p><label class="cx-fl">Threshold (days)<input type="number" value="30" min="1"></label><button type="button" class="cx-btn p">Save</button>', "", cxTag("IM"));
+    return h + '<section class="cx-card cx-rh"><div><span>Total rules</span><b>' + CXR.length + '</b><small><i class="g"></i>' + CXR.filter(function (r) { return r[7] === "Active"; }).length + ' active <i class="r"></i>1 over budget <i class="y"></i>1 paused</small></div>' +
+      cxKpi("Total findings", "238") + cxKpi("Total inspections", "159.9K") + cxKpi("Average conformance", "95.8%") + cxKpi("Total deviation", "6,653") + '</section>' +
+      cxCard("Rules", '<table class="cx-tbl"><thead><tr><th>Rule</th><th>Transaction</th><th>Process</th><th class="n">Conformance</th><th class="n">Findings (30d)</th><th>Last executed</th><th>Status</th></tr></thead><tbody>' + CXA.map(function (a) {
+        return '<tr class="gh"><td colspan="7">' + a.n + ' · ' + a.r + '</td></tr>' + CXR.filter(function (r) { return r[0] === a.id; }).map(function (r) {
+          return '<tr><td><b class="cx-lkt">' + cxe(r[1]) + '</b></td><td>' + cxe(r[2]) + '</td><td>' + cxe(r[3]) + '</td><td class="n">' + r[4].toFixed(1) + '%</td><td class="n">' + r[5] + '</td><td>' + r[6] + '</td><td><span class="cx-st s-' + (r[7] === "Active" ? "resolved" : r[7] === "Paused" ? "acknowledged" : "new") + '"><i></i>' + r[7] + '</span></td></tr>';
+        }).join("");
+      }).join("") + '</tbody></table>', "", '<span class="cx-note">Grouped by agent</span>' + cxTag("PM")) + CXCFG.map(function (f) { return f(); }).join("");
   };
   CXS["pm-proc"] = function () {
     var op = cxOpen();
-    return cxHead("Business processes", '<span class="cx-new">New</span>') + '<p class="cx-lead">Each retail business process with its steps, the agents watching it and the findings open against it.</p>' +
+    var tabs = '<nav class="cx-tabs"><button type="button" data-cxpt="pr" aria-pressed="' + (ccProcTab !== "sol") + '">Processes</button><button type="button" data-cxpt="sol" aria-pressed="' + (ccProcTab === "sol") + '">Solution</button></nav>';
+    if (ccProcTab === "sol") return cxHead("Business processes", '<span class="cx-new">New</span>') + tabs + '<p class="cx-lead">Business documents in the client solution, with their EDI and ERP equivalents.</p>' +
+      cxCard("", '<table class="cx-tbl"><thead><tr><th>Business document</th><th>EDI documents</th><th>ERP document</th><th>Processes</th></tr></thead><tbody>' + CXSOL.map(function (r) {
+        return '<tr><td><b>' + r[0] + '</b></td><td><code>' + r[1] + '</code></td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>'; }).join("") + '</tbody></table>');
+    return cxHead("Business processes", '<span class="cx-new">New</span>') + tabs + '<p class="cx-lead">The client solution covers three processes. Each shows its steps, the agents watching it and its open findings.</p>' +
       cxCard("", '<table class="cx-tbl cx-pt"><thead><tr><th>Process</th><th>Steps</th><th>Key measure</th><th>Agents</th><th>Open findings</th><th>Value at risk</th><th>Health</th></tr></thead><tbody>' + CCSTG.map(function (g) {
         return '<tr class="gh"><td colspan="7">' + g[0] + '</td></tr>' + g[1].map(function (i) {
           var P = PROCESSES.retail[i], n = op.filter(function (f) { return f.p === i; }), sev = n.some(function (f) { return f.sev === "c"; }) ? "c" : n.length ? "w" : "ok", ag = {}, v = n.reduce(function (a, f) { return a + f.val; }, 0);
@@ -227,21 +237,12 @@
         }).join("");
       }).join("") + '</tbody></table>');
   };
-  CXS["pm-agents"] = function () {
-    return cxHead("Agents", '<span class="cx-new">New</span>') + '<p class="cx-lead">Agents inspect documents and processes, raise findings and recommend actions. A person approves each action before it runs.</p><div class="cx-ag">' + CXA.map(function (a) {
+  CXS["ws"] = function () {
+    return cxHead("Workspace", '<span class="cx-new">New</span>') + '<p class="cx-lead">Agents inspect documents and processes, raise findings and recommend actions. A person approves each action before it runs.</p><div class="cx-ag">' + CXA.map(function (a) {
       var rs = CXR.filter(function (r) { return r[0] === a.id; }), op = a.f.filter(function (id) { return !ccDone[id]; });
       return '<section class="cx-card"><header class="cx-agh"><span class="cx-agi">' + a.n[0] + '</span><div><h3>' + a.n + '</h3><span>' + a.r + (a.nw ? ' <em class="cx-new">New</em>' : '') + '</span></div></header><p class="cx-sub">' + a.d + '</p>' +
         '<dl class="cx-dl"><div><dt>Rules</dt><dd>' + rs.length + '</dd></div><div><dt>Open findings</dt><dd>' + op.length + '</dd></div><div><dt>Approval</dt><dd>Required</dd></div></dl><ul class="cx-agr">' + rs.map(function (r) { return '<li>' + ci("check") + cxe(r[1]) + '</li>'; }).join("") + '</ul></section>';
     }).join("") + '</div>';
-  };
-  CXS["pm-rules"] = function () {
-    return cxHead("Rules", '<button type="button" class="cx-btn">' + ci("plus") + 'Create new rule</button>') + '<section class="cx-card cx-rh"><div><span>Total rules</span><b>' + CXR.length + '</b><small><i class="g"></i>' + CXR.filter(function (r) { return r[7] === "Active"; }).length + ' active <i class="r"></i>1 over budget <i class="y"></i>1 paused</small></div>' +
-      cxKpi("Total findings", "238") + cxKpi("Total inspections", "159.9K") + cxKpi("Average conformance", "95.8%") + cxKpi("Total deviation", "6,653") + '</section>' +
-      cxCard("List of rules", '<table class="cx-tbl"><thead><tr><th>Rule</th><th>Transaction</th><th>Process</th><th class="n">Conformance</th><th class="n">Findings (30d)</th><th>Last executed</th><th>Status</th></tr></thead><tbody>' + CXA.map(function (a) {
-        return '<tr class="gh"><td colspan="7">' + a.n + ' · ' + a.r + '</td></tr>' + CXR.filter(function (r) { return r[0] === a.id; }).map(function (r) {
-          return '<tr><td><b class="cx-lkt">' + cxe(r[1]) + '</b></td><td>' + cxe(r[2]) + '</td><td>' + cxe(r[3]) + '</td><td class="n">' + r[4].toFixed(1) + '%</td><td class="n">' + r[5] + '</td><td>' + r[6] + '</td><td><span class="cx-st s-' + (r[7] === "Active" ? "resolved" : r[7] === "Paused" ? "acknowledged" : "new") + '"><i></i>' + r[7] + '</span></td></tr>';
-        }).join("");
-      }).join("") + '</tbody></table>', "", '<span class="cx-note">Grouped by agent</span>');
   };
 
   /* Dashboard: one view of the network. Each component names the module that produces it. */
@@ -249,7 +250,7 @@
   function cxDc(c) { return '<section class="cx-card cx-dc w' + c.w + '" data-mod="' + (c.mod || "all") + '"><header><h3>' + c.t + '</h3>' + cxTag(c.mod) + '</header><div class="cx-dcb">' + c.h() + '</div>' + (c.f ? '<footer class="cx-dcf">' + c.f() + '</footer>' : "") + '</section>'; }
   CXS["dash"] = function () {
     var list = CXDASH.slice().sort(function (a, b) { return a.o - b.o; }).filter(function (c) { return ccModF === "all" || !c.mod || c.mod === ccModF; });
-    return '<header class="cx-ph cx-dh"><div><h2>Dashboard</h2><p>' + cxe(ccCompany()) + ' · Retail and CPG · ' + CCSNAP + ' · Illustrative data</p></div>' + cxModSeg() + '</header><div class="cx-dg">' + list.map(cxDc).join("") + '</div>';
+    return '<header class="cx-ph cx-dh"><div><h2>Overview</h2><p>' + cxe(ccCompany()) + ' · Retail and CPG · ' + CCSNAP + ' · Illustrative data</p></div>' + cxModSeg() + '</header><div class="cx-dg">' + list.map(cxDc).join("") + '</div>';
   };
   CXDASH.push(
     { o: 10, mod: "IM", w: 2, t: "Network activity", h: function () {
@@ -258,7 +259,7 @@
     { o: 20, mod: "PM", w: 2, t: "Process performance", h: function () {
       var op = cxOpen().filter(function (f) { return f.mod === "Performance Monitor"; }), hi = op.filter(function (f) { return f.sev === "c"; }).length, val = op.reduce(function (a, f) { return a + f.val; }, 0);
       return '<div class="cx-k2">' + cxKpi("Open findings", op.length, hi + " high severity") + cxKpi("Value at risk", "$" + Math.round(val / 1000) + "K", "Across open findings") +
-        cxKpi("Average conformance", "95.8%", "Last 30 days") + cxKpi("Active rules", "14", "Across 5 agents") + '</div>'; }, f: function () { return cxGoBtn("Business processes", "pm-proc"); } },
+        cxKpi("Average conformance", "95.8%", "Last 30 days") + cxKpi("Active rules", CXR.filter(function (r) { return r[7] === "Active"; }).length, "Across " + CXA.length + " agents") + '</div>'; }, f: function () { return cxGoBtn("Business processes", "pm-proc"); } },
     { o: 40, mod: "", w: 4, t: "Priority findings", h: function () {
       var op = cxSort(cxModF(ccItems()).filter(function (i) { return !i.done; })).slice(0, 6);
       return '<table class="cx-tbl cx-pf"><thead><tr><th>Finding</th><th>Module</th><th>Severity</th><th>Detected</th></tr></thead><tbody>' + op.map(function (i) {
@@ -284,10 +285,10 @@
       f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>'; } },
     { o: 100, mod: "PM", w: 3, t: "Findings by agent", h: function () {
       return cxBars(CXA.map(function (a, k) { return [a.n + " · " + a.r, a.f.filter(function (id) { return !ccDone[id]; }).length + [12, 5, 3, 4, 6][k], "", "b"]; }), { max: 20 }); },
-      f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Agents", "pm-agents"); } },
-    { o: 110, mod: "IM", w: 3, t: "Trading community", h: function () {
+      f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Workspace", "ws"); } },
+    { o: 110, mod: "IM", w: 3, t: "Community", h: function () {
       return '<ul class="cx-stl">' + [["Total partners", "208"], ["Added this year", "21"], ["Added this month", "3"], ["Added last month", "4"], ["Active partners", "163"]].map(function (r) { return '<li><span>' + r[0] + '</span><b>' + r[1] + '</b></li>'; }).join("") + '</ul>'; },
-      f: function () { return cxGoBtn("Trading community", "im-com"); } }
+      f: function () { return cxGoBtn("Community", "im-com"); } }
   );
 
   /* Findings: every module in one list */
@@ -333,7 +334,7 @@
       h = '<header><span><p>Finding · ' + cxe(cxAgentName(f)) + '</p><h3>' + cxe(f.ot) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
         '<p class="cx-chipsr">' + cxSevChip(f.sev) + cxStChip(f) + cxTag(f.mod === "Integration Monitor" ? "IM" : "PM") + '<span class="cx-tg">' + cxe(f.how) + '</span></p><p>' + cxe(f.os) + '</p>' +
         '<div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
-        '<dl class="cx-dl"><div><dt>Trading partner</dt><dd>' + cxe(f.partner) + '</dd></div><div><dt>Process</dt><dd><button type="button" class="cx-lk" data-cxproc="' + f.p + '">' + cxe(P.n) + '</button>, step ' + (f.st + 1) + ': ' + cxe(P.steps[f.st][0]) + '</dd></div><div><dt>Rule</dt><dd>' + cxe(CXRULE[f.id]) + '</dd></div><div><dt>Transactions</dt><dd>' + cxe(CXDOC[f.id]) + '</dd></div></dl>' +
+        '<dl class="cx-dl"><div><dt>Partner</dt><dd>' + cxe(f.partner) + '</dd></div><div><dt>Process</dt><dd><button type="button" class="cx-lk" data-cxproc="' + f.p + '">' + cxe(P.n) + '</button>, step ' + (f.st + 1) + ': ' + cxe(P.steps[f.st][0]) + '</dd></div><div><dt>Rule</dt><dd>' + cxe(CXRULE[f.id]) + '</dd></div><div><dt>Transactions</dt><dd>' + cxe(CXDOC[f.id]) + '</dd></div></dl>' +
         '<h4>Timeline</h4><ol class="cx-tl">' + f.ev.map(function (e) { return '<li><b>' + cxe(e[0]) + '</b><span>' + cxe(e[1]) + '</span></li>'; }).join("") + '</ol>' +
         '<h4>Root cause</h4><p>' + cxe(f.cause) + '</p><h4>Recommended action</h4><div class="cx-rec">' + ci("bot") + '<span>' + cxe(f.act) + '<small>Approver: ' + cxe(f.appr) + '</small></span></div>' +
         '<h4>Teams involved</h4><p>' + f.who.map(cxe).join(", ") + '</p></div><div class="cx-ft">' + (done ? '<span class="cx-done">' + ci("ok") + (done === 2 ? "Marked as known issue" : "Action approved. The finding is closed.") + '</span>' :
@@ -355,8 +356,8 @@
       var hi = cxSort(ccItems().filter(function (i) { return !i.done && i.sev === "h"; }));
       return [hi.length + " high-severity findings are open across Integration Monitor, Performance Monitor and the Retail add-on. Start with these three.", hi.slice(0, 3)]; } },
     { q: function () { return ccRole() === "retailer" ? "Why are orders to Meadowline Care down?" : "Why are Harbor Grocers orders down?"; }, a: function () {
-      var t = ccRole() === "retailer" ? "Ivy found outbound order volume to Meadowline Care 64% below projection since 05:52. Meadowline Care moved its AS2 endpoint in a maintenance window, so deliveries to the previous address fail. The weekly sales feed to Meadowline Care is blocked by the same change."
-        : "Ivy found order volume 64% below projection since 05:52. AS2 receipts from Harbor Grocers fail signature checks because the partner rotated its signing certificate. The weekly sales feed is missing for the same reason.";
+      var t = ccRole() === "retailer" ? "Ivy found outbound order volume to Meadowline Care 64% below projection since 05:52. Meadowline Care moved its AS2 endpoint in a maintenance window, so deliveries to the previous address fail. The weekly remittance advice to Meadowline Care is blocked by the same change."
+        : "Ivy found order volume 64% below projection since 05:52. AS2 receipts from Harbor Grocers fail signature checks because the partner rotated its signing certificate. The weekly remittance advice is missing for the same reason.";
       return [t, ccItems().filter(function (i) { return i.key === "f:f2" || i.key === "f:f7"; })]; } },
     { q: function () { return "What needs my approval?"; }, a: function () {
       var w = cxSort(ccItems().filter(function (i) { return !i.actDone; }));
@@ -374,15 +375,16 @@
   }
 
   /* Shell */
-  var CXNAV = [["dash", "Dashboard", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"],
-    ["im", "Integration Monitor", "im", [["im-tp", "Trading partners", "users"], ["im-com", "Trading community", "net"], ["im-proj", "Projections and anomalies", "trend"], ["im-map", "Document mapping", "map"], ["im-cfg", "System configuration", "cog"]]],
-    ["pm", "Performance Monitor", "pm", [["pm-proc", "Business processes", "flow", 1], ["pm-agents", "Agents", "bot", 1], ["pm-rules", "Rules", "rules"], ["an", "Analytics", "chart"]]]];
-  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "pm-act": "act", "rt-actions": "act" };
+  var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"], ["ws", "Workspace", "bot"],
+    ["im", "Integration Monitor", "im", [["im-tp", "Partners", "users"], ["im-com", "Community", "net"], ["im-proj", "Projections and anomalies", "trend"]]],
+    ["pm", "Performance Monitor", "pm", [["pm-proc", "Business processes", "flow", 1], ["an", "Performance Analytics", "chart"]]]];
+  var CXNAVEND = [["cfg", "Configuration", "cog"]];
+  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "pm-act": "act", "rt-actions": "act", "pm-agents": "ws", "pm-rules": "cfg", "rt-rules": "cfg", "im-cfg": "cfg", "im-map": "pm-proc" };
   function cxMod() { var m = cxModKey(); return m ? CCMOD[m][0] : ""; }
   function cxBadge(k) { var it = ccItems(); var n = k === "find" ? it.filter(function (i) { return !i.done; }).length : k === "act" ? it.filter(function (i) { return !i.actDone; }).length : 0; return n ? '<em class="cx-nb">' + n + '</em>' : ""; }
   function cxTheme() { return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"; }
   function cxRender() {
-    var nav = CXNAV.map(function (g) {
+    var nav = CXNAV.concat(CXNAVEND).map(function (g) {
       if (!g[3]) return '<li><button type="button" class="cx-n1' + (ccScr === g[0] ? " on" : "") + '" data-cxgo="' + g[0] + '" title="' + g[1] + '"' + (ccScr === g[0] ? ' aria-current="page"' : "") + '>' + ci(g[2]) + '<span>' + g[1] + '</span>' + cxBadge(g[0]) + '</button></li>';
       return '<li class="cx-ng"><button type="button" class="cx-n1 cx-grp" data-cxgrp="' + g[0] + '" aria-expanded="' + !!ccGrp[g[0]] + '" title="' + g[1] + '">' + ci("chev", "cv") + ci(g[2]) + '<span>' + g[1] + '</span><i class="cx-md ' + g[0] + '" aria-hidden="true"></i></button>' + (ccGrp[g[0]] ? '<ul>' + g[3].map(function (s) {
         return '<li><button type="button" class="cx-n2' + (ccScr === s[0] ? " on" : "") + '" data-cxgo="' + s[0] + '" title="' + s[1] + '"' + (ccScr === s[0] ? ' aria-current="page"' : "") + '>' + ci(s[2]) + '<span>' + s[1] + (s[3] ? ' <em class="cx-new">New</em>' : '') + '</span></button></li>'; }).join("") + '</ul>' : '') + '</li>';
@@ -394,9 +396,9 @@
       '<div class="cx-body' + (ccNavMin ? " min" : "") + (ccAv ? " av" : "") + '"><nav class="cx-nav" aria-label="Command Center"><ul>' + nav + '</ul><a class="cx-n1 cx-col" href="' + CC_GENOME + '" title="Open Process Genome">' + ci("gen") + '<span>Open Process Genome</span></a><button type="button" class="cx-n1 cx-col" data-cxmin title="' + (ccNavMin ? "Expand panel" : "Collapse panel") + '">' + ci("side") + '<span>Collapse panel</span></button></nav>' +
       '<main class="cx-main" id="cx-main">' + CXS[ccScr]() + '</main>' + cxAviator() + '</div>' + cxDrawer();
   }
-  function cxGo(s) { s = CXALIAS[s] || s; if (!CXS[s]) s = "dash"; ccScr = s; ccDr = null; var m = cxModKey(s); if (m) ccGrp[CCMOD[m][1]] = true; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
+  function cxGo(s) { if (s === "im-map") ccProcTab = "sol"; if (s === "rt-rules") ccCfgTab = "rp"; s = CXALIAS[s] || s; if (!CXS[s]) s = "dash"; ccScr = s; ccDr = null; var m = cxModKey(s); if (m) ccGrp[CCMOD[m][1]] = true; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-cxgo],[data-cxgrp],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxseg],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme]"); if (!b) return;
+    var b = e.target.closest("[data-cxgo],[data-cxgrp],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxseg],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt]"); if (!b) return;
     if (b.hasAttribute("data-cxgo")) cxGo(b.getAttribute("data-cxgo"));
     else if (b.hasAttribute("data-cxgrp")) { var g = b.getAttribute("data-cxgrp"); ccGrp[g] = !ccGrp[g]; if (ccNavMin) { ccNavMin = false; ccGrp[g] = true; } cxRender(); }
     else if (b.hasAttribute("data-cxmin")) { ccNavMin = !ccNavMin; cxRender(); }
@@ -411,6 +413,8 @@
     else if (b.hasAttribute("data-cxpj")) { ccPj = +b.getAttribute("data-cxpj"); cxRender(); }
     else if (b.hasAttribute("data-cxq")) { cxAsk(+b.getAttribute("data-cxq")); cxRender(); var l = cx.querySelector(".cx-avb"); if (l) l.scrollTop = l.scrollHeight; }
     else if (b.hasAttribute("data-cxmod")) { ccModF = b.getAttribute("data-cxmod"); cxRender(); var f = cx.querySelector('[data-cxmod="' + ccModF + '"]'); if (f) f.focus({ preventScroll: true }); }
+    else if (b.hasAttribute("data-cxcfg")) { ccCfgTab = b.getAttribute("data-cxcfg"); cxRender(); }
+    else if (b.hasAttribute("data-cxpt")) { ccProcTab = b.getAttribute("data-cxpt"); cxRender(); }
     else if (b.hasAttribute("data-cxat")) { ccActTab = b.getAttribute("data-cxat"); cxRender(); }
     else if (b.hasAttribute("data-cxtheme")) { var n = cxTheme() === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", n); try { localStorage.setItem("edi-guide-theme", n); } catch (err) {} cxRender(); }
     else if (b.hasAttribute("data-cxfs")) { if (document.fullscreenElement) document.exitFullscreen(); else if (ccEl.requestFullscreen) ccEl.requestFullscreen().catch(function () {}); }

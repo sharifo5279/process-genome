@@ -8,9 +8,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const CORE_SCREENS = ['dash', 'find', 'act', 'im-tp', 'im-com', 'im-proj', 'im-map', 'im-cfg',
-  'pm-proc', 'pm-agents', 'pm-rules', 'an'];
-const RETAIL_SCREENS = ['rt-partners', 'rt-orders', 'rt-shipments', 'rt-invoices', 'rt-rules'];
+const CORE_SCREENS = ['dash', 'find', 'act', 'ws', 'cfg', 'im-tp', 'im-com', 'im-proj', 'pm-proc', 'an'];
+const RETAIL_SCREENS = ['rt-partners', 'rt-orders', 'rt-shipments', 'rt-invoices'];
 const source = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
 const textOf = html => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 const PROCESS_STUB = Array.from({ length: 11 }, (_, i) => ({
@@ -237,7 +236,7 @@ test('one dashboard, findings list and action queue attribute every record to it
     for (const i of items) assert.ok(find.includes(textOf(i.title)), `${role} findings list ${i.key}`);
     assert.ok(textOf(screen('dash')).includes(role === 'retailer' ? 'Northfield Stores' : 'Nuvori Beauty'));
   }
-  for (const id of ['rt-home', 'rt-actions', 'im-dash', 'pm-dash', 'pm-find', 'pm-act']) assert.equal(app.CXS[id], undefined, `${id} is folded into the shared screens`);
+  for (const id of ['rt-home', 'rt-actions', 'rt-rules', 'im-dash', 'pm-dash', 'pm-find', 'pm-act', 'pm-agents', 'pm-rules', 'im-map', 'im-cfg']) assert.equal(app.CXS[id], undefined, `${id} is folded into the shared screens`);
 });
 
 test('module filter narrows the dashboard, findings and action queue', () => {
@@ -252,6 +251,19 @@ test('module filter narrows the dashboard, findings and action queue', () => {
     }
     assert.doesNotMatch(screen('dash'), new RegExp('data-mod="(' + others.join('|') + ')"'));
   }
+});
+
+test('demo findings stay inside the three processes of the client solution', () => {
+  const { app, click, screen } = loadApp();
+  for (const role of ['retailer', 'supplier']) {
+    click({ 'data-rt-role': role });
+    assert.deepEqual([...new Set(app.ccItems().map(i => i.proc))].sort(), [0, 1, 3]);
+  }
+  const cfg = screen('cfg');
+  assert.ok(cfg.includes('Rules &amp; Policies') && cfg.includes('Retail policies'));
+  for (const r of app.RTDATA.rules) assert.ok(cfg.includes(`data-rt-rule="${r.id}"`), `${r.id} sits in Configuration`);
+  app.ccProcTab = 'sol';
+  assert.match(screen('pm-proc'), /Business document/);
 });
 
 test('approving a core finding closes it and moves its action to Completed', () => {
