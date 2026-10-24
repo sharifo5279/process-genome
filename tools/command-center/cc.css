@@ -387,3 +387,25 @@
   .cx-hv { align-self: center; }
   .rt-toast { border: 2px solid var(--pa) !important; border-radius: 12px !important; background: var(--pc) !important; color: var(--pf) !important; box-shadow: 0 12px 32px rgba(0, 24, 137, 0.16) !important; }
   .rt-toast .ci { color: var(--pa) !important; }
+  /* Packages */
+  .cx-pkg { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 3px 3px 3px 10px; border: 1px solid var(--pl); border-radius: 8px; background: var(--pcl); font-size: 11px; font-weight: 600; color: var(--pmu); white-space: nowrap; }
+  .cx-pkg select { height: 28px; padding: 0 26px 0 8px; border: 0; border-radius: 6px; background: var(--pc); color: var(--pai); font: 600 12px/16px var(--font); cursor: pointer; }
+  .cx.glass .cx-pkg { background: transparent; }
+  .rt-role { margin-left: 12px !important; }
+  .cx-hero-im { display: block; }
+  .cx-hero-im .cx-hs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .cx-hero-im .cx-hh { grid-column: 1 / -1; } .cx-hero-im .cx-hh ~ .cx-hh { margin-top: 10px; }
+  .cx-ovg { margin-top: 16px; }
+  .cx-ka2 { grid-column: span 1; } .cx-ka2 > span { display: flex !important; align-items: center; gap: 6px; white-space: normal !important; } .cx-ka2 > span .ci { width: 14px; height: 14px; color: var(--pa); }
+  .cx-ka2 > small { font-size: 13px !important; line-height: 18px; color: var(--pf) !important; margin-top: 4px; }
+  .cx-fsum:has(.cx-ka2) { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .cx-fsum .cx-ka2 { grid-column: span 2; }
+  .cx-dl1 { grid-template-columns: 1fr !important; } .cx-dl1 dt { margin-bottom: 4px; }
+  .cx-tabs-h { margin: 0 0 0 16px; border-bottom: 0; }
+  .ws-lens { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; font-size: 12px; color: var(--pmu); }
+  .ws-lens span { margin-right: 4px; font-weight: 600; }
+  .ws-lens button { height: 28px; padding: 0 10px; border: 1px solid var(--pl2); border-radius: 999px; background: var(--pc); font-size: 12px; cursor: pointer; }
+  .ws-lens button[aria-pressed="true"] { border: 2px solid var(--pa); padding: 0 9px; color: var(--pai) !important; font-weight: 600; }
+  .ws-pre { font-style: normal; font-size: 11px; font-weight: 600; color: var(--pmu); margin-left: 4px; }
+  .ws-docs { margin: 0; font-size: 13px; line-height: 22px; color: var(--pmu); }
+  .cx-agh .cx-mod { margin-left: auto; }

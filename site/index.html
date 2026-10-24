@@ -2419,7 +2419,7 @@ var TRANSLATE = [
   var CCF = [
     { id: "f1", p: 0, st: 2, sev: "c", mod: "Performance Monitor", how: "Rule and prediction", pil: "Extend", dp: 2, partner: "Northfield Stores", n: 14, val: 8400, at: "07:10",
       ot: "Ship notices not sent for 14 shipments", os: "Carrier pickup confirmed at 06:10. No 856 sent, and the loads arrive at the DC in about 5 hours.",
-      bt: "14 shipments at risk of chargebacks", bs: "Northfield Stores charges for each shipment that arrives before its ship notice.",
+      bt: "14 shipments arriving before their ship notice", bs: "Northfield Stores cannot receive the loads by scan until the ship notices arrive.",
       ev: [["06:10", "Carrier pickup confirmed for 14 loads"], ["06:12", "Shipments closed in the ERP"], ["07:10", "Rule breached: no 856 within 1 hour of pickup"], ["08:05", "Predicted arrival before ship notice for all 14 loads"]],
       cause: "The ERP shipment export stopped after a release at 05:45. Orders and invoices are unaffected.",
       act: "Build the 14 ship notices from carrier pickup and pack data, then send them to Northfield Stores.", appr: "EDI operations lead",
@@ -2432,8 +2432,8 @@ var TRANSLATE = [
       act: "Request the new certificate from Harbor Grocers, load it, and ask the partner to resend orders since 05:52.", appr: "EDI operations lead",
       area: "Certificate management", who: ["Customer service", "Information security", "Sales and key accounts"] },
     { id: "f3", p: 0, st: 1, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Westline Home", n: 37, val: 3700, at: "05:00",
-      ot: "37 acknowledgments past the 24-hour window", os: "Purchase orders received yesterday have no 855. The retailer fines late acknowledgments.",
-      bt: "37 orders not confirmed with Westline Home", bs: "Unconfirmed orders risk cancellation and a $100 late-acknowledgment fine each.",
+      ot: "37 acknowledgments past the 24-hour window", os: "Purchase orders received yesterday have no 855. Westline Home requires acknowledgment within 24 hours.",
+      bt: "37 orders not confirmed with Westline Home", bs: "Unconfirmed orders risk cancellation by the customer.",
       ev: [["Yesterday 04:58", "37 purchase orders received and loaded"], ["05:00", "24-hour acknowledgment window closed"], ["05:05", "Orders found on credit hold in the ERP"]],
       cause: "The orders sit in ERP credit review. Acknowledgments are generated only after release.",
       act: "Ask order management to release the orders, or send acknowledgments with a hold status.", appr: "Customer service lead",
@@ -2445,13 +2445,6 @@ var TRANSLATE = [
       cause: "The new costs were sent to the retailer but not loaded into billing.",
       act: "Correct the billing cost for 9 items and resend the 112 invoices.", appr: "Billing and pricing",
       area: "Rejections", who: ["Finance and treasury", "Master data"] },
-    { id: "f5", p: 3, st: 1, sev: "w", mod: "Performance Monitor", how: "Prediction", pil: "Extend", dp: 3, partner: "Northfield Stores", n: 23, val: 12750, at: "Yesterday",
-      ot: "23 debit memos without backup", os: "Debit memos cite late ship notices. Proof of delivery is not attached to 17 of them.",
-      bt: "$12,750 in deductions open, 8 days to dispute", bs: "17 deductions have delivery evidence and can be disputed. 6 are valid.",
-      ev: [["Yesterday", "23 debit memos received in the 812"], ["Yesterday", "Matched to 23 shipments and their 856 timestamps"], ["06:00", "Delivery evidence found for 17 shipments"]],
-      cause: "The retailer counted the ship notice time from the original order, not the revised one.",
-      act: "Dispute 17 deductions with proof of delivery attached and accept the other 6.", appr: "Deductions analyst",
-      area: "Chargebacks and deductions management", who: ["Finance and treasury", "Sales and key accounts"] },
     { id: "f7", p: 0, st: 5, sev: "w", mod: "Integration Monitor", how: "Missing document", pil: "Optimize", partner: "Harbor Grocers", n: 1, val: 0, at: "06:00",
       ot: "Remittance advice not received", os: "The weekly 820 from Harbor Grocers was due at 06:00. The last remittance arrived 7 days ago.",
       bt: "Harbor Grocers payments cannot be applied", bs: "Cash received without remittance detail stays unapplied until the 820 arrives.",
@@ -2473,13 +2466,6 @@ var TRANSLATE = [
       cause: "Not yet known. The partner's acknowledgments for other document types are flowing.",
       act: "Ask Westline Home to confirm receipt of the 52 invoices, and resend those it did not receive.", appr: "EDI operations lead",
       area: "Monitoring", who: ["Accounts receivable", "IT and ERP"] },
-    { id: "f11", p: 1, st: 0, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Westline Home", n: 4, val: 1000, at: "06:55",
-      ot: "4 ship notices fail carton validation", os: "Westline Home returned 824 application advice: carton labels in 4 ship notices have no serial shipping container codes.",
-      bt: "4 shipments will be received by hand", bs: "Westline Home charges $250 for each shipment it receives by hand.",
-      ev: [["06:40", "4 ship notices sent to Westline Home"], ["06:55", "824 rejections cite missing carton serial codes"]],
-      cause: "A new packing station prints labels without serial codes.",
-      act: "Reprint the labels with serial codes and resend the 4 ship notices.", appr: "Shipping supervisor",
-      area: "Rejections", who: ["Supply chain", "Warehouse"] }
   ];
   /* The demo client solution covers three processes */
   var CCSTG = [["Order and fulfill", [0]], ["Receive and pay", [1]], ["Settle and recover", [3]]];
@@ -2521,11 +2507,6 @@ var TRANSLATE = [
       ev: [["Monday", "832 cost change received from Solara Personal Care"], ["04:20", "First invoice failed price match"], ["07:30", "112 invoices held on the same 9 items"]],
       cause: "The supplier cost change was received but not approved in the item master.",
       act: "Route the 9 cost changes to merchandising for approval, then rerun the invoice match.", appr: "Accounts payable lead", who: ["Accounts payable", "Merchandising", "Master data"] },
-    f5: { partner: "Fieldstone Essentials", ot: "23 chargebacks disputed by the supplier", os: "Fieldstone Essentials disputed 23 late-ship-notice chargebacks and attached proof of delivery to 17.",
-      bt: "$12,750 in chargebacks disputed, 8 days to respond", bs: "17 disputes include delivery evidence. 6 have none.",
-      ev: [["Yesterday", "23 chargebacks issued for late ship notices"], ["06:00", "Disputes received with proof of delivery for 17"], ["06:05", "Ship notice times matched to the revised order dates"]],
-      cause: "The chargebacks used the original order date, not the revised one.",
-      act: "Reverse the 17 chargebacks with delivery evidence and uphold the other 6.", appr: "Vendor compliance analyst", who: ["Vendor compliance", "Accounts payable"] },
     f7: { partner: "Meadowline Care", ot: "Remittance advice not delivered", os: "The weekly 820 to Meadowline Care was due at 06:00. The last remittance went out 7 days ago.",
       bt: "Meadowline Care cannot apply this week's payments", bs: "Supplier collections may escalate while payments stay unapplied.",
       ev: [["Last Saturday 05:40", "Last 820 delivered"], ["06:00", "Expected remittance window closed"]],
@@ -2541,11 +2522,6 @@ var TRANSLATE = [
       ev: [["05:00", "Last 997 sent for an invoice"], ["06:00", "Acknowledgment volume fell below the projected band"], ["08:10", "52 invoices held in the inbound queue"]],
       cause: "The inbound invoice queue paused after a translator restart at 04:55.",
       act: "Restart the inbound invoice queue, then send the 52 acknowledgments to Tidewell Home.", who: ["Accounts payable", "IT and ERP"] },
-    f11: { partner: "Copperleaf Living", os: "Carton labels in 4 inbound 856s from Copperleaf Living have no serial shipping container codes.",
-      bt: "4 inbound shipments will be received by hand", bs: "Manual receiving delays stock to shelf.",
-      ev: [["06:40", "4 ship notices received from Copperleaf Living"], ["06:55", "Validation failed on carton serial codes"]],
-      cause: "The supplier labels are printed without serial codes.",
-      act: "Return 824 application advice to Copperleaf Living with the missing codes listed.", appr: "Receiving supervisor", who: ["DC receiving", "Supplier compliance"] }
   };
   /* Demo state shared by the console and the Product overlay */
   var ccDone = {};
@@ -2553,6 +2529,13 @@ var TRANSLATE = [
   function ccToks(lbl) { return lbl.split(" / ")[0].replace(/^GDSN /, "").split(/,\s*| or /); }
   /* Process instances in flight for the client solution, with documents waiting at each step (illustrative) */
   var CCFLOW = { 0: { n: 1284, ok: 1150, risk: 84, br: 50, steps: [310, 262, 248, 92, 226, 146] }, 1: { n: 284, ok: 262, risk: 16, br: 6, steps: [58, 41, 66, 52, 39, 28] }, 3: { n: 188, ok: 171, risk: 13, br: 4, steps: [22, 46, 38, 41, 25, 16] } };
+  /* Generic Performance Monitor process templates, used when the Retail pack is off. Steps come from the matching reference process unless given here. */
+  var CCGEN = {
+    0: { n: "Order to cash", owner: "Order management and accounts receivable", outcome: "Turn customer orders into shipped goods, invoices and collected cash.", measures: ["Order acknowledgment rate"] },
+    1: { n: "Procure to pay", owner: "Procurement and accounts payable", outcome: "Receive supplier goods against orders, match invoices and pay on terms.", measures: ["Supplier on-time delivery"] },
+    3: { n: "Claims and disputes", owner: "Accounts receivable", outcome: "Resolve customer claims and short payments with evidence.", measures: ["Dispute rate"],
+      steps: [["Claim raised", "Portal"], ["Debit memo", "812"], ["Net remittance", "820 / REMADV"], ["Research and classify", "ERP"], ["Dispute", "Portal"], ["Settle", "812, 820 / REMADV"]] }
+  };
   /* Product overlay: Command Center coverage on the genome. Optimize shows monitors and findings now; Extend shows agents at decision points. */
   var pmPv = "off", pmPvLast = "optimize";
   function pmPvOn() { return pmPv !== "off" && pmMode === "pt" && !!PMPV[pmK]; }

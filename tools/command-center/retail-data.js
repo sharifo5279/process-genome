@@ -26,109 +26,15 @@
       }
     },
     workflows: [
-      { id: "partners", title: "Partner readiness", subtitle: "Required feeds, configuration and connection health", icon: "users", processes: [0, 1] },
+      { id: "partners", hidden: true, title: "Partner readiness", subtitle: "Required feeds, configuration and connection health", icon: "users", processes: [0, 1] },
       { id: "orders", title: "Order commitments", subtitle: "Acknowledgments, accepted changes and fulfillment instructions", icon: "flow", processes: [0] },
       { id: "shipments", title: "Shipment readiness", subtitle: "Notice conformance, routing sequence and receiving evidence", icon: "net", processes: [0, 1] },
       { id: "invoices", title: "Invoice and deduction control", subtitle: "Price matching, settlement evidence and review ownership", icon: "check", processes: [0, 1, 3] }
     ],
     cases: [
-      {
-        id: "rt-partner-signature", workflow: "partners", title: "Order feed failing signature checks",
-        source: "IM", agent: "Ivy", severity: "critical", process: 0,
-        ruleId: "rt-rule-signature", partnerId: "pt-nuvori", owner: "Alex Morgan · Integration operations",
-        reference: "AS2-1024-0912", amount: null, unit: "failed attempts", value: 12,
-        policy: "Connection policy AS2-04: alert after 5 signature-validation failures within 15 minutes on this connection.",
-        roles: {
-          retailer: { partner: "Nuvori Beauty", direction: "Outbound 850 order feed", summary: "Twelve order-delivery attempts to Nuvori Beauty failed signature validation between 09:00 and 09:12.", impact: "Order transmission is impaired. The failed-attempt count does not establish how many distinct orders are affected.", nextAction: "Review the connection evidence with the supplier's integration team and agree a replay plan after signature validation succeeds." },
-          supplier: { partner: "Northfield Stores", direction: "Inbound 850 order feed", summary: "Twelve inbound delivery attempts from Northfield Stores failed signature validation between 09:00 and 09:12.", impact: "The inbound order channel is impaired. No accepted business documents can be established from these failed attempts.", nextAction: "Review the configured signing certificate with the retailer's integration team and agree a replay plan after validation succeeds." }
-        },
-        documents: [
-          { type: "AS2", id: "AS2-1024-0912", status: "fail", time: "09:12", detail: "Most recent failed transmission attempt" },
-          { type: "MDN", id: "MDN-1024-0912", status: "fail", time: "09:12", detail: "Negative transport receipt: signature validation failed" },
-          { type: "850 feed", id: "Last accepted interchange", status: "pass", time: "08:08", detail: "Last successful transport and translation event" }
-        ],
-        checks: [
-          { name: "Connection reachability", expected: "Partner AS2 endpoint responds", observed: "Endpoint responded to all 12 attempts", status: "pass" },
-          { name: "Signature validation", expected: "Configured signing certificate accepted", observed: "12 failed validations in 12 minutes", status: "fail" },
-          { name: "Failure-burst threshold", expected: "Fewer than 5 failures in 15 minutes", observed: "12 failures in the current window", status: "fail" },
-          { name: "Affected order count", expected: "Accepted and deduplicated business-document evidence", observed: "Unavailable for failed attempts", status: "unknown" }
-        ],
-        timeline: [
-          { time: "08:08", title: "Last successful interchange", detail: "Transport and translation completed for the preceding batch.", status: "pass" },
-          { time: "09:00", title: "First signature failure", detail: "The receiving gateway rejected signature validation.", status: "fail" },
-          { time: "09:05", title: "Connection threshold exceeded", detail: "The fifth failure met this connection's configured alert threshold.", status: "fail" },
-          { time: "09:12", title: "Twelve attempts affected", detail: "Ivy grouped the attempts into one connection finding.", status: "fail" }
-        ],
-        explanation: "The AS2 endpoint is reachable, but signature validation is failing. This points to a connection or signing-configuration issue; the available telemetry does not prove which party changed a certificate. Ivy groups transport evidence without inferring order-level business failure.",
-        evidenceGap: "No trusted business acceptance, unique order count or order value is available for the failed attempts.",
-        action: { label: "Prepare connection review", completedLabel: "Review prepared", completionNote: "An internal review packet is prepared for Integration operations. No certificate was changed and no documents were replayed." }
-      },
-      {
-        id: "rt-partner-coverage", workflow: "partners", title: "One required document route is unconfigured",
-        source: "IM", agent: "Ivy", severity: "attention", process: 0,
-        ruleId: "rt-rule-coverage", partnerId: "pt-liora", owner: "Jordan Lee · Partner enablement",
-        reference: "PROFILE-RT-CPG-02", amount: null, unit: "required route missing", value: 1,
-        policy: "Partner profile RT-CPG-02 requires configured directions for 850, 855, 856, 810 and 997. The 846 is optional for this relationship.",
-        roles: {
-          retailer: { partner: "Liora Wellness", direction: "Supplier-to-retailer 856 route", summary: "Four of five required document directions are configured for Liora Wellness. The inbound supplier ship-notice route is missing.", impact: "The configured-document checklist is incomplete. This is an integration setup gap, not proof that a shipment is missing.", nextAction: "Prepare the missing 856 route requirement for Partner enablement, including the expected sender, receiver and document standard." },
-          supplier: { partner: "Westline Home", direction: "Supplier-to-retailer 856 route", summary: "Four of five required document directions are configured for Westline Home. The outbound retailer ship-notice route is missing.", impact: "The account's configured-document checklist is incomplete. Successful order tests do not establish readiness to exchange ship notices.", nextAction: "Prepare the missing 856 route requirement for Partner enablement before completing this retail account's setup review." }
-        },
-        documents: [
-          { type: "850", id: "CFG-850-021", status: "pass", time: "23 Oct 15:30", detail: "Required order direction configured" },
-          { type: "855", id: "CFG-855-021", status: "pass", time: "23 Oct 15:35", detail: "Required acknowledgment direction configured" },
-          { type: "856", id: "No route configured", status: "fail", time: "09:20", detail: "Required ship-notice direction missing" },
-          { type: "810", id: "CFG-810-021", status: "pass", time: "23 Oct 15:40", detail: "Required invoice direction configured" },
-          { type: "997", id: "CFG-997-021", status: "pass", time: "23 Oct 15:45", detail: "Functional acknowledgment direction configured" }
-        ],
-        checks: [
-          { name: "Required document configuration", expected: "5 required directions configured", observed: "4 configured; 856 absent", status: "fail" },
-          { name: "Optional inventory advice", expected: "846 excluded from required coverage", observed: "846 is marked not required", status: "pass" },
-          { name: "Ship-notice test evidence", expected: "A completed test after route configuration", observed: "No 856 test available", status: "unknown" }
-        ],
-        timeline: [
-          { time: "23 Oct 15:00", title: "Relationship profile assigned", detail: "The provisioned retail profile identifies five required document directions.", status: "pass" },
-          { time: "23 Oct 15:45", title: "Four directions configured", detail: "Order, acknowledgment, invoice and functional acknowledgment routes are present.", status: "pass" },
-          { time: "09:20", title: "Coverage gap identified", detail: "The configuration matrix still has no 856 route.", status: "fail" }
-        ],
-        explanation: "The finding compares required directions in this partner profile with integration configuration. Optional document types stay outside the denominator. It establishes a configuration gap and does not infer process completion, test success or production readiness.",
-        evidenceGap: "End-to-end ship-notice testing and business acceptance have not yet been evidenced.",
-        action: { label: "Prepare enablement checklist", completedLabel: "Checklist prepared", completionNote: "The missing route and test requirements are prepared for Partner enablement. No integration configuration was changed." }
-      },
-      {
-        id: "rt-order-ack", workflow: "orders", title: "Order acknowledgment is 20 minutes overdue",
-        source: "PM", agent: "Lex", severity: "attention", process: 0,
-        ruleId: "rt-rule-ack", partnerId: "pt-meadowline", owner: "Dana Ortiz · Order operations",
-        reference: "PO-78316", amount: null, unit: "minutes overdue", value: 20,
-        policy: "Trading terms ACK-120: this partner requires an 855 within 120 minutes of confirmed order receipt during its agreed service window.",
-        roles: {
-          retailer: { partner: "Meadowline Care", direction: "Outbound order · inbound acknowledgment", summary: "Meadowline Care received PO-78316 at 07:10. No business acknowledgment is observed by the configured 09:10 deadline.", impact: "The ordered quantities remain unconfirmed. A functional acknowledgment confirms message processing, not the supplier's commitment.", nextAction: "Prepare a supplier follow-up with the order lines and the agreed acknowledgment deadline." },
-          supplier: { partner: "Harbor Grocers", direction: "Inbound order · outbound acknowledgment", summary: "Harbor Grocers' PO-78316 was received at 07:10. No outgoing business acknowledgment is observed by the configured 09:10 deadline.", impact: "The retail account has no evidenced confirmation of the requested quantities. The record does not establish cancellation or a financial penalty.", nextAction: "Prepare a review for Order operations to confirm quantities or explain the hold before an acknowledgment is issued." }
-        },
-        documents: [
-          { type: "850", id: "PO-78316", status: "pass", time: "07:10", detail: "Order received and correlated" },
-          { type: "997", id: "FA-78316", status: "pass", time: "07:12", detail: "Functional acknowledgment recorded" },
-          { type: "855", id: "Not observed", status: "unknown", time: "Due 09:10", detail: "No matching business acknowledgment in the available feed" }
-        ],
-        lines: [
-          { sku: "BL-250", description: "Hydrating body lotion 250 ml", ordered: 1200, acknowledged: null, shipped: null, invoiced: null, price: 8.4, expectedPrice: 8.4 },
-          { sku: "HC-075", description: "Daily hand cream 75 ml", ordered: 600, acknowledged: null, shipped: null, invoiced: null, price: 4.8, expectedPrice: 4.8 }
-        ],
-        checks: [
-          { name: "Order receipt anchor", expected: "Confirmed receipt timestamp", observed: "07:10 on 24 Oct", status: "pass" },
-          { name: "Partner service window", expected: "120-minute policy applies to this order", observed: "ACK-120 applies; deadline 09:10", status: "pass" },
-          { name: "Matching business acknowledgment", expected: "855 correlated by order and partner before 09:10", observed: "None observed by 09:30", status: "fail" },
-          { name: "Supplier commitment", expected: "Accepted quantities and dates in a business response", observed: "Unknown; 997 does not establish a commitment", status: "unknown" }
-        ],
-        timeline: [
-          { time: "07:10", title: "Order received", detail: "PO-78316 contains 1,800 units across two lines.", status: "pass" },
-          { time: "07:12", title: "Functional acknowledgment recorded", detail: "Message processing is acknowledged; quantities are not yet committed.", status: "pass" },
-          { time: "09:10", title: "Configured deadline passed", detail: "The partner-specific 120-minute window closed.", status: "fail" },
-          { time: "09:30", title: "Acknowledgment still unobserved", detail: "Lex calculates 20 minutes overdue using the fixed snapshot.", status: "fail" }
-        ],
-        explanation: "Lex starts the clock from confirmed order receipt and evaluates the policy assigned to this relationship. The correlated 855 is absent from the available feed. The healthy feed check supports investigation, but an off-platform acknowledgment remains possible.",
-        evidenceGap: "No ERP hold reason or acknowledgment sent outside the connected feed is available.",
-        action: { label: "Prepare acknowledgment follow-up", completedLabel: "Follow-up prepared", completionNote: "An internal follow-up is prepared for Order operations with the two order lines and deadline. No partner message or acknowledgment was sent." }
-      },
+      
+      
+      
       {
         id: "rt-order-change", workflow: "orders", title: "Warehouse release uses the superseded quantity",
         source: "PM", agent: "Reese", severity: "critical", process: 0,
@@ -234,44 +140,7 @@
         evidenceGap: "Actual warehouse execution, carrier pickup and delivery status are not connected.",
         action: { label: "Prepare routing review", completedLabel: "Routing review prepared", completionNote: "The conflicting sequence and current approval are prepared for Transportation planning. No load was held, retendered or rebooked." }
       },
-      {
-        id: "rt-invoice-price", workflow: "invoices", title: "Invoice exceeds the agreed line price by $300",
-        source: "PM", agent: "Reese", severity: "attention", process: 1,
-        ruleId: "rt-rule-price", partnerId: "pt-nuvori", owner: "Morgan Reed · Invoice exceptions",
-        reference: "INV-10388 / PO-78219", amount: 300, amountLabel: "Documented price variance", unit: "price variance", value: 300,
-        policy: "Pricing agreement PRICE-06: compare invoice lines with the latest accepted order price in USD per each. No price tolerance or later accepted price change is recorded for this order.",
-        roles: {
-          retailer: { partner: "Nuvori Beauty", direction: "Inbound supplier invoice", summary: "Nuvori Beauty's invoice uses $12.50 on 600 cleanser units; the accepted order price is $12.00. The other line matches.", impact: "The document comparison identifies a $300 price variance. Receipt-based matching and the payment decision remain separate checks.", nextAction: "Prepare the two-line comparison for Accounts payable and the supplier's billing contact to review." },
-          supplier: { partner: "Northfield Stores", direction: "Outbound retailer invoice", summary: "The invoice to Northfield Stores bills 600 cleanser units at $12.50 instead of the accepted $12.00 order price.", impact: "A $300 billing variance is evidenced. The snapshot does not show that the retailer has rejected the invoice or imposed a deduction.", nextAction: "Prepare a billing correction review against the accepted order before issuing any replacement or credit document." }
-        },
-        documents: [
-          { type: "850", id: "PO-78219", status: "pass", time: "22 Oct 11:00", detail: "Accepted price reference" },
-          { type: "855", id: "ACK-78219", status: "pass", time: "22 Oct 12:15", detail: "Quantities and prices accepted" },
-          { type: "856", id: "ASN-10479", status: "pass", time: "08:05", detail: "Advised quantities match the invoice" },
-          { type: "810", id: "INV-10388", status: "fail", time: "08:45", detail: "$14,160 invoice; $13,860 at accepted order prices" },
-          { type: "Receipt", id: "Not connected", status: "unknown", time: "09:30", detail: "Physical receipt cannot be verified" }
-        ],
-        lines: [
-          { sku: "CW-120", description: "Cloudwash cleanser 120 ml", ordered: 600, acknowledged: 600, shipped: 600, invoiced: 600, price: 12.5, expectedPrice: 12, variance: 300 },
-          { sku: "BB-200", description: "Everyday body balm 200 ml", ordered: 360, acknowledged: 360, shipped: 360, invoiced: 360, price: 18.5, expectedPrice: 18.5, variance: 0 }
-        ],
-        lineNote: "Shipped is the ASN-advised quantity. Invoice subtotal $14,160; accepted-order subtotal $13,860; difference $300. No tax or freight is included in this example.",
-        checks: [
-          { name: "Document correlation", expected: "Same order, partner, line and item identifiers", observed: "Both invoice lines matched to accepted order lines", status: "pass" },
-          { name: "Price and currency basis", expected: "USD per each; accepted order price", observed: "CW-120: $12.50 invoiced vs $12.00 agreed", status: "fail" },
-          { name: "Order-to-invoice quantities", expected: "600 cleanser and 360 body-balm units", observed: "Both line quantities match", status: "pass" },
-          { name: "Three-way receipt match", expected: "Recorded received quantities", observed: "Receiving system not connected", status: "unknown" }
-        ],
-        timeline: [
-          { time: "22 Oct 11:00", title: "Order prices established", detail: "The cleanser line is priced at $12.00 per unit.", status: "pass" },
-          { time: "22 Oct 12:15", title: "Order accepted", detail: "The acknowledgment accepts the order quantities and prices.", status: "pass" },
-          { time: "08:45", title: "Invoice exchanged", detail: "The cleanser line uses $12.50; the body-balm line matches.", status: "fail" },
-          { time: "08:47", title: "Variance calculated", detail: "Reese calculates 600 × $0.50 = $300.", status: "fail" }
-        ],
-        explanation: "Reese compares each invoice line with the accepted order using normalized item, unit and currency references. The sole price difference is $0.50 on 600 units. A later catalog price alone would not replace the accepted order terms without applicable change evidence.",
-        evidenceGap: "Receiving records, subsequent price authorization and invoice disposition are not available.",
-        action: { label: "Prepare invoice review", completedLabel: "Invoice review prepared", completionNote: "A line-level price comparison is prepared for Invoice exceptions. No invoice was edited, rejected, retransmitted or paid." }
-      },
+      
       {
         id: "rt-invoice-deduction", workflow: "invoices", title: "Two deductions need receiving evidence",
         source: "PM", agent: "Reese", severity: "attention", process: 3,
@@ -311,18 +180,8 @@
       }
     ],
     rules: [
-      { id: "rt-rule-signature", name: "Connection signature-failure burst", agent: "Ivy", workflow: "partners", scope: "AS2 connection policy AS2-04", condition: "Group signature-validation failures on the same connection during a rolling 15-minute window.", threshold: 5, unit: "failures in 15 minutes", evidence: "Connection identifier, attempt timestamps, transport receipts and signature-validation result", guardrail: "An attempt count does not establish distinct orders or financial exposure.", test: {
-        operator: "lt", measure: "Signature failures in a 15-minute window", passValue: 2, failValue: 12,
-        passLabel: "Two-failure window", failLabel: "Twelve-failure window",
-        pass: "2 signature failures within a 15-minute observation window.", fail: "12 signature failures within 12 minutes on the same connection.",
-        passDecision: "No failure-burst finding", failDecision: "Raise a grouped connection finding"
-      } },
-      { id: "rt-rule-coverage", name: "Required partner document configuration", agent: "Ivy", workflow: "partners", scope: "Provisioned partner profile RT-CPG-02", condition: "Compare required document directions with configured integration routes; exclude optional types.", threshold: 5, unit: "required directions", evidence: "Partner profile, document standard, sender/receiver direction and route configuration", guardrail: "Configuration coverage does not establish business-process or production readiness. The required count must come from the assigned partner profile.", test: {
-        operator: "min", measure: "Required document directions configured", passValue: 5, failValue: 4,
-        passLabel: "All five directions present", failLabel: "Ship-notice direction absent",
-        pass: "850, 855, 856, 810 and 997 directions are configured: 5 total.", fail: "The 856 direction is missing: 4 configured; optional 846 is excluded.",
-        passDecision: "Required configuration count met", failDecision: "Raise a required-route coverage finding"
-      } },
+      
+      
       { id: "rt-rule-ack", name: "Partner acknowledgment deadline", agent: "Lex", workflow: "orders", scope: "Partner policy ACK-120 and its agreed service window", condition: "Start from confirmed order receipt and seek a correlated business acknowledgment within the configured window.", threshold: 120, unit: "minutes after receipt", evidence: "Order receipt timestamp, order/partner correlation, 855 or equivalent business response and service calendar", guardrail: "Apply this relationship's policy only. A 997 is not a business commitment; missing off-platform evidence remains possible.", test: {
         operator: "max", measure: "Minutes from receipt to acknowledgment or current observation", passValue: 95, failValue: 140,
         passLabel: "Acknowledgment at 08:45", failLabel: "Still unobserved at 09:30",
@@ -347,7 +206,7 @@
         pass: "Approval at 08:10; release at 08:20: 0 minutes released early.", fail: "Release at 08:20; approval at 09:10: 50 minutes released early.",
         passDecision: "Release sequence is within policy", failDecision: "Raise a routing-sequence finding"
       } },
-      { id: "rt-rule-price", name: "Invoice matches accepted order price", agent: "Reese", workflow: "invoices", scope: "Pricing agreement PRICE-06", condition: "Compare invoice unit prices with the latest accepted order on the same item, unit and currency basis.", threshold: 0, unit: "USD per-unit price tolerance", evidence: "Accepted order, business acknowledgment, invoice lines, revision history and item/unit references", guardrail: "This is a two-document price check. Three-way matching additionally requires receipt evidence.", test: {
+      { id: "rt-rule-price", name: "Invoice matches accepted order price", agent: "Nora", workflow: "invoices", scope: "Pricing agreement PRICE-06", condition: "Compare invoice unit prices with the latest accepted order on the same item, unit and currency basis.", threshold: 0, unit: "USD per-unit price tolerance", evidence: "Accepted order, business acknowledgment, invoice lines, revision history and item/unit references", guardrail: "This is a two-document price check. Three-way matching additionally requires receipt evidence.", test: {
         operator: "max", measure: "Absolute unit-price variance in USD per each", passValue: 0, failValue: 0.5,
         passLabel: "Invoice at accepted order price", failLabel: "Invoice fifty cents above order price",
         pass: "600 units invoiced and accepted at $12.00 each: $0.00 per-unit variance.", fail: "600 units at $12.50 rather than $12.00: $0.50 per-unit variance, $300 total.",

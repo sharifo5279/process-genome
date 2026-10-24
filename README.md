@@ -34,30 +34,30 @@ node --test tools/command-center/retail.test.cjs
 already installed, then writes the prototype page. Retail process names and steps are read from the
 Process Genome page. All checks run before anything is written.
 
-### Structure
+### Packages and structure
 
-- One dashboard, one findings list and one action queue. Every dashboard component, finding and action
-  names its module: Integration Monitor, Performance Monitor or Retail add-on. A module filter narrows all three.
-- Root: Overview (glass landing: process ring, failure points, components by module), Findings, Action queue,
-  Workspace and Configuration (Rules & Policies with the eight-step rule wizard, partner settings).
-- Workspace (`workspace.js`): process-centric views and Solution, dashboards built from Overview components, reports,
-  notifications, tasks and reminders, and agents with a "Build your own agent" link to Aviator Studio. Saved under
-  `process-genome-cc-workspace-v1` in this browser.
-- Integration Monitor: Partners, Community, Projections and anomalies. Performance Monitor: Performance Analytics.
-- Demo data covers one client solution of three processes: Order to cash; Receive, match and pay; Deductions.
-- Retail add-on (`retail-data.js`, `retail.js`): partner participation, orders and commitments, ASNs and
-  readiness, invoices and deductions; its policy templates appear under Configuration (`CXCFG`). It registers its cases with `CXITEMS`,
-  its dashboard components with `CXDASH`, its Aviator questions with `CXQ` and its navigation group with
-  `CXNAV`. Other industries can add modules the same way.
+A Package selector in the top bar switches between the three client configurations (saved as
+`process-genome-cc-package` in this browser):
+
+| Package | Adds |
+|---|---|
+| Integration Monitor (every Trading Grid client) | Overview (failure points, network activity, transaction volume), Findings, Action queue, Partners, Projections and anomalies, Configuration (Monitoring), Workspace (Dashboards, Reports, Notifications, Tasks and reminders, Agents with Ivy) |
+| + Performance Monitor (any industry) | Process ring on the Overview, Workspace › Business processes with Solution, the Partner scorecard dashboard, agents Lex, Nora, Liz and Reese, Configuration › Rules & Policies with the rule wizard. Generic process templates: Order to cash, Procure to pay, Claims and disputes |
+| + Retail pack (includes Performance Monitor) | Retail process definitions, retail cases with evidence, retail lenses in Business processes, Required documents on Partners, Retail KPIs dashboard and Overview card, retail policy templates, retailer and supplier perspectives |
+
+The navigation is the same seven entries for every package; Workspace gains sections as packages are added, and the
+Retail pack adds content rather than screens. Every finding, action and dashboard component names its module.
+
+Modules register through shared lists: `CXITEMS` (findings and actions), `CXDASH` (components), `CXQ` (Aviator),
+`CXCFG` (Configuration cards), `CXPTAB` (Partners tabs), `WSPRE` (prebuilt dashboards) and `WSLENS` (process lenses).
+Workspace saved items are kept under `process-genome-cc-workspace-v2`.
 
 ### Perspectives and demo state
 
-The perspective switch selects Northfield Stores (retailer) or Nuvori Beauty (CPG supplier). Core findings
-carry both perspectives (`CCF` and `CCFR` in `data.js`); retail cases carry both in `RTDATA`.
-Case assignments, prepared actions, watchlists and policy settings are stored in this browser under
-`process-genome-retail-v1`, separately for each perspective. Reset demo clears only the selected perspective.
-Every record is illustrative. Preparing a retail action creates a local review packet; approving a core
-action marks the finding resolved in the page only. No messages, documents or transactions are sent.
+With the Retail pack, the perspective switch selects Northfield Stores (retailer) or Nuvori Beauty (CPG supplier).
+Core findings carry both perspectives (`CCF` and `CCFR` in `data.js`); retail cases carry both in `RTDATA`. Retail case
+work is stored under `process-genome-retail-v1`, per perspective. Every record is illustrative; no messages, documents or
+transactions are sent.
 
 ## Visitor stats (on hold)
 Same model as the Trading Grid Innovation Guide (sharifo5279/tg-innovation-guide), so the Process Genome can join the

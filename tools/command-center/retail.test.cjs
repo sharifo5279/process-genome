@@ -8,8 +8,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const CORE_SCREENS = ['dash', 'find', 'act', 'ws-proc', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg', 'im-tp', 'im-com', 'im-proj', 'an'];
-const RETAIL_SCREENS = ['rt-partners', 'rt-orders', 'rt-shipments', 'rt-invoices'];
+const CORE_SCREENS = ['dash', 'find', 'act', 'im-tp', 'im-proj', 'ws-proc', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg'];
+
 const source = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
 const textOf = html => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 const PROCESS_STUB = Array.from({ length: 11 }, (_, i) => ({
@@ -69,8 +69,6 @@ function loadApp(storage = new Map()) {
 
 // Explicit expected outcomes catch reversed comparisons and ignored thresholds.
 const ruleChanges = [
-  ['rt-rule-signature', 2, [false, false]],
-  ['rt-rule-coverage', 4, [true, true]],
   ['rt-rule-ack', 150, [true, true]],
   ['rt-rule-order-change', 200, [true, true]],
   ['rt-rule-sscc', 2, [true, true]],
@@ -96,10 +94,10 @@ test('a relaxed deduction deadline cannot waive missing evidence', () => {
 
 test('perspectives switch labels and case context while isolating saved work', () => {
   const { app, click, form, storage } = loadApp();
-  const c = app.rtCase('rt-order-ack');
+  const c = app.rtCase('rt-order-change');
   assert.equal(app.rtProfile().company, 'Northfield Stores');
   assert.equal(app.rtProfile().label, 'Retailer');
-  assert.equal(app.rtContext(c).partner, 'Meadowline Care');
+  assert.equal(app.rtContext(c).partner, 'Tidewell Home');
   form('Retailer owner', 'Retailer-only note');
   app.rtSaveCase(c);
   app.rtBag().watches['pt-nuvori'] = true;
@@ -109,7 +107,7 @@ test('perspectives switch labels and case context while isolating saved work', (
   click({ 'data-rt-role': 'supplier' });
   assert.equal(app.rtProfile().company, 'Nuvori Beauty');
   assert.equal(app.rtProfile().label, 'CPG supplier');
-  assert.equal(app.rtContext(c).partner, 'Harbor Grocers');
+  assert.equal(app.rtContext(c).partner, 'Brightway Marketplace');
   for (const item of app.RTDATA.cases) assert.equal(app.rtContext(item), item.roles.supplier);
   assert.notEqual(app.rtCS(c), retailerState);
   assert.equal(app.rtCS(c).status, 'open');
@@ -131,7 +129,7 @@ test('perspectives switch labels and case context while isolating saved work', (
 });
 
 test('assignment preserves Prepare and does not claim a prepared handoff', () => {
-  const { app, form, screen } = loadApp(), c = app.rtCase('rt-order-ack');
+  const { app, form, screen } = loadApp(), c = app.rtCase('rt-order-change');
   form('Order management lead', 'Awaiting the current acknowledgment.');
   app.rtSaveCase(c);
   assert.equal(app.rtCS(c).status, 'assigned');
@@ -148,7 +146,7 @@ test('assignment preserves Prepare and does not claim a prepared handoff', () =>
 });
 
 test('preparing records a distinct local action while the business exception stays open', () => {
-  const { app, click, form, screen } = loadApp(), c = app.rtCase('rt-order-ack');
+  const { app, click, form, screen } = loadApp(), c = app.rtCase('rt-order-change');
   form('Order management lead', 'Prepare the evidence for review.');
   click({ 'data-rt-prepare': c.id });
   assert.equal(app.rtCS(c).status, 'prepared');
@@ -165,31 +163,25 @@ test('preparing records a distinct local action while the business exception sta
   assert.ok(textOf(screen('find')).includes('Action prepared'), 'the finding stays open after preparation');
 });
 
-test('financial screens keep price variance and deductions separate in both perspectives', () => {
-  const { click, screen } = loadApp();
+test('deductions keep observed amounts separate from validity in both perspectives', () => {
+  const { app, click } = loadApp(), c = app.rtCase('rt-invoice-deduction');
   for (const role of ['retailer', 'supplier']) {
     click({ 'data-rt-role': role });
-    const invoices = textOf(screen('rt-invoices'));
-    assert.match(invoices, /Invoice price variance \$300/);
-    assert.match(invoices, /Observed deductions \$750/);
-    assert.match(invoices, /Validity and recovery are unconfirmed/);
-    assert.doesNotMatch(invoices, /\$(?:1\.1k|1\.05k|1,?050)\b/i);
+    app.rtCaseTab = 'evidence';
+    const html = textOf(app.rtCaseDialog(c));
+    assert.match(html, /Deduction breakdown/);
+    assert.match(html, /Unconfirmed/);
+    assert.match(html, /\$450/);
   }
 });
 
 test('case search finds secondary document IDs and combines other filters', () => {
   const { app } = loadApp();
-  app.ccScr = 'rt-orders';
-  for (const [query, id] of [
-    ['FA-10482', 'rt-shipment-labels'], ['AA-10482', 'rt-shipment-labels'],
-    ['CFG-855-021', 'rt-partner-coverage'], ['MDN-1024-0912', 'rt-partner-signature']
-  ]) {
+  app.ccScr = 'find';
+  for (const [query, id] of [['FA-10482', 'rt-shipment-labels'], ['AA-10482', 'rt-shipment-labels']]) {
     app.rtFilter().query = query.toLowerCase();
     assert.deepEqual(Array.from(app.rtFiltered(app.RTDATA.cases), c => c.id), [id]);
   }
-  app.rtFilter().query = '997';
-  assert.ok(app.rtFiltered(app.RTDATA.cases).some(c => c.id === 'rt-order-ack'));
-  app.rtFilter().query = 'FA-10482';
   app.rtFilter().source = 'IM';
   assert.equal(app.rtFiltered(app.RTDATA.cases).length, 0);
   app.rtFilter().source = 'PM';
@@ -197,16 +189,14 @@ test('case search finds secondary document IDs and combines other filters', () =
   assert.equal(app.rtFiltered(app.RTDATA.cases).length, 0);
 });
 
-test('every retail screen and case tab renders for both perspectives', () => {
+test('the Retail pack adds content, not screens; every case tab renders in both perspectives', () => {
   const { app, click, screen } = loadApp();
-  assert.deepEqual(Object.keys(app.CXS).filter(k => k.startsWith('rt-')).sort(), RETAIL_SCREENS.slice().sort());
+  assert.deepEqual(Object.keys(app.CXS).filter(k => k.startsWith('rt-')), []);
   for (const role of ['retailer', 'supplier']) {
     click({ 'data-rt-role': role });
-    for (const key of RETAIL_SCREENS) {
-      const html = screen(key);
-      assert.match(html, /<h2>/, `${role}/${key} needs its screen heading`);
-      assert.doesNotMatch(html, /\b(?:undefined|NaN)\b/, `${role}/${key}`);
-    }
+    app.ccPtTab = 'req';
+    assert.match(screen('im-tp'), /Participation matrix/);
+    app.ccPtTab = 'all';
     for (const c of app.RTDATA.cases) {
       for (const tab of ['overview', 'evidence', 'activity', 'action']) {
         app.rtCaseTab = tab;
@@ -230,26 +220,26 @@ test('one dashboard, findings list and action queue attribute every record to it
     const items = app.ccItems();
     assert.equal(items.length, app.CCF.length + app.RTDATA.cases.length);
     assert.deepEqual([...new Set(items.map(i => i.mod))].sort(), ['IM', 'PM', 'RT']);
-    const dash = screen('dash');
-    for (const mod of ['Integration Monitor', 'Performance Monitor', 'Retail add-on']) assert.ok(dash.includes(mod), `${role} dashboard names ${mod}`);
-    const find = textOf(screen('find'));
+    const findHtml = screen('find');
+    for (const mod of ['Integration Monitor', 'Performance Monitor', 'Retail pack']) assert.ok(findHtml.includes(mod), `${role} findings name ${mod}`);
+    const find = textOf(findHtml);
     for (const i of items) assert.ok(find.includes(textOf(i.title)), `${role} findings list ${i.key}`);
     assert.ok(textOf(screen('dash')).includes(role === 'retailer' ? 'Northfield Stores' : 'Nuvori Beauty'));
   }
-  for (const id of ['rt-home', 'rt-actions', 'rt-rules', 'im-dash', 'pm-dash', 'pm-find', 'pm-act', 'pm-agents', 'pm-rules', 'im-map', 'im-cfg', 'pm-proc']) assert.equal(app.CXS[id], undefined, `${id} is folded into the shared screens`);
+  for (const id of ['rt-home', 'rt-actions', 'rt-rules', 'im-dash', 'pm-dash', 'pm-find', 'pm-act', 'pm-agents', 'pm-rules', 'im-map', 'im-cfg', 'pm-proc', 'an', 'im-com', 'rt-partners', 'rt-orders', 'rt-shipments', 'rt-invoices']) assert.equal(app.CXS[id], undefined, `${id} is folded into the shared screens`);
 });
 
-test('module filter narrows the dashboard, findings and action queue', () => {
+test('module filter narrows findings and the action queue', () => {
   const { app, screen } = loadApp();
   for (const mod of ['IM', 'PM', 'RT']) {
     app.ccModF = mod;
     const html = screen('find');
-    const others = ['IM', 'PM', 'RT'].filter(m => m !== mod);
     for (const i of app.ccItems()) {
       if (i.mod === mod) assert.ok(html.includes(i.open), `${mod} keeps ${i.key}`);
       else assert.ok(!html.includes(i.open), `${mod} hides ${i.key}`);
     }
-    assert.doesNotMatch(screen('dash'), new RegExp('data-mod="(' + others.join('|') + ')"'));
+    const act = screen('act');
+    for (const i of app.ccItems()) if (i.mod !== mod) assert.ok(!act.includes(i.open), `${mod} queue hides ${i.key}`);
   }
 });
 
@@ -260,7 +250,7 @@ test('demo findings stay inside the three processes of the client solution', () 
     assert.deepEqual([...new Set(app.ccItems().map(i => i.proc))].sort(), [0, 1, 3]);
   }
   const cfg = screen('cfg');
-  assert.ok(cfg.includes('Rules &amp; Policies') && cfg.includes('Retail policies'));
+  assert.ok(cfg.includes('Rules &amp; Policies') && cfg.includes('Retail policy templates'));
   for (const r of app.RTDATA.rules) assert.ok(cfg.includes(`data-rt-rule="${r.id}"`), `${r.id} sits in Configuration`);
   app.ccWsProc = 'sol';
   assert.match(screen('ws-proc'), /Business document/);
@@ -298,10 +288,35 @@ test('workspace saves dashboards, reports, notifications, tasks and reminders', 
   const { app, click, screen, storage } = loadApp();
   const W = app.wsLoad();
   assert.ok(screen('ws-dash').includes('Order to cash daily'));
-  click({ 'data-wstog': '3' });
-  assert.equal(W.notifs[3].on, true);
+  click({ 'data-wstog': '1' });
+  assert.equal(W.notifs[1].on, true);
   click({ 'data-wsdone': '0' });
   assert.equal(W.tasks[0].done, true);
-  assert.ok(JSON.parse(storage.get('process-genome-cc-workspace-v1')).tasks[0].done);
+  assert.ok(JSON.parse(storage.get('process-genome-cc-workspace-v2')).tasks[0].done);
   assert.match(screen('ws-agents'), /Build your own agent/);
+});
+
+test('packages: Integration Monitor alone, plus Performance Monitor, plus the Retail pack', () => {
+  const { app, screen } = loadApp();
+  const leak = /Retail|retail|chargeback|OTIF|Northfield Stores · Retail/;
+  app.ccSetPkg('im');
+  assert.deepEqual([...new Set(app.ccItems().map(i => i.mod))], ['IM']);
+  assert.equal(app.cxNavOk('ws-proc'), false);
+  assert.equal(app.cxAgents().map(a => a.id).join(), 'ivy');
+  for (const key of ['dash', 'find', 'act', 'im-tp', 'im-proj', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg']) {
+    const t = textOf(screen(key));
+    assert.doesNotMatch(t, leak, `im/${key} shows retail content`);
+    assert.doesNotMatch(t, /Performance Monitor|Business process|\bLex\b|\bNora\b|\bLiz\b|\bReese\b/, `im/${key} shows Performance Monitor content`);
+  }
+  assert.doesNotMatch(screen('cfg'), /data-rwnew/);
+
+  app.ccSetPkg('pm');
+  assert.deepEqual([...new Set(app.ccItems().map(i => i.mod))].sort(), ['IM', 'PM']);
+  assert.equal(app.ccProc(3).n, 'Claims and disputes');
+  for (const key of ['dash', 'find', 'act', 'im-tp', 'ws-proc', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg']) assert.doesNotMatch(textOf(screen(key)), leak, `pm/${key} shows retail content`);
+  assert.match(screen('cfg'), /data-rwnew/);
+
+  app.ccSetPkg('rt');
+  assert.deepEqual([...new Set(app.ccItems().map(i => i.mod))].sort(), ['IM', 'PM', 'RT']);
+  assert.equal(app.ccProc(3).n, app.PROCESSES.retail[3].n);
 });
