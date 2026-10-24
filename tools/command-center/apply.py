@@ -1,4 +1,4 @@
-"""Apply the Command Center additions (console view and Product overlay, Retail and CPG) to a Process Genome page.
+"""Apply the Command Center additions (Command Center app and Product overlay, Retail and CPG) to a Process Genome page.
 
 Usage: python3 tools/command-center/apply.py INPUT.html [OUTPUT.html]
 Run it on a master build that does not already contain Command Center. OUTPUT defaults to INPUT.
@@ -22,34 +22,16 @@ rep("</style>", rd("cc.css") + "</style>")
 
 # Areas link and product overlay button
 rep('<a href="#retail/solution" data-v="sol" data-sol hidden>',
-    '<a href="#retail/command" data-v="cc" data-cc hidden><b>Command Center</b><span>Process health, findings and actions. Desktop only.</span></a>\n      <a href="#retail/solution" data-v="sol" data-sol hidden>')
+    '<a href="#retail/command" data-v="cc" data-cc hidden><b>Command Center</b><span>Monitors, findings and agent actions. Desktop only.</span></a>\n      <a href="#retail/solution" data-v="sol" data-sol hidden>')
 rep('<span>Strategy overlay</span></button>',
     '<span>Strategy overlay</span></button>\n<button type="button" class="pm-btn pm-ov" id="pm-pvt" aria-pressed="false" hidden><span class="sw" aria-hidden="true"></span><span>Product overlay</span></button>')
 
-# Console markup, after the operations map view
-fs_svg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>'
+# Command Center app markup, before the operations map view
 cc_html = '''<div class="vmap" id="v-cc" hidden>
 <div class="wrap map-areas" id="cc-areas"></div>
-<div class="pm cc" id="cc" tabindex="-1" lang="en" role="region" aria-labelledby="cc-h" hidden>
+<div class="pm cc" id="cc" tabindex="-1" lang="en" role="region" aria-label="Command Center" hidden>
   <div class="pm-frame" id="cc-frame">
-  <div class="pm-stage" id="cc-stage">
-    <div class="pm-top">
-      <div class="pm-ttl"><p>Retail and CPG</p><h2 id="cc-h">Command Center</h2></div>
-      <div class="pm-seg" role="group" aria-label="View for">
-        <button type="button" data-per="ops" aria-pressed="true">Operations</button>
-        <button type="button" data-per="biz" aria-pressed="false">Business</button>
-      </div>
-      <div class="pm-act">
-        <span class="cc-mods">Integration Monitor · Performance Monitor</span>
-        <button type="button" class="pm-btn" data-gv="map" data-gk="retail">Open Process Genome</button>
-        <button type="button" class="pm-btn ic" id="cc-fs" aria-label="Full screen" title="Full screen">''' + fs_svg + '''</button>
-      </div>
-    </div>
-    <div class="pm-chips" id="cc-chips" role="group" aria-label="Lifecycle stage"></div>
-    <p class="cc-asof"><span class="cc-lgd"><span><b></b>Document flow</span><span><i></i>Healthy</span><span><i class="w"></i>Warning</span><span><i class="c"></i>Critical</span><span><i class="na"></i>Outside the network</span></span>Illustrative · 08:40</p>
-    <div class="cc-main" id="cc-main"></div>
-    <aside class="pm-panel" aria-live="polite"><div class="pp" id="cc-pp"></div></aside>
-  </div>
+  <div class="pm-stage" id="cc-stage"><div class="cx" id="cx"></div></div>
   </div>
   <div class="pm-small">
     <div>
