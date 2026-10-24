@@ -1166,7 +1166,7 @@
 
   <main class="content" id="content" tabindex="-1">
     <nav class="areas" id="areas" aria-label="Guide area">
-      <a href="#all" data-v="ops"><b>Overview</b><span>About the Process Genome, standards, and reference</span></a>
+      <a href="#all" data-v="ops"><b>Overview</b><span>About the Process Genome and standards</span></a>
       <a href="#all/opsmap" data-v="om" data-om><b>Operations map</b><span>Work areas and stakeholders on one screen. Desktop only.</span></a>
       <a href="#all/processes" data-v="proc"><b>Process Genome</b><span>Business processes and the documents behind each step</span></a>
       <a href="#retail/map" data-v="map" data-map hidden><b>Process Genome</b><span>Processes and documents on one interactive map.</span></a>
@@ -1195,7 +1195,7 @@
       </div>
     </section>
 
-    <section class="sec std gx-ind" id="gx-ind">
+    <section class="sec std gx-ind" id="gx-ind" hidden style="display: none">
       <h2 tabindex="-1">Industries</h2>
       <p class="sec-note">Views available for each industry. The operations map is common to all industries.</p>
       <div class="tbl">
@@ -1226,7 +1226,7 @@
       </div>
     </section>
 
-    <section class="sec ref" id="reference">
+    <section class="sec ref" id="reference" hidden style="display: none">
       <h2 tabindex="-1">Reference</h2>
       <div class="ref-grid">
         <div>
@@ -1411,7 +1411,6 @@
         <ul aria-labelledby="ftr-guide">
           <li><a href="#about" data-target="about">Overview</a></li>
           <li><a href="#standards" data-target="standards">Standards by region</a></li>
-          <li><a href="#reference" data-target="reference">Reference</a></li>
           <li><a href="#processes" data-target="processes">Process Genome</a></li>
         </ul>
       </div>
@@ -1643,7 +1642,7 @@ var TRANSLATE = [
   var toc = document.getElementById("toc"), tocHead = toc.querySelector(".toc-head"), cur = document.getElementById("toccur");
   function buildToc(k) {
     tocBody.innerHTML = '<ul class="toc-l1">' +
-      (k === "all" ? top("ops", "Overview", sub("about", "About the Process Genome") + sub("gx-ind", "Industries") + sub("standards", "Standards by region") + sub("reference", "Reference")) : "") +
+      (k === "all" ? top("ops", "Overview", sub("about", "About the Process Genome") + sub("standards", "Standards by region")) : "") +
       (GENOME[k] ? "" : top("proc", "Process Genome", k === "all" ? '<li class="toc-note">Select an industry to see its business processes.</li>' : PROCESSES[k].map(function (p) { return sub(pslug(k, p.n), p.n); }).join(""))) + '</ul>';
   }
   function closeToc() { toc.classList.remove("open"); tocHead.setAttribute("aria-expanded", "false"); }
