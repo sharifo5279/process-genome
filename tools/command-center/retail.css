@@ -16,7 +16,7 @@
   .rt-app .cx-top { gap: 12px; height: 58px; padding: 0 18px; border-bottom: 1px solid var(--pl); }
   .rt-app .cx-brand { font-size: 17px; letter-spacing: -.025em; gap: 9px; white-space: nowrap; }
   .rt-app .cx-brand em { font-size: 12px; letter-spacing: 0; padding-left: 10px; border-left: 1px solid var(--pl); }
-  .rt-app .cx-cust { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 0; padding: 0; margin-left: 3px; font-size: 12px; }
+  .rt-app .cx-cust { max-width: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 0; padding: 0; margin-left: 3px; font-size: 12px; }
   .rt-app .cx-me { background: #16489c; }
   .rt-app .cx-body { gap: 10px; padding: 10px; }
   .rt-app .cx-nav { width: 224px; border-radius: 9px; }

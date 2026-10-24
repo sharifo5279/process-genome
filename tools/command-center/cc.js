@@ -1,11 +1,13 @@
-  /* Command Center for Retail and CPG (owner, Oct 24): the Command Center prototype (Analytics, Integration Monitor,
-     Performance Monitor, Aviator) recreated in this site, extended with business process monitoring and AI agents.
-     Illustrative values for the concept preview. Demo customer: Nuvori Beauty, a beauty and personal care supplier. */
-  var ccEl = document.getElementById("cc"), ccFrame = document.getElementById("cc-frame"), cx = document.getElementById("cx");
-  var ccScr = "pm-dash", ccGrp = { im: false, pm: true }, ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccTpt = "Customer", ccFAgent = "all", ccPj = 0, ccAvLog = [];
-  var ccDone = {};
-  var CCNET = /^(\d{3}|GDSN)/;
-  function ccToks(lbl) { return lbl.split(" / ")[0].replace(/^GDSN /, "").split(/,\s*| or /); }
+  /* Command Center for Retail and CPG (owner, Oct 24): one dashboard, one findings list and one action queue across
+     Integration Monitor, Performance Monitor and the Retail add-on. Recreated from the Command Center prototypes and
+     extended with business process monitoring and AI agents. Illustrative values for the concept preview.
+     Two perspectives of the same network: a retailer (Northfield Stores) and a CPG supplier (Nuvori Beauty). */
+  var ccEl = document.getElementById("cc"), cx = document.getElementById("cx");
+  var ccScr = "dash", ccGrp = { im: true, pm: true, rt: true }, ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccTpt = "Customer", ccPj = 0, ccAvLog = [];
+  var ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "open";
+  var CC_GENOME = "../#retail/map";
+  function ccRole() { return typeof rtRole === "string" ? rtRole : "supplier"; }
+  function ccCompany() { return ccRole() === "retailer" ? "Northfield Stores" : "Nuvori Beauty"; }
 
   /* Icons (Lucide paths) */
   var CXI = {
@@ -23,6 +25,9 @@
     full: '<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>', warn: '<path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4M12 17h.01"/>',
     ok: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>', send: '<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>', plus: '<path d="M12 5v14M5 12h14"/>', filter: '<path d="M22 3H2l8 9.5V19l4 2v-8.5z"/>'
   };
+  CXI.moon = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>'; CXI.sun = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  CXI.gen = '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6h7M6 8.5v7M18 8.5v7M8.5 18h7M8 8l8 8"/>';
+  CXI.ext = '<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>';
   function ci(n, c) { return '<svg class="ci' + (c ? " " + c : "") + '" viewBox="0 0 24 24" aria-hidden="true">' + CXI[n] + '</svg>'; }
   function cxe(s) { return esc(s); }
 
@@ -61,6 +66,12 @@
     ["Lakeshore Market", "LSM-RT-0520", "Active", "BU-0425", "Feb 2, 2024", "Today, 08:12"], ["Pinecrest Department Stores", "PDS-RT-0618", "Active", "BU-0019", "Nov 15, 2019", "Today, 07:58"],
     ["Coastal Drug", "CDR-RT-0702", "Active", "BU-0480", "Apr 30, 2023", "Today, 08:05"], ["Summit Beauty Supply", "SBS-DS-0811", "Inactive", "BU-0082", "Jul 21, 2022", "Aug 3, 2026"],
     ["Ridgeway Freight", "RDF-CA-0905", "Active", "BU-0395", "May 6, 2021", "Today, 08:40"], ["Crestline Logistics", "CRL-3P-1010", "Active", "BU-0132", "Oct 11, 2020", "Today, 07:20"]];
+  var CXPR = [["Nuvori Beauty", "NUV-SP-0112", "Active", "BU-0451", "Mar 4, 2021", "Today, 09:12"], ["Meadowline Care", "MDC-SP-0207", "Active", "BU-0367", "Jun 18, 2020", "Today, 05:52"],
+    ["Copperleaf Living", "CPL-SP-0331", "Active", "BU-0442", "Jan 9, 2022", "Today, 09:22"], ["Tidewell Home", "TDH-DS-0415", "Active", "BU-0249", "Sep 27, 2023", "Today, 09:24"],
+    ["Solara Personal Care", "SPC-SP-0520", "Active", "BU-0425", "Feb 2, 2024", "Today, 09:15"], ["Fieldstone Essentials", "FSE-SP-0618", "Active", "BU-0019", "Nov 15, 2019", "Today, 09:10"],
+    ["Liora Wellness", "LRW-SP-0702", "Active", "BU-0480", "Oct 20, 2026", "Yesterday, 16:20"], ["Brookfield Pet Supply", "BPS-SP-0811", "Inactive", "BU-0082", "Jul 21, 2022", "Aug 3, 2026"],
+    ["Ridgeway Freight", "RDF-CA-0905", "Active", "BU-0395", "May 6, 2021", "Today, 08:40"], ["Crestline Logistics", "CRL-3P-1010", "Active", "BU-0132", "Oct 11, 2020", "Today, 09:26"]];
+  function cxPartners() { return ccRole() === "retailer" ? CXPR : CXP; }
 
   /* Small chart helpers */
   function cxLine(series, o) {
@@ -99,30 +110,49 @@
     return h + '</div>';
   }
 
-  /* Findings helpers */
-  function cxOpen() { return CCF.filter(function (f) { return !ccDone[f.id]; }); }
-  function cxSevChip(s) { return s === "c" ? '<span class="cx-sev h">' + ci("warn") + 'High</span>' : '<span class="cx-sev m">' + ci("warn") + 'Medium</span>'; }
-  function cxStChip(f) { var st = ccDone[f.id] ? (ccDone[f.id] === 2 ? "Known issue" : "Resolved") : CXST[f.id]; return '<span class="cx-st s-' + st.replace(/ /g, "").toLowerCase() + '"><i></i>' + st + '</span>'; }
+  /* Modules and shared records. Each finding and dashboard component carries the module that produces it. */
+  var CCMOD = { IM: ["Integration Monitor", "im"], PM: ["Performance Monitor", "pm"], RT: ["Retail add-on", "rt"] };
+  function cxTag(m) { return m && CCMOD[m] ? '<span class="cx-mod ' + CCMOD[m][1] + '"><i></i>' + CCMOD[m][0] + '</span>' : '<span class="cx-mod all"><i></i>All modules</span>'; }
+  function cxModKey(scr) { scr = scr || ccScr; return scr.indexOf("im-") === 0 ? "IM" : scr.indexOf("pm-") === 0 || scr === "an" ? "PM" : scr.indexOf("rt-") === 0 ? "RT" : ""; }
+  function cxF(f) { var o = ccRole() === "retailer" && CCFR[f.id], r = {}, k; if (!o) return f; for (k in f) r[k] = f[k]; for (k in o) r[k] = o[k]; return r; }
+  function cxAll() { return CCF.map(cxF); }
+  function cxById(id) { return cxF(CCF.filter(function (x) { return x.id === id; })[0]); }
+  function cxOpen() { return cxAll().filter(function (f) { return !ccDone[f.id]; }); }
+  function cxSevChip(s) { return s === "c" || s === "h" ? '<span class="cx-sev h">' + ci("warn") + 'High</span>' : '<span class="cx-sev m">' + ci("warn") + 'Medium</span>'; }
+  function cxStPill(st) { return '<span class="cx-st s-' + st.replace(/ /g, "").toLowerCase() + '"><i></i>' + st + '</span>'; }
+  function cxStChip(f) { return cxStPill(ccDone[f.id] ? (ccDone[f.id] === 2 ? "Known issue" : "Resolved") : CXST[f.id]); }
   function cxAt(f) { return /^\d/.test(f.at) ? "Today, " + f.at : f.at; }
   function cxAgentName(f) { var a = CXAF[f.id]; return a.n + " · " + a.r; }
+  function cxOrd(t) { var m = /^(\d\d):(\d\d)/.exec(String(t)); return m ? +m[1] * 60 + +m[2] : -1; }
   function cxProcName(i) { return PROCESSES.retail[i].n; }
-  function cxFindRows(list, opt) {
-    var groups = CXA.map(function (a) { return [a, list.filter(function (f) { return CXAF[f.id] === a; })]; }).filter(function (g) { return g[1].length; });
-    return '<table class="cx-tbl"><thead><tr><th>Finding</th><th>Rule</th><th>Process</th><th>Trading partner</th><th>Transactions</th>' + (opt && opt.noAs ? '' : '<th>Assigned to</th>') + '<th>Status</th><th>Detected</th><th>Severity</th></tr></thead><tbody>' +
-      groups.map(function (g) {
-        return '<tr class="gh"><td colspan="9">' + cxe(g[0].n + " · " + g[0].r) + '</td></tr>' + g[1].map(function (f) {
-          return '<tr><td><button type="button" class="cx-lk" data-cxf="' + f.id + '">' + cxe(f.ot) + '</button></td><td>' + cxe(CXRULE[f.id]) + '</td><td>' + cxe(GENOME.retail.short[f.p]) + '</td><td>' + cxe(f.partner) + '</td><td>' + cxe(CXDOC[f.id]) + '</td>' +
-            (opt && opt.noAs ? '' : '<td>' + cxe(CXAS[f.id] || "Unassigned") + '</td>') + '<td>' + cxStChip(f) + '</td><td>' + cxAt(f) + '</td><td>' + cxSevChip(f.sev) + '</td></tr>';
-        }).join("");
-      }).join("") + '</tbody></table>';
+
+  /* Item providers: the core monitors register here, and industry add-ons append their own. One record shape for findings and actions. */
+  var CXITEMS = [function () {
+    return cxAll().map(function (f) {
+      var d = ccDone[f.id], a = CXAF[f.id];
+      return { key: "f:" + f.id, mod: f.mod === "Integration Monitor" ? "IM" : "PM", title: f.ot, partner: f.partner, check: CXRULE[f.id], proc: f.p, sev: f.sev === "c" ? "h" : "m",
+        agent: a.n + " · " + a.r, owner: CXAS[f.id] || "Unassigned", status: d ? (d === 2 ? "Known issue" : "Resolved") : CXST[f.id], done: !!d, at: cxAt(f), ord: cxOrd(f.at), val: f.val,
+        open: 'data-cxf="' + f.id + '"', act: f.act, appr: f.appr, actDone: !!d, actState: d === 2 ? "Marked as known issue" : "Action approved. The finding is closed.",
+        actBtn: '<button type="button" class="cx-btn p" data-cxapp="' + f.id + '">Approve action</button>' };
+    });
+  }];
+  function ccItems() { return [].concat.apply([], CXITEMS.map(function (p) { return p(); })); }
+  function cxSort(list) { return list.slice().sort(function (a, b) { return (a.sev === "h" ? 0 : 1) - (b.sev === "h" ? 0 : 1) || (b.ord - a.ord); }); }
+  function cxModF(list) { return ccModF === "all" ? list : list.filter(function (i) { return i.mod === ccModF; }); }
+  function cxModSeg() {
+    return '<span class="cx-seg cx-mseg" role="group" aria-label="Filter by module">' + [["all", "All modules"], ["IM", "Integration Monitor"], ["PM", "Performance Monitor"], ["RT", "Retail add-on"]].map(function (o) {
+      return '<button type="button" data-cxmod="' + o[0] + '" aria-pressed="' + (ccModF === o[0]) + '">' + (o[0] === "all" ? "" : '<i class="cx-md ' + CCMOD[o[0]][1] + '"></i>') + o[1] + '</button>'; }).join("") + '</span>';
   }
 
   /* Screens */
   var CXS = {};
-  function cxHead(t, extra) { return '<header class="cx-ph"><h2>' + t + '</h2>' + (extra || "") + '</header>'; }
+  var CCSNAP = "24 Oct 2026, 09:30 ET";
+  function cxHead(t, extra) { var m = cxModKey(); return '<header class="cx-ph"><h2>' + t + '</h2>' + (m ? cxTag(m) : "") + (extra || "") + '</header>'; }
   function cxCard(t, body, cls, right) { return '<section class="cx-card' + (cls ? " " + cls : "") + '">' + (t ? '<header><h3>' + t + '</h3>' + (right || "") + '</header>' : "") + body + '</section>'; }
   function cxKpi(l, v, s, cls) { return '<div class="cx-kpi' + (cls ? " " + cls : "") + '"><span>' + l + '</span><b>' + v + '</b>' + (s ? '<small>' + s + '</small>' : "") + '</div>'; }
   function cxSeg(name, opts, cur) { return '<span class="cx-seg" role="group">' + opts.map(function (o) { return '<button type="button" data-cxseg="' + name + '" data-v="' + o + '" aria-pressed="' + (o === cur) + '">' + o + '</button>'; }).join("") + '</span>'; }
+  function cxGoBtn(label, scr) { return '<button type="button" class="cx-lk" data-cxgo="' + scr + '">' + label + ci("chev", "cx-lki") + '</button>'; }
+  function cxItemLink(i, cls) { return '<button type="button" class="cx-lk' + (cls ? " " + cls : "") + '" ' + i.open + '>' + cxe(i.title) + '</button>'; }
 
   var CXCAT = [["Order and fulfillment", "850 PO · 855 PO Ack · 856 ASN", 85, [["PO acknowledgment rate", "855 PO acknowledgment", "96.5%", "≥ 98%", 98, 5, 0], ["PO acknowledgment cycle time", "850 PO to 855 PO acknowledgment", "5.5 hrs", "≤ 4 hrs", 73, 4, 1], ["Order accuracy", "850 PO and 855 PO acknowledgment", "98.2%", "≥ 99%", 99, 5, 0], ["Order fill rate", "855 PO acknowledgment", "95.5%", "≥ 98%", 97, 5, 0], ["Backorder rate", "855 PO acknowledgment", "3.5%", "≤ 2%", 57, 4, 1]]],
     ["Shipping and delivery", "856 ASN · 214 Shipment status", 94, [["Ship notice timeliness", "856 before arrival", "97.1%", "≥ 98%", 96, 6, 0], ["On-time in-full (OTIF)", "850, 856 and 214", "91.5%", "≥ 95%", 96, 8, 1], ["ASN accuracy", "856 against receipt", "98.8%", "≥ 99%", 98, 5, 0]]],
@@ -150,15 +180,6 @@
     }
     return h;
   };
-  CXS["im-dash"] = function () {
-    return cxHead("Dashboard") + cxCard("Daily digest", '<div class="cx-k5">' + cxKpi("Transaction volume, top 10 partners", "27,022", '<button type="button" class="cx-lk" data-cxgo="im-com">View partner list</button>') + cxKpi("Partners onboarded", "13", '<em class="up">↑ 18% vs last week</em>') +
-      cxKpi("Document volume this week", "2,056", '<em class="up">↑ 11% vs last week</em>') + cxKpi("Anomalies detected", "3", '<em class="dn">↑ 2 vs yesterday</em>') + cxKpi("Failed transactions", "121", '<button type="button" class="cx-lk" data-cxgo="pm-find">View findings</button>') + '</div>', "", '<span class="cx-note">Updated for Friday, October 23, 2026 (UTC) ' + ci("spark") + '</span>') +
-      '<div class="cx-g21">' + cxCard("Document transaction summary", '<div class="cx-g2 in">' + [["Yesterday", "Thursday, October 22, 2026", "2,056"], ["Last month", "September 1 to 30, 2026", "45,231"]].map(function (p) {
-        return '<div><b class="cx-pl">' + p[0] + '</b><small class="cx-pd">' + p[1] + '</small><div class="cx-dw">' + cxDonut([["850", 34, "#0066FF"], ["856", 27, "#001889"], ["810", 25, "#5B8DEF"], ["Other", 14, "#9DB7F2"]], 62, p[2], "Total") + '<ul class="cx-lg"><li><i style="background:#0066FF"></i>850 Purchase order</li><li><i style="background:#001889"></i>856 Ship notice</li><li><i style="background:#5B8DEF"></i>810 Invoice</li><li><i style="background:#9DB7F2"></i>Other documents</li></ul></div></div>';
-      }).join("") + '</div>', "", ci("spark", "cx-ai")) +
-      cxCard("Trading community statistics", '<ul class="cx-stl">' + [["Total partners", "208"], ["Added this year", "21"], ["Added this month", "3"], ["Added last month", "4"], ["Active partners", "163"]].map(function (r) { return '<li><span>' + r[0] + '</span><b>' + r[1] + '</b>' + ci("chev") + '</li>'; }).join("") + '</ul>') + '</div>' +
-      cxCard("Transaction volume", cxLine([{ v: [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590], area: true }], { w: 1060, h: 230, min: 3000, max: 5000, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Transaction volume, last 12 months" }), "", cxSeg("rng", ["12M", "3M", "24M"], "12M"));
-  };
   CXS["im-tp"] = function () {
     return cxHead("Trading partners") + cxCard("Partner integration analysis", '<div class="cx-k3">' + cxKpi("Total partners", "208", "78% active") + cxKpi("Active partners", "163", "Sent or received in 30 days") + cxKpi("Inactive partners", "45", "No activity in 30 days") + '</div>') +
       cxCard("Trading partner stats", cxLine([{ v: [172, 176, 179, 183, 186, 190, 193, 196, 199, 203, 205, 208] }, { v: [3, 4, 3, 4, 3, 4, 3, 3, 3, 4, 2, 3], c: "b2" }], { w: 1060, h: 230, max: 240, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Partners over 12 months" }) + '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>Total partners</li><li><i style="background:#001889"></i>Onboarded</li></ul>', "", cxSeg("rng", ["24M", "12M", "6M", "3M", "1M"], "12M"));
@@ -166,14 +187,18 @@
   CXS["im-com"] = function () {
     return cxHead("Trading community") + '<div class="cx-k4">' + cxKpi("Total partners", "208") + cxKpi("Added this month", "3") + cxKpi("Added last month", "4") + cxKpi("Added this year", "21") + '</div>' +
       cxCard("Partners", '<table class="cx-tbl"><thead><tr><th>Partner name</th><th>Partner alias</th><th>Status</th><th>BUID</th><th>Onboarding date</th><th>Last activity</th></tr></thead><tbody>' +
-        CXP.map(function (p) { return '<tr><td><b>' + p[0] + '</b></td><td><code>' + p[1] + '</code></td><td><span class="cx-st s-' + (p[2] === "Active" ? "resolved" : "known") + '"><i></i>' + p[2] + '</span></td><td>' + p[3] + '</td><td>' + p[4] + '</td><td>' + p[5] + '</td></tr>'; }).join("") + '</tbody></table>', "", '<span class="cx-note">Showing 10 of 208</span>');
+        cxPartners().map(function (p) { return '<tr><td><b>' + p[0] + '</b></td><td><code>' + p[1] + '</code></td><td><span class="cx-st s-' + (p[2] === "Active" ? "resolved" : "known") + '"><i></i>' + p[2] + '</span></td><td>' + p[3] + '</td><td>' + p[4] + '</td><td>' + p[5] + '</td></tr>'; }).join("") + '</tbody></table>', "", '<span class="cx-note">Showing 10 of 208</span>');
   };
   var CXPJ = [["Harbor Grocers orders", "Order volume drop", 5, "Inbound", "Purchase order (850)", "X12", "Harbor Grocers", "f2"], ["Brightway inventory feed", "Feed late", 3, "Outbound", "Inventory advice (846)", "X12", "Brightway Marketplace", "f10"],
     ["Harbor Grocers sales feed", "Feed missing", 1, "Inbound", "Product activity (852)", "X12", "Harbor Grocers", "f7"], ["Northfield Stores invoices", "Within projection", 0, "Outbound", "Invoice (810)", "X12", "Northfield Stores", null],
     ["Westline Home orders", "Within projection", 0, "Inbound", "Purchase order (850)", "X12", "Westline Home", null]];
+  var CXPJR = [["Meadowline Care orders", "Order volume drop", 5, "Outbound", "Purchase order (850)", "X12", "Meadowline Care", "f2"], ["Tidewell Home inventory feed", "Feed late", 3, "Inbound", "Inventory advice (846)", "X12", "Tidewell Home", "f10"],
+    ["Meadowline Care sales feed", "Feed missing", 1, "Outbound", "Product activity (852)", "X12", "Meadowline Care", "f7"], ["Nuvori Beauty invoices", "Within projection", 0, "Inbound", "Invoice (810)", "X12", "Nuvori Beauty", null],
+    ["Copperleaf Living orders", "Within projection", 0, "Outbound", "Purchase order (850)", "X12", "Copperleaf Living", null]];
+  function cxProj() { return ccRole() === "retailer" ? CXPJR : CXPJ; }
   CXS["im-proj"] = function () {
-    var p = CXPJ[ccPj], act = ccPj === 0 ? [62, 88, 91, 41, null, null, null, null, null, null] : [70, 72, 75, 74, null, null, null, null, null, null], prj = [null, null, null, 112, 108, 104, 98, 96, 94, 95];
-    return cxHead("Projections and anomalies") + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + CXPJ.map(function (x, i) {
+    var PJ = cxProj(), p = PJ[ccPj], act = ccPj === 0 ? [62, 88, 91, 41, null, null, null, null, null, null] : [70, 72, 75, 74, null, null, null, null, null, null], prj = [null, null, null, 112, 108, 104, 98, 96, 94, 95];
+    return cxHead("Projections and anomalies") + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
       return '<button type="button" data-cxpj="' + i + '" aria-pressed="' + (i === ccPj) + '"><b>' + x[0] + '</b><small>' + x[1] + ' · Executed today, 08:00</small>' + (x[2] ? '<em>' + x[2] + ci("warn") + '</em>' : '') + '</button>';
     }).join("") + '</nav><section class="cx-pjd"><header><h3>' + p[0] + '</h3>' + (p[7] ? '<button type="button" class="cx-btn" data-cxf="' + p[7] + '">Open finding</button>' : '') + '</header>' +
       '<div class="cx-chips">' + [["D", "Direction", p[3]], ["D", "Document type", p[4]], ["S", "Document standard", p[5]], ["T", "Trading partner", p[6]]].map(function (c) { return '<div><i>' + c[0] + '</i><span>' + c[1] + '<b>' + c[2] + '</b></span></div>'; }).join("") + '</div>' +
@@ -190,19 +215,6 @@
   CXS["im-cfg"] = function () {
     return cxHead("System configuration") + cxCard("Trading partner settings", '<p class="cx-sub">Days without activity before a trading partner is marked inactive.</p><label class="cx-fl">Threshold (days)<input type="number" value="30" min="1"></label><button type="button" class="cx-btn p">Save</button>');
   };
-  CXS["pm-dash"] = function () {
-    var op = cxOpen(), hi = op.filter(function (f) { return f.sev === "c"; }).length, val = op.reduce(function (a, f) { return a + f.val; }, 0);
-    return cxHead("Dashboard") + cxCard("Key metrics", '<div class="cx-k5">' + cxKpi("Active rules", "14", "Across 5 agents") + cxKpi("Open findings", op.length, hi + " high severity") + cxKpi("Value at risk", "$" + Math.round(val / 1000) + "K", "Across open findings") +
-      cxKpi("Total inspections", "159,920", "Documents checked") + '<div class="cx-kpi"><span>Avg conformance and deviation</span><b>95.8%<small class="r">4.2%</small></b><span class="cx-pb"><i style="width:95.8%"></i></span></div></div>', "", '<span class="cx-note">Last 30 days</span>') +
-      '<div class="cx-g2">' + cxCard("My actions", '<p class="cx-sub">' + op.length + ' items need attention</p><ul class="cx-acts">' + op.slice(0, 4).map(function (f) {
-        return '<li><header><button type="button" class="cx-lk b" data-cxf="' + f.id + '">' + cxe(f.ot) + '</button>' + cxSevChip(f.sev) + '</header><p><code>' + f.id.toUpperCase() + '</code> Rule: ' + cxe(CXRULE[f.id]) + '</p><p><b>' + cxe(f.partner) + '</b> | ' + cxe(cxAgentName(f)) + '<span>' + cxAt(f) + '</span></p></li>';
-      }).join("") + '</ul>', "", '<button type="button" class="cx-lk" data-cxgo="pm-act">View all</button>') +
-      cxCard("Process health", '<p class="cx-sub">Open findings by retail business process</p><ul class="cx-ph2">' + CCSTG.map(function (g) {
-        return '<li><b>' + g[0] + '</b>' + g[1].map(function (i) { var n = op.filter(function (f) { return f.p === i; }), sev = n.some(function (f) { return f.sev === "c"; }) ? "c" : n.length ? "w" : "ok";
-          return '<button type="button" class="cx-pc ' + sev + '" data-cxproc="' + i + '"><i></i>' + cxe(GENOME.retail.short[i]) + (n.length ? '<em>' + n.length + '</em>' : '') + '</button>'; }).join("") + '</li>';
-      }).join("") + '</ul>', "", '<button type="button" class="cx-lk" data-cxgo="pm-proc">View processes</button>') + '</div>' +
-      cxCard("Findings by agent", cxBars(CXA.map(function (a) { return [a.n + " · " + a.r, a.f.filter(function (id) { return !ccDone[id]; }).length + [12, 5, 3, 4, 6][CXA.indexOf(a)], "", "b"]; }), { max: 20 }), "", '<span class="cx-note">Last 30 days</span>');
-  };
   CXS["pm-proc"] = function () {
     var op = cxOpen();
     return cxHead("Business processes", '<span class="cx-new">New</span>') + '<p class="cx-lead">Each retail business process with its steps, the agents watching it and the findings open against it.</p>' +
@@ -214,21 +226,6 @@
           return '<tr><td><button type="button" class="cx-lk b" data-cxproc="' + i + '">' + cxe(P.n) + '</button></td><td><span class="cx-steps">' + steps + '</span></td><td>' + cxe(P.measures[CCM[i][0]]) + ' <b>' + CCM[i][1] + '</b></td><td>' + (Object.keys(ag).join(", ") || "Lex, Nora") + '</td><td>' + (n.length || "None") + '</td><td>' + (v ? "$" + v.toLocaleString("en-US") : "None") + '</td><td><span class="cx-hl ' + sev + '"><i></i>' + { c: "Critical", w: "Warning", ok: "Healthy" }[sev] + '</span></td></tr>';
         }).join("");
       }).join("") + '</tbody></table>');
-  };
-  CXS["pm-find"] = function () {
-    var all = CCF.filter(function (f) { return ccFAgent === "all" || CXAF[f.id].id === ccFAgent; }), op = all.filter(function (f) { return !ccDone[f.id]; }), nw = op.filter(function (f) { return CXST[f.id] === "New"; }).length;
-    return cxHead("Findings", '<label class="cx-sel">' + '<select data-cxag>' + '<option value="all">All agents</option>' + CXA.map(function (a) { return '<option value="' + a.id + '"' + (ccFAgent === a.id ? " selected" : "") + '>' + a.n + " · " + a.r + '</option>'; }).join("") + '</select></label>') +
-      '<div class="cx-g12">' + cxCard("Total findings", '<div class="cx-dw">' + cxGauge([["New", nw, "#E8590C"], ["Ack", op.length - nw, "#F4B740"], ["Closed", all.length - op.length, "#0066FF"]]) +
-        '<ul class="cx-lg"><li><i style="background:#E8590C"></i>New<b>' + nw + '</b></li><li><i style="background:#F4B740"></i>Acknowledged<b>' + (op.length - nw) + '</b></li><li><i style="background:#0066FF"></i>Closed<b>' + (all.length - op.length) + '</b></li></ul></div>') +
-      cxCard("", '<p class="cx-ka">' + ci("spark") + 'Key analysis</p><span class="cx-tag">' + ci("warn") + 'Order to cash</span><h4 class="cx-kt">Four of eleven findings sit in Order to cash, two of them critical</h4><p class="cx-sub">Harbor Grocers orders stopped at 05:52 after a certificate rotation, and Northfield Stores shipments have no ship notices. Both block revenue this morning. Approve the two critical actions first, then work the acknowledgment backlog for Westline Home before the 12:00 cutoff.</p>') + '</div>' +
-      cxCard("List of findings", cxFindRows(all), "", '<span class="cx-note">Grouped by agent</span>');
-  };
-  CXS["pm-act"] = function () {
-    var op = cxOpen();
-    return cxHead("My actions") + '<p class="cx-lead">Agent recommendations waiting for a decision. Actions run after approval.</p>' + '<ul class="cx-acl">' + op.map(function (f) {
-      return '<li class="' + f.sev + '"><div><header>' + cxSevChip(f.sev) + '<span>' + cxe(cxAgentName(f)) + ' · ' + cxAt(f) + '</span></header><button type="button" class="cx-lk b" data-cxf="' + f.id + '">' + cxe(f.ot) + '</button><p>' + cxe(f.act) + '</p><small>' + cxe(f.partner) + ' · ' + cxe(cxProcName(f.p)) + ' · Approver: ' + cxe(f.appr) + '</small></div>' +
-        '<div class="cx-acb"><button type="button" class="cx-btn p" data-cxapp="' + f.id + '">Approve action</button><button type="button" class="cx-btn" data-cxf="' + f.id + '">Review</button></div></li>';
-    }).join("") + (op.length ? "" : '<li class="cx-empty">No actions waiting.</li>') + '</ul>';
   };
   CXS["pm-agents"] = function () {
     return cxHead("Agents", '<span class="cx-new">New</span>') + '<p class="cx-lead">Agents inspect documents and processes, raise findings and recommend actions. A person approves each action before it runs.</p><div class="cx-ag">' + CXA.map(function (a) {
@@ -247,14 +244,94 @@
       }).join("") + '</tbody></table>', "", '<span class="cx-note">Grouped by agent</span>');
   };
 
+  /* Dashboard: one view of the network. Each component names the module that produces it. */
+  var CXDASH = [];
+  function cxDc(c) { return '<section class="cx-card cx-dc w' + c.w + '" data-mod="' + (c.mod || "all") + '"><header><h3>' + c.t + '</h3>' + cxTag(c.mod) + '</header><div class="cx-dcb">' + c.h() + '</div>' + (c.f ? '<footer class="cx-dcf">' + c.f() + '</footer>' : "") + '</section>'; }
+  CXS["dash"] = function () {
+    var list = CXDASH.slice().sort(function (a, b) { return a.o - b.o; }).filter(function (c) { return ccModF === "all" || !c.mod || c.mod === ccModF; });
+    return '<header class="cx-ph cx-dh"><div><h2>Dashboard</h2><p>' + cxe(ccCompany()) + ' · Retail and CPG · ' + CCSNAP + ' · Illustrative data</p></div>' + cxModSeg() + '</header><div class="cx-dg">' + list.map(cxDc).join("") + '</div>';
+  };
+  CXDASH.push(
+    { o: 10, mod: "IM", w: 2, t: "Network activity", h: function () {
+      return '<div class="cx-k2">' + cxKpi("Documents this week", "2,056", '<em class="up">↑ 11% vs last week</em>') + cxKpi("Volume anomalies", "3", '<em class="dn">↑ 2 vs yesterday</em>') +
+        cxKpi("Failed transactions", "121", "Last 24 hours") + cxKpi("Active partners", "163", "Of 208 connected") + '</div>'; }, f: function () { return cxGoBtn("Projections and anomalies", "im-proj"); } },
+    { o: 20, mod: "PM", w: 2, t: "Process performance", h: function () {
+      var op = cxOpen().filter(function (f) { return f.mod === "Performance Monitor"; }), hi = op.filter(function (f) { return f.sev === "c"; }).length, val = op.reduce(function (a, f) { return a + f.val; }, 0);
+      return '<div class="cx-k2">' + cxKpi("Open findings", op.length, hi + " high severity") + cxKpi("Value at risk", "$" + Math.round(val / 1000) + "K", "Across open findings") +
+        cxKpi("Average conformance", "95.8%", "Last 30 days") + cxKpi("Active rules", "14", "Across 5 agents") + '</div>'; }, f: function () { return cxGoBtn("Business processes", "pm-proc"); } },
+    { o: 40, mod: "", w: 4, t: "Priority findings", h: function () {
+      var op = cxSort(cxModF(ccItems()).filter(function (i) { return !i.done; })).slice(0, 6);
+      return '<table class="cx-tbl cx-pf"><thead><tr><th>Finding</th><th>Module</th><th>Severity</th><th>Detected</th></tr></thead><tbody>' + op.map(function (i) {
+        return '<tr><td>' + cxItemLink(i, "b") + '<small>' + cxe(i.partner) + '</small></td><td>' + cxTag(i.mod) + '</td><td>' + cxSevChip(i.sev) + '</td><td>' + cxe(i.at) + '</td></tr>'; }).join("") +
+        (op.length ? "" : '<tr><td colspan="4" class="cx-empty">No open findings.</td></tr>') + '</tbody></table>'; },
+      f: function () { return cxGoBtn("View all " + cxModF(ccItems()).filter(function (i) { return !i.done; }).length + " open findings", "find"); } },
+    { o: 50, mod: "", w: 2, t: "Action queue", h: function () {
+      var it = cxModF(ccItems()), w = cxSort(it.filter(function (i) { return !i.actDone; })), d = it.length - w.length;
+      return '<div class="cx-k2 cx-k2s">' + cxKpi("Awaiting decision", w.length) + cxKpi("Completed", d) + '</div><ul class="cx-aq">' + w.slice(0, 3).map(function (i) {
+        return '<li>' + cxTag(i.mod) + cxItemLink(i, "b") + '<p>' + cxe(i.act) + '</p></li>'; }).join("") + '</ul>'; }, f: function () { return cxGoBtn("Open action queue", "act"); } },
+    { o: 60, mod: "PM", w: 3, t: "Process health", h: function () {
+      var op = cxOpen();
+      return '<p class="cx-sub">Open findings by retail business process</p><ul class="cx-ph2">' + CCSTG.map(function (g) {
+        return '<li><b>' + g[0] + '</b>' + g[1].map(function (i) { var n = op.filter(function (f) { return f.p === i; }), sev = n.some(function (f) { return f.sev === "c"; }) ? "c" : n.length ? "w" : "ok";
+          return '<button type="button" class="cx-pc ' + sev + '" data-cxproc="' + i + '"><i></i>' + cxe(GENOME.retail.short[i]) + (n.length ? '<em>' + n.length + '</em>' : '') + '</button>'; }).join("") + '</li>'; }).join("") + '</ul>'; },
+      f: function () { return cxGoBtn("View processes", "pm-proc"); } },
+    { o: 70, mod: "IM", w: 3, t: "Document transaction summary", h: function () {
+      return '<div class="cx-g2 in">' + [["Yesterday", "Friday, October 23, 2026", "2,056"], ["Last month", "September 1 to 30, 2026", "45,231"]].map(function (p) {
+        return '<div><b class="cx-pl">' + p[0] + '</b><small class="cx-pd">' + p[1] + '</small>' + cxDonut([["850", 34, "#0066FF"], ["856", 27, "#001889"], ["810", 25, "#5B8DEF"], ["Other", 14, "#9DB7F2"]], 54, p[2], "Total") + '</div>'; }).join("") +
+        '</div><ul class="cx-lg row"><li><i style="background:#0066FF"></i>850 Purchase order</li><li><i style="background:#001889"></i>856 Ship notice</li><li><i style="background:#5B8DEF"></i>810 Invoice</li><li><i style="background:#9DB7F2"></i>Other</li></ul>'; } },
+    { o: 80, mod: "IM", w: 4, t: "Transaction volume", h: function () {
+      return cxLine([{ v: [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590], area: true }], { w: 760, h: 220, min: 3000, max: 5000, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Transaction volume, last 12 months" }); },
+      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>'; } },
+    { o: 100, mod: "PM", w: 3, t: "Findings by agent", h: function () {
+      return cxBars(CXA.map(function (a, k) { return [a.n + " · " + a.r, a.f.filter(function (id) { return !ccDone[id]; }).length + [12, 5, 3, 4, 6][k], "", "b"]; }), { max: 20 }); },
+      f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Agents", "pm-agents"); } },
+    { o: 110, mod: "IM", w: 3, t: "Trading community", h: function () {
+      return '<ul class="cx-stl">' + [["Total partners", "208"], ["Added this year", "21"], ["Added this month", "3"], ["Added last month", "4"], ["Active partners", "163"]].map(function (r) { return '<li><span>' + r[0] + '</span><b>' + r[1] + '</b></li>'; }).join("") + '</ul>'; },
+      f: function () { return cxGoBtn("Trading community", "im-com"); } }
+  );
+
+  /* Findings: every module in one list */
+  var CXKA = {
+    supplier: "Order to cash carries three of the high-severity findings. Harbor Grocers orders stopped at 05:52 after a certificate rotation, 14 Northfield Stores shipments have no ship notices, and $46,200 in invoices is held on price. Approve these actions first, then work the Westline Home acknowledgment backlog.",
+    retailer: "Order to cash carries three of the high-severity findings. Orders are not reaching Meadowline Care after an endpoint change, 14 Nuvori Beauty loads arrive without ship notices, and $46,200 in Solara Personal Care invoices is held on price. Approve these actions first, then clear the Copperleaf Living acknowledgment backlog."
+  };
+  CXS["find"] = function () {
+    var all = cxModF(ccItems()), op = all.filter(function (i) { return !i.done; }), hi = op.filter(function (i) { return i.sev === "h"; }).length;
+    var list = cxSort(all.filter(function (i) { return (ccStF === "all" || !i.done) && (ccSevF === "all" || i.sev === ccSevF); }));
+    var by = function (m) { return op.filter(function (i) { return i.mod === m; }).length; };
+    var sel = function (name, opts, cur, label) { return '<label class="cx-sel"><span class="sr-only">' + label + '</span><select data-' + name + ' aria-label="' + label + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select></label>'; };
+    var groups = ["IM", "PM", "RT"].map(function (m) { return [m, list.filter(function (i) { return i.mod === m; })]; }).filter(function (g) { return g[1].length; });
+    return cxHead("Findings", cxModSeg()) +
+      '<div class="cx-fsum">' + cxKpi("Open findings", op.length, hi + " high severity") + ["IM", "PM", "RT"].filter(function (m) { return ccModF === "all" || ccModF === m; }).map(function (m) {
+        return '<div class="cx-kpi cx-km"><span>' + cxTag(m) + '</span><b>' + by(m) + '</b><small>Open</small></div>'; }).join("") + '</div>' +
+      (ccModF === "all" ? cxCard("", '<p class="cx-ka">' + ci("spark") + 'Key analysis</p><p class="cx-sub">' + cxe(CXKA[ccRole()]) + (by("RT") ? " The Retail add-on adds " + by("RT") + " open cases on partner readiness, order commitments, shipment readiness and settlement." : "") + '</p>', "cx-kac") : "") +
+      cxCard("All findings", '<table class="cx-tbl cx-ftb"><thead><tr><th>Finding</th><th>Rule or check</th><th>Process</th><th>Owner</th><th>Status</th><th>Detected</th><th>Severity</th></tr></thead><tbody>' + groups.map(function (g) {
+        return '<tr class="gh"><td colspan="7">' + cxTag(g[0]) + '<span>' + g[1].length + ' shown</span></td></tr>' + g[1].map(function (i) {
+          return '<tr><td>' + cxItemLink(i, "b") + '<small>' + cxe(i.partner) + ' · ' + cxe(i.agent) + '</small></td><td>' + cxe(i.check) + '</td><td>' + cxe(GENOME.retail.short[i.proc]) + '</td><td>' + cxe(i.owner) + '</td><td>' + cxStPill(i.status) + '</td><td>' + cxe(i.at) + '</td><td>' + cxSevChip(i.sev) + '</td></tr>'; }).join("");
+      }).join("") + (list.length ? "" : '<tr><td colspan="7" class="cx-empty">No findings match these filters.</td></tr>') + '</tbody></table>', "",
+        sel("cxsev", [["all", "All severities"], ["h", "High"], ["m", "Medium"]], ccSevF, "Severity") + sel("cxstf", [["open", "Open"], ["all", "Open and closed"]], ccStF, "Status"));
+  };
+
+  /* Action queue: recommendations from agents and add-on workflows */
+  var CXACTX = [];
+  CXS["act"] = function () {
+    var it = cxModF(ccItems()), wait = cxSort(it.filter(function (i) { return !i.actDone; })), done = it.filter(function (i) { return i.actDone; }), list = ccActTab === "open" ? wait : done;
+    return cxHead("Action queue", CXACTX.map(function (f) { return f(); }).join("") + cxModSeg()) + '<p class="cx-lead">Recommended actions from Performance Monitor agents, Integration Monitor anomalies and Retail add-on workflows. An action runs only after a person approves it.</p>' +
+      '<nav class="cx-tabs"><button type="button" data-cxat="open" aria-pressed="' + (ccActTab === "open") + '">Awaiting decision <em>' + wait.length + '</em></button><button type="button" data-cxat="done" aria-pressed="' + (ccActTab === "done") + '">Completed <em>' + done.length + '</em></button></nav>' +
+      '<ul class="cx-acl">' + list.map(function (i) {
+        return '<li class="' + (i.sev === "h" ? "c" : "w") + '"><div><header>' + cxTag(i.mod) + cxSevChip(i.sev) + '<span>' + cxe(i.agent) + ' · ' + cxe(i.at) + '</span></header>' + cxItemLink(i, "b") + '<p>' + cxe(i.act) + '</p><small>' + cxe(i.partner) + ' · ' + cxe(cxProcName(i.proc)) + ' · ' + (i.mod === "RT" ? "Owner: " + cxe(i.owner) : "Approver: " + cxe(i.appr)) + '</small></div>' +
+          '<div class="cx-acb">' + (i.actDone ? '<span class="cx-done">' + ci("ok") + cxe(i.actState) + '</span>' : i.actBtn) + '<button type="button" class="cx-btn" ' + i.open + '>Review</button></div></li>';
+      }).join("") + (list.length ? "" : '<li class="cx-empty">' + (ccActTab === "open" ? "No actions waiting." : "No completed actions yet.") + '</li>') + '</ul>';
+  };
+
   /* Drawers: a finding, or a business process */
   function cxDrawer() {
     if (!ccDr) return "";
     var h;
     if (ccDr[0] === "f") {
-      var f = CCF.filter(function (x) { return x.id === ccDr[1]; })[0], P = PROCESSES.retail[f.p], done = ccDone[f.id];
+      var f = cxById(ccDr[1]), P = PROCESSES.retail[f.p], done = ccDone[f.id];
       h = '<header><span><p>Finding · ' + cxe(cxAgentName(f)) + '</p><h3>' + cxe(f.ot) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
-        '<p class="cx-chipsr">' + cxSevChip(f.sev) + cxStChip(f) + '<span class="cx-tg">' + cxe(f.mod) + ' · ' + cxe(f.how) + '</span></p><p>' + cxe(f.os) + '</p>' +
+        '<p class="cx-chipsr">' + cxSevChip(f.sev) + cxStChip(f) + cxTag(f.mod === "Integration Monitor" ? "IM" : "PM") + '<span class="cx-tg">' + cxe(f.how) + '</span></p><p>' + cxe(f.os) + '</p>' +
         '<div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
         '<dl class="cx-dl"><div><dt>Trading partner</dt><dd>' + cxe(f.partner) + '</dd></div><div><dt>Process</dt><dd><button type="button" class="cx-lk" data-cxproc="' + f.p + '">' + cxe(P.n) + '</button>, step ' + (f.st + 1) + ': ' + cxe(P.steps[f.st][0]) + '</dd></div><div><dt>Rule</dt><dd>' + cxe(CXRULE[f.id]) + '</dd></div><div><dt>Transactions</dt><dd>' + cxe(CXDOC[f.id]) + '</dd></div></dl>' +
         '<h4>Timeline</h4><ol class="cx-tl">' + f.ev.map(function (e) { return '<li><b>' + cxe(e[0]) + '</b><span>' + cxe(e[1]) + '</span></li>'; }).join("") + '</ol>' +
@@ -267,47 +344,59 @@
         '<dl class="cx-dl"><div><dt>Owner</dt><dd>' + cxe(Q.owner || "") + '</dd></div><div><dt>' + cxe(Q.measures[CCM[i][0]]) + '</dt><dd>' + CCM[i][1] + '</dd></div><div><dt>Open findings</dt><dd>' + op.length + '</dd></div></dl><h4>Steps</h4><ol class="cx-sp">' +
         Q.steps.map(function (s, k) { var fs = op.filter(function (x) { return x.st === k; }), sev = fs.some(function (x) { return x.sev === "c"; }) ? "c" : fs.length ? "w" : "ok";
           return '<li class="' + sev + '"><i>' + (k + 1) + '</i><div><b>' + cxe(s[0]) + '</b><code>' + cxe(s[1]) + '</code>' + fs.map(function (x) { return '<button type="button" class="cx-lk" data-cxf="' + x.id + '">' + cxe(x.ot) + '</button>'; }).join("") + '</div></li>'; }).join("") +
-        '</ol></div><div class="cx-ft"><button type="button" class="cx-btn" data-gv="map" data-gk="retail">Open in Process Genome</button></div>';
+        '</ol></div><div class="cx-ft"><a class="cx-btn" href="' + CC_GENOME + '">Open in Process Genome</a></div>';
     }
     return '<div class="cx-scrim" data-cxclose></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
   }
 
-  /* Aviator */
-  var CXQ = [["Which processes are at risk this morning?", "Order to cash is critical: Harbor Grocers orders stopped at 05:52 (f2) and 14 Northfield Stores shipments have no ship notice (f1). Item and price synchronization, Deductions and Routing and delivery each have one warning.", ["f2", "f1"]],
-    ["Why are Harbor Grocers orders down?", "Ivy found order volume 64% below projection since 05:52. AS2 receipts from Harbor Grocers fail signature checks because the partner rotated its signing certificate. The weekly sales feed is missing for the same reason.", ["f2", "f7"]],
-    ["What needs my approval?", null, null]];
+  /* Aviator: scripted answers over the shared findings. Add-ons append questions. */
+  var CXQ = [
+    { q: function () { return "What should I work on first?"; }, a: function () {
+      var hi = cxSort(ccItems().filter(function (i) { return !i.done && i.sev === "h"; }));
+      return [hi.length + " high-severity findings are open across Integration Monitor, Performance Monitor and the Retail add-on. Start with these three.", hi.slice(0, 3)]; } },
+    { q: function () { return ccRole() === "retailer" ? "Why are orders to Meadowline Care down?" : "Why are Harbor Grocers orders down?"; }, a: function () {
+      var t = ccRole() === "retailer" ? "Ivy found outbound order volume to Meadowline Care 64% below projection since 05:52. Meadowline Care moved its AS2 endpoint in a maintenance window, so deliveries to the previous address fail. The weekly sales feed to Meadowline Care is blocked by the same change."
+        : "Ivy found order volume 64% below projection since 05:52. AS2 receipts from Harbor Grocers fail signature checks because the partner rotated its signing certificate. The weekly sales feed is missing for the same reason.";
+      return [t, ccItems().filter(function (i) { return i.key === "f:f2" || i.key === "f:f7"; })]; } },
+    { q: function () { return "What needs my approval?"; }, a: function () {
+      var w = cxSort(ccItems().filter(function (i) { return !i.actDone; }));
+      return [w.length + " actions wait for a decision. The most urgent:", w.filter(function (i) { return i.sev === "h"; }).slice(0, 3)]; } }
+  ];
   function cxAviator() {
     if (!ccAv) return "";
     var log = ccAvLog.map(function (m) { return '<li class="' + m[0] + '">' + m[1] + '</li>'; }).join("");
-    return '<aside class="cx-av"><header>' + ci("spark") + '<b>Aviator</b><button type="button" class="cx-ic" data-cxav aria-label="Close Aviator">' + ci("x") + '</button></header><div class="cx-avb"><p class="cx-hi">Hi. Ask about processes, partners, findings or agents.</p><ul class="cx-avl">' + log + '</ul>' +
-      '<ul class="cx-avq">' + CXQ.map(function (q, i) { return '<li><button type="button" data-cxq="' + i + '">' + q[0] + '</button></li>'; }).join("") + '</ul></div><div class="cx-ft"><span>Ask Aviator. Use @ to add agents.</span><button type="button" class="cx-ic" aria-label="Send" disabled>' + ci("send") + '</button><small>AI can make mistakes. Check important information.</small></div></aside>';
+    return '<aside class="cx-av"><header>' + ci("spark") + '<b>Aviator</b><button type="button" class="cx-ic" data-cxav aria-label="Close Aviator">' + ci("x") + '</button></header><div class="cx-avb"><p class="cx-hi">Ask about processes, partners, findings or agents for ' + cxe(ccCompany()) + '.</p><ul class="cx-avl">' + log + '</ul>' +
+      '<ul class="cx-avq">' + CXQ.map(function (q, i) { return '<li><button type="button" data-cxq="' + i + '">' + cxe(q.q()) + '</button></li>'; }).join("") + '</ul></div><div class="cx-ft"><span>Ask Aviator. Use @ to add agents.</span><button type="button" class="cx-ic" aria-label="Send" disabled>' + ci("send") + '</button><small>Scripted answers over illustrative data. AI can make mistakes. Check important information.</small></div></aside>';
   }
-  function cxAsk(i) {
-    var q = CXQ[i], a;
-    if (q[1]) a = cxe(q[1]) + '<span class="cx-avr">' + q[2].map(function (id) { var f = CCF.filter(function (x) { return x.id === id; })[0]; return '<button type="button" class="cx-lk" data-cxf="' + id + '">' + cxe(f.ot) + '</button>'; }).join("") + '</span>';
-    else { var op = cxOpen(); a = op.length + ' actions wait for approval. The two most urgent:' + '<span class="cx-avr">' + op.filter(function (f) { return f.sev === "c"; }).slice(0, 2).map(function (f) { return '<button type="button" class="cx-lk" data-cxf="' + f.id + '">' + cxe(f.act) + '</button>'; }).join("") + '</span>'; }
-    ccAvLog.push(["q", cxe(q[0])], ["a", a]);
+  function cxAsk(k) {
+    var q = CXQ[k], r = q.a();
+    ccAvLog.push(["q", cxe(q.q())], ["a", cxe(r[0]) + (r[1].length ? '<span class="cx-avr">' + r[1].map(function (i) { return cxItemLink(i); }).join("") + '</span>' : "")]);
   }
 
   /* Shell */
-  var CXNAV = [["an", "Analytics", "chart"], ["im", "Integration monitor", "im", [["im-dash", "Dashboard", "dash"], ["im-tp", "Trading partners", "users"], ["im-com", "TP community", "net"], ["im-proj", "Projection and anomalies", "trend"], ["im-map", "Document mapping", "map"], ["im-cfg", "System configuration", "cog"]]],
-    ["pm", "Performance monitor", "pm", [["pm-dash", "Dashboard", "dash"], ["pm-proc", "Business processes", "flow", 1], ["pm-find", "Findings", "search"], ["pm-act", "My actions", "check"], ["pm-agents", "Agents", "bot", 1], ["pm-rules", "Rules", "rules"]]]];
-  function cxMod() { return ccScr === "an" ? "" : ccScr.indexOf("im-") === 0 ? "Integration Monitor" : "Performance Monitor"; }
+  var CXNAV = [["dash", "Dashboard", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"],
+    ["im", "Integration Monitor", "im", [["im-tp", "Trading partners", "users"], ["im-com", "Trading community", "net"], ["im-proj", "Projections and anomalies", "trend"], ["im-map", "Document mapping", "map"], ["im-cfg", "System configuration", "cog"]]],
+    ["pm", "Performance Monitor", "pm", [["pm-proc", "Business processes", "flow", 1], ["pm-agents", "Agents", "bot", 1], ["pm-rules", "Rules", "rules"], ["an", "Analytics", "chart"]]]];
+  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "pm-act": "act", "rt-actions": "act" };
+  function cxMod() { var m = cxModKey(); return m ? CCMOD[m][0] : ""; }
+  function cxBadge(k) { var it = ccItems(); var n = k === "find" ? it.filter(function (i) { return !i.done; }).length : k === "act" ? it.filter(function (i) { return !i.actDone; }).length : 0; return n ? '<em class="cx-nb">' + n + '</em>' : ""; }
+  function cxTheme() { return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"; }
   function cxRender() {
     var nav = CXNAV.map(function (g) {
-      if (!g[3]) return '<li><button type="button" class="cx-n1' + (ccScr === g[0] ? " on" : "") + '" data-cxgo="' + g[0] + '" title="' + g[1] + '">' + ci(g[2]) + '<span>' + g[1] + '</span></button></li>';
-      return '<li><button type="button" class="cx-n1 cx-grp" data-cxgrp="' + g[0] + '" aria-expanded="' + !!ccGrp[g[0]] + '" title="' + g[1] + '">' + ci("chev", "cv") + ci(g[2]) + '<span>' + g[1] + '</span></button>' + (ccGrp[g[0]] ? '<ul>' + g[3].map(function (s) {
-        return '<li><button type="button" class="cx-n2' + (ccScr === s[0] ? " on" : "") + '" data-cxgo="' + s[0] + '" title="' + s[1] + '">' + ci(s[2]) + '<span>' + s[1] + (s[3] ? ' <em class="cx-new">New</em>' : '') + '</span></button></li>'; }).join("") + '</ul>' : '') + '</li>';
+      if (!g[3]) return '<li><button type="button" class="cx-n1' + (ccScr === g[0] ? " on" : "") + '" data-cxgo="' + g[0] + '" title="' + g[1] + '"' + (ccScr === g[0] ? ' aria-current="page"' : "") + '>' + ci(g[2]) + '<span>' + g[1] + '</span>' + cxBadge(g[0]) + '</button></li>';
+      return '<li class="cx-ng"><button type="button" class="cx-n1 cx-grp" data-cxgrp="' + g[0] + '" aria-expanded="' + !!ccGrp[g[0]] + '" title="' + g[1] + '">' + ci("chev", "cv") + ci(g[2]) + '<span>' + g[1] + '</span><i class="cx-md ' + g[0] + '" aria-hidden="true"></i></button>' + (ccGrp[g[0]] ? '<ul>' + g[3].map(function (s) {
+        return '<li><button type="button" class="cx-n2' + (ccScr === s[0] ? " on" : "") + '" data-cxgo="' + s[0] + '" title="' + s[1] + '"' + (ccScr === s[0] ? ' aria-current="page"' : "") + '>' + ci(s[2]) + '<span>' + s[1] + (s[3] ? ' <em class="cx-new">New</em>' : '') + '</span></button></li>'; }).join("") + '</ul>' : '') + '</li>';
     }).join("");
-    cx.innerHTML = '<header class="cx-top"><span class="cx-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#0066FF"/><path d="M22.5 13.6h1.8l1.3-2.1h-3.1V8.1h-3.9v5.9a6.8 6.8 0 1 0 0 6.3c0 1 .1 1.7.6 2.4.8 1.2 2.3 1.3 3.6 1.3.7 0 1.1-.1 1.8-.2v-2.8l-1 .1c-1 0-1-.7-1-1.5zM12.6 20.2a3.1 3.1 0 1 1 0-6.1 3.1 3.1 0 0 1 0 6.1z" fill="#fff"/></svg>Command Center<em>' + cxMod() + '</em></span>' +
-      '<span class="cx-cust">Nuvori Beauty · Retail and CPG</span><span class="cx-tb"><button type="button" class="cx-avt" data-cxav aria-pressed="' + ccAv + '">' + ci("spark") + 'Aviator</button><button type="button" class="cx-ic" aria-label="Notifications">' + ci("bell") + '</button><button type="button" class="cx-ic" aria-label="Help">' + ci("help") + '</button>' +
-      '<button type="button" class="cx-ic" data-cxfs aria-label="Full screen">' + ci("full") + '</button><span class="cx-me">KM</span></span></header>' +
-      '<div class="cx-body' + (ccNavMin ? " min" : "") + (ccAv ? " av" : "") + '"><nav class="cx-nav" aria-label="Command Center"><ul>' + nav + '</ul><button type="button" class="cx-n1 cx-col" data-cxmin title="' + (ccNavMin ? "Expand panel" : "Collapse panel") + '">' + ci("side") + '<span>Collapse panel</span></button></nav>' +
+    var th = cxTheme();
+    cx.innerHTML = '<header class="cx-top"><span class="cx-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#0066FF"/><path d="M22.5 13.6h1.8l1.3-2.1h-3.1V8.1h-3.9v5.9a6.8 6.8 0 1 0 0 6.3c0 1 .1 1.7.6 2.4.8 1.2 2.3 1.3 3.6 1.3.7 0 1.1-.1 1.8-.2v-2.8l-1 .1c-1 0-1-.7-1-1.5zM12.6 20.2a3.1 3.1 0 1 1 0-6.1 3.1 3.1 0 0 1 0 6.1z" fill="#fff"/></svg>Command Center' + (cxMod() ? '<em>' + cxMod() + '</em>' : '') + '</span>' +
+      '<span class="cx-cust">' + cxe(ccCompany()) + ' · Retail and CPG</span><span class="cx-tb"><button type="button" class="cx-avt" data-cxav aria-pressed="' + ccAv + '">' + ci("spark") + 'Aviator</button><button type="button" class="cx-ic" data-cxgo="act" aria-label="Open action queue">' + ci("bell") + '</button><button type="button" class="cx-ic" data-cxhelp aria-label="Help">' + ci("help") + '</button>' +
+      '<button type="button" class="cx-ic" data-cxtheme aria-label="' + (th === "dark" ? "Switch to light theme" : "Switch to dark theme") + '">' + ci(th === "dark" ? "sun" : "moon") + '</button><button type="button" class="cx-ic" data-cxfs aria-label="Full screen">' + ci("full") + '</button><span class="cx-me" title="' + cxe(ccCompany()) + '">' + (ccRole() === "retailer" ? "NS" : "NB") + '</span></span></header>' +
+      '<div class="cx-body' + (ccNavMin ? " min" : "") + (ccAv ? " av" : "") + '"><nav class="cx-nav" aria-label="Command Center"><ul>' + nav + '</ul><a class="cx-n1 cx-col" href="' + CC_GENOME + '" title="Open Process Genome">' + ci("gen") + '<span>Open Process Genome</span></a><button type="button" class="cx-n1 cx-col" data-cxmin title="' + (ccNavMin ? "Expand panel" : "Collapse panel") + '">' + ci("side") + '<span>Collapse panel</span></button></nav>' +
       '<main class="cx-main" id="cx-main">' + CXS[ccScr]() + '</main>' + cxAviator() + '</div>' + cxDrawer();
   }
-  function cxGo(s) { ccScr = s; ccDr = null; if (s.indexOf("im-") === 0) ccGrp.im = true; if (s.indexOf("pm-") === 0) ccGrp.pm = true; cxRender(); var m = document.getElementById("cx-main"); if (m) m.scrollTop = 0; }
+  function cxGo(s) { s = CXALIAS[s] || s; if (!CXS[s]) s = "dash"; ccScr = s; ccDr = null; var m = cxModKey(s); if (m) ccGrp[CCMOD[m][1]] = true; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-cxgo],[data-cxgrp],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxseg],[data-cxpj],[data-cxq],[data-cxfs]"); if (!b) return;
+    var b = e.target.closest("[data-cxgo],[data-cxgrp],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxseg],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme]"); if (!b) return;
     if (b.hasAttribute("data-cxgo")) cxGo(b.getAttribute("data-cxgo"));
     else if (b.hasAttribute("data-cxgrp")) { var g = b.getAttribute("data-cxgrp"); ccGrp[g] = !ccGrp[g]; if (ccNavMin) { ccNavMin = false; ccGrp[g] = true; } cxRender(); }
     else if (b.hasAttribute("data-cxmin")) { ccNavMin = !ccNavMin; cxRender(); }
@@ -321,18 +410,16 @@
     else if (b.hasAttribute("data-cxseg")) { if (b.getAttribute("data-cxseg") === "tpt") { ccTpt = b.getAttribute("data-v"); cxRender(); } else { b.parentNode.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); } }
     else if (b.hasAttribute("data-cxpj")) { ccPj = +b.getAttribute("data-cxpj"); cxRender(); }
     else if (b.hasAttribute("data-cxq")) { cxAsk(+b.getAttribute("data-cxq")); cxRender(); var l = cx.querySelector(".cx-avb"); if (l) l.scrollTop = l.scrollHeight; }
+    else if (b.hasAttribute("data-cxmod")) { ccModF = b.getAttribute("data-cxmod"); cxRender(); var f = cx.querySelector('[data-cxmod="' + ccModF + '"]'); if (f) f.focus({ preventScroll: true }); }
+    else if (b.hasAttribute("data-cxat")) { ccActTab = b.getAttribute("data-cxat"); cxRender(); }
+    else if (b.hasAttribute("data-cxtheme")) { var n = cxTheme() === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", n); try { localStorage.setItem("edi-guide-theme", n); } catch (err) {} cxRender(); }
     else if (b.hasAttribute("data-cxfs")) { if (document.fullscreenElement) document.exitFullscreen(); else if (ccEl.requestFullscreen) ccEl.requestFullscreen().catch(function () {}); }
   });
-  cx.addEventListener("change", function (e) { if (e.target.matches("[data-cxag]")) { ccFAgent = e.target.value; cxRender(); } });
-  document.addEventListener("keydown", function (e) { if (ccEl.hidden || e.key !== "Escape" || !ccDr) return; e.preventDefault(); ccDr = null; cxRender(); });
-  function ccFit() {
-    var fs = document.fullscreenElement === ccEl;
-    ccEl.classList.toggle("small", !fs && (window.innerWidth < 1024 || window.innerHeight < 560));
-    var w = fs ? window.innerWidth : ccFrame.clientWidth, hh = fs ? window.innerHeight : window.innerHeight - 81;
-    if (w) ccEl.style.setProperty("--s", Math.min(w / 1440, hh / 810));
-  }
-  function ccOpen() { ccEl.hidden = false; ccFit(); cxRender(); }
-  function ccClose() { if (ccEl.hidden) return; if (document.fullscreenElement === ccEl) { try { document.exitFullscreen(); } catch (err) {} } ccEl.hidden = true; }
-  document.getElementById("cc-back").addEventListener("click", function () { curV = "ops"; render("all"); window.scrollTo({ top: 0 }); });
-  document.addEventListener("fullscreenchange", function () { if (!ccEl.hidden) setTimeout(ccFit, 50); });
-  window.addEventListener("resize", function () { if (!ccEl.hidden) ccFit(); });
+  cx.addEventListener("change", function (e) {
+    if (e.target.matches("[data-cxsev]")) { ccSevF = e.target.value; cxRender(); }
+    else if (e.target.matches("[data-cxstf]")) { ccStF = e.target.value; cxRender(); }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key !== "Escape" || !ccDr || ccDr[0] !== "f" && ccDr[0] !== "p") return; e.preventDefault(); ccDr = null; cxRender(); });
+  function ccFit() { ccEl.classList.toggle("small", window.innerWidth < 1024 || window.innerHeight < 560); }
+  function ccStart() { ccFit(); cxRender(); }
+  window.addEventListener("resize", ccFit);

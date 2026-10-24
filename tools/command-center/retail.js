@@ -34,7 +34,7 @@
   function rtCases(id) { return RTDATA.cases.filter(function (c) { return !id || c.workflow === id; }); }
   function rtIcon(name) { return ci(CXI[name] ? name : "flow"); }
   function rtHeading(title, description, actions, eyebrow) {
-    return '<div class="rt-heading"><div><span class="rt-eyebrow">' + rte(eyebrow || "Retail and CPG") + '</span><h2>' + rte(title) + '</h2><p>' + rte(description) + '</p></div><div class="rt-head-actions">' + (actions || '') + '</div></div>';
+    return '<div class="rt-heading"><div><div class="rt-hm">' + cxTag("RT") + (eyebrow ? '<span class="rt-eyebrow">' + rte(eyebrow) + '</span>' : '') + '</div><h2>' + rte(title) + '</h2><p>' + rte(description) + '</p></div><div class="rt-head-actions">' + (actions || '') + '</div></div>';
   }
   function rtSnapshot() { return '<div class="rt-snapshot"><span>Demo snapshot · ' + rte(RTDATA.snapshot.date + " · " + RTDATA.snapshot.time) + '</span><span>Demo actions stay in this browser</span></div>'; }
   function rtMetric(label, value, note, screen) {
@@ -63,21 +63,6 @@
     }).join('') + (list.length ? '' : '<tr><td colspan="6"><div class="rt-empty">No cases match these filters. ' + rtButton("Clear filters", "data-rt-clear") + '</div></td></tr>') + '</tbody></table></div>';
   }
 
-  /* Overview and focused workspaces. */
-  CXS["rt-home"] = function () {
-    var high = RTDATA.cases.filter(function (c) { return c.severity === "critical"; });
-    var actionCount = RTDATA.cases.filter(function (c) { return rtCS(c).status === "prepared"; }).length;
-    var invoiceCases = rtCases("invoices");
-    return '<div class="rt-page">' + rtHeading("Retail overview", rtRole === "retailer" ? "Keep suppliers, commitments, and receiving plans in sync." : "Keep retail accounts, fulfillment, and cash collection in sync.", rtButton("Reset demo", "data-rt-reset") + rtNavButton("Action queue", "rt-actions", true)) +
-      '<section class="rt-banner"><div class="rt-banner-copy"><span class="rt-eyebrow">' + rte(rtProfile().company) + ' · Morning brief</span><h3>' + high.length + ' priorities need a decision this morning.</h3><p>Trace each exception from network activity to its business process, then prepare the next step with the right owner.</p></div><div class="rt-banner-meta"><span>8 connected demo cases</span><strong>One operating view</strong><span>Integration health + process performance</span></div></section>' +
-      '<div class="rt-metrics">' + rtMetric("Partner coverage", RTDATA.partners.length + " partners", "Required, optional, and missing feeds", "rt-partners") + rtMetric("Open business exceptions", rtCases().filter(function (c) { return c.source === "PM"; }).length, "Across orders, shipments, and settlement", "pm-find") + rtMetric("Settlement investigations", invoiceCases.length + " cases", "$300 price variance · $750 deductions", "rt-invoices") + rtMetric("Actions prepared", actionCount, "Owned next steps in this demo", "rt-actions") + '</div>' +
-      rtSection("Work the retail day", "Four connected workspaces. Follow the evidence into IM or PM.") + '<div class="rt-workflows">' + RTDATA.workflows.map(function (w, i) {
-        var cases = rtCases(w.id), notes = ["Participation and feed health", "Acknowledgments and changes", "Compliance and shipment evidence", "Matching and deduction backup"];
-        return '<button type="button" class="rt-workflow" data-cxgo="rt-' + w.id + '"><span class="rt-workflow-top">' + rtIcon(["users", "flow", "box", "doc"][i]) + '<span class="rt-source ' + (i ? "pm" : "im") + '">' + (i ? "PM" : "IM") + '</span></span><h3>' + rte(w.title) + '</h3><p>' + notes[i] + '</p><span class="rt-workflow-foot"><b>' + cases.length + ' exceptions</b><span>Explore ' + ci("chev") + '</span></span></button>';
-      }).join('') + '</div>' + '<section class="rt-panel">' + rtSection("Priority queue", "Evidence, responsibility, and next steps in one place.", rtNavButton("View all cases", "rt-actions")) + rtCaseTable(high, "compact") + '</section>' +
-      '<div class="rt-grid"><section class="rt-panel">' + rtSection("Integration Monitor", "Are partners participating and are the expected feeds flowing?", rtNavButton("Open IM", "im-dash")) + '<div class="rt-stat-row"><strong>2</strong><span>network and participation issues</span>' + rtChip("Metadata and feed evidence", "info") + '</div></section><section class="rt-panel">' + rtSection("Performance Monitor", "Are business documents and commitments meeting the agreed policy?", rtNavButton("Open PM", "pm-dash")) + '<div class="rt-stat-row"><strong>6</strong><span>process and document exceptions</span>' + rtChip("Policy and process evidence", "info") + '</div></section></div>' + rtSnapshot() + '</div>';
-  };
-
   function rtCoverage(p) {
     var req = p.documents.filter(function (d) { return d.required; }), ok = req.filter(function (d) { return d.status === "healthy"; });
     return { total: req.length, healthy: ok.length, percent: req.length ? Math.round(ok.length / req.length * 100) : 0 };
@@ -97,7 +82,7 @@
   CXS["rt-partners"] = function () {
     var missing = 0, unconfigured = 0, total = 0, healthy = 0;
     RTDATA.partners.forEach(function (p) { p.documents.forEach(function (d) { if (d.required) { if (p.status !== "onboarding") { total++; if (d.status === "healthy") healthy++; } if (d.status === "missing" || d.status === "late") missing++; if (d.status === "unconfigured") unconfigured++; } }); });
-    return '<div class="rt-page">' + rtHeading("Partner participation", "Know who is connected, what is expected, and where the evidence stops.", rtNavButton("IM dashboard", "im-dash"), "Integration Monitor · Retail workspace") + '<div class="rt-metrics">' + rtMetric("Production feeds active", healthy + "/" + total, "Onboarding tests are shown separately") + rtMetric("Late or missing", missing, "Expected feed window breached") + rtMetric("Configuration gaps", unconfigured, "Required feed not yet configured") + rtMetric("On your watchlist", Object.keys(rtBag().watches).filter(function (k) { return rtBag().watches[k]; }).length, "Partner follow-up in this browser") + '</div><section class="rt-panel">' + rtSection("Participation matrix", "Required routes are partner-specific. Open a partner for all documents, directions, and requirements.", rtButton("Export coverage", "data-rt-export=\"coverage\"")) + rtMatrix(RTDATA.partners) + '<p class="rt-note">Active describes document flow. A dash means the displayed document is out of scope. Other routes are included in the coverage denominator; open the partner to inspect them.</p></section><section class="rt-panel">' + rtSection("Feed and integration exceptions", "Integration Monitor findings · volumes, availability, and technical evidence") + rtToolbar(false) + rtCaseTable(rtCases("partners")) + '</section>' + rtSnapshot() + '</div>';
+    return '<div class="rt-page">' + rtHeading("Partner participation", "Know who is connected, what is expected, and where the evidence stops.", rtNavButton("Dashboard", "dash"), "Uses Integration Monitor feed data") + '<div class="rt-metrics">' + rtMetric("Production feeds active", healthy + "/" + total, "Onboarding tests are shown separately") + rtMetric("Late or missing", missing, "Expected feed window breached") + rtMetric("Configuration gaps", unconfigured, "Required feed not yet configured") + rtMetric("On your watchlist", Object.keys(rtBag().watches).filter(function (k) { return rtBag().watches[k]; }).length, "Partner follow-up in this browser") + '</div><section class="rt-panel">' + rtSection("Participation matrix", "Required routes are partner-specific. Open a partner for all documents, directions, and requirements.", rtButton("Export coverage", "data-rt-export=\"coverage\"")) + rtMatrix(RTDATA.partners) + '<p class="rt-note">Active describes document flow. A dash means the displayed document is out of scope. Other routes are included in the coverage denominator; open the partner to inspect them.</p></section><section class="rt-panel">' + rtSection("Feed and integration exceptions", "Integration Monitor findings · volumes, availability, and technical evidence") + rtToolbar(false) + rtCaseTable(rtCases("partners")) + '</section>' + rtSnapshot() + '</div>';
   };
   function rtWorkflowPage(id) {
     var w = rtWorkflow(id), cases = rtCases(id), kind = { orders: "Order commitments", shipments: "Shipment readiness", invoices: "Settlement investigation" }[id];
@@ -107,14 +92,9 @@
       shipments: ["Separate ASN conformance, business acceptance, and physical receiving evidence.", "Readiness exceptions", "2", "Packing and sequence checks", "Receipt visibility", "Incomplete", "ASN acceptance is not proof of delivery", "Decision owners", "Logistics + EDI", "Review the evidence before release"],
       invoices: ["Compare source documents, explain the variance, and assemble the evidence for a decision.", "Invoice price variance", "$300", "Difference from accepted order price", "Observed deductions", "$750", "Validity and recovery are unconfirmed", "Decision owners", rtRole === "retailer" ? "AP + compliance" : "AR + deductions", "Prepared evidence is not recovered cash"]
     }[id];
-    return '<div class="rt-page">' + rtHeading(w.title, texts[0], rtNavButton("PM dashboard", "pm-dash"), "Performance Monitor · Retail workspace") + '<p class="rt-note">Reference process sequence</p><div class="rt-process" aria-label="' + rte(kind) + '">' + stages.map(function (s, i) { return '<div class="rt-step"><i>' + (i + 1) + '</i><span>' + rte(s) + '</span></div>'; }).join('') + '</div><div class="rt-metrics">' + rtMetric(texts[1], texts[2], texts[3]) + rtMetric(texts[4], texts[5], texts[6]) + rtMetric(texts[7], texts[8], texts[9]) + rtMetric("Prepared next steps", cases.filter(function (c) { return rtCS(c).status === "prepared"; }).length + "/" + cases.length, "Review in the shared action queue", "rt-actions") + '</div><section class="rt-panel">' + rtSection("Exceptions to investigate", "Open a case to inspect the policy, document chain, and recommended next step.", rtButton("Export cases", 'data-rt-export="' + id + '"')) + rtToolbar(false) + rtCaseTable(cases) + '</section><div class="rt-grid">' + cases.map(function (c) { var x = rtContext(c); return '<section class="rt-panel"><div class="rt-section-head"><h3>' + rte(c.reference) + '</h3>' + rtSource(c) + '</div><p>' + rte(x.impact) + '</p><div class="rt-summary-list"><div><span>Policy owner</span><b>' + rte(rtCS(c).owner) + '</b></div><div><span>Evidence</span><b>' + c.documents.length + ' documents / events</b></div></div>' + rtButton("Investigate " + c.reference, 'data-rt-case="' + c.id + '"', true) + '</section>'; }).join('') + '</div>' + rtSnapshot() + '</div>';
+    return '<div class="rt-page">' + rtHeading(w.title, texts[0], rtNavButton("Dashboard", "dash"), "Uses Performance Monitor document data") + '<p class="rt-note">Reference process sequence</p><div class="rt-process" aria-label="' + rte(kind) + '">' + stages.map(function (s, i) { return '<div class="rt-step"><i>' + (i + 1) + '</i><span>' + rte(s) + '</span></div>'; }).join('') + '</div><div class="rt-metrics">' + rtMetric(texts[1], texts[2], texts[3]) + rtMetric(texts[4], texts[5], texts[6]) + rtMetric(texts[7], texts[8], texts[9]) + rtMetric("Prepared next steps", cases.filter(function (c) { return rtCS(c).status === "prepared"; }).length + "/" + cases.length, "Review in the action queue", "act") + '</div><section class="rt-panel">' + rtSection("Exceptions to investigate", "Open a case to inspect the policy, document chain, and recommended next step.", rtButton("Export cases", 'data-rt-export="' + id + '"')) + rtToolbar(false) + rtCaseTable(cases) + '</section><div class="rt-grid">' + cases.map(function (c) { var x = rtContext(c); return '<section class="rt-panel"><div class="rt-section-head"><h3>' + rte(c.reference) + '</h3>' + rtSource(c) + '</div><p>' + rte(x.impact) + '</p><div class="rt-summary-list"><div><span>Policy owner</span><b>' + rte(rtCS(c).owner) + '</b></div><div><span>Evidence</span><b>' + c.documents.length + ' documents / events</b></div></div>' + rtButton("Investigate " + c.reference, 'data-rt-case="' + c.id + '"', true) + '</section>'; }).join('') + '</div>' + rtSnapshot() + '</div>';
   }
   ["orders", "shipments", "invoices"].forEach(function (id) { CXS["rt-" + id] = function () { return rtWorkflowPage(id); }; });
-  CXS["rt-actions"] = function () {
-    var prepared = RTDATA.cases.filter(function (c) { return rtCS(c).status !== "open"; });
-    return '<div class="rt-page">' + rtHeading("Action queue", "Carry the evidence and its owner into the next step.", rtButton("Export action log", 'data-rt-export="actions"')) + '<div class="rt-metrics">' + rtMetric("Need review", RTDATA.cases.length - prepared.length, "Awaiting an owned next step") + rtMetric("Prepared or assigned", prepared.length, "Saved within this demo") + rtMetric("Evidence gaps", RTDATA.cases.filter(function (c) { return c.evidenceGap; }).length, "Visible until new evidence is available") + rtMetric("External actions", "0", "No messages or documents have been sent") + '</div><section class="rt-panel">' + rtSection("All retail cases", "Preparing a task does not resolve the underlying business exception.") + rtToolbar(true) + rtCaseTable(RTDATA.cases) + '</section>' + (prepared.length ? '<section class="rt-panel">' + rtSection("Owned work", "Assignments and prepared handoffs retain their evidence and decision status.") + prepared.map(function (c) { var s = rtCS(c); return '<article class="rt-action-card"><div>' + rtSource(c) + '<h3>' + rte(s.status === 'prepared' ? c.action.completedLabel : 'Assigned for investigation') + '</h3><p>' + rte(s.status === 'prepared' ? c.action.completionNote : 'Owner and investigation note saved. The next-step packet has not been prepared.') + '</p><small>' + rte(s.owner) + ' · ' + rte(rtContext(c).partner) + ' · ' + rte(c.reference) + '</small></div>' + rtButton("Review task", 'data-rt-case="' + c.id + '" data-rt-open-tab="action"') + '</article>'; }).join('') + '</section>' : '<div class="rt-callout">Open an exception and prepare its next step. The owned task and evidence will appear here.</div>') + rtSnapshot() + '</div>';
-  };
-
   /* Case evidence is shared by both monitors without changing their responsibilities. */
   function rtKV(rows) { return '<dl class="rt-kv">' + rows.map(function (r) { return '<div><dt>' + rte(r[0]) + '</dt><dd>' + rte(r[1]) + '</dd></div>'; }).join('') + '</dl>'; }
   function rtTimeline(c) {
@@ -151,7 +131,7 @@
   }
   function rtCaseDialog(c) {
     var s = rtCS(c), tabs = '<div class="rt-dialog-tabs" role="tablist" aria-label="Case detail">' + [["overview", "Overview"], ["evidence", "Evidence"], ["activity", "Activity"], ["action", "Next action"]].map(function (t) { return '<button type="button" role="tab" class="' + (rtCaseTab === t[0] ? 'on' : '') + '" aria-selected="' + (rtCaseTab === t[0]) + '" data-rt-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
-    return rtDialog(c.title, rtContext(c).partner + " · " + c.reference, '<div class="rt-detail-status">' + rtSource(c) + rtChip(rtLabel(c.severity), c.severity) + rtStatus(c) + '<span>' + rte(c.agent) + ' · ' + rte(s.owner) + '</span></div>' + rtCaseBody(c), '<span class="rt-note">' + (s.status === "prepared" ? 'Task prepared; the business exception remains open.' : 'Review evidence before preparing the next step.') + '</span>' + rtButton("Assign / add note", 'data-rt-tab="action"') + rtButton(s.status !== "prepared" ? c.action.label : "Review prepared action", s.status !== "prepared" ? 'data-rt-prepare="' + c.id + '"' : 'data-rt-tab="action"', true), tabs);
+    return rtDialog(c.title, rtContext(c).partner + " · " + c.reference, '<div class="rt-detail-status">' + cxTag("RT") + rtSource(c) + rtChip(rtLabel(c.severity), c.severity) + rtStatus(c) + '<span>' + rte(c.agent) + ' · ' + rte(s.owner) + '</span></div>' + rtCaseBody(c), '<span class="rt-note">' + (s.status === "prepared" ? 'Task prepared; the business exception remains open.' : 'Review evidence before preparing the next step.') + '</span>' + rtButton("Assign / add note", 'data-rt-tab="action"') + rtButton(s.status !== "prepared" ? c.action.label : "Review prepared action", s.status !== "prepared" ? 'data-rt-prepare="' + c.id + '"' : 'data-rt-tab="action"', true), tabs);
   }
   function rtPartnerDialog(p) {
     var cv = rtCoverage(p), cases = RTDATA.cases.filter(function (c) { return rtContext(c).partner === p.names[rtRole]; });
@@ -159,7 +139,7 @@
   }
   function rtProcessDialog(index) {
     var p = PROCESSES.retail[index], cases = RTDATA.cases.filter(function (c) { return c.process === index; });
-    return rtDialog(p.n, "Process Genome · Retail and CPG", '<p>' + rte(p.outcome) + '</p>' + rtKV([["Business owner", p.owner || "Process owner"], ["Connected exceptions", cases.length], ["Reference", "Process Genome definition"]]) + '<ol class="rt-timeline">' + p.steps.map(function (s, i) { return '<li class="rt-event"><time>Step ' + (i + 1) + '</time><div><b>' + rte(s[0]) + '</b><p>' + rte(s[1]) + '</p></div></li>'; }).join('') + '</ol>' + (cases.length ? rtCaseTable(cases, "compact") : ''), rtButton("Close", "data-rt-close") + '<a class="rt-button primary" href="#retail/map">Open Process Genome</a>');
+    return rtDialog(p.n, "Process Genome · Retail and CPG", '<p>' + rte(p.outcome) + '</p>' + rtKV([["Business owner", p.owner || "Process owner"], ["Connected exceptions", cases.length], ["Reference", "Process Genome definition"]]) + '<ol class="rt-timeline">' + p.steps.map(function (s, i) { return '<li class="rt-event"><time>Step ' + (i + 1) + '</time><div><b>' + rte(s[0]) + '</b><p>' + rte(s[1]) + '</p></div></li>'; }).join('') + '</ol>' + (cases.length ? rtCaseTable(cases, "compact") : ''), rtButton("Close", "data-rt-close") + '<a class="rt-button primary" href="' + CC_GENOME + '">Open Process Genome</a>');
   }
 
   /* Partner policies are inspectable and testable; activation is demo-only. */
@@ -183,77 +163,57 @@
     return rtDialog(rule.name, "Retail policy · " + rule.agent + (saved && saved.active ? " · Active in demo" : " · Template"), body, '<span class="rt-note">Activation records a demo configuration for this perspective.</span>' + rtButton("Close", "data-rt-close") + '<button type="button" class="rt-button primary" data-rt-activate-rule="' + rule.id + '"' + (!rtRuleDraft.tested ? ' disabled' : '') + '>Activate in demo</button>');
   }
   CXS["rt-rules"] = function () {
-    return '<div class="rt-page">' + rtHeading("Retail policy templates", "Inspect the partner scope, required evidence, and policy test before activation.", rtNavButton("All PM rules", "pm-rules")) + '<div class="rt-grid">' + RTDATA.rules.map(function (r) { var saved = rtBag().rules[r.id]; return '<section class="rt-panel rt-rule"><div class="rt-section-head"><span class="rt-source ' + (r.agent === "Ivy" ? "im" : "pm") + '">' + (r.agent === "Ivy" ? "IM" : "PM") + ' · ' + rte(r.agent) + '</span>' + rtChip(saved && saved.active ? "Active in demo" : "Template", saved && saved.active ? "info" : "neutral") + '</div><h3>' + rte(r.name) + '</h3><p>' + rte(r.condition) + '</p><p class="rt-note">' + rte(r.scope) + '</p>' + rtButton("Inspect and test", 'data-rt-rule="' + r.id + '"') + '</section>'; }).join('') + '</div>' + rtSnapshot() + '</div>';
+    return '<div class="rt-page">' + rtHeading("Retail policy templates", "Inspect the partner scope, required evidence, and policy test before activation.", rtNavButton("All rules", "pm-rules"), "Templates for Performance Monitor agents") + '<div class="rt-grid">' + RTDATA.rules.map(function (r) { var saved = rtBag().rules[r.id]; return '<section class="rt-panel rt-rule"><div class="rt-section-head"><span class="rt-source ' + (r.agent === "Ivy" ? "im" : "pm") + '">' + (r.agent === "Ivy" ? "IM" : "PM") + ' · ' + rte(r.agent) + '</span>' + rtChip(saved && saved.active ? "Active in demo" : "Template", saved && saved.active ? "info" : "neutral") + '</div><h3>' + rte(r.name) + '</h3><p>' + rte(r.condition) + '</p><p class="rt-note">' + rte(r.scope) + '</p>' + rtButton("Inspect and test", 'data-rt-rule="' + r.id + '"') + '</section>'; }).join('') + '</div>' + rtSnapshot() + '</div>';
   };
 
-  /* Retain the current monitor screens and add restrained industry entry points. */
-  var rtBaseScreens = {};
-  ["im-dash", "im-tp", "im-com", "im-proj", "im-map", "im-cfg", "pm-dash", "pm-proc", "pm-find", "pm-act", "pm-agents", "pm-rules", "an"].forEach(function (key) {
-    rtBaseScreens[key] = CXS[key];
-    CXS[key] = function () {
-      var source = key.indexOf("im-") === 0 ? "IM" : "PM";
-      var cases = RTDATA.cases.filter(function (c) { return c.source === source; });
-      var head = '<section class="rt-core-context"><div><span class="rt-eyebrow">Retail and CPG · ' + rte(rtProfile().company) + '</span><strong>' + (source === "IM" ? 'Partner participation and feed health' : 'Orders, ASN readiness, and settlement') + '</strong><p>' + cases.length + ' industry cases connect this monitor to the Retail overview.</p></div><div class="rt-head-actions">' + rtNavButton("Retail overview", "rt-home") + rtNavButton(source === "IM" ? "Open participation" : "Open retail cases", source === "IM" ? "rt-partners" : "rt-actions", true) + '</div></section>';
-      if (key === "pm-find" || key === "pm-dash" || key === "pm-act" || key === "im-proj") head += '<section class="rt-panel">' + rtSection("Retail cases", "Current demo perspective · evidence and owned next steps", key === "pm-act" ? rtNavButton("Shared action queue", "rt-actions") : '') + rtCaseTable(key === "pm-dash" ? cases.slice(0, 3) : cases, "compact") + '</section>';
-      if (key === "pm-rules" || key === "pm-agents") head += '<div class="rt-callout"><b>Retail policy templates</b><p>Partner scope, evidence gates, and a testable example for the existing agent model.</p>' + rtNavButton("Explore retail policies", "rt-rules", true) + '</div>';
-      return head + '<div class="rt-reference-label">Core capability sample · Nuvori Beauty (CPG supplier) · Illustrative reference data</div><div class="rt-core-sample">' + rtBaseScreens[key]() + '</div>';
-    };
+  /* The Retail add-on: its workspaces in the navigation, its cases in the shared findings and action queue, its components on the dashboard. */
+  CXNAV.push(["rt", "Retail add-on", "flow", [["rt-partners", "Partner participation", "users"], ["rt-orders", "Orders and commitments", "doc"], ["rt-shipments", "ASNs and readiness", "box"], ["rt-invoices", "Invoices and deductions", "chart"], ["rt-rules", "Retail policies", "rules"]]]);
+  function rtAt(c) { var t = String((c.timeline[c.timeline.length - 1] || {}).time || ""), m = /(\d\d:\d\d)$/.exec(t); return m && (t === m[1] || t.indexOf(RTDATA.snapshot.date.slice(8) + " Oct") === 0) ? "Today, " + m[1] : t; }
+  CXITEMS.push(function () {
+    return RTDATA.cases.map(function (c) {
+      var x = rtContext(c), s = rtCS(c), rule = rtRule(c.ruleId), w = rtWorkflow(c.workflow), at = rtAt(c);
+      return { key: "rt:" + c.id, mod: "RT", title: c.title, partner: x.partner, check: rule ? rule.name : c.reference, proc: c.process, sev: c.severity === "critical" ? "h" : "m",
+        agent: c.agent + " · " + w.title, owner: s.owner, status: ({ open: "New", assigned: "Assigned", prepared: "Action prepared" })[s.status] || "New", done: false, at: at, ord: cxOrd(at.replace(/^Today, /, "")), val: c.amount || 0,
+        open: 'data-rt-case="' + rte(c.id) + '"', act: x.nextAction, appr: s.owner, actDone: s.status === "prepared", actState: c.action.completedLabel + ". " + c.action.completionNote,
+        actBtn: '<button type="button" class="cx-btn p" data-rt-prepare="' + rte(c.id) + '">' + rte(c.action.label) + '</button>' };
+    });
   });
-
-  /* Contextual demo answers retain the original Aviator sample on core screens. */
-  var rtBaseAviator = cxAviator, rtAvLog = [];
-  var RTQUESTIONS = ["What should I work on first?", "What does the order-feed failure prove?", "Which evidence is still missing?"];
-  cxAviator = function () {
-    if (ccScr.indexOf("rt-") !== 0) return rtBaseAviator().replace('<p class="cx-hi">', '<p class="rt-note">Core capability sample · Nuvori Beauty · Scripted answers</p><p class="cx-hi">');
-    if (!ccAv) return '';
-    return '<aside class="cx-av"><header>' + ci("spark") + '<b>Aviator</b><button type="button" class="cx-ic" data-cxav aria-label="Close Aviator">' + ci("x") + '</button></header><div class="cx-avb"><p class="cx-hi">Explore the retail evidence for ' + rte(rtProfile().company) + '.</p><span class="rt-chip info">Scripted demo guide</span><ul class="cx-avl">' + rtAvLog.map(function (m) { return '<li class="' + m.type + '">' + m.html + '</li>'; }).join('') + '</ul><ul class="cx-avq">' + RTQUESTIONS.map(function (q, i) { return '<li><button type="button" data-rt-ask="' + i + '">' + rte(q) + '</button></li>'; }).join('') + '</ul></div><div class="cx-ft"><small>Answers use the illustrative case evidence. No live AI service is connected.</small></div></aside>';
-  };
-  function rtAsk(index) {
-    var cases, answer;
-    if (index === 0) {
-      cases = RTDATA.cases.filter(function (c) { return c.severity === "critical"; });
-      answer = cases.length + ' high-priority cases need review. Start with the impaired order channel, the release quantity mismatch, and the carton-identifier exception. Preparing an action keeps the underlying exception open.';
-    } else if (index === 1) {
-      cases = [rtCase("rt-partner-signature")];
-      answer = cases[0].explanation + ' ' + cases[0].evidenceGap;
-    } else {
-      cases = RTDATA.cases.filter(function (c) { return c.workflow === "shipments" || c.workflow === "invoices"; });
-      answer = 'Shipping and settlement cases need receiving, approval, or price-authorization evidence. An ASN or functional acknowledgment alone cannot establish physical receipt or deduction validity.';
-    }
-    rtAvLog.push({ type: "q", html: rte(RTQUESTIONS[index]) });
-    rtAvLog.push({ type: "a", html: rte(answer) + '<span class="cx-avr">' + cases.map(function (c) { return '<button type="button" class="cx-lk" data-rt-case="' + c.id + '">' + rte(c.title) + '</button>'; }).join('') + '</span>' });
-    cxRender();
-  }
-
-  /* Extend the shared shell. Both monitors remain the original named applications. */
-  CXNAV.unshift(["rt", "Retail and CPG", "flow", [["rt-home", "Retail overview", "dash"], ["rt-partners", "Partner participation", "users"], ["rt-orders", "Orders and commitments", "doc"], ["rt-shipments", "ASNs and readiness", "box"], ["rt-invoices", "Invoices and deductions", "chart"], ["rt-actions", "Action queue", "check"]]]);
-  ccScr = "rt-home"; ccGrp.rt = true; ccGrp.im = false; ccGrp.pm = false;
-  var rtBaseMod = cxMod, rtBaseRender = cxRender, rtBaseDrawer = cxDrawer, rtBaseGo = cxGo;
-  cxMod = function () { return ccScr.indexOf("rt-") === 0 ? "Retail and CPG" : rtBaseMod(); };
-  cxGo = function (screen) { if (screen.indexOf("rt-") === 0) ccGrp.rt = true; rtBaseGo(screen); };
+  CXDASH.push(
+    { o: 30, mod: "RT", w: 2, t: "Retail workflows", h: function () {
+      return '<ul class="rt-wl">' + RTDATA.workflows.map(function (w) {
+        var cases = rtCases(w.id), hi = cases.filter(function (c) { return c.severity === "critical"; }).length;
+        return '<li><button type="button" data-cxgo="rt-' + w.id + '">' + rtIcon(["users", "flow", "box", "doc"][RTDATA.workflows.indexOf(w)]) + '<span><b>' + rte(w.title) + '</b><small>' + rte(w.subtitle) + '</small></span><em>' + cases.length + '</em>' + (hi ? '<i class="rt-hi">' + hi + ' high</i>' : '') + '</button></li>'; }).join('') + '</ul>'; },
+      f: function () { return '<span class="cx-note">Open cases by workflow</span>'; } },
+    { o: 90, mod: "RT", w: 2, t: "Partner participation", h: function () {
+      var total = 0, healthy = 0, late = 0, gaps = 0;
+      RTDATA.partners.forEach(function (p) { p.documents.forEach(function (d) { if (!d.required) return; if (p.status !== "onboarding") { total++; if (d.status === "healthy") healthy++; } if (d.status === "missing" || d.status === "late") late++; if (d.status === "unconfigured") gaps++; }); });
+      return '<div class="cx-k2">' + cxKpi("Production feeds active", healthy + "/" + total, "Required routes") + cxKpi("Late or missing", late, "Feed window breached") + cxKpi("Configuration gaps", gaps, "Required route not set up") + cxKpi(rtProfile().partnerLabel, RTDATA.partners.length, "In this demo") + '</div>'; },
+      f: function () { return cxGoBtn("Participation matrix", "rt-partners"); } }
+  );
+  CXACTX.push(function () { return '<span class="rt-head-actions">' + rtButton("Export retail cases", 'data-rt-export="actions"') + rtButton("Reset demo", "data-rt-reset") + '</span>'; });
+  CXQ.push({ q: function () { return "What does the order-feed failure prove?"; }, a: function () { var c = rtCase("rt-partner-signature"); return [c.explanation + " " + c.evidenceGap, ccItems().filter(function (i) { return i.key === "rt:" + c.id; })]; } },
+    { q: function () { return "Which evidence is still missing?"; }, a: function () {
+      return ["Shipping and settlement cases need receiving, approval, or price-authorization evidence. An ASN or functional acknowledgment alone cannot establish physical receipt or deduction validity.",
+        ccItems().filter(function (i) { return /^rt:rt-(shipment|invoice)/.test(i.key); })]; } });
+  var rtBaseRender = cxRender, rtBaseDrawer = cxDrawer;
   cxDrawer = function () {
-    if (!ccDr || ccDr[0].indexOf("rt-") !== 0) return rtBaseDrawer().replace('<div class="cx-db">', '<div class="cx-db"><p class="rt-reference-label">Nuvori Beauty reference sample · approvals change this demo only</p>');
+    if (!ccDr || ccDr[0].indexOf("rt-") !== 0) return rtBaseDrawer();
     if (ccDr[0] === "rt-case") return rtCaseDialog(rtCase(ccDr[1]));
     if (ccDr[0] === "rt-partner") return rtPartnerDialog(rtPartner(ccDr[1]));
     if (ccDr[0] === "rt-rule") return rtRuleDialog(rtRule(ccDr[1]));
     if (ccDr[0] === "rt-process") return rtProcessDialog(Number(ccDr[1]));
     if (ccDr[0] === "rt-reset") return rtDialog("Reset this demo perspective?", rtProfile().company, '<p>This clears locally prepared actions, notes, watchlist entries, and activated demo policies for ' + rte(rtProfile().label) + '. You can immediately replay every scenario.</p>', rtButton("Keep exploring", "data-rt-close") + rtButton("Reset perspective", "data-rt-confirm-reset", true), '', true);
-    if (ccDr[0] === "rt-help") return rtDialog("Explore Command Center for Retail and CPG", "Interactive prototype", '<p>Start with the Retail overview, switch perspective, and open a case in any workspace.</p><ol><li>Inspect the business issue and its partner policy.</li><li>Follow the document chain and identify missing evidence.</li><li>Assign an owner, add a note, and prepare the next action.</li><li>Review the shared action queue or export an evidence packet.</li></ol><p>The existing Integration Monitor and Performance Monitor screens remain available. Their reference sample is labeled separately from the new perspective-specific cases.</p><div class="rt-callout">All partners, records, metrics, and action outcomes are illustrative. No live network or operational application is connected.</div>', rtButton("Start exploring", "data-rt-close", true), '', true);
+    if (ccDr[0] === "rt-help") return rtDialog("Command Center for Retail and CPG", "Clickable prototype", '<p>One dashboard, one findings list and one action queue across three modules. Each dashboard component and finding names its module.</p><dl class="rt-kv"><div><dt>Integration Monitor</dt><dd>Network activity, partner connections and volume anomalies</dd></div><div><dt>Performance Monitor</dt><dd>Business process rules, agents and findings</dd></div><div><dt>Retail add-on</dt><dd>Partner participation, order commitments, shipment readiness and settlement</dd></div></dl><ol><li>Switch between the retailer and CPG supplier perspectives.</li><li>Open a finding to inspect its evidence, rule and business process.</li><li>Approve or prepare the recommended action in the action queue.</li></ol><div class="rt-callout">All partners, records, metrics, and action outcomes are illustrative. No live network or operational application is connected.</div>', rtButton("Start exploring", "data-rt-close", true), '', true);
     return '';
   };
   cxRender = function () {
     var oldMain = cx.querySelector(".cx-main"), scroll = oldMain ? oldMain.scrollTop : 0;
     rtBaseRender();
     cx.classList.add("rt-app");
-    var customer = cx.querySelector(".cx-cust");
-    if (customer) customer.textContent = rtProfile().company;
     var toolbar = cx.querySelector(".cx-tb");
     if (toolbar) toolbar.insertAdjacentHTML("beforebegin", '<div class="rt-role" role="group" aria-label="Demo perspective"><span>Demo perspective</span><button type="button" class="' + (rtRole === "retailer" ? 'on' : '') + '" data-rt-role="retailer" aria-pressed="' + (rtRole === "retailer") + '">Retailer</button><button type="button" class="' + (rtRole === "supplier" ? 'on' : '') + '" data-rt-role="supplier" aria-pressed="' + (rtRole === "supplier") + '">CPG supplier</button></div>');
-    var help = cx.querySelector('[aria-label="Help"]'), notifications = cx.querySelector('[aria-label="Notifications"]');
-    if (help) help.setAttribute("data-rt-help", "");
-    if (notifications) { notifications.setAttribute("data-cxgo", "rt-actions"); notifications.setAttribute("aria-label", "Open action queue"); }
-    var avatar = cx.querySelector(".cx-me"); if (avatar) { avatar.textContent = rtRole === "retailer" ? "NS" : "NB"; avatar.title = rtProfile().company; }
-    if (ccScr === "pm-rules") { var create = cx.querySelector(".rt-core-sample .cx-ph .cx-btn"); if (create) create.setAttribute("data-cxgo", "rt-rules"); }
+    var help = cx.querySelector("[data-cxhelp]"); if (help) help.setAttribute("data-rt-help", "");
+    if (ccScr === "pm-rules") { var create = cx.querySelector(".cx-ph .cx-btn"); if (create) create.setAttribute("data-cxgo", "rt-rules"); }
     var main = cx.querySelector(".cx-main"); if (main) main.scrollTop = scroll;
     if (rtToastText) cx.insertAdjacentHTML("beforeend", '<div class="rt-toast" role="status">' + ci("ok") + '<span>' + rte(rtToastText) + '</span></div>');
     var dialog = cx.querySelector(".rt-dialog");
@@ -321,11 +281,10 @@
   }
 
   cx.addEventListener("click", function (event) {
-    var b = event.target.closest('[data-rt-role],[data-rt-case],[data-rt-partner],[data-rt-rule],[data-rt-process],[data-rt-tab],[data-rt-doc],[data-rt-watch],[data-rt-close],[data-rt-prepare],[data-rt-save-case],[data-rt-reset],[data-rt-confirm-reset],[data-rt-test-rule],[data-rt-activate-rule],[data-rt-export],[data-rt-export-case],[data-rt-clear],[data-rt-help],[data-rt-ask]');
+    var b = event.target.closest('[data-rt-role],[data-rt-case],[data-rt-partner],[data-rt-rule],[data-rt-process],[data-rt-tab],[data-rt-doc],[data-rt-watch],[data-rt-close],[data-rt-prepare],[data-rt-save-case],[data-rt-reset],[data-rt-confirm-reset],[data-rt-test-rule],[data-rt-activate-rule],[data-rt-export],[data-rt-export-case],[data-rt-clear],[data-rt-help]');
     if (!b) { if (event.target.hasAttribute && event.target.hasAttribute("data-rt-backdrop")) rtClose(); return; }
     var id;
-    if (b.hasAttribute("data-rt-role")) { rtRole = b.getAttribute("data-rt-role"); rtSave(); ccDr = null; rtFilters = {}; ccAvLog = []; rtAvLog = []; rtModalStack = []; rtToast("Demo perspective: " + rtProfile().label); cxRender(); return; }
-    if (b.hasAttribute("data-rt-ask")) return rtAsk(Number(b.getAttribute("data-rt-ask")));
+    if (b.hasAttribute("data-rt-role")) { rtRole = b.getAttribute("data-rt-role"); rtSave(); ccDr = null; rtFilters = {}; ccAvLog = []; rtModalStack = []; rtToast("Demo perspective: " + rtProfile().label); cxRender(); return; }
     if (b.hasAttribute("data-rt-case")) return rtOpen("rt-case", b.getAttribute("data-rt-case"), b.getAttribute("data-rt-open-tab"));
     if (b.hasAttribute("data-rt-partner")) return rtOpen("rt-partner", b.getAttribute("data-rt-partner"));
     if (b.hasAttribute("data-rt-rule")) return rtOpen("rt-rule", b.getAttribute("data-rt-rule"));

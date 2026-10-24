@@ -33,7 +33,7 @@
       (ex ? '<span>' + pmBars("h", true) + '</span><span>' + pmBars("m", true) + '</span><span>' + pmBars("l", true) + '</span>'
         : '<span>' + pmBars("h") + '<span class="obw">Critical</span></span><span>' + pmBars("m") + '<span class="obw">Warning</span></span><span>' + pmBars("l") + '<span class="obw">Monitored</span></span>') + '</div>' +
       '<p class="pp-key pv-key">' + (ex ? "Numbers on tiles mark agent decision points." : "<b>IM</b> Integration Monitor · <b>PM</b> Performance Monitor rule") + '</p>' +
-      '<button type="button" class="pm-btn pm-more" data-gv="cc" data-gk="retail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>Open Command Center</button></div>';
+      '<a class="pm-btn pm-more" href="command-center/" target="_blank" rel="noopener" aria-label="Try the Command Center clickable prototype (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>Try the Command Center prototype</a></div>';
     if (ex) {
       h += '<h4>Performance Monitor agents</h4><ul class="pp-list pv-list">' + PMOV.extend.dp.map(function (d, i) {
         var a = P.ag[i] || ["", ""];

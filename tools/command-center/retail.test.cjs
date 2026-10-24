@@ -8,18 +8,22 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const CORE_SCREENS = ['im-dash', 'im-tp', 'im-com', 'im-proj', 'im-map', 'im-cfg',
-  'pm-dash', 'pm-proc', 'pm-find', 'pm-act', 'pm-agents', 'pm-rules', 'an'];
-const RETAIL_SCREENS = ['rt-home', 'rt-partners', 'rt-orders', 'rt-shipments',
-  'rt-invoices', 'rt-actions', 'rt-rules'];
+const CORE_SCREENS = ['dash', 'find', 'act', 'im-tp', 'im-com', 'im-proj', 'im-map', 'im-cfg',
+  'pm-proc', 'pm-agents', 'pm-rules', 'an'];
+const RETAIL_SCREENS = ['rt-partners', 'rt-orders', 'rt-shipments', 'rt-invoices', 'rt-rules'];
 const source = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
-const dataSource = source('retail-data.js');
-const appSource = source('retail.js');
 const textOf = html => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const PROCESS_STUB = Array.from({ length: 11 }, (_, i) => ({
+  n: `Reference process ${i}`, owner: 'Process owner', outcome: 'Reference outcome', measures: ['Measure A', 'Measure B', 'Measure C'],
+  steps: Array.from({ length: 6 }, (_, k) => [`Reference step ${k}`, '850, 856'])
+}));
 
+// Loads the four console modules in page order against a minimal DOM.
 function loadApp(storage = new Map()) {
   const listeners = {}, controls = new Map();
+  const el = () => ({ addEventListener() {}, classList: { add() {}, toggle() {} }, setAttribute() {}, getAttribute() { return null; } });
   const cx = {
+    innerHTML: '',
     addEventListener(type, handler) { (listeners[type] ||= []).push(handler); },
     querySelector(selector) { return controls.get(selector) || null; },
     querySelectorAll() { return []; },
@@ -27,26 +31,23 @@ function loadApp(storage = new Map()) {
     insertAdjacentHTML() {}
   };
   const app = {
-    CXI: {}, CXS: Object.fromEntries(CORE_SCREENS.map(key =>
-      [key, () => `<div data-core-screen="${key}">Retained core content</div>`])),
-    CXNAV: [['im', 'Integration monitor'], ['pm', 'Performance monitor']],
-    ccScr: 'pm-dash', ccGrp: {}, ccAv: false, ccAvLog: [], ccDr: null,
-    cx, ci: () => '', cxMod: () => '', cxRender() {}, cxDrawer: () => '',
-    cxGo() {}, cxAviator: () => '', cxAsk() {},
-    document: { activeElement: null },
+    document: {
+      activeElement: null, documentElement: el(), fullscreenElement: null,
+      getElementById(id) { return id === 'cx' ? cx : el(); }, addEventListener() {}
+    },
+    window: { addEventListener() {}, innerWidth: 1440, innerHeight: 900 },
     localStorage: {
       getItem(key) { return storage.get(key) || null; },
       setItem(key, value) { storage.set(key, value); }
     },
     setTimeout() { return 1; }, clearTimeout() {},
-    PROCESSES: { retail: Array.from({ length: 9 }, (_, i) => ({
-      n: `Reference process ${i}`, owner: 'Process owner', outcome: 'Reference outcome',
-      steps: [['Reference step', 'Reference document']]
-    })) }
+    esc: s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
+    PROCESSES: { retail: PROCESS_STUB },
+    GENOME: { retail: { short: PROCESS_STUB.map((p, i) => `Process ${i}`) } }
   };
+  app.window.document = app.document;
   vm.createContext(app);
-  vm.runInContext(dataSource, app, { filename: 'retail-data.js' });
-  vm.runInContext(appSource, app, { filename: 'retail.js' });
+  vm.runInContext(['data.js', 'cc.js', 'retail-data.js', 'retail.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
 
   function click(attributes) {
     const target = {
@@ -136,14 +137,15 @@ test('assignment preserves Prepare and does not claim a prepared handoff', () =>
   app.rtSaveCase(c);
   assert.equal(app.rtCS(c).status, 'assigned');
   app.rtCaseTab = 'action';
-  const detail = app.rtCaseDialog(c), queue = screen('rt-actions');
+  const detail = app.rtCaseDialog(c), queue = screen('act');
   assert.ok(detail.includes(`data-rt-prepare="${c.id}"`));
-  assert.ok(queue.includes('Assigned for investigation'));
+  assert.ok(queue.includes(`data-rt-prepare="${c.id}"`), 'an assigned case still awaits its prepared action');
+  assert.ok(textOf(screen('find')).includes('Assigned'));
   for (const html of [detail, queue]) {
     assert.ok(!html.includes(c.action.completedLabel));
     assert.ok(!html.includes(c.action.completionNote));
   }
-  assert.match(textOf(screen('rt-home')), /Actions prepared 0/);
+  assert.match(textOf(queue), /Completed 0/);
 });
 
 test('preparing records a distinct local action while the business exception stays open', () => {
@@ -152,31 +154,33 @@ test('preparing records a distinct local action while the business exception sta
   click({ 'data-rt-prepare': c.id });
   assert.equal(app.rtCS(c).status, 'prepared');
   assert.equal(app.rtCS(c).note, 'Prepare the evidence for review.');
-  const detail = app.rtCaseDialog(c), queue = screen('rt-actions');
+  const detail = app.rtCaseDialog(c);
   assert.ok(!detail.includes(`data-rt-prepare="${c.id}"`));
   assert.ok(detail.includes('business exception remains open'));
-  assert.ok(queue.includes(c.action.completedLabel));
-  assert.ok(queue.includes(c.action.completionNote));
-  assert.match(textOf(queue), /External actions 0/);
-  assert.match(textOf(screen('rt-home')), /Actions prepared 1/);
+  app.ccActTab = 'done';
+  const done = screen('act');
+  assert.ok(done.includes(c.action.completedLabel));
+  assert.ok(done.includes(c.action.completionNote));
+  assert.match(textOf(done), /Completed 1/);
+  app.ccActTab = 'open';
+  assert.ok(textOf(screen('find')).includes('Action prepared'), 'the finding stays open after preparation');
 });
 
 test('financial screens keep price variance and deductions separate in both perspectives', () => {
   const { click, screen } = loadApp();
   for (const role of ['retailer', 'supplier']) {
     click({ 'data-rt-role': role });
-    const home = textOf(screen('rt-home')), invoices = textOf(screen('rt-invoices'));
-    assert.match(home, /\$300 price variance.*\$750 deductions/);
+    const invoices = textOf(screen('rt-invoices'));
     assert.match(invoices, /Invoice price variance \$300/);
     assert.match(invoices, /Observed deductions \$750/);
     assert.match(invoices, /Validity and recovery are unconfirmed/);
-    assert.doesNotMatch(home + invoices, /\$(?:1\.1k|1\.05k|1,?050)\b/i);
+    assert.doesNotMatch(invoices, /\$(?:1\.1k|1\.05k|1,?050)\b/i);
   }
 });
 
 test('case search finds secondary document IDs and combines other filters', () => {
   const { app } = loadApp();
-  app.ccScr = 'rt-actions';
+  app.ccScr = 'rt-orders';
   for (const [query, id] of [
     ['FA-10482', 'rt-shipment-labels'], ['AA-10482', 'rt-shipment-labels'],
     ['CFG-855-021', 'rt-partner-coverage'], ['MDN-1024-0912', 'rt-partner-signature']
@@ -215,11 +219,47 @@ test('every retail screen and case tab renders for both perspectives', () => {
   }
 });
 
-test('industry additions retain each existing monitor and analytics screen', () => {
-  const { screen } = loadApp();
-  for (const key of CORE_SCREENS) {
-    const html = screen(key);
-    assert.ok(html.includes(`data-core-screen="${key}"`), `${key} lost its core content`);
-    assert.match(textOf(html), /Nuvori Beauty.*Illustrative reference data/);
+test('one dashboard, findings list and action queue attribute every record to its module', () => {
+  const { app, click, screen } = loadApp();
+  for (const role of ['retailer', 'supplier']) {
+    click({ 'data-rt-role': role });
+    for (const key of CORE_SCREENS) {
+      const html = screen(key);
+      assert.match(html, /<h2>/, `${role}/${key} needs its screen heading`);
+      assert.doesNotMatch(html, /\b(?:undefined|NaN)\b/, `${role}/${key}`);
+    }
+    const items = app.ccItems();
+    assert.equal(items.length, app.CCF.length + app.RTDATA.cases.length);
+    assert.deepEqual([...new Set(items.map(i => i.mod))].sort(), ['IM', 'PM', 'RT']);
+    const dash = screen('dash');
+    for (const mod of ['Integration Monitor', 'Performance Monitor', 'Retail add-on']) assert.ok(dash.includes(mod), `${role} dashboard names ${mod}`);
+    const find = textOf(screen('find'));
+    for (const i of items) assert.ok(find.includes(textOf(i.title)), `${role} findings list ${i.key}`);
+    assert.ok(textOf(screen('dash')).includes(role === 'retailer' ? 'Northfield Stores' : 'Nuvori Beauty'));
   }
+  for (const id of ['rt-home', 'rt-actions', 'im-dash', 'pm-dash', 'pm-find', 'pm-act']) assert.equal(app.CXS[id], undefined, `${id} is folded into the shared screens`);
+});
+
+test('module filter narrows the dashboard, findings and action queue', () => {
+  const { app, screen } = loadApp();
+  for (const mod of ['IM', 'PM', 'RT']) {
+    app.ccModF = mod;
+    const html = screen('find');
+    const others = ['IM', 'PM', 'RT'].filter(m => m !== mod);
+    for (const i of app.ccItems()) {
+      if (i.mod === mod) assert.ok(html.includes(i.open), `${mod} keeps ${i.key}`);
+      else assert.ok(!html.includes(i.open), `${mod} hides ${i.key}`);
+    }
+    assert.doesNotMatch(screen('dash'), new RegExp('data-mod="(' + others.join('|') + ')"'));
+  }
+});
+
+test('approving a core finding closes it and moves its action to Completed', () => {
+  const { app, click, screen } = loadApp();
+  click({ 'data-cxapp': 'f1' });
+  const item = app.ccItems().find(i => i.key === 'f:f1');
+  assert.equal(item.done, true);
+  assert.equal(item.actDone, true);
+  app.ccActTab = 'done';
+  assert.ok(screen('act').includes('Action approved'));
 });

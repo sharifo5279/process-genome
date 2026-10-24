@@ -71,12 +71,12 @@
       act: "Rerun the inventory extract and send a full 846 to Brightway Marketplace.", appr: "E-commerce operations",
       area: "Monitoring", who: ["IT and ERP", "Sales and key accounts"] },
     { id: "f11", p: 1, st: 0, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Westline Home", n: 4, val: 1000, at: "06:55",
-      ot: "4 ship notices fail carton validation", os: "Carton labels in 4 inbound 856s are missing serial shipping container codes.",
-      bt: "4 shipments will be received by hand", bs: "Manual receiving delays stock to shelf and costs $250 per shipment.",
-      ev: [["06:40", "4 ship notices received from the supplier"], ["06:55", "Validation failed on carton serial codes"]],
+      ot: "4 ship notices fail carton validation", os: "Westline Home returned 824 application advice: carton labels in 4 ship notices have no serial shipping container codes.",
+      bt: "4 shipments will be received by hand", bs: "Westline Home charges $250 for each shipment it receives by hand.",
+      ev: [["06:40", "4 ship notices sent to Westline Home"], ["06:55", "824 rejections cite missing carton serial codes"]],
       cause: "A new packing station prints labels without serial codes.",
-      act: "Return the 824 to the supplier with the missing codes listed.", appr: "Receiving supervisor",
-      area: "Rejections", who: ["Supply chain", "Procurement"] }
+      act: "Reprint the labels with serial codes and resend the 4 ship notices.", appr: "Shipping supervisor",
+      area: "Rejections", who: ["Supply chain", "Warehouse"] }
   ];
   var CCSTG = [["Plan and synchronize", [4, 10, 6]], ["Order and fulfill", [0, 7, 8]], ["Ship and receive", [2, 1, 5]], ["Settle and recover", [3, 9]]];
   /* Key measure per process: index into the process measures, illustrative value */
@@ -95,3 +95,60 @@
       ["Flag items for check-in review", "Route sales manager"], ["Open a reconciliation with the 3PL", "Logistics coordinator"],
       ["Match the credit or dispute the deduction", "Accounts receivable"]]
   } };
+  /* Retailer perspective (Northfield Stores) of the same findings. Base records above are the CPG supplier perspective (Nuvori Beauty). */
+  var CCFR = {
+    f1: { partner: "Nuvori Beauty", ot: "No ship notices for 14 inbound loads", os: "Carrier pickup confirmed at 06:10 for 14 Nuvori Beauty loads. No 856 received, and the loads reach the DC in about 5 hours.",
+      bt: "14 inbound loads will be received by hand", bs: "Loads that arrive before their ship notice cannot be scanned at the dock.",
+      ev: [["06:10", "Carrier pickup confirmed for 14 loads"], ["07:10", "Rule breached: no 856 within 1 hour of pickup"], ["08:05", "Predicted arrival before ship notice for all 14 loads"]],
+      cause: "Nuvori Beauty has sent no ship notices since 05:45. Its acknowledgments and invoices arrive normally.",
+      act: "Request the 14 ship notices from Nuvori Beauty and alert DC receiving to plan for manual receipt.", appr: "Supplier compliance lead", who: ["Supplier compliance", "DC receiving", "Merchandising"] },
+    f2: { partner: "Meadowline Care", ot: "Outbound order volume 64% below projection", os: "41 purchase orders delivered to Meadowline Care since 05:00 against 115 projected. Last successful delivery at 05:52.",
+      bt: "Replenishment orders not reaching Meadowline Care", bs: "About $182,000 in store replenishment orders is waiting for delivery.",
+      ev: [["05:52", "Last 850 delivered to Meadowline Care"], ["06:30", "Volume fell below the projected band"], ["06:41", "AS2 deliveries returning connection errors"], ["07:15", "Anomaly confirmed across two order windows"]],
+      cause: "Meadowline Care moved its AS2 endpoint in a maintenance window. Deliveries to the previous address fail.",
+      act: "Confirm the new AS2 endpoint with Meadowline Care, update the connection, and resend orders since 05:52.", appr: "EDI operations lead", who: ["Replenishment", "Supplier compliance", "Information security"] },
+    f3: { partner: "Copperleaf Living", ot: "37 acknowledgments past the 24-hour window", os: "Purchase orders sent to Copperleaf Living yesterday have no 855. Store allocation waits on confirmed quantities.",
+      bt: "37 orders not confirmed by Copperleaf Living", bs: "Unconfirmed orders delay allocation and may need another source.",
+      ev: [["Yesterday 04:58", "37 purchase orders delivered and functionally acknowledged"], ["05:00", "24-hour acknowledgment window closed"]],
+      cause: "Copperleaf Living received the orders. Its order acknowledgments have not been generated.",
+      act: "Send an acknowledgment reminder to Copperleaf Living and flag the 37 orders to buying.", appr: "Buying operations lead", who: ["Buying", "Replenishment"] },
+    f4: { partner: "Solara Personal Care", ot: "112 supplier invoices failed price match", os: "Invoices from Solara Personal Care carry new costs on 9 items. The purchase orders still carry the previous cost.",
+      bt: "$46,200 in invoices held in accounts payable", bs: "Held invoices miss early-payment terms unless resolved this week.",
+      ev: [["Monday", "832 cost change received from Solara Personal Care"], ["04:20", "First invoice failed price match"], ["07:30", "112 invoices held on the same 9 items"]],
+      cause: "The supplier cost change was received but not approved in the item master.",
+      act: "Route the 9 cost changes to merchandising for approval, then rerun the invoice match.", appr: "Accounts payable lead", who: ["Accounts payable", "Merchandising", "Master data"] },
+    f5: { partner: "Fieldstone Essentials", ot: "23 chargebacks disputed by the supplier", os: "Fieldstone Essentials disputed 23 late-ship-notice chargebacks and attached proof of delivery to 17.",
+      bt: "$12,750 in chargebacks disputed, 8 days to respond", bs: "17 disputes include delivery evidence. 6 have none.",
+      ev: [["Yesterday", "23 chargebacks issued for late ship notices"], ["06:00", "Disputes received with proof of delivery for 17"], ["06:05", "Ship notice times matched to the revised order dates"]],
+      cause: "The chargebacks used the original order date, not the revised one.",
+      act: "Reverse the 17 chargebacks with delivery evidence and uphold the other 6.", appr: "Vendor compliance analyst", who: ["Vendor compliance", "Accounts payable"] },
+    f6: { os: "No 214 events since pickup. Three inbound loads have DC appointments before noon.",
+      bt: "3 DC appointments at risk", bs: "Missed appointments leave dock labor idle and delay store replenishment.",
+      act: "Request status from Ridgeway Freight and release the 3 appointment slots if the loads are late.", who: ["Transportation", "DC receiving"] },
+    f7: { partner: "Meadowline Care", ot: "Weekly sales feed not delivered", os: "The 852 to Meadowline Care was due at 06:00 Monday. The last feed went out 7 days ago.",
+      bt: "Meadowline Care is planning on last week's sales", bs: "Supplier replenishment for vendor-managed items uses stale data.",
+      ev: [["Last Monday 05:40", "Last 852 delivered"], ["06:00", "Expected feed window closed"]],
+      cause: "Same AS2 endpoint change as the order volume finding for Meadowline Care.",
+      act: "Resend the 852 to Meadowline Care after the connection is updated.", who: ["Replenishment", "Supplier collaboration"] },
+    f8: { os: "Store transfer orders sent to Crestline Logistics in the 940 yesterday have no 945.",
+      bt: "6 store shipments without confirmation", bs: "Stores cannot plan receiving until the 3PL confirms shipment.", who: ["Logistics", "Store operations"] },
+    f9: { partner: "Solara Personal Care", os: "New costs for 9 Solara Personal Care items are not on 61 open purchase orders. Invoices for these orders will fail price match.",
+      bt: "$28,400 in invoices likely to fail match", bs: "The same price mismatch will affect 61 orders that are not invoiced yet.",
+      ev: [["Monday", "832 cost change received for 9 items"], ["07:50", "61 open orders found with the previous cost"]],
+      cause: "Approved cost changes do not update open purchase orders.",
+      act: "Update the cost on the 61 open orders, or ask Solara Personal Care to invoice at the order cost.", appr: "Merchandising analyst", who: ["Merchandising", "Accounts payable"] },
+    f10: { partner: "Tidewell Home", ot: "Drop-ship inventory feed 3 hours late", os: "The hourly 846 from Tidewell Home stopped at 05:00.",
+      bt: "240 online items may oversell", bs: "The website shows stock from 05:00 for items that may have sold out since.",
+      ev: [["05:00", "Last 846 received"], ["06:00", "Hourly feed missed"], ["08:10", "Three feeds missed in a row"]],
+      cause: "Not yet known. Orders and acknowledgments with Tidewell Home are flowing.",
+      act: "Request a full 846 from Tidewell Home and limit online availability for its items until it arrives.", who: ["E-commerce", "Supplier collaboration"] },
+    f11: { partner: "Copperleaf Living", os: "Carton labels in 4 inbound 856s from Copperleaf Living have no serial shipping container codes.",
+      bt: "4 inbound shipments will be received by hand", bs: "Manual receiving delays stock to shelf.",
+      ev: [["06:40", "4 ship notices received from Copperleaf Living"], ["06:55", "Validation failed on carton serial codes"]],
+      cause: "The supplier labels are printed without serial codes.",
+      act: "Return 824 application advice to Copperleaf Living with the missing codes listed.", appr: "Receiving supervisor", who: ["DC receiving", "Supplier compliance"] }
+  };
+  /* Demo state shared by the console and the Product overlay */
+  var ccDone = {};
+  var CCNET = /^(\d{3}|GDSN)/;
+  function ccToks(lbl) { return lbl.split(" / ")[0].replace(/^GDSN /, "").split(/,\s*| or /); }

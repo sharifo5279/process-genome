@@ -12,77 +12,47 @@ detail sheets.
 
 ## Command Center source and generation
 
-Command Center (Retail and CPG console and Product overlay) is maintained in
-`tools/command-center/`, separately from the claude.ai master. Keep changes in these source files;
-do not hand-edit the generated `site/index.html`.
+Command Center is a clickable prototype on a page of its own, `site/command-center/index.html`
+(https://process-genome.onrender.com/command-center/). The Process Genome links to it from the Retail and
+CPG view bar and from the Product overlay, opening in a new tab, the way the Trading Grid Innovation Guide
+links its prototypes. Sources live in `tools/command-center/`; do not hand-edit generated pages.
 
-| Generated block | Source files, in load order |
+| Output | Source files, in load order |
 |---|---|
-| Styles | `cc.css`, then `retail.css` |
-| Model and Genome overlay | `data.js`, then `pv.js` |
-| Console and retail workspace | `cc.js`, then `retail-data.js`, then `retail.js` |
-| Console container | The `CC_HTML` template in `apply.py` |
+| Process Genome page: one managed block | `data.js` (shared findings data), `pv.js` (Product overlay) |
+| Command Center page | `cc.css`, `retail.css`; `data.js`, `cc.js`, `retail-data.js`, `retail.js`; page template in `apply.py` |
 
-After rebuilding from an **unpatched master**, install Command Center once:
+Build both after a master rebuild, or after editing any module:
 
 ```sh
 node tools/build-site.mjs /path/to/master.html
 python3 tools/command-center/apply.py site/index.html
+node --test tools/command-center/retail.test.cjs
 ```
 
-To update the already-generated site from the source modules, including when the original master
-is unavailable, use:
+`apply.py` installs the model block into a fresh master build, or replaces only that block when it is
+already installed, then writes the prototype page. Retail process names and steps are read from the
+Process Genome page. All checks run before anything is written.
 
-```sh
-python3 tools/command-center/apply.py --refresh site/index.html
-```
+### Structure
 
-Both modes accept an optional output path for review without modifying the input:
+- One dashboard, one findings list and one action queue. Every dashboard component, finding and action
+  names its module: Integration Monitor, Performance Monitor or Retail add-on. A module filter narrows all three.
+- Integration Monitor and Performance Monitor screens: trading partners, community, projections and anomalies,
+  document mapping, configuration; business processes, agents, rules and analytics.
+- Retail add-on (`retail-data.js`, `retail.js`): partner participation, orders and commitments, ASNs and
+  readiness, invoices and deductions, and retail policy templates. It registers its cases with `CXITEMS`,
+  its dashboard components with `CXDASH`, its Aviator questions with `CXQ` and its navigation group with
+  `CXNAV`. Other industries can add modules the same way.
 
-```sh
-python3 tools/command-center/apply.py --refresh site/index.html /tmp/process-genome-review.html
-```
+### Perspectives and demo state
 
-The generator writes explicit `process-genome:command-center` begin/end markers around its four
-managed blocks. Refresh replaces only those blocks, validates the existing integration hooks and
-retail-only route guards, and verifies that all content outside the blocks is byte-for-byte
-unchanged. It prints a SHA-256 fingerprint for that preserved content. Repeating refresh with the
-same sources produces identical output and skips rewriting an unchanged file.
-
-The first refresh can migrate the original unmarked checked-in additions from commit
-`b8e45684e99052c663aa9d69ef06ff48cda350e6`. Their frozen block fingerprints must match exactly.
-Unknown legacy content, partial/duplicate markers, missing modules, or changed integration anchors
-stop generation before output is written. Resolve the source/build mismatch rather than bypassing
-those checks. Refresh does not recreate the Genome master or reapply router changes; a fresh master
-build still uses the initial installation command above. All seven module files must be present.
-
-### Retail and CPG demo
-
-Open `#retail/command` for the Retail overview. The demo perspective switch selects Northfield
-Stores (retailer) or Nuvori Beauty (CPG supplier). Four workspaces cover partner participation,
-order commitments, ASN readiness, and invoice/deduction investigation. Eight cases include
-documents, policy checks, line comparisons, evidence gaps, and owned next steps.
-
-The existing IM, PM, and Analytics views remain available. Focused retail entry points and cases
-sit above the preserved core capability sample, whose Nuvori Beauty context is explicitly labeled.
-This is an industry extension of the current prototype, not a replacement CCPM product design.
-
-Case assignments, prepared actions, watchlists, and policy settings are stored in this browser
-under `process-genome-retail-v1`, separately for each perspective. Reset demo clears only the
-selected perspective. Every record is illustrative. Actions prepare local review packets; no
-messages, business documents, operational changes, disputes, or financial transactions are sent.
-Policy tests evaluate two fixtures against the edited threshold and any required evidence gate.
-Activating a demo policy saves its configuration; it does not rewrite the fixed case snapshot.
-
-Run the focused smoke checks after editing the retail modules:
-
-```sh
-node tools/command-center/retail.test.cjs
-python3 tools/command-center/apply.py --refresh site/index.html
-```
-
-Browser verification should cover both perspectives, each case tab, nested policy/process
-dialogs, draft retention, assignment/preparation, searches, filters, downloads, and core navigation.
+The perspective switch selects Northfield Stores (retailer) or Nuvori Beauty (CPG supplier). Core findings
+carry both perspectives (`CCF` and `CCFR` in `data.js`); retail cases carry both in `RTDATA`.
+Case assignments, prepared actions, watchlists and policy settings are stored in this browser under
+`process-genome-retail-v1`, separately for each perspective. Reset demo clears only the selected perspective.
+Every record is illustrative. Preparing a retail action creates a local review packet; approving a core
+action marks the finding resolved in the page only. No messages, documents or transactions are sent.
 
 ## Visitor stats (on hold)
 Same model as the Trading Grid Innovation Guide (sharifo5279/tg-innovation-guide), so the Process Genome can join the
