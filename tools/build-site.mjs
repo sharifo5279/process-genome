@@ -1,5 +1,8 @@
 // Build the Render static site from the Process Genome master page (the claude.ai artifact build):
+//   node tools/build-site.mjs /path/to/master.html                      (visitor stats off)
 //   API_ORIGIN=https://process-genome-stats.onrender.com node tools/build-site.mjs /path/to/master.html
+// The master is a page body; site/index.html wraps it in a full document (charset, phone viewport, title, description,
+// link preview tags, favicons), as the Innovation Guide's build does, so phones render it at device width.
 // Same model as the Trading Grid Innovation Guide's tools/build-site.mjs, so the Process Genome can join the guide (2027 H1)
 // without changing how it is counted:
 // 1. site/index.html = the master page with the favicon links, the footer stats link made relative, one small script that
@@ -12,13 +15,21 @@ import path from "node:path";
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const MASTER = process.argv[2] || "/home/claude/process-genome-site.html";
 const API = (process.env.API_ORIGIN || "").replace(/\/$/, "");
-if (!/^https:\/\//.test(API)) throw new Error("set API_ORIGIN to the stats service's https origin");
+const STATS_ON = /^https:\/\//.test(API);
 let html = fs.readFileSync(MASTER, "utf8");
 
 // the footer link points at the live host's /stats/; on this site it is relative
 const STATS = /https:\/\/[a-z0-9.-]+\/stats\//g;
-if (!STATS.test(html)) throw new Error("footer stats link missing from the master");
+if (STATS_ON && !STATS.test(html)) throw new Error("footer stats link missing from the master");
 html = html.replace(STATS, "/stats/");
+
+// document head: the master's <title> sits in its body; previews and phones read <head>
+const SITE = "https://process-genome.onrender.com/", TITLE = "Business Network Process Genome";
+const DESC = "A reference model of B2B operations by industry: the work, the business processes, and the documents that connect trading partners.";
+const T = html.match(/<title>[^<]*<\/title>/); if (T) html = html.replace(T[0], "");
+const HEAD = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">` +
+  `<title>${TITLE}</title><meta name="description" content="${DESC}"><meta property="og:type" content="website"><meta property="og:site_name" content="${TITLE}">` +
+  `<meta property="og:title" content="${TITLE}"><meta property="og:description" content="${DESC}"><meta property="og:url" content="${SITE}"><meta name="twitter:card" content="summary">`;
 
 // favicon files for browsers that do not use the inline SVG icon
 const FAV = '<link rel="icon" href="img/favicon/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="img/favicon/apple-touch-icon.png">\n';
@@ -57,9 +68,11 @@ if(!t||t.closest("#areas,.tabs,header,footer"))return;if(!t.closest("#v-ops,#v-p
 var f=viewOf(window.PG_FIRST_HASH);if(f)send(f,"link");check();
 }catch(e){}})();</script>`;
 
-html = FAV + FIRST + html + BEACON + TRACK;
-fs.mkdirSync(path.join(ROOT, "site/stats"), { recursive: true });
+html = HEAD + FAV + "</head><body>" + (STATS_ON ? FIRST : "") + html + (STATS_ON ? BEACON + TRACK : "") + "</body></html>";
 fs.writeFileSync(path.join(ROOT, "site/index.html"), html);
+fs.copyFileSync(path.join(ROOT, "site/img/favicon/favicon.ico"), path.join(ROOT, "site/favicon.ico"));
+if (!STATS_ON) { fs.rmSync(path.join(ROOT, "site/stats"), { recursive: true, force: true }); console.log("site/index.html", (html.length / 1024).toFixed(0) + " KB; visitor stats off"); process.exit(0); }
+fs.mkdirSync(path.join(ROOT, "site/stats"), { recursive: true });
 
 let st = fs.readFileSync(path.join(ROOT, "tools/stats-template.html"), "utf8").split("__API__").join(API);
 for (const k of ["__PRODUCTS__", "__GROUPS__"]) if (!st.includes(k)) throw new Error("stats template has no " + k + " placeholder");
@@ -67,5 +80,4 @@ st = st.split("__PRODUCTS__").join(JSON.stringify(REG.map(({ h, ...r }) => r)).r
 st = st.split("__GROUPS__").join(JSON.stringify(GROUPS));
 st = st.replace("<head>", "<head>" + FAV.replace(/href="img\//g, 'href="/img/'));
 fs.writeFileSync(path.join(ROOT, "site/stats/index.html"), st);
-fs.copyFileSync(path.join(ROOT, "site/img/favicon/favicon.ico"), path.join(ROOT, "site/favicon.ico"));
 console.log("site/index.html", (html.length / 1024).toFixed(0) + " KB; stats page reads", API, ";", REG.length, "views");

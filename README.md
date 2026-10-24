@@ -5,7 +5,10 @@
 | `process-genome` | Static site, publish directory `site` | The Process Genome (`site/index.html`) and its favicon files |
 | `process-genome-stats` | Node web service, `node server/index.mjs` (not created yet) | `POST /api/hit`, `POST /api/event`, `GET /api/stats?days=1..90`, `GET /healthz` |
 
-Master copy: the claude.ai artifact build. `site/index.html` is generated from it, never edited by hand.
+Master copy: the claude.ai artifact build. `site/index.html` is generated from it, never edited by hand:
+`node tools/build-site.mjs /path/to/master.html` wraps the master in a full document (charset, phone viewport, title,
+description, link preview tags, favicons). Below 1024 px the Process Genome and the Operations map render as lists with
+detail sheets.
 
 Command Center (Retail and CPG console and Product overlay) is not in the master yet. Until it is, apply it to each build with
 `python3 tools/command-center/apply.py site/index.html`.
