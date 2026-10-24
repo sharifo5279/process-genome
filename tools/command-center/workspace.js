@@ -10,17 +10,17 @@
   /* Every saved item and option carries the package that brings it: im (all clients), pm, or rt */
   function wsSeed() {
     return {
-      dashboards: [{ n: "Order to cash daily", c: [20, 40, 60], t: "pm" }],
+      dashboards: [{ n: "Process performance daily", c: [20, 40, 60], t: "pm" }],
       reports: [{ n: "Daily findings digest", s: "Findings digest", f: "Email", w: "Daily, 06:30", r: "EDI operations", last: "Today, 06:30", t: "im" },
         { n: "Weekly process performance", s: "Process performance", f: "PDF", w: "Weekly, Monday 07:00", r: "Operations leads", last: "Mon, 07:00", t: "pm" },
         { n: "Retail compliance", s: "Retail compliance", f: "PDF", w: "Weekly, Friday 16:00", r: "Vendor compliance", last: "Fri, 16:00", t: "rt" }],
       notifs: [{ t: "High-severity finding", ch: "Email, Microsoft Teams", r: "EDI operations", on: true, k: "im" }, { t: "Partner feed late", ch: "Email", r: "Partner enablement", on: false, k: "im" },
         { t: "Action waiting over 1 hour", ch: "In-app", r: "Approvers", on: true, k: "pm" }, { t: "Process health turns critical", ch: "Microsoft Teams", r: "Supply chain", on: true, k: "pm" },
         { t: "Dispute window closing", ch: "Email", r: "Deductions review", on: true, k: "rt" }],
-      tasks: [{ t: "Confirm the new AS2 endpoint with the partner", o: "Alex Morgan", d: "Today", k: "f:f2", done: false, tr: "im" },
-        { t: "Update the cost on open orders", o: "Dana Ortiz", d: "Oct 27", k: "f:f9", done: true, tr: "pm" },
+      tasks: [{ t: "Restore the AS2 connection for the order feed", o: "Alex Morgan", d: "Today", k: "f:f2", done: false, tr: "im" },
+        { t: "Resolve the cost mismatch on open orders", o: "Dana Ortiz", d: "Oct 27", k: "f:f9", done: false, tr: "pm" },
         { t: "Request the 214 and 861 for the two deductions", o: "Jamie Brooks", d: "Tomorrow", k: "rt:rt-invoice-deduction", done: false, tr: "rt" }],
-      reminders: [{ t: "Check the remittance advice after the connection fix", w: "Today, 11:30", tr: "im" }, { t: "Check acknowledgments before the 12:00 cutoff", w: "Today, 11:30", tr: "pm" }, { t: "Deduction dispute window closes", w: "Nov 1, 09:00", tr: "rt" }],
+      reminders: [{ t: "Check the remittance advice after the connection fix", w: "Today, 11:30", tr: "im" }, { t: "Check acknowledgments before the 12:00 cutoff", w: "Today, 11:30", tr: "pm" }, { t: "Deduction review window closes", w: "Nov 21, 09:00", tr: "rt" }],
       rules: []
     };
   }
@@ -37,6 +37,7 @@
     ccWs = s && typeof s === "object" && Array.isArray(s.dashboards) ? s : wsSeed();
     ["dashboards", "reports", "notifs", "tasks", "reminders", "rules"].forEach(function (k) { if (!Array.isArray(ccWs[k])) ccWs[k] = wsSeed()[k]; });
     ccWs.dashboards = ccWs.dashboards.filter(function (d) { return d.n !== "Network health"; });
+    ccWs.dashboards.forEach(function (d) { if (d.n === "Order to cash daily") d.n = "Process performance daily"; });
     ccWs.rules.forEach(function (r) { CXR.push(r); });
     return ccWs;
   }
@@ -54,30 +55,55 @@
     return ccWsForm === form ? '<section class="cx-card ws-form"><header><h3>' + title + '</h3></header><div class="ws-fg">' + fields + '</div><div class="ws-fa"><button type="button" class="cx-btn p" data-wssave="' + form + '">' + saveLabel + '</button><button type="button" class="cx-btn" data-wsform="">Cancel</button></div></section>' : "";
   }
 
+  var ccWsStep = -1;
+  var WSDOCN = { "850": "Purchase order", "855": "Order acknowledgment", "860, 865": "Order change and acknowledgment", "856": "Ship notice", "856, 824": "Ship notice", "861": "Receiving advice", "810": "Invoice", "820": "Remittance advice",
+    "812": "Debit memo", "812, 820": "Debit memo and remittance", "753": "Routing request", "754": "Routing instructions", "204, 990": "Load tender and response", "214": "Shipment status", "210": "Freight invoice",
+    "944": "Warehouse stock receipt", "940": "Warehouse shipping order", "945": "Warehouse shipping advice", "846, 947": "Warehouse inventory" };
+  function wsDocName(c) { return WSDOCN[c] || ""; }
+  var WSREF = { "850": "PO-", "855": "PO-", "860": "PO-", "856": "ASN-", "861": "RCV-", "810": "INV-", "820": "REM-", "812": "DM-", "753": "ROUTE-", "754": "ROUTE-", "204": "LOAD-", "214": "PRO-", "210": "FRT-", "944": "RCV-", "940": "WH-", "945": "WH-", "846": "INVRPT-" };
+  var WSREJ = { "856": "Duplicate SSCC in carton loop", "856, 824": "Duplicate SSCC in carton loop", "810": "Unit price differs from the PO", "850": "Unknown ship-to location" };
+  /* Transactions at the selected step: control numbers, partner, business reference, acknowledgment and application advice status. Illustrative. */
+  function wsTx(i, k, s, code) {
+    var all = cxPartners(), first = code.split(",")[0], pre = WSREF[first] || "DOC-";
+    /* Warehouse documents go to the 3PL, freight documents to the carrier, everything else to trading partners */
+    var ps = /^94/.test(first) ? [all[9]] : /^(204|214|210)/.test(first) ? [all[8]] : all.slice(0, 8).filter(function (p) { return p[2] === "Active"; });
+    var rows = [0, 1, 2, 3, 4, 5].map(function (j) {
+      var seed = i * 7919 + k * 613 + j * 97 + 4521, late = j < Math.min(2, s[2]), ack = j === 2 && s[3] > 0, rej = j === 3 && s[4] > 0;
+      var st = late ? '<span class="cx-st s-new"><i></i>Past SLA</span>' : rej ? '<span class="cx-st s-new"><i></i>Rejected</span>' : ack ? '<span class="cx-st s-known"><i></i>Awaiting 997</span>' : '<span class="cx-st s-resolved"><i></i>Accepted</span>';
+      return '<tr><td><code>' + String(100000000 + seed * 13).slice(-9) + '</code></td><td><code>' + (1000 + seed % 9000) + '</code></td><td><code>' + ("000" + (j + 1)).slice(-4) + '</code></td><td>' + cxe(ps[(seed + j) % ps.length][0]) + '</td>' +
+        '<td>' + pre + (10000 + seed % 89999) + '</td><td>' + ("0" + (9 - j)).slice(-2) + ':' + ("0" + (seed % 60)).slice(-2) + '</td><td>' + (ack ? "Overdue" : s[0] === "Out" ? "Received" : "Sent") + '</td><td>' + (rej ? cxe(WSREJ[code] || "Rejected") : "None") + '</td><td>' + st + '</td></tr>';
+    }).join("");
+    return cxCard("Transactions · " + code + " " + wsDocName(code), '<table class="cx-tbl ws-tx"><thead><tr><th>ISA13</th><th>GS06</th><th>ST02</th><th>Partner</th><th>Reference</th><th>Time</th><th>997</th><th>824</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table>',
+      "", '<span class="cx-note">' + s[1].toLocaleString("en-US") + ' today · showing 6</span><button type="button" class="cx-btn" data-wstgi>' + ci("ext") + 'Open in TG Insights</button>');
+  }
   /* Business processes (Performance Monitor): one view per process in the client solution, plus the Solution document map.
      The Retail pack adds retail process definitions and lenses for its workflows. */
-  var CCPROCS = [0, 1, 3], WSLENS = [];
+  var WSLENS = [];
   CXS["ws-proc"] = function () {
-    var seg = '<nav class="ws-lens ws-pseg" aria-label="Business process"><span>Process</span>' + CCPROCS.map(function (i) { return '<button type="button" data-wsproc="' + i + '" aria-pressed="' + (ccWsProc === String(i)) + '">' + cxe(ccShort(i)) + '</button>'; }).join("") +
+    var seg = '<nav class="ws-lens ws-pseg" aria-label="Business process"><span>Process</span>' + ccSol().map(function (i) { return '<button type="button" data-wsproc="' + i + '" aria-pressed="' + (ccWsProc === String(i)) + '">' + cxe(ccShort(i)) + '</button>'; }).join("") +
       '<button type="button" data-wsproc="sol" aria-pressed="' + (ccWsProc === "sol") + '">Solution</button></nav>';
     var h = wsHead("Business processes", "") + seg;
     if (ccWsProc === "sol") return h + '<p class="cx-lead">Business documents in the client solution, with their EDI and ERP equivalents.</p>' +
-      cxCard("", '<table class="cx-tbl"><thead><tr><th>Business document</th><th>EDI documents</th><th>ERP document</th><th>Processes</th></tr></thead><tbody>' + CXSOL.map(function (r) {
-        return '<tr><td><b>' + r[0] + '</b></td><td><code>' + r[1] + '</code></td><td>' + r[2] + '</td><td>' + cxe(cxProcNames(r[3])) + '</td></tr>'; }).join("") + '</tbody></table>');
-    var i = +ccWsProc, P = ccProc(i), F = CCFLOW[i], lenses = ccOn("rt") ? WSLENS : [], lens = lenses.filter(function (l) { return l.k === ccWsLens; })[0];
+      cxCard("", '<table class="cx-tbl"><thead><tr><th>Business document</th><th>EDI documents</th><th>Typical ERP document (not monitored)</th><th>Processes</th></tr></thead><tbody>' + cxSol().map(function (r) {
+        return '<tr><td><b>' + r[0] + '</b></td><td><code>' + r[1] + '</code></td><td>' + (r[2] || "None") + '</td><td>' + cxe(cxProcNames(r[3])) + '</td></tr>'; }).join("") + '</tbody></table>');
+    if (ccSol().indexOf(+ccWsProc) < 0) ccWsProc = String(ccSol()[0]);
+    var i = +ccWsProc, P = ccProc(i), F = ccFlow(i), K = CCKPI[ccRole()][i], lenses = ccOn("rt") ? WSLENS : [], lens = lenses.filter(function (l) { return l.k === ccWsLens; })[0];
     var items = cxSort(ccItems().filter(function (x) { return x.proc === i && !x.done && (!lens || lens.match(x)); })), core = cxOpen().filter(function (f) { return f.p === i && ccOn(f.mod === "Integration Monitor" ? "im" : "pm"); });
-    var val = core.reduce(function (a, f) { return a + f.val; }, 0);
-    var steps = ccSteps(i).map(function (p, n) {
-      var k = p[0], s = p[1], fs = core.filter(function (f) { return f.st === k; }), sev = fs.some(function (f) { return f.sev === "c"; }) ? "c" : fs.length ? "w" : "ok";
-      return '<li class="' + sev + '"><span class="ws-sn">' + (n + 1) + '</span><b>' + cxe(ccStepName(i, k)) + '</b><code>' + cxe(ccStepDoc(s)) + '</code><strong>' + F.steps[k].toLocaleString("en-US") + '</strong><small>In flight</small>' +
-        fs.map(function (f) { return '<button type="button" class="cx-lk" data-cxf="' + f.id + '">' + cxe(f.ot) + '</button>'; }).join("") + '</li>';
+    var vis = ccSteps(i), exc = function (k) { var s = F.steps[k]; return s[2] + s[3] + s[4]; };
+    if (!vis.some(function (p) { return p[0] === ccWsStep; })) ccWsStep = vis.slice().sort(function (a, b) { return exc(b[0]) - exc(a[0]); })[0][0];
+    var rows = vis.map(function (p, n) {
+      var k = p[0], s = F.steps[k], code = ccStepDoc(p[1]).split(" / ")[0], fs = core.filter(function (f) { return f.st === k; }), sev = fs.some(function (f) { return f.sev === "c"; }) ? "c" : exc(k) ? "w" : "ok";
+      function c(v, cls) { return '<td class="n' + (v ? " " + cls : "") + '">' + (v ? v.toLocaleString("en-US") : "0") + '</td>'; }
+      return '<tr class="ws-st ' + sev + (k === ccWsStep ? " on" : "") + '" data-wsstep="' + k + '"><td><span class="ws-sn">' + (n + 1) + '</span></td><td><b><code>' + cxe(code) + '</code> ' + cxe(wsDocName(code)) + '</b><small>' + cxe(ccStepName(i, k)) + '</small></td><td>' + s[0] + '</td>' +
+        c(s[1], "") + c(s[2], "w") + c(s[3], "w") + c(s[4], "c") + '<td>' + s[5] + '</td><td>' + fs.map(function (f) { return '<button type="button" class="cx-lk" data-cxf="' + f.id + '">' + cxe(f.ot) + '</button>'; }).join("") + '</td></tr>';
     }).join("");
-    var rules = CXR.filter(function (r) { return r[3].indexOf(i) >= 0 && cxAgents().some(function (a) { return a.id === r[0]; }); });
-    var docs = CXSOL.filter(function (r) { return r[3].indexOf(i) >= 0; });
+    var flow = '<table class="cx-tbl ws-ft"><thead><tr><th></th><th>Document and step</th><th>Direction</th><th class="n">Today</th><th class="n">Past SLA</th><th class="n">997 overdue</th><th class="n">824 rejects</th><th>Oldest open</th><th>Findings</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    var rules = CXR.filter(function (r) { return cxRuleP(r).indexOf(i) >= 0 && cxAgents().some(function (a) { return a.id === r[0]; }); });
+    var docs = cxSol().filter(function (r) { return r[3].indexOf(i) >= 0; });
     var lensNav = lenses.length ? '<nav class="ws-lens" aria-label="Retail lens"><span>Retail lens</span>' + [{ k: "all", n: "All findings" }].concat(lenses).map(function (l) { return '<button type="button" data-wslens="' + l.k + '" aria-pressed="' + ((lens ? lens.k : "all") === l.k) + '">' + l.n + '</button>'; }).join("") + '</nav>' : "";
-    return h + '<div class="cx-fsum ws-pk">' + cxKpi("In flight", F.n.toLocaleString("en-US"), Math.round(100 * F.ok / F.n) + "% on track") + cxKpi("At risk or breached", F.risk + F.br, F.br + " breached") +
-      cxKpi("Open findings", items.length, items.filter(function (x) { return x.sev === "h"; }).length + " high severity") + cxKpi(cxe(P.measures[CCM[i][0]]), CCM[i][1], val ? "$" + Math.round(val / 1000) + "K value at risk" : "No value at risk") + '</div>' +
-      cxCard("Process flow", '<ol class="ws-flow">' + steps + '</ol>', "", '<span class="cx-note">EDI steps on Trading Grid</span>') +
+    return h + '<div class="cx-fsum ws-pk">' + cxKpi("Documents today", F.n.toLocaleString("en-US"), Math.round(100 * F.ok / F.n) + "% on track") + cxKpi("At risk or breached", F.risk + F.br, F.br + " breached") +
+      cxKpi("Open findings", items.length, items.filter(function (x) { return x.sev === "h"; }).length + " high severity") + cxKpi(cxe(K[0]), K[1], "Last 30 days") + '</div>' +
+      cxCard("Document flow", flow, "", '<span class="cx-note">EDI documents on Trading Grid. Select a step for its transactions.</span>') + wsTx(i, ccWsStep, F.steps[ccWsStep], ccStepDoc(ccProc(i).steps[ccWsStep]).split(" / ")[0]) +
       '<div class="cx-g21">' + cxCard("Open findings", lensNav + '<table class="cx-tbl cx-pf"><thead><tr><th>Finding</th><th>Module</th><th>Severity</th><th>Detected</th></tr></thead><tbody>' + items.map(function (x) {
         return '<tr><td>' + cxItemLink(x, "b") + '<small>' + cxe(x.partner) + '</small></td><td>' + cxTag(x.mod) + '</td><td>' + cxSevChip(x.sev) + '</td><td>' + cxe(x.at) + '</td></tr>'; }).join("") +
         (items.length ? "" : '<tr><td colspan="4" class="cx-empty">No open findings.</td></tr>') + '</tbody></table>') +
@@ -85,10 +111,10 @@
   };
 
   /* Dashboards: Overview tabs. Prebuilt by package, plus custom dashboards from the component library */
-  var WSPRE = [{ k: "pm", n: "Partner scorecard", t: "pm", h: function () { return cxScorecard(); } }];
+  var WSPRE = [{ k: "pm", n: function () { return ccRole() === "retailer" ? "Supplier scorecard" : ccOn("rt") ? "Scorecard with retail accounts" : "Scorecard with customers"; }, t: "pm", h: function () { return cxScorecard(); } }];
   function wsDashTabs() {
     var W = wsLoad();
-    return WSPRE.filter(function (d) { return ccOn(d.t); }).map(function (d) { return { key: "p:" + d.k, n: d.n, pre: d }; })
+    return WSPRE.filter(function (d) { return ccOn(d.t); }).map(function (d) { return { key: "p:" + d.k, n: typeof d.n === "function" ? d.n() : d.n, pre: d }; })
       .concat(wsIdx(W.dashboards).map(function (p) { return { key: "c:" + p[1], n: p[0].n, dash: p[0], ix: p[1] }; }));
   }
   function wsCurDash() { var tabs = wsDashTabs(); return tabs.filter(function (t) { return t.key === ccWsDash; })[0] || tabs[0]; }
@@ -155,12 +181,12 @@
   ];
   function rwJob() { return RWJOBS.filter(function (j) { return j[0] === ccRw.agent; })[0]; }
   function rwStep() {
-    var s = ccRw.step, j = rwJob(), procs = CCPROCS.map(function (i) { return ccProc(i).n; });
+    var s = ccRw.step, j = rwJob(), procs = ccSol().map(function (i) { return ccProc(i).n; });
     if (s === 0) return '<h4 class="rw-q">What do you want an agent to do?</h4><p class="cx-sub">Each agent has a different job. Pick the one that matches what you need to catch.</p><div class="rw-jobs">' + RWJOBS.map(function (x) {
       var a = CXA.filter(function (y) { return y.id === x[0]; })[0];
       return '<button type="button" class="rw-job" data-rwagent="' + x[0] + '" aria-pressed="' + (ccRw.agent === x[0]) + '"><b>' + x[1] + '</b><span>' + x[2] + '</span><em><i class="cx-agi">' + a.n[0] + '</i>' + a.n + ' · ' + a.r + '</em></button>'; }).join("") + '</div>';
     if (s === 1) return '<h4 class="rw-q">Where should the rule apply?</h4><div class="ws-fg">' + wsField("Business process", wsSel("data-rw=proc", procs, ccRw.proc)) +
-      wsField("Partners", wsSel("data-rw=partner", ["All partners"].concat(cxPartners().map(function (p) { return p[0]; })), ccRw.partner)) + wsField("Document", wsSel("data-rw=doc", CXSOL.map(function (r) { return r[0] + " (" + r[1].split(",")[0] + ")"; }), ccRw.doc)) + '</div>';
+      wsField("Partners", wsSel("data-rw=partner", ["All partners"].concat(cxPartners().map(function (p) { return p[0]; })), ccRw.partner)) + wsField("Document", wsSel("data-rw=doc", cxSol().map(function (r) { return r[0] + " (" + r[1].split(",")[0] + ")"; }), ccRw.doc)) + '</div>';
     if (s === 2) return '<h4 class="rw-q">What should happen?</h4><div class="ws-fg">' + wsField("Rule name", '<input type="text" data-rw="name" value="' + cxe(ccRw.name) + '">') + wsField("Expected behavior", '<textarea data-rw="expect" rows="3">' + cxe(ccRw.expect) + '</textarea>') + '</div>';
     if (s === 3) return '<h4 class="rw-q">When is it a deviation?</h4><div class="ws-fg">' + wsField("Medium severity from (" + j[4] + ")", '<input type="number" step="any" min="0" data-rw="med" value="' + ccRw.med + '">') +
       wsField("High severity from (" + j[4] + ")", '<input type="number" step="any" min="0" data-rw="high" value="' + ccRw.high + '">') + '</div>';
@@ -202,9 +228,11 @@
     var dr = cx.querySelector(".cx-dr.rw"); if (dr) { var f = dr.querySelector(".cx-db input, .cx-db select, .cx-db textarea, .cx-db button"); if (f && document.activeElement === document.body) f.focus({ preventScroll: true }); }
   };
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-wsproc],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
+    var b = e.target.closest("[data-wsproc],[data-wsstep],[data-wstgi],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
     var W = wsLoad(), v;
-    if (b.hasAttribute("data-wsproc")) { ccWsProc = b.getAttribute("data-wsproc"); }
+    if (b.hasAttribute("data-wsproc")) { ccWsProc = b.getAttribute("data-wsproc"); ccWsStep = -1; }
+    else if (b.hasAttribute("data-wsstep") && !e.target.closest("[data-cxf]")) { ccWsStep = +b.getAttribute("data-wsstep"); }
+    else if (b.hasAttribute("data-wstgi")) { cxToast("TG Insights opens with these transactions in the product. It is not connected in this prototype."); }
     else if (b.hasAttribute("data-cxwsproc")) { ccWsProc = b.getAttribute("data-cxwsproc"); cxGo("ws-proc"); return; }
     else if (b.hasAttribute("data-wsform")) { ccWsForm = b.getAttribute("data-wsform"); }
     else if (b.hasAttribute("data-wsdash")) { ccWsDash = b.getAttribute("data-wsdash"); }
@@ -224,14 +252,14 @@
       if (f === "rem") W.reminders.unshift({ t: n, w: (wsVal("[data-wsd]") || "").replace("T", ", ") || "No time", tr: "im" });
       ccWsForm = ""; wsSave(); cxToast("Saved.");
     }
-    else if (b.hasAttribute("data-rwnew")) { ccRw = { step: 0, proc: ccProc(0).n, partner: "All partners", doc: CXSOL[0][0] + " (850)", ref: "None", file: "", budget: 50000, onb: "Pause the rule and notify", test: null }; rwPick("nora"); ccDr = ["rule"]; }
+    else if (b.hasAttribute("data-rwnew")) { ccRw = { step: 0, proc: ccProc(0).n, partner: "All partners", doc: cxSol()[0][0] + " (850)", ref: "None", file: "", budget: 50000, onb: "Pause the rule and notify", test: null }; rwPick("nora"); ccDr = ["rule"]; }
     else if (b.hasAttribute("data-rwclose")) { ccRw = null; ccDr = null; }
     else if (b.hasAttribute("data-rwagent")) { rwPick(b.getAttribute("data-rwagent")); }
     else if (b.hasAttribute("data-rwref")) { ccRw.ref = b.getAttribute("data-rwref"); ccRw.file = ""; }
     else if (b.hasAttribute("data-rwgo")) { rwRead(); ccRw.step = Math.max(0, Math.min(7, ccRw.step + +b.getAttribute("data-rwgo"))); }
     else if (b.hasAttribute("data-rwtest")) { rwRead(); var k = RWJOBS.map(function (x) { return x[0]; }).indexOf(ccRw.agent) + 1, nn = 3800 + 431 * k, d = 9 + 7 * k; ccRw.test = { n: nn, d: d, h: Math.ceil(d / 5), c: 100 - 100 * d / nn }; }
     else if (b.hasAttribute("data-rwdeploy")) {
-      var j = rwJob(), r = [ccRw.agent, ccRw.name || j[3], ccRw.doc, [CCPROCS.filter(function (i) { return ccProc(i).n === ccRw.proc; })[0] || 0], +(ccRw.test ? ccRw.test.c : 99).toFixed(1), 0, "Just now", "Active"];
+      var j = rwJob(), r = [ccRw.agent, ccRw.name || j[3], ccRw.doc, [ccSol().filter(function (i) { return ccProc(i).n === ccRw.proc; })[0] || 0], +(ccRw.test ? ccRw.test.c : 99).toFixed(1), 0, "Just now", "Active"];
       CXR.push(r); W.rules.push(r); wsSave(); ccRw = null; ccDr = null; cxToast("Rule deployed. " + r[1] + " is active.");
     }
     cxRender();

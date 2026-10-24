@@ -247,14 +247,15 @@ test('demo findings stay inside the three processes of the client solution', () 
   const { app, click, screen } = loadApp();
   for (const role of ['retailer', 'supplier']) {
     click({ 'data-rt-role': role });
-    assert.deepEqual([...new Set(app.ccItems().map(i => i.proc))].sort(), [0, 1, 3]);
+    const sol = app.ccSol();
+    for (const p of new Set(app.ccItems().map(i => i.proc))) assert.ok(sol.includes(p), `${role}: process ${p} is in the solution ${sol}`);
+    for (const p of sol) { app.ccWsProc = String(p); assert.match(screen('ws-proc'), /Document flow/); }
   }
   const cfg = screen('cfg');
   assert.ok(cfg.includes('Rules &amp; Policies') && cfg.includes('Retail policy templates'));
   for (const r of app.RTDATA.rules) assert.ok(cfg.includes(`data-rt-rule="${r.id}"`), `${r.id} sits in Configuration`);
   app.ccWsProc = 'sol';
   assert.match(screen('ws-proc'), /Business document/);
-  for (const p of ['0', '1', '3']) { app.ccWsProc = p; assert.match(screen('ws-proc'), /Process flow/); }
 });
 
 test('approving a core finding closes it and moves its action to Completed', () => {
@@ -287,7 +288,7 @@ test('rule wizard walks eight steps and deploys a Performance Monitor rule', () 
 test('workspace saves dashboards, reports, notifications, tasks and reminders', () => {
   const { app, click, screen, storage } = loadApp();
   const W = app.wsLoad();
-  assert.ok(screen('ws-dash').includes('Order to cash daily'));
+  assert.ok(screen('ws-dash').includes('Process performance daily'));
   click({ 'data-wstog': '1' });
   assert.equal(W.notifs[1].on, true);
   click({ 'data-wsdone': '0' });
@@ -318,5 +319,6 @@ test('packages: Integration Monitor alone, plus Performance Monitor, plus the Re
 
   app.ccSetPkg('rt');
   assert.deepEqual([...new Set(app.ccItems().map(i => i.mod))].sort(), ['IM', 'PM', 'RT']);
-  assert.equal(app.ccProc(3).n, app.PROCESSES.retail[3].n);
+  assert.equal(app.ccProc(3).n, app.ccRole() === 'retailer' ? 'Chargebacks and deductions' : app.PROCESSES.retail[3].n);
+  assert.equal(app.ccProc(0).n, app.PROCESSES.retail[0].n);
 });

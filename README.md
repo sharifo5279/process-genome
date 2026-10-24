@@ -50,7 +50,9 @@ packages are added; the Retail pack adds content rather than screens. Every find
 
 Modules register through shared lists: `CXITEMS` (findings and actions), `CXDASH` (components), `CXQ` (Aviator),
 `CXCFG` (Configuration cards), `CXPTAB` (Partners tabs), `WSPRE` (prebuilt dashboards) and `WSLENS` (process lenses).
-Integration Monitor capabilities are in `im.js`. Business process views show only the steps that exchange an EDI document on
+The client solution follows the client's side of the relationship (`CCSOL`): a supplier runs Order to cash, warehouse
+fulfillment and Deductions; a retailer runs Purchase to pay, Routing and delivery, and Chargebacks. Findings and retail cases carry
+a process and step for each perspective. Integration Monitor capabilities are in `im.js`. Business process views show only the steps that exchange an EDI document on
 Trading Grid; portal, ERP and warehouse-system steps from the reference processes are left out.
 Workspace saved items are kept under `process-genome-cc-workspace-v2`.
 

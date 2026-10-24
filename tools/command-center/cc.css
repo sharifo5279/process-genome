@@ -439,3 +439,8 @@
   .im-ex { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; } .im-ex li { display: flex; gap: 10px; align-items: flex-start; } .im-ex li .ci { color: var(--pa); flex: none; }
   @container (max-width: 1080px) { .im-vol { grid-template-columns: 1fr; } }
   .im-nh { margin-bottom: 16px; }
+  /* Business processes: document flow table and transactions */
+  .ws-ft tbody tr { cursor: pointer; } .ws-ft tbody tr.on td { background: var(--psel); } .ws-ft tbody tr.on td:first-child { box-shadow: inset 3px 0 0 var(--pa); }
+  .ws-ft td small { display: block; font-size: 12px; color: var(--pmu); font-weight: 400; } .ws-ft td.w { color: #B54708; font-weight: 700; } .ws-ft td.c { color: #C4320A; font-weight: 700; }
+  .ws-ft td .cx-lk { display: block; text-align: left; font-size: 12px; }
+  .ws-tx td { font-size: 13px; white-space: nowrap; }

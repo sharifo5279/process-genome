@@ -3,17 +3,18 @@
      anomalies and Explain with Aviator. Every client gets these. Illustrative values. */
   var imBand = -1, imIa = "doc", imExplain = false, imVol = { per: "12", gr: "Day", dt: "All", pt: "All", ad: "All", st: "All", sol: "All" };
   /* Per partner, in cxPartners() order: protocol, 30-day volume, 30-day errors, top error, second address */
-  var IMPT = [["AS2", 22400, 12, "Signature verification failed"], ["AS2", 18100, 41, "Signature verification failed"], ["SFTP", 9600, 6, "Invalid interchange receiver ID"],
-    ["API", 7400, 3, "Duplicate control number"], ["AS2", 5200, 2, "Unknown trading partner"], ["VAN", 3100, 9, "Missing required segment"], ["AS2", 2400, 1, "Duplicate control number"],
-    ["VAN", 0, 0, "None"], ["SFTP", 1800, 4, "Invalid date format"], ["AS2", 1200, 2, "Missing required segment"]];
-  var IMBANDS = [["20K and above", 3, 20000], ["5K to 20K", 14, 5000], ["1K to 5K", 46, 1000], ["Under 1K", 100, 1], ["No traffic in 30 days", 45, 0]];
+  var IMPT = [["AS2", 14200, 64, "Signature verification failed"], ["AS2", 11800, 296, "Signature verification failed"], ["SFTP", 10400, 38, "Invalid interchange receiver ID"],
+    ["API", 7400, 21, "Duplicate control number"], ["AS2", 5200, 12, "Unknown trading partner"], ["VAN", 3100, 57, "Missing required segment"], ["AS2", 60, 3, "Duplicate control number"],
+    ["VAN", 0, 0, "None"], ["SFTP", 1800, 26, "Invalid date format"], ["AS2", 1200, 14, "Missing required segment"]];
+  var IMBANDS = [["10K and above", 3, 10000], ["2K to 10K", 14, 2000], ["500 to 2K", 46, 500], ["Under 500", 100, 1], ["No traffic in 30 days", 45, 0]];
   function imPt(name) { var ps = cxPartners(); for (var k = 0; k < ps.length; k++) if (ps[k][0] === name) return k; return 0; }
   function imBandOf(v) { for (var b = 0; b < IMBANDS.length; b++) if (v >= IMBANDS[b][2]) return b; return IMBANDS.length - 1; }
   function imKind(k) { return k === 8 ? "carrier" : k === 9 ? "3pl" : "trade"; }
   /* Document types seen from the client: In is received, Out is sent */
   var IMDOCS = ["850", "855", "856", "810", "820", "846", "214", "940", "945"];
-  function imDir(d) {
-    var rcv = ccRole() === "retailer" ? ["855", "856", "810", "214", "945"] : ["850", "820", "214", "945"];
+  function imDir(d, k) {
+    if (k != null && imKind(k) === "3pl") return d === "940" ? "Out" : "In";
+    var rcv = ccRole() === "retailer" ? ["855", "856", "810", "846", "214", "945"] : ["850", "820", "214", "945"];
     return d === "997" ? "Both" : rcv.indexOf(d) >= 0 ? "In" : "Out";
   }
   function imCell(k, d) {
@@ -31,18 +32,18 @@
   /* Overview: daily digest card */
   CXDASH.push({ o: 5, mod: "IM", w: 6, t: "Daily digest · yesterday", h: function () {
     var ps = cxPartners();
-    return '<div class="im-dg"><div class="cx-k4">' + cxKpi("Documents", "2,184", '<em class="up">↑ 4% vs prior day</em>') + cxKpi("Failed transactions", "37", "Across 9 partners") +
+    return '<div class="im-dg"><div class="cx-k4">' + cxKpi("Documents", "4,612", '<em class="up">↑ 4% vs prior day</em>') + cxKpi("Failed transactions", "37", "Across 9 partners") +
       cxKpi("Partners onboarded", "2", ps[6][0] + " and 1 more") + cxKpi("Anomalies detected", "3", "2 volume, 1 failed transactions") + '</div>' +
       '<table class="cx-tbl"><thead><tr><th>Top partners by volume</th><th class="n">Documents</th><th class="n">Errors</th><th>Most common error</th></tr></thead><tbody>' +
-      [0, 1, 2, 3, 5].map(function (k) { return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(ps[k][0]) + '">' + cxe(ps[k][0]) + '</button></td><td class="n">' + Math.round(IMPT[k][1] / 30).toLocaleString("en-US") + '</td><td class="n">' + Math.max(0, Math.round(IMPT[k][2] / 4)) + '</td><td>' + cxe(IMPT[k][3]) + '</td></tr>'; }).join("") + '</tbody></table>' +
-      '<div class="cx-kpi cx-ka2 im-ka"><span>' + ci("spark") + 'Key analysis</span><small>Volume rose 4% on order traffic. Failed transactions doubled at ' + cxe(ps[1][0]) + ' after its signing certificate changed; the other partners stayed within their normal error range.</small></div></div>'; },
+      [[0, 6], [1, 3], [2, 4], [3, 2], [5, 5]].map(function (x) { var k = x[0]; return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(ps[k][0]) + '">' + cxe(ps[k][0]) + '</button></td><td class="n">' + Math.round(IMPT[k][1] / 30).toLocaleString("en-US") + '</td><td class="n">' + x[1] + '</td><td>' + cxe(IMPT[k][3]) + '</td></tr>'; }).join("") + '</tbody></table>' +
+      '<div class="cx-kpi cx-ka2 im-ka"><span>' + ci("spark") + 'Key analysis</span><small>Volume rose 4% on order traffic. Failed transactions stayed within the normal range; ' + cxe(ps[5][0]) + ' had the most, all for a missing required segment.</small></div></div>'; },
     f: function () { return '<span class="cx-note">Daily Summarizer and Explainer Agent · Generated 06:00</span>'; } });
 
   /* Overview: Network health. Network activity, document summary and transaction volume analysis with the refine panel */
   CXS["im-vol"] = function () {
     var ps = cxPartners(), v = imVol, seed = [v.dt, v.pt, v.ad, v.st, v.sol].filter(function (x) { return x !== "All"; }).length;
     var f = 1 / (1 + seed * 1.6), n = v.per === "1" ? 30 : v.per === "24" ? 24 : 12;
-    var base = v.per === "1" ? [138, 142, 151, 147, 98, 76, 140, 149, 155, 152, 150, 101, 79, 146, 158, 161, 157, 153, 104, 81, 149, 160, 166, 163, 158, 107, 84, 155, 164, 169]
+    var base = v.per === "1" ? [4410, 4520, 4610, 4580, 3120, 2410, 4460, 4550, 4640, 4600, 4590, 3180, 2470, 4490, 4620, 4700, 4660, 4610, 3240, 2520, 4520, 4650, 4720, 4690, 4630, 3260, 2550, 4580, 4612, 4700]
       : v.per === "24" ? [3410, 3480, 3520, 3600, 3550, 3490, 3620, 3700, 3760, 3740, 3800, 3790, 3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590]
       : [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590];
     var wk = v.gr === "Week" ? 7 : 1, vals = base.map(function (x) { return Math.round(x * f * wk); }), mx = Math.max.apply(null, vals);
@@ -51,7 +52,7 @@
     function sel(key, label, opts) { return '<label class="ws-f"><span>' + label + '</span><select data-imvol="' + key + '">' + ["All"].concat(opts).map(function (o) { return '<option' + (o === v[key] ? " selected" : "") + '>' + cxe(o) + '</option>'; }).join("") + '</select></label>'; }
     function seg(key, opts) { return opts.map(function (o) { return '<button type="button" data-imseg="' + key + ':' + o[0] + '" aria-pressed="' + (v[key] === o[0]) + '">' + o[1] + '</button>'; }).join(""); }
     var addr = ps.slice(0, 6).map(function (p) { return "ZZ:" + p[1]; });
-    var mix = [["Purchase order (850)", 34], ["Functional acknowledgment (997)", 27], ["Ship notice (856)", 14], ["Invoice (810)", 12], ["Order acknowledgment (855)", 8], ["Remittance advice (820)", 5]];
+    var mix = [["Functional acknowledgment (997)", 30], ["Purchase order (850)", 22], ["Ship notice (856)", 20], ["Invoice (810)", 18], ["Order acknowledgment (855)", 6], ["Remittance advice (820)", 4]];
     var by = function (o) { return CXDASH.filter(function (c) { return c.o === o; })[0]; };
     return cxOvHead() + '<div class="cx-dg im-nh">' + cxDc(by(10), 3) + cxDc(by(70), 3) + '</div><div class="im-vol"><aside class="cx-card im-ref"><header><h3>Refine</h3></header>' +
       sel("dt", "Document type", ["850", "855", "856", "810", "820", "997"]) + sel("pt", "Trading partner", ps.map(function (p) { return p[0]; })) + sel("ad", "EDI address", addr) +
@@ -106,7 +107,7 @@
     var h = '<header><span><p>Partner details</p><h3>' + cxe(p[0]) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
       '<dl class="cx-dl"><div><dt>Status</dt><dd>' + p[2] + '</dd></div><div><dt>Alias</dt><dd><code>' + p[1] + '</code></dd></div><div><dt>Protocol</dt><dd>' + e[0] + '</dd></div><div><dt>Onboarded</dt><dd>' + p[4] + '</dd></div><div><dt>Last activity</dt><dd>' + p[5] + '</dd></div></dl>' +
       '<h4>EDI addresses</h4><table class="cx-tbl"><thead><tr><th>Address</th><th>Protocol</th><th class="n">Documents, 30 days</th></tr></thead><tbody><tr><td><code>' + a1 + '</code></td><td>' + e[0] + '</td><td class="n">' + split[0].toLocaleString("en-US") + '</td></tr><tr><td><code>' + a2 + '</code></td><td>' + e[0] + '</td><td class="n">' + split[1].toLocaleString("en-US") + '</td></tr></tbody></table>' +
-      '<h4>Document relationships</h4><table class="cx-tbl"><thead><tr><th>Document</th><th>Direction</th><th>Status</th></tr></thead><tbody>' + docs.map(function (d) { var c = imCell(k, d); return '<tr><td><code>' + d + '</code></td><td>' + imDir(d) + '</td><td><span class="cx-st s-' + IMCELL[c][1] + '"><i></i>' + IMCELL[c][0] + '</span></td></tr>'; }).join("") + '</tbody></table>' +
+      '<h4>Document relationships</h4><table class="cx-tbl"><thead><tr><th>Document</th><th>Direction</th><th>Status</th></tr></thead><tbody>' + docs.map(function (d) { var c = imCell(k, d); return '<tr><td><code>' + d + '</code></td><td>' + imDir(d, k) + '</td><td><span class="cx-st s-' + IMCELL[c][1] + '"><i></i>' + IMCELL[c][0] + '</span></td></tr>'; }).join("") + '</tbody></table>' +
       '<h4>Transaction processing errors, 30 days</h4>' + (e[2] ? '<p><b>' + e[2] + '</b> errors. Most common: ' + cxe(e[3]) + '.</p>' : '<p>No processing errors.</p>') +
       '<h4>Volume by EDI address, 6 months</h4>' + cxLine([{ v: [0.82, 0.88, 0.91, 0.95, 0.97, 1].map(function (x) { return Math.round(split[0] * x); }) }, { v: [0.9, 0.86, 0.95, 1.02, 0.98, 1].map(function (x) { return Math.round(split[1] * x); }), c: "b2" }], { w: 440, h: 160, xl: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Volume by EDI address" }) +
       '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>' + a1 + '</li><li><i style="background:#001889"></i>' + a2 + '</li></ul></div>';
