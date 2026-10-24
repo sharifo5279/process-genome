@@ -5,6 +5,7 @@
     var P = PMPV[pmK], m = [];
     if (P.im.some(function (x) { return x[1].indexOf(c) >= 0; })) m.push("IM");
     if (P.pm.some(function (x) { return x[1].indexOf(c) >= 0; })) m.push("PM");
+    if (P.asn && P.asn.some(function (x) { return x[1].indexOf(c) >= 0; })) m.push("ASN");
     return m;
   }
   function pmPvSev(c) {
@@ -25,21 +26,21 @@
     }
     var h = '<div class="oc pv"><div class="oc-h"><p class="pp-e">Product overlay</p><span class="oc-ill">Illustrative</span></div>' +
       '<p class="oc-q">Command Center</p><p class="oc-def">Monitors each business process on the network and recommends the next action.</p>' +
-      '<ol class="oc-lad pv-lad"><li><button type="button" data-pvp="optimize" aria-pressed="' + !ex + '"><b>Optimize</b><span>Integration Monitor and Performance Monitor</span></button></li>' +
+      '<ol class="oc-lad pv-lad"><li><button type="button" data-pvp="optimize" aria-pressed="' + !ex + '"><b>Optimize</b><span>Integration Monitor, Performance Monitor and ASN Intelligence</span></button></li>' +
       '<li><button type="button" data-pvp="extend" aria-pressed="' + ex + '"><b>Extend</b><span>Performance Monitor agents</span></button></li></ol>' +
       '<p class="oc-def pv-def">' + (ex ? "Agents predict a problem at a decision point, recommend an action and wait for a person to approve it."
-        : "Integration Monitor watches volume, timing and acknowledgments. Performance Monitor checks business rules across documents.") + '</p>' +
+        : "Integration Monitor watches volume, timing and acknowledgments. Performance Monitor checks business rules across documents. ASN Intelligence monitors ship notice health by supplier.") + '</p>' +
       '<div class="oc-k"><b>' + (ex ? "Shading: value at stake" : "Shading: findings now") + '</b>' +
       (ex ? '<span>' + pmBars("h", true) + '</span><span>' + pmBars("m", true) + '</span><span>' + pmBars("l", true) + '</span>'
         : '<span>' + pmBars("h") + '<span class="obw">Critical</span></span><span>' + pmBars("m") + '<span class="obw">Warning</span></span><span>' + pmBars("l") + '<span class="obw">Monitored</span></span>') + '</div>' +
-      '<p class="pp-key pv-key">' + (ex ? "Numbers on tiles mark agent decision points." : "<b>IM</b> Integration Monitor · <b>PM</b> Performance Monitor rule") + '</p>' +
+      '<p class="pp-key pv-key">' + (ex ? "Numbers on tiles mark agent decision points." : "<b>IM</b> Integration Monitor · <b>PM</b> Performance Monitor rule · <b>ASN</b> ASN Intelligence") + '</p>' +
       '<a class="pm-btn pm-more" href="command-center/" target="_blank" rel="noopener" aria-label="Try the Command Center clickable prototype (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>Try the Command Center prototype</a></div>';
     if (ex) {
       h += '<h4>Performance Monitor agents</h4><ul class="pp-list pv-list">' + PMOV.extend.dp.map(function (d, i) {
         var a = P.ag[i] || ["", ""];
         return '<li><button type="button" data-pe="' + esc(d[1][0]) + '"><span class="pv-t pv-n">' + (i + 1) + '</span><span>' + esc(d[0]) + '<small>' + esc(a[0]) + '. Approved by ' + esc(lc(a[1])) + '.</small></span></button></li>';
       }).join("") + '</ul>';
-    } else h += '<h4>Integration Monitor</h4>' + list(P.im, "IM") + '<h4>Performance Monitor rules</h4>' + list(P.pm, "PM");
+    } else h += '<h4>Integration Monitor</h4>' + list(P.im, "IM") + '<h4>Performance Monitor rules</h4>' + list(P.pm, "PM") + (P.asn ? '<h4>ASN Intelligence (in development)</h4>' + list(P.asn, "ASN") : "");
     return h;
   }
   function pmApplyOv() {

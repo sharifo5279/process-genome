@@ -61,6 +61,7 @@
     pm: [["Acknowledgment within 24 hours", ["855"]], ["Ship notice within 1 hour of pickup", ["856"]], ["Invoice matches order price and quantity", ["810"]],
       ["Item confirmed before the first order", ["CIC", "CIN"]], ["Cost change loaded before invoicing", ["832", "879"]], ["Delivery events for every tendered load", ["214", "204"]],
       ["Shipping advice for every warehouse order", ["945", "940"]], ["Deduction backup inside the dispute window", ["812"]], ["Return credit matches an authorization", ["180"]]],
+    asn: [["ASN health, failures and SLA adherence by supplier", ["856"]], ["Rejections explained with the rule and the fix", ["824"]], ["Missing acknowledgments on ship notices", ["997"]]],
     /* Recommended action and approver for each Extend decision point, in decision point order */
     ag: [["Hold invoices and correct the cost on open orders", "Pricing analyst"], ["Build and send the ship notice from pickup data", "EDI operations lead"],
       ["Dispute with backup attached, or accept", "Deductions analyst"], ["Adjust the proposed order quantity", "Demand planner"],
