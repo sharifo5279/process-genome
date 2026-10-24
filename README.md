@@ -10,8 +10,79 @@ Master copy: the claude.ai artifact build. `site/index.html` is generated from i
 description, link preview tags, favicons). Below 1024 px the Process Genome and the Operations map render as lists with
 detail sheets.
 
-Command Center (Retail and CPG console and Product overlay) is not in the master yet. Until it is, apply it to each build with
-`python3 tools/command-center/apply.py site/index.html`.
+## Command Center source and generation
+
+Command Center (Retail and CPG console and Product overlay) is maintained in
+`tools/command-center/`, separately from the claude.ai master. Keep changes in these source files;
+do not hand-edit the generated `site/index.html`.
+
+| Generated block | Source files, in load order |
+|---|---|
+| Styles | `cc.css`, then `retail.css` |
+| Model and Genome overlay | `data.js`, then `pv.js` |
+| Console and retail workspace | `cc.js`, then `retail-data.js`, then `retail.js` |
+| Console container | The `CC_HTML` template in `apply.py` |
+
+After rebuilding from an **unpatched master**, install Command Center once:
+
+```sh
+node tools/build-site.mjs /path/to/master.html
+python3 tools/command-center/apply.py site/index.html
+```
+
+To update the already-generated site from the source modules, including when the original master
+is unavailable, use:
+
+```sh
+python3 tools/command-center/apply.py --refresh site/index.html
+```
+
+Both modes accept an optional output path for review without modifying the input:
+
+```sh
+python3 tools/command-center/apply.py --refresh site/index.html /tmp/process-genome-review.html
+```
+
+The generator writes explicit `process-genome:command-center` begin/end markers around its four
+managed blocks. Refresh replaces only those blocks, validates the existing integration hooks and
+retail-only route guards, and verifies that all content outside the blocks is byte-for-byte
+unchanged. It prints a SHA-256 fingerprint for that preserved content. Repeating refresh with the
+same sources produces identical output and skips rewriting an unchanged file.
+
+The first refresh can migrate the original unmarked checked-in additions from commit
+`b8e45684e99052c663aa9d69ef06ff48cda350e6`. Their frozen block fingerprints must match exactly.
+Unknown legacy content, partial/duplicate markers, missing modules, or changed integration anchors
+stop generation before output is written. Resolve the source/build mismatch rather than bypassing
+those checks. Refresh does not recreate the Genome master or reapply router changes; a fresh master
+build still uses the initial installation command above. All seven module files must be present.
+
+### Retail and CPG demo
+
+Open `#retail/command` for the Retail overview. The demo perspective switch selects Northfield
+Stores (retailer) or Nuvori Beauty (CPG supplier). Four workspaces cover partner participation,
+order commitments, ASN readiness, and invoice/deduction investigation. Eight cases include
+documents, policy checks, line comparisons, evidence gaps, and owned next steps.
+
+The existing IM, PM, and Analytics views remain available. Focused retail entry points and cases
+sit above the preserved core capability sample, whose Nuvori Beauty context is explicitly labeled.
+This is an industry extension of the current prototype, not a replacement CCPM product design.
+
+Case assignments, prepared actions, watchlists, and policy settings are stored in this browser
+under `process-genome-retail-v1`, separately for each perspective. Reset demo clears only the
+selected perspective. Every record is illustrative. Actions prepare local review packets; no
+messages, business documents, operational changes, disputes, or financial transactions are sent.
+Policy tests evaluate two fixtures against the edited threshold and any required evidence gate.
+Activating a demo policy saves its configuration; it does not rewrite the fixed case snapshot.
+
+Run the focused smoke checks after editing the retail modules:
+
+```sh
+node tools/command-center/retail.test.cjs
+python3 tools/command-center/apply.py --refresh site/index.html
+```
+
+Browser verification should cover both perspectives, each case tab, nested policy/process
+dialogs, draft retention, assignment/preparation, searches, filters, downloads, and core navigation.
 
 ## Visitor stats (on hold)
 Same model as the Trading Grid Innovation Guide (sharifo5279/tg-innovation-guide), so the Process Genome can join the
