@@ -179,7 +179,7 @@
       return '<div class="cx-k2">' + CXCATR[3].map(function (m) { return cxKpi(m[0], m[2], "Target " + m[3]); }).join("") + '</div>'; },
       f: function () { return '<button type="button" class="cx-lk" data-rt-kpis>Retail KPIs dashboard' + ci("chev", "cx-lki") + '</button>'; } }
   );
-  WSPRE.push({ k: "rt", n: "Retail KPIs", t: "rt", h: function () { return '<h4 class="cx-sh">Retail KPIs</h4>' + cxCatList([CXCATR]); } });
+  WSPRE.push({ k: "rt", n: "Retail KPIs", t: "rt", h: function () { return cxCatList([CXCATR]); } });
   RTDATA.workflows.filter(function (w) { return !w.hidden; }).forEach(function (w) { WSLENS.push({ k: w.id, n: w.title, match: function (x) { return x.wf === w.id; } }); });
   CXACTX.push(function () { return ccOn("rt") ? '<span class="rt-head-actions">' + rtButton("Reset demo", "data-rt-reset") + '</span>' : ""; });
   CXQ.push({ t: "rt", q: function () { return "Which evidence is still missing?"; }, a: function () {

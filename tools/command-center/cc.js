@@ -4,7 +4,7 @@
      One Overview, one findings list and one action queue; every record names the module that produced it.
      Illustrative values for the concept preview. */
   var ccEl = document.getElementById("cc"), cx = document.getElementById("cx");
-  var ccScr = "dash", ccGrp = { ws: true }, ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccPj = 0, ccAvLog = [];
+  var ccScr = "dash", ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccPj = 0, ccAvLog = [];
   var ccCfgTab = "", ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "open", ccPtTab = "all";
   var CC_GENOME = "../#retail/map";
   var CCPKG = { im: ["im"], pm: ["im", "pm"], rt: ["im", "pm", "rt"] }, CCPKGN = { im: "Integration Monitor", pm: "+ Performance Monitor", rt: "+ Retail pack" };
@@ -120,7 +120,7 @@
   /* Modules and shared records. Each finding and dashboard component carries the module that produces it. */
   var CCMOD = { IM: ["Integration Monitor", "im"], PM: ["Performance Monitor", "pm"], RT: ["Retail pack", "rt"] };
   function cxTag(m) { return m && CCMOD[m] ? '<span class="cx-mod ' + CCMOD[m][1] + '"><i></i>' + CCMOD[m][0] + '</span>' : '<span class="cx-mod all"><i></i>All modules</span>'; }
-  function cxModKey(scr) { scr = scr || ccScr; return scr.indexOf("im-") === 0 ? "IM" : scr === "ws-proc" ? (ccOn("rt") ? "RT" : "PM") : ""; }
+  function cxModKey(scr) { scr = scr || ccScr; return scr === "im-tp" ? "IM" : ""; }
   function cxF(f) { var o = ccRole() === "retailer" && CCFR[f.id], r = {}, k; if (!o) return f; for (k in f) r[k] = f[k]; for (k in o) r[k] = o[k]; return r; }
   function cxAll() { return CCF.map(cxF); }
   function cxById(id) { return cxF(CCF.filter(function (x) { return x.id === id; })[0]); }
@@ -208,7 +208,7 @@
   function cxProj() { return ccRole() === "retailer" ? CXPJR : CXPJ; }
   CXS["im-proj"] = function () {
     var PJ = cxProj(), p = PJ[ccPj], act = ccPj === 0 ? [62, 88, 91, 41, null, null, null, null, null, null] : [70, 72, 75, 74, null, null, null, null, null, null], prj = [null, null, null, 112, 108, 104, 98, 96, 94, 95];
-    return cxHead("Projections and anomalies") + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
+    return cxOvHead() + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
       return '<button type="button" data-cxpj="' + i + '" aria-pressed="' + (i === ccPj) + '"><b>' + x[0] + '</b><small>' + x[1] + ' · Executed today, 08:00</small>' + (x[2] ? '<em>' + x[2] + ci("warn") + '</em>' : '') + '</button>';
     }).join("") + '</nav><section class="cx-pjd"><header><h3>' + p[0] + '</h3>' + (p[7] ? '<button type="button" class="cx-btn" data-cxf="' + p[7] + '">Open finding</button>' : '') + '</header>' +
       '<div class="cx-chips">' + [["D", "Direction", p[3]], ["D", "Document type", p[4]], ["S", "Document standard", p[5]], ["P", "Partner", p[6]]].map(function (c) { return '<div><i>' + c[0] + '</i><span>' + c[1] + '<b>' + c[2] + '</b></span></div>'; }).join("") + '</div>' +
@@ -306,10 +306,16 @@
     return '<section class="cx-hero2" aria-label="Process health"><div class="cx-hv">' + svg + '</div>' + side + '</section>';
   }
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
+  function cxOvHead() {
+    var procs = ccOn("pm") ? " · " + [0, 1, 3].map(ccShort).join("; ") : "", cd = wsCurDash();
+    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
+      wsDashTabs().map(function (t) { return '<button type="button" data-cxgo="ws-dash" data-wsdash="' + t.key + '" aria-pressed="' + (ccScr === "ws-dash" && cd === t) + '">' + cxe(t.n) + '</button>'; }).join("");
+    return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' +
+      '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + '<button type="button" class="cx-ovn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></nav>';
+  }
   CXS["dash"] = function () {
     var by = function (o) { return CXDASH.filter(function (c) { return c.o === o; })[0]; }, rt = ccOn("rt") && by(35);
-    var procs = ccOn("pm") ? " · " + [0, 1, 3].map(ccShort).join("; ") : "";
-    return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' + cxHero() +
+    return cxOvHead() + cxHero() +
       '<div class="cx-dg cx-ovg">' + cxDc(by(10), rt ? 2 : 3) + (rt ? cxDc(rt, 2) : "") + cxDc(by(80), rt ? 2 : 3) + '</div>';
   };
   CXDASH.push(
@@ -429,25 +435,25 @@
     ccAvLog.push(["q", cxe(q.q())], ["a", cxe(r[0]) + (r[1].length ? '<span class="cx-avr">' + r[1].map(function (i) { return cxItemLink(i); }).join("") + '</span>' : "")]);
   }
 
-  /* Shell. One navigation for every package; Workspace gains sections as packages are added. [id, label, icon, children or package] */
-  var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"], ["im-tp", "Partners", "users"], ["im-proj", "Projections and anomalies", "trend"],
-    ["ws", "Workspace", "grid", [["ws-proc", "Business processes", "flow", "pm"], ["ws-dash", "Dashboards", "dash"], ["ws-rep", "Reports", "doc"], ["ws-not", "Notifications", "bell"], ["ws-task", "Tasks and reminders", "clock"], ["ws-agents", "Agents", "bot"]]],
-    ["cfg", "Configuration", "cog"]];
-  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "pm-act": "act", "rt-actions": "act", "pm-agents": "ws-agents", "ws": "ws-agents", "pm-rules": "cfg", "rt-rules": "cfg", "im-cfg": "cfg",
+  /* Shell. Six entries for every package. Overview gains dashboards and Workspace gains sections as packages are added. */
+  var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"], ["im-tp", "Partners", "users"], ["ws", "Workspace", "grid"], ["cfg", "Configuration", "cog"]];
+  var CXOV = ["dash", "im-proj", "ws-dash"];
+  var CXWS = [["ws-proc", "Business processes", "pm"], ["ws-rep", "Reports"], ["ws-not", "Notifications"], ["ws-task", "Tasks and reminders"], ["ws-agents", "Agents"]];
+  function cxWsSecs() { return CXWS.filter(function (w) { return !w[2] || ccOn(w[2]); }); }
+  function cxNavKey(s) { return CXOV.indexOf(s) >= 0 ? "dash" : s.indexOf("ws-") === 0 ? "ws" : s; }
+  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "pm-act": "act", "rt-actions": "act", "pm-agents": "ws-agents", "pm-rules": "cfg", "rt-rules": "cfg", "im-cfg": "cfg",
     "im-map": "ws-proc", "pm-proc": "ws-proc", "im-com": "im-tp", "an": "ws-dash", "rt-partners": "im-tp", "rt-orders": "ws-proc", "rt-shipments": "ws-proc", "rt-invoices": "ws-proc" };
-  function cxNavOk(s) { return CXNAV.some(function (g) { return g[0] === s || (Array.isArray(g[3]) && g[3].some(function (c) { return c[0] === s && (!c[3] || ccOn(c[3])); })); }); }
+  function cxNavOk(s) { return CXOV.indexOf(s) >= 0 || cxWsSecs().some(function (w) { return w[0] === s; }) || s !== "ws" && CXNAV.some(function (g) { return g[0] === s; }); }
   function cxMod() { var m = cxModKey(); return m ? CCMOD[m][0] : ""; }
   function cxBadge(k) { var it = ccItems(); var n = k === "find" ? it.filter(function (i) { return !i.done; }).length : k === "act" ? it.filter(function (i) { return !i.actDone; }).length : 0; return n ? '<em class="cx-nb">' + n + '</em>' : ""; }
   function cxTheme() { return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"; }
   function cxRender() {
     if (!cxNavOk(ccScr)) ccScr = "dash";
-    var nav = CXNAV.map(function (g) {
-      if (!Array.isArray(g[3])) return '<li><button type="button" class="cx-n1' + (ccScr === g[0] ? " on" : "") + '" data-cxgo="' + g[0] + '" title="' + g[1] + '"' + (ccScr === g[0] ? ' aria-current="page"' : "") + '>' + ci(g[2]) + '<span>' + g[1] + '</span>' + cxBadge(g[0]) + '</button></li>';
-      return '<li class="cx-ng"><button type="button" class="cx-n1 cx-grp" data-cxgrp="' + g[0] + '" aria-expanded="' + !!ccGrp[g[0]] + '" title="' + g[1] + '">' + ci("chev", "cv") + ci(g[2]) + '<span>' + g[1] + '</span></button>' + (ccGrp[g[0]] ? '<ul>' + g[3].filter(function (c) { return !c[3] || ccOn(c[3]); }).map(function (c) {
-        return '<li><button type="button" class="cx-n2' + (ccScr === c[0] ? " on" : "") + '" data-cxgo="' + c[0] + '" title="' + c[1] + '"' + (ccScr === c[0] ? ' aria-current="page"' : "") + '>' + ci(c[2]) + '<span>' + c[1] + '</span></button></li>'; }).join("") + '</ul>' : '') + '</li>';
+    var cur = cxNavKey(ccScr), nav = CXNAV.map(function (g) {
+      return '<li><button type="button" class="cx-n1' + (cur === g[0] ? " on" : "") + '" data-cxgo="' + g[0] + '" title="' + g[1] + '"' + (cur === g[0] ? ' aria-current="page"' : "") + '>' + ci(g[2]) + '<span>' + g[1] + '</span>' + cxBadge(g[0]) + '</button></li>';
     }).join("");
     var th = cxTheme();
-    cx.classList.toggle("glass", ccScr === "dash");
+    cx.classList.toggle("glass", CXOV.indexOf(ccScr) >= 0);
     cx.innerHTML = '<header class="cx-top"><span class="cx-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#0066FF"/><path d="M22.5 13.6h1.8l1.3-2.1h-3.1V8.1h-3.9v5.9a6.8 6.8 0 1 0 0 6.3c0 1 .1 1.7.6 2.4.8 1.2 2.3 1.3 3.6 1.3.7 0 1.1-.1 1.8-.2v-2.8l-1 .1c-1 0-1-.7-1-1.5zM12.6 20.2a3.1 3.1 0 1 1 0-6.1 3.1 3.1 0 0 1 0 6.1z" fill="#fff"/></svg>Command Center' + (cxMod() ? '<em>' + cxMod() + '</em>' : '') + '</span>' +
       '<span class="cx-cust">' + cxe(ccCompany()) + (ccOn("rt") ? ' · Retail and CPG' : '') + '</span><label class="cx-pkg"><span>Package</span><select data-cxpkg aria-label="Package">' + Object.keys(CCPKG).map(function (k) { return '<option value="' + k + '"' + (k === ccPkg ? " selected" : "") + '>' + CCPKGN[k] + '</option>'; }).join("") + '</select></label>' +
       '<span class="cx-tb"><button type="button" class="cx-avt" data-cxav aria-pressed="' + ccAv + '">' + ci("spark") + 'Aviator</button><button type="button" class="cx-ic" data-cxgo="act" aria-label="Open action queue">' + ci("bell") + '</button><button type="button" class="cx-ic" data-cxhelp aria-label="Help">' + ci("help") + '</button>' +
@@ -455,11 +461,10 @@
       '<div class="cx-body' + (ccNavMin ? " min" : "") + (ccAv ? " av" : "") + '"><nav class="cx-nav" aria-label="Command Center"><ul>' + nav + '</ul><a class="cx-n1 cx-col" href="' + CC_GENOME + '" title="Open Process Genome">' + ci("gen") + '<span>Open Process Genome</span></a><button type="button" class="cx-n1 cx-col" data-cxmin title="' + (ccNavMin ? "Expand panel" : "Collapse panel") + '">' + ci("side") + '<span>Collapse panel</span></button></nav>' +
       '<main class="cx-main" id="cx-main">' + CXS[ccScr]() + '</main>' + cxAviator() + '</div>' + cxDrawer();
   }
-  function cxGo(s) { if (s === "im-map") ccWsProc = "sol"; if (s === "an") ccWsDash = "p:pm"; if (s === "rt-partners") ccPtTab = "req"; s = CXALIAS[s] || s; if (!CXS[s] || !cxNavOk(s)) s = "dash"; ccScr = s; ccDr = null; if (s.indexOf("ws-") === 0) ccGrp.ws = true; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
+  function cxGo(s) { if (s === "ws") s = cxWsSecs()[0][0]; if (s === "im-map") ccWsProc = "sol"; if (s === "an") ccWsDash = "p:pm"; if (s === "rt-partners") ccPtTab = "req"; s = CXALIAS[s] || s; if (!CXS[s] || !cxNavOk(s)) s = "dash"; ccScr = s; ccDr = null; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-cxgo],[data-cxgrp],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt],[data-cxhelp]"); if (!b) return;
+    var b = e.target.closest("[data-cxgo],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt],[data-cxhelp]"); if (!b) return;
     if (b.hasAttribute("data-cxgo")) cxGo(b.getAttribute("data-cxgo"));
-    else if (b.hasAttribute("data-cxgrp")) { var g = b.getAttribute("data-cxgrp"); ccGrp[g] = !ccGrp[g]; if (ccNavMin) { ccNavMin = false; ccGrp[g] = true; } cxRender(); }
     else if (b.hasAttribute("data-cxmin")) { ccNavMin = !ccNavMin; cxRender(); }
     else if (b.hasAttribute("data-cxav")) { ccAv = !ccAv; cxRender(); }
     else if (b.hasAttribute("data-cxf")) { ccDr = ["f", b.getAttribute("data-cxf")]; cxRender(); }

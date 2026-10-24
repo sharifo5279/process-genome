@@ -41,12 +41,12 @@ A Package selector in the top bar switches between the three client configuratio
 
 | Package | Adds |
 |---|---|
-| Integration Monitor (every Trading Grid client) | Overview (failure points, network activity, transaction volume), Findings, Action queue, Partners, Projections and anomalies, Configuration (Monitoring), Workspace (Dashboards, Reports, Notifications, Tasks and reminders, Agents with Ivy) |
-| + Performance Monitor (any industry) | Process ring on the Overview, Workspace › Business processes with Solution, the Partner scorecard dashboard, agents Lex, Nora, Liz and Reese, Configuration › Rules & Policies with the rule wizard. Generic process templates: Order to cash, Procure to pay, Claims and disputes |
-| + Retail pack (includes Performance Monitor) | Retail process definitions, retail cases with evidence, retail lenses in Business processes, Required documents on Partners, Retail KPIs dashboard and Overview card, retail policy templates, retailer and supplier perspectives |
+| Integration Monitor (every Trading Grid client) | Overview (Summary with failure points, network activity and transaction volume; Projections and anomalies; custom dashboards), Findings, Action queue, Partners, Workspace (Reports, Notifications, Tasks and reminders, Agents with Ivy), Configuration (Monitoring) |
+| + Performance Monitor (any industry) | Process ring on the Overview, Workspace › Business processes with Solution, the Partner scorecard tab on the Overview, agents Lex, Nora, Liz and Reese, Configuration › Rules & Policies with the rule wizard. Generic process templates: Order to cash, Procure to pay, Claims and disputes |
+| + Retail pack (includes Performance Monitor) | Retail process definitions, retail cases with evidence, retail lenses in Business processes, Required documents on Partners, Retail KPIs tab and card on the Overview, retail policy templates, retailer and supplier perspectives |
 
-The navigation is the same seven entries for every package; Workspace gains sections as packages are added, and the
-Retail pack adds content rather than screens. Every finding, action and dashboard component names its module.
+The navigation is the same six entries for every package. The Overview gains dashboard tabs and Workspace gains sections as
+packages are added; the Retail pack adds content rather than screens. Every finding, action and dashboard component names its module.
 
 Modules register through shared lists: `CXITEMS` (findings and actions), `CXDASH` (components), `CXQ` (Aviator),
 `CXCFG` (Configuration cards), `CXPTAB` (Partners tabs), `WSPRE` (prebuilt dashboards) and `WSLENS` (process lenses).

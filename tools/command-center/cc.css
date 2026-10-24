@@ -409,3 +409,10 @@
   .ws-pre { font-style: normal; font-size: 11px; font-weight: 600; color: var(--pmu); margin-left: 4px; }
   .ws-docs { margin: 0; font-size: 13px; line-height: 22px; color: var(--pmu); }
   .cx-agh .cx-mod { margin-left: auto; }
+
+  /* Overview tabs: summary, projections and dashboards; Create dashboard at the end of the row */
+  .cx-ovt { align-items: center; margin: 4px 0 16px; }
+  .cx-ovt .cx-ovn { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--pl); border-radius: 8px; background: var(--pc); color: var(--pai); font-weight: 600; }
+  .cx-ovt .cx-ovn svg { width: 16px; height: 16px; }
+  .cx.glass .cx-ovt { border-bottom-color: var(--g-line); }
+  .ws-pseg { margin: 0 0 16px; }

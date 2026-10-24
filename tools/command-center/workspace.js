@@ -44,7 +44,10 @@
   function wsVal(sel) { var el = cx.querySelector(sel); return el ? String(el.value || "").trim() : ""; }
   function wsSel(name, opts, cur) { return '<select ' + name + '>' + opts.map(function (o) { return '<option' + (o === cur ? " selected" : "") + '>' + cxe(o) + '</option>'; }).join("") + '</select>'; }
   function wsField(label, ctl) { return '<label class="ws-f"><span>' + label + '</span>' + ctl + '</label>'; }
-  function wsHead(t, lead, extra) { return cxHead(t, extra) + (lead ? '<p class="cx-lead">' + lead + '</p>' : ""); }
+  function wsHead(t, lead, extra) {
+    return cxHead("Workspace", extra) + '<nav class="cx-tabs" aria-label="Workspace">' + cxWsSecs().map(function (w) { return '<button type="button" data-cxgo="' + w[0] + '" aria-pressed="' + (ccScr === w[0]) + '">' + w[1] + '</button>'; }).join("") + '</nav>' +
+      (lead ? '<p class="cx-lead">' + lead + '</p>' : "");
+  }
   function wsNew(form, label) { return '<button type="button" class="cx-btn p" data-wsform="' + form + '">' + ci("plus") + label + '</button>'; }
   function wsForm(form, title, fields, saveLabel) {
     return ccWsForm === form ? '<section class="cx-card ws-form"><header><h3>' + title + '</h3></header><div class="ws-fg">' + fields + '</div><div class="ws-fa"><button type="button" class="cx-btn p" data-wssave="' + form + '">' + saveLabel + '</button><button type="button" class="cx-btn" data-wsform="">Cancel</button></div></section>' : "";
@@ -54,9 +57,9 @@
      The Retail pack adds retail process definitions and lenses for its workflows. */
   var CCPROCS = [0, 1, 3], WSLENS = [];
   CXS["ws-proc"] = function () {
-    var seg = '<nav class="cx-tabs">' + CCPROCS.map(function (i) { return '<button type="button" data-wsproc="' + i + '" aria-pressed="' + (ccWsProc === String(i)) + '">' + cxe(ccShort(i)) + '</button>'; }).join("") +
+    var seg = '<nav class="ws-lens ws-pseg" aria-label="Business process"><span>Process</span>' + CCPROCS.map(function (i) { return '<button type="button" data-wsproc="' + i + '" aria-pressed="' + (ccWsProc === String(i)) + '">' + cxe(ccShort(i)) + '</button>'; }).join("") +
       '<button type="button" data-wsproc="sol" aria-pressed="' + (ccWsProc === "sol") + '">Solution</button></nav>';
-    var h = wsHead("Business processes", "", seg);
+    var h = wsHead("Business processes", "") + seg;
     if (ccWsProc === "sol") return h + '<p class="cx-lead">Business documents in the client solution, with their EDI and ERP equivalents.</p>' +
       cxCard("", '<table class="cx-tbl"><thead><tr><th>Business document</th><th>EDI documents</th><th>ERP document</th><th>Processes</th></tr></thead><tbody>' + CXSOL.map(function (r) {
         return '<tr><td><b>' + r[0] + '</b></td><td><code>' + r[1] + '</code></td><td>' + r[2] + '</td><td>' + cxe(cxProcNames(r[3])) + '</td></tr>'; }).join("") + '</tbody></table>');
@@ -80,20 +83,19 @@
       cxCard("Rules and documents", '<ul class="cx-agr">' + rules.map(function (r) { var a = CXA.filter(function (x) { return x.id === r[0]; })[0]; return '<li>' + ci("check") + cxe(r[1]) + ' <small class="ws-mu">' + a.n + '</small></li>'; }).join("") + '</ul><h4 class="cx-sh">Documents</h4><p class="ws-docs">' + docs.map(function (r) { return '<code>' + r[1].split(",")[0] + '</code> ' + r[0]; }).join(" · ") + '</p>', "", cxGoBtn("Rules", "cfg")) + '</div>';
   };
 
-  /* Dashboards: prebuilt by package, plus custom dashboards from the component library */
+  /* Dashboards: Overview tabs. Prebuilt by package, plus custom dashboards from the component library */
   var WSPRE = [{ k: "pm", n: "Partner scorecard", t: "pm", h: function () { return cxScorecard(); } }];
   function wsDashTabs() {
     var W = wsLoad();
     return WSPRE.filter(function (d) { return ccOn(d.t); }).map(function (d) { return { key: "p:" + d.k, n: d.n, pre: d }; })
       .concat(wsIdx(W.dashboards).map(function (p) { return { key: "c:" + p[1], n: p[0].n, dash: p[0], ix: p[1] }; }));
   }
+  function wsCurDash() { var tabs = wsDashTabs(); return tabs.filter(function (t) { return t.key === ccWsDash; })[0] || tabs[0]; }
   CXS["ws-dash"] = function () {
-    var tabs = wsDashTabs(), cur = tabs.filter(function (t) { return t.key === ccWsDash; })[0] || tabs[0], comps = cxComps();
+    var cur = wsCurDash(), comps = cxComps();
     var pick = comps.map(function (c) { return '<label class="ws-ck"><input type="checkbox" data-wscomp="' + c.o + '"><span>' + c.t + '</span>' + cxTag(c.mod) + '</label>'; }).join("");
-    var h = wsHead("Dashboards", "Prebuilt dashboards for your packages, and your own built from the component library.", wsNew("dash", "Create dashboard")) +
-      wsForm("dash", "New dashboard", wsField("Name", '<input type="text" data-wsname placeholder="Dashboard name">') + '<div class="ws-cks">' + pick + '</div>', "Save dashboard");
+    var h = cxOvHead() + wsForm("dash", "New dashboard", wsField("Name", '<input type="text" data-wsname placeholder="Dashboard name">') + '<div class="ws-cks">' + pick + '</div>', "Save dashboard");
     if (!cur) return h + '<p class="cx-empty">No dashboards yet.</p>';
-    h += '<nav class="cx-tabs">' + tabs.map(function (t) { return '<button type="button" data-wsdash="' + t.key + '" aria-pressed="' + (t === cur) + '">' + cxe(t.n) + (t.pre ? ' <em class="ws-pre">Prebuilt</em>' : '') + '</button>'; }).join("") + '</nav>';
     if (cur.pre) return h + cur.pre.h();
     var list = cur.dash.c.map(function (o) { return comps.filter(function (c) { return c.o === o; })[0]; }).filter(Boolean);
     return h + '<div class="ws-bar"><span class="cx-note">' + list.length + ' components</span><button type="button" class="cx-btn" data-wsdel="dashboards:' + cur.ix + '">' + ci("trash") + 'Delete dashboard</button></div><div class="cx-dg">' + list.map(function (c) { return cxDc(c); }).join("") + '</div>';
