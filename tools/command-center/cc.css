@@ -416,3 +416,25 @@
   .cx-ovt .cx-ovn svg { width: 16px; height: 16px; }
   .cx.glass .cx-ovt { border-bottom-color: var(--g-line); }
   .ws-pseg { margin: 0 0 16px; }
+
+  /* Integration Monitor: digest, volume analysis, network graph, integration analysis, Explain with Aviator */
+  .im-dg .cx-tbl { margin: 4px 0 12px; }
+  .im-ka { display: flex; gap: 10px; align-items: flex-start; }
+  .im-vol { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .im-ref { display: grid; gap: 10px; }
+  .im-ref .ws-f select { width: 100%; }
+  .im-gap { margin-left: 12px; }
+  .im-ng { width: 100%; height: auto; display: block; }
+  .im-sp { stroke: var(--pl2); stroke-width: 1.5; } .im-sp.on { stroke: var(--pa); stroke-width: 2.5; }
+  .im-bn { cursor: pointer; } .im-bn circle { fill: var(--psel); stroke: var(--pa); stroke-width: 2; } .im-bn.idle circle { fill: var(--pcl); stroke: var(--pl2); }
+  .im-bn.on circle { fill: var(--pa); } .im-bn.on .im-bv { fill: #fff; } .im-bn:focus-visible circle { stroke-width: 4; }
+  .im-bv { font-size: 15px; font-weight: 800; fill: var(--pf); } .im-bl { font-size: 12px; font-weight: 600; fill: var(--pmu); }
+  .im-me { fill: var(--pc); stroke: var(--pf); stroke-width: 2.5; } .im-mt { font-size: 12px; font-weight: 800; fill: var(--pf); } .im-ms { font-size: 11px; fill: var(--pmu); }
+  .im-pl { list-style: none; margin: 0 0 8px; padding: 0; } .im-pl li { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--pl); } .im-pl small { color: var(--pmu); font-size: 12px; }
+  .im-back { transform: rotate(180deg); }
+  .im-mx { overflow-x: auto; } .im-mx th.c, .im-mx td.c { text-align: center; } .im-mx th small { display: block; font-weight: 500; color: var(--pmu); }
+  .im-c { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; } .im-c.a { background: var(--pa); } .im-c.i { background: #FAAD1F; } .im-c.n { background: var(--pc); border: 1.5px solid var(--pl2); }
+  .im-na { color: var(--pfa); }
+  .im-pjb { display: flex; justify-content: flex-end; margin: -4px 0 12px; }
+  .im-ex { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; } .im-ex li { display: flex; gap: 10px; align-items: flex-start; } .im-ex li .ci { color: var(--pa); flex: none; }
+  @container (max-width: 1080px) { .im-vol { grid-template-columns: 1fr; } }

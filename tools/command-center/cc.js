@@ -15,6 +15,12 @@
   function ccIndustry() { return ccOn("rt") ? "Retail and CPG" : "Trading Grid"; }
   /* Process definitions come from the active package: retail definitions with the Retail pack, generic templates otherwise */
   function ccProc(i) { if (ccOn("rt")) return PROCESSES.retail[i]; var g = CCGEN[i]; return { n: g.n, owner: g.owner, outcome: g.outcome, measures: g.measures, steps: g.steps || PROCESSES.retail[i].steps }; }
+  /* Command Center sees EDI traffic only. Process views show the steps that exchange a document, with names for that document where the reference step is wider. */
+  var CCSTEPN = { "1:2": "Receiving advice" };
+  function ccSteps(i) { return ccProc(i).steps.map(function (s, k) { return [k, s]; }).filter(function (p) { return ccToks(p[1][1]).some(function (t) { return /^(\d{3}|[A-Z]{6})$/.test(t.trim()); }); }); }
+  function ccStepName(i, k) { return (ccOn("rt") && CCSTEPN[i + ":" + k]) || ccProc(i).steps[k][0]; }
+  function ccStepNo(i, k) { var s = ccSteps(i); for (var j = 0; j < s.length; j++) if (s[j][0] === k) return j + 1; return 0; }
+  function ccStepDoc(s) { return s[1].replace(/,?\s*(WMS|ERP)\b/g, ""); }
   function ccShort(i) { return ccOn("rt") ? GENOME.retail.short[i] : CCGEN[i].n; }
 
   /* Icons (Lucide paths) */
@@ -43,7 +49,7 @@
   var CXA = [
     { id: "lex", n: "Lex", r: "Timing and SLA agent", d: "Watches every document clock: acknowledgment windows and ship notice timing.", f: ["f1", "f3"], t: "pm" },
     { id: "nora", n: "Nora", r: "Conformance agent", d: "Checks documents against partner rules before and after they are sent: price, quantity, labels and required fields.", f: ["f4"], t: "pm" },
-    { id: "liz", n: "Liz", r: "Process agent", d: "Follows each business process across documents and systems, and flags steps that will fail later in the process.", f: ["f9"], t: "pm" },
+    { id: "liz", n: "Liz", r: "Process agent", d: "Follows each business process across its EDI documents, and flags steps that will fail later in the process.", f: ["f9"], t: "pm" },
     { id: "reese", n: "Reese", r: "Reconciliation agent", d: "Reconciles values across orders, shipments, invoices and remittances.", f: [], t: "pm" },
     { id: "ivy", n: "Ivy", r: "Volume agent", d: "Compares document volume with its projection by partner and hour, and raises missing documents and volume drops as findings.", f: ["f2", "f7", "f10"], t: "im" }
   ];
@@ -196,24 +202,29 @@
     if (cur) return h + cur.h();
     return h + '<div class="cx-k4">' + cxKpi("Total partners", "208", "21 added this year") + cxKpi("Active partners", "163", "Sent or received in 30 days") + cxKpi("Inactive partners", "45", "No activity in 30 days") + cxKpi("Added this month", "3", "4 last month") + '</div>' +
       cxCard("Partners", '<table class="cx-tbl"><thead><tr><th>Partner name</th><th>Partner alias</th><th>Status</th><th>BUID</th><th>Onboarding date</th><th>Last activity</th></tr></thead><tbody>' +
-        cxPartners().map(function (p) { return '<tr><td><b>' + p[0] + '</b></td><td><code>' + p[1] + '</code></td><td><span class="cx-st s-' + (p[2] === "Active" ? "resolved" : "known") + '"><i></i>' + p[2] + '</span></td><td>' + p[3] + '</td><td>' + p[4] + '</td><td>' + p[5] + '</td></tr>'; }).join("") + '</tbody></table>', "", '<span class="cx-note">Showing 10 of 208</span>') +
+        cxPartners().map(function (p) { return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(p[0]) + '"><b>' + p[0] + '</b></button></td><td><code>' + p[1] + '</code></td><td><span class="cx-st s-' + (p[2] === "Active" ? "resolved" : "known") + '"><i></i>' + p[2] + '</span></td><td>' + p[3] + '</td><td>' + p[4] + '</td><td>' + p[5] + '</td></tr>'; }).join("") + '</tbody></table>', "", '<span class="cx-note">Showing 10 of 208</span>') +
       cxCard("Partners over 12 months", cxLine([{ v: [172, 176, 179, 183, 186, 190, 193, 196, 199, 203, 205, 208] }, { v: [3, 4, 3, 4, 3, 4, 3, 3, 3, 4, 2, 3], c: "b2" }], { w: 1060, h: 230, max: 240, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Partners over 12 months" }) + '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>Total partners</li><li><i style="background:#001889"></i>Onboarded</li></ul>');
   };
   var CXPJ = [["Harbor Grocers orders", "Order volume drop", 5, "Inbound", "Purchase order (850)", "X12", "Harbor Grocers", "f2"], ["Westline Home acknowledgments", "Volume drop", 3, "Inbound", "Functional acknowledgment (997)", "X12", "Westline Home", "f10"],
     ["Harbor Grocers remittances", "Document missing", 1, "Inbound", "Remittance advice (820)", "X12", "Harbor Grocers", "f7"], ["Northfield Stores invoices", "Within projection", 0, "Outbound", "Invoice (810)", "X12", "Northfield Stores", null],
-    ["Westline Home orders", "Within projection", 0, "Inbound", "Purchase order (850)", "X12", "Westline Home", null]];
+    ["Westline Home orders", "Within projection", 0, "Inbound", "Purchase order (850)", "X12", "Westline Home", null],
+    ["Failed transactions, all partners", "Failed transactions above threshold", 2, "Both", "All document types", "X12", "All partners", null, 1]];
   var CXPJR = [["Meadowline Care orders", "Order volume drop", 5, "Outbound", "Purchase order (850)", "X12", "Meadowline Care", "f2"], ["Tidewell Home acknowledgments", "Volume drop", 3, "Outbound", "Functional acknowledgment (997)", "X12", "Tidewell Home", "f10"],
     ["Meadowline Care remittances", "Document missing", 1, "Outbound", "Remittance advice (820)", "X12", "Meadowline Care", "f7"], ["Nuvori Beauty invoices", "Within projection", 0, "Inbound", "Invoice (810)", "X12", "Nuvori Beauty", null],
-    ["Copperleaf Living orders", "Within projection", 0, "Outbound", "Purchase order (850)", "X12", "Copperleaf Living", null]];
+    ["Copperleaf Living orders", "Within projection", 0, "Outbound", "Purchase order (850)", "X12", "Copperleaf Living", null],
+    ["Failed transactions, all partners", "Failed transactions above threshold", 2, "Both", "All document types", "X12", "All partners", null, 1]];
   function cxProj() { return ccRole() === "retailer" ? CXPJR : CXPJ; }
   CXS["im-proj"] = function () {
-    var PJ = cxProj(), p = PJ[ccPj], act = ccPj === 0 ? [62, 88, 91, 41, null, null, null, null, null, null] : [70, 72, 75, 74, null, null, null, null, null, null], prj = [null, null, null, 112, 108, 104, 98, 96, 94, 95];
-    return cxOvHead() + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
+    var PJ = cxProj(), p = PJ[ccPj] || PJ[0], fl = !!p[8], act = fl ? [9, 11, 10, 27, null, null, null, null, null, null] : ccPj === 0 ? [62, 88, 91, 41, null, null, null, null, null, null] : [70, 72, 75, 74, null, null, null, null, null, null],
+      prj = fl ? [null, null, null, 11, 10, 10, 11, 10, 9, 10] : [null, null, null, 112, 108, 104, 98, 96, 94, 95];
+    var ex = imExplain ? cxCard("Aviator findings", '<ul class="im-ex">' + [PJ[0][0] + ": volume fell 64% below the projected range at 06:30 and has not recovered. The partner's AS2 messages fail signature checks, so orders are not arriving.",
+      PJ[1][0] + ": acknowledgments dropped while the partner's other documents flow normally. The gap began at 05:00.", "Failed transactions: 27 in the last hour against a threshold of 18. Most are signature failures from one partner and clear when its certificate is updated."].map(function (t) { return '<li>' + ci("spark") + '<span>' + cxe(t) + '</span></li>'; }).join("") + '</ul><p class="cx-note">Written from your watchlists, projections and anomalies. AI can make mistakes. Check important information.</p>', "im-exc") : "";
+    return cxOvHead() + '<div class="im-pjb"><button type="button" class="cx-btn p" data-imexplain aria-pressed="' + imExplain + '">' + ci("spark") + (imExplain ? "Hide Aviator findings" : "Explain with Aviator") + '</button></div>' + ex + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
       return '<button type="button" data-cxpj="' + i + '" aria-pressed="' + (i === ccPj) + '"><b>' + x[0] + '</b><small>' + x[1] + ' · Executed today, 08:00</small>' + (x[2] ? '<em>' + x[2] + ci("warn") + '</em>' : '') + '</button>';
     }).join("") + '</nav><section class="cx-pjd"><header><h3>' + p[0] + '</h3>' + (p[7] ? '<button type="button" class="cx-btn" data-cxf="' + p[7] + '">Open finding</button>' : '') + '</header>' +
       '<div class="cx-chips">' + [["D", "Direction", p[3]], ["D", "Document type", p[4]], ["S", "Document standard", p[5]], ["P", "Partner", p[6]]].map(function (c) { return '<div><i>' + c[0] + '</i><span>' + c[1] + '<b>' + c[2] + '</b></span></div>'; }).join("") + '</div>' +
-      cxLine([{ v: act, c: "act" }, { v: prj, c: "prj" }], { w: 840, h: 210, max: 140, xl: ["Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29"], now: 3, band: prj.map(function (v) { return v == null ? null : [v - 16, v + 16]; }), label: "Projection and actual" }) +
-      '<ul class="cx-lg row"><li><i class="bd"></i>Projected range</li><li><i style="background:#5B8DEF"></i>Projection</li><li><i style="background:#E8590C"></i>Actual</li></ul><h4 class="cx-sh">Heat map: hourly activity projection</h4>' + cxHeat() + '</section></div>';
+      cxLine([{ v: act, c: "act" }, { v: prj, c: "prj" }], { w: 840, h: 210, max: fl ? 30 : 140, xl: ["Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29"], now: 3, band: prj.map(function (v) { return v == null ? null : fl ? [0, 18] : [v - 16, v + 16]; }), label: "Projection and actual" }) +
+      '<ul class="cx-lg row"><li><i class="bd"></i>' + (fl ? "Error threshold" : "Projected range") + '</li><li><i style="background:#5B8DEF"></i>Projection</li><li><i style="background:#E8590C"></i>Actual</li></ul><h4 class="cx-sh">Heat map: hourly activity projection</h4>' + cxHeat() + '</section></div>';
   };
   /* Solution: the business documents behind the client's processes (process indices) */
   var CXSOL = [["Purchase order", "850, 860", "Sales order", [0]], ["Order acknowledgment", "855, 865", "Order confirmation", [0]], ["Price catalog", "832", "Condition record", [0]],
@@ -308,7 +319,7 @@
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
   function cxOvHead() {
     var procs = ccOn("pm") ? " · " + [0, 1, 3].map(ccShort).join("; ") : "", cd = wsCurDash();
-    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
+    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Transaction volume"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
       wsDashTabs().map(function (t) { return '<button type="button" data-cxgo="ws-dash" data-wsdash="' + t.key + '" aria-pressed="' + (ccScr === "ws-dash" && cd === t) + '">' + cxe(t.n) + '</button>'; }).join("");
     return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' +
       '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + '<button type="button" class="cx-ovn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></nav>';
@@ -316,7 +327,7 @@
   CXS["dash"] = function () {
     var by = function (o) { return CXDASH.filter(function (c) { return c.o === o; })[0]; }, rt = ccOn("rt") && by(35);
     return cxOvHead() + cxHero() +
-      '<div class="cx-dg cx-ovg">' + cxDc(by(10), rt ? 2 : 3) + (rt ? cxDc(rt, 2) : "") + cxDc(by(80), rt ? 2 : 3) + '</div>';
+      '<div class="cx-dg cx-ovg">' + cxDc(by(5)) + cxDc(by(10), rt ? 2 : 3) + (rt ? cxDc(rt, 2) : "") + cxDc(by(80), rt ? 2 : 3) + '</div>';
   };
   CXDASH.push(
     { o: 10, mod: "IM", w: 2, t: "Network activity", h: function () {
@@ -344,7 +355,7 @@
         '</div><ul class="cx-lg row"><li><i style="background:#0066FF"></i>850 Purchase order</li><li><i style="background:#001889"></i>856 Ship notice</li><li><i style="background:#5B8DEF"></i>810 Invoice</li><li><i style="background:#9DB7F2"></i>Other</li></ul>'; } },
     { o: 80, mod: "IM", w: 4, t: "Transaction volume", h: function () {
       return cxLine([{ v: [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590], area: true }], { w: 760, h: 220, min: 3000, max: 5000, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Transaction volume, last 12 months" }); },
-      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>'; } },
+      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>' + cxGoBtn("Analyze volume", "im-vol"); } },
     { o: 100, mod: "PM", w: 3, t: "Findings by agent", h: function () {
       return cxBars(cxAgents().map(function (a, k) { return [a.n + " · " + a.r, a.f.filter(function (id) { return !ccDone[id]; }).length + [12, 5, 3, 4, 6][k], "", "b"]; }), { max: 20 }); },
       f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Agents", "ws-agents"); } }
@@ -395,7 +406,7 @@
       h = '<header><span><p>Finding · ' + cxe(cxAgentName(f)) + '</p><h3>' + cxe(f.ot) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
         '<p class="cx-chipsr">' + cxSevChip(f.sev) + cxStChip(f) + cxTag(f.mod === "Integration Monitor" ? "IM" : "PM") + '<span class="cx-tg">' + cxe(f.how) + '</span></p><p>' + cxe(f.os) + '</p>' +
         '<div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
-        '<dl class="cx-dl"><div><dt>Partner</dt><dd>' + cxe(f.partner) + '</dd></div>' + (pm ? '<div><dt>Process</dt><dd><button type="button" class="cx-lk" data-cxproc="' + f.p + '">' + cxe(P.n) + '</button>, step ' + (f.st + 1) + ': ' + cxe(P.steps[f.st][0]) + '</dd></div>' : "") +
+        '<dl class="cx-dl"><div><dt>Partner</dt><dd>' + cxe(f.partner) + '</dd></div>' + (pm ? '<div><dt>Process</dt><dd><button type="button" class="cx-lk" data-cxproc="' + f.p + '">' + cxe(P.n) + '</button>, step ' + ccStepNo(f.p, f.st) + ': ' + cxe(ccStepName(f.p, f.st)) + '</dd></div>' : "") +
         '<div><dt>' + (f.mod === "Integration Monitor" ? "Check" : "Rule") + '</dt><dd>' + cxe(CXRULE[f.id]) + '</dd></div><div><dt>Transactions</dt><dd>' + cxe(CXDOC[f.id]) + '</dd></div></dl>' +
         '<h4>Timeline</h4><ol class="cx-tl">' + f.ev.map(function (e) { return '<li><b>' + cxe(e[0]) + '</b><span>' + cxe(e[1]) + '</span></li>'; }).join("") + '</ol>' +
         '<h4>Root cause</h4><p>' + cxe(f.cause) + '</p><h4>Recommended action</h4><div class="cx-rec">' + ci("bot") + '<span>' + cxe(f.act) + '<small>Approver: ' + cxe(f.appr) + '</small></span></div>' +
@@ -403,7 +414,7 @@
           '<button type="button" class="cx-btn p" data-cxapp="' + f.id + '">Approve action</button><button type="button" class="cx-btn" data-cxknown="' + f.id + '">Mark as known issue</button>') + '</div>';
     } else if (ccDr[0] === "help") {
       h = '<header><span><p>Clickable prototype</p><h3>Command Center</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
-        '<p>Switch the package in the top bar to see what each client gets.</p><dl class="cx-dl cx-dl1"><div><dt>' + cxTag("IM") + '</dt><dd>Standard for every Trading Grid client: network activity, partners, projections and anomalies, Ivy the volume agent.</dd></div>' +
+        '<p>Switch the package in the top bar to see what each client gets.</p><dl class="cx-dl cx-dl1"><div><dt>' + cxTag("IM") + '</dt><dd>Standard for every Trading Grid client: daily digest, transaction volume, projections and anomalies, partners with network graph and integration analysis, Ivy the volume agent.</dd></div>' +
         '<div><dt>' + cxTag("PM") + '</dt><dd>Add-on for any industry: business processes, agents, rules and the partner scorecard.</dd></div>' +
         '<div><dt>' + cxTag("RT") + '</dt><dd>Includes Performance Monitor and adds retail processes, cases, policy templates, KPIs and the retailer and supplier perspectives.</dd></div></dl>' +
         '<p class="cx-sub">All partners, records and outcomes are illustrative. No live network is connected.</p></div>';
@@ -437,7 +448,7 @@
 
   /* Shell. Six entries for every package. Overview gains dashboards and Workspace gains sections as packages are added. */
   var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"], ["im-tp", "Partners", "users"], ["ws", "Workspace", "grid"], ["cfg", "Configuration", "cog"]];
-  var CXOV = ["dash", "im-proj", "ws-dash"];
+  var CXOV = ["dash", "im-proj", "im-vol", "ws-dash"];
   var CXWS = [["ws-proc", "Business processes", "pm"], ["ws-rep", "Reports"], ["ws-not", "Notifications"], ["ws-task", "Tasks and reminders"], ["ws-agents", "Agents"]];
   function cxWsSecs() { return CXWS.filter(function (w) { return !w[2] || ccOn(w[2]); }); }
   function cxNavKey(s) { return CXOV.indexOf(s) >= 0 ? "dash" : s.indexOf("ws-") === 0 ? "ws" : s; }

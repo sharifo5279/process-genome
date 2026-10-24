@@ -444,6 +444,28 @@
   .cx-ovt .cx-ovn svg { width: 16px; height: 16px; }
   .cx.glass .cx-ovt { border-bottom-color: var(--g-line); }
   .ws-pseg { margin: 0 0 16px; }
+
+  /* Integration Monitor: digest, volume analysis, network graph, integration analysis, Explain with Aviator */
+  .im-dg .cx-tbl { margin: 4px 0 12px; }
+  .im-ka { display: flex; gap: 10px; align-items: flex-start; }
+  .im-vol { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .im-ref { display: grid; gap: 10px; }
+  .im-ref .ws-f select { width: 100%; }
+  .im-gap { margin-left: 12px; }
+  .im-ng { width: 100%; height: auto; display: block; }
+  .im-sp { stroke: var(--pl2); stroke-width: 1.5; } .im-sp.on { stroke: var(--pa); stroke-width: 2.5; }
+  .im-bn { cursor: pointer; } .im-bn circle { fill: var(--psel); stroke: var(--pa); stroke-width: 2; } .im-bn.idle circle { fill: var(--pcl); stroke: var(--pl2); }
+  .im-bn.on circle { fill: var(--pa); } .im-bn.on .im-bv { fill: #fff; } .im-bn:focus-visible circle { stroke-width: 4; }
+  .im-bv { font-size: 15px; font-weight: 800; fill: var(--pf); } .im-bl { font-size: 12px; font-weight: 600; fill: var(--pmu); }
+  .im-me { fill: var(--pc); stroke: var(--pf); stroke-width: 2.5; } .im-mt { font-size: 12px; font-weight: 800; fill: var(--pf); } .im-ms { font-size: 11px; fill: var(--pmu); }
+  .im-pl { list-style: none; margin: 0 0 8px; padding: 0; } .im-pl li { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--pl); } .im-pl small { color: var(--pmu); font-size: 12px; }
+  .im-back { transform: rotate(180deg); }
+  .im-mx { overflow-x: auto; } .im-mx th.c, .im-mx td.c { text-align: center; } .im-mx th small { display: block; font-weight: 500; color: var(--pmu); }
+  .im-c { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; } .im-c.a { background: var(--pa); } .im-c.i { background: #FAAD1F; } .im-c.n { background: var(--pc); border: 1.5px solid var(--pl2); }
+  .im-na { color: var(--pfa); }
+  .im-pjb { display: flex; justify-content: flex-end; margin: -4px 0 12px; }
+  .im-ex { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; } .im-ex li { display: flex; gap: 10px; align-items: flex-start; } .im-ex li .ci { color: var(--pa); flex: none; }
+  @container (max-width: 1080px) { .im-vol { grid-template-columns: 1fr; } }
   /* Retail and CPG workspaces: additive, scoped to the Command Center. */
   .cx.rt-app {
     --rt-navy: #102b56;
@@ -786,9 +808,9 @@
     { id: "f1", p: 0, st: 2, sev: "c", mod: "Performance Monitor", how: "Rule and prediction", pil: "Extend", dp: 2, partner: "Northfield Stores", n: 14, val: 8400, at: "07:10",
       ot: "Ship notices not sent for 14 shipments", os: "Carrier pickup confirmed at 06:10. No 856 sent, and the loads arrive at the DC in about 5 hours.",
       bt: "14 shipments arriving before their ship notice", bs: "Northfield Stores cannot receive the loads by scan until the ship notices arrive.",
-      ev: [["06:10", "Carrier pickup confirmed for 14 loads"], ["06:12", "Shipments closed in the ERP"], ["07:10", "Rule breached: no 856 within 1 hour of pickup"], ["08:05", "Predicted arrival before ship notice for all 14 loads"]],
-      cause: "The ERP shipment export stopped after a release at 05:45. Orders and invoices are unaffected.",
-      act: "Build the 14 ship notices from carrier pickup and pack data, then send them to Northfield Stores.", appr: "EDI operations lead",
+      ev: [["05:45", "Last 856 sent to Northfield Stores"], ["06:10", "Carrier pickup events (214) for 14 loads"], ["07:10", "Rule breached: no 856 within 1 hour of pickup"], ["08:05", "Predicted arrival before ship notice for all 14 loads"]],
+      cause: "No 856 has been sent since 05:45, while 855 and 810 traffic continues. The ship notice feed into Trading Grid stopped.",
+      act: "Restart the ship notice feed and send the 14 notices to Northfield Stores.", appr: "EDI operations lead",
       area: "Missing documents", who: ["Supply chain", "IT and ERP", "Customer service"] },
     { id: "f2", p: 0, st: 0, sev: "c", mod: "Integration Monitor", how: "Anomaly", pil: "Optimize", partner: "Harbor Grocers", n: 74, val: 182000, at: "06:30",
       ot: "Order volume 64% below projection", os: "Harbor Grocers sent 41 purchase orders since 05:00 against 115 projected. Last interchange at 05:52.",
@@ -800,15 +822,15 @@
     { id: "f3", p: 0, st: 1, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Westline Home", n: 37, val: 3700, at: "05:00",
       ot: "37 acknowledgments past the 24-hour window", os: "Purchase orders received yesterday have no 855. Westline Home requires acknowledgment within 24 hours.",
       bt: "37 orders not confirmed with Westline Home", bs: "Unconfirmed orders risk cancellation by the customer.",
-      ev: [["Yesterday 04:58", "37 purchase orders received and loaded"], ["05:00", "24-hour acknowledgment window closed"], ["05:05", "Orders found on credit hold in the ERP"]],
-      cause: "The orders sit in ERP credit review. Acknowledgments are generated only after release.",
+      ev: [["Yesterday 04:58", "37 purchase orders received and loaded"], ["05:00", "24-hour acknowledgment window closed"], ["05:05", "Acknowledgments sent for other orders; none for these 37"]],
+      cause: "Only these 37 orders lack an 855 while other orders are acknowledged, which points to an order hold before acknowledgment.",
       act: "Ask order management to release the orders, or send acknowledgments with a hold status.", appr: "Customer service lead",
       area: "Fix routing", who: ["Customer service", "Finance and treasury"] },
     { id: "f4", p: 0, st: 4, sev: "c", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Northfield Stores", n: 112, val: 46200, at: "04:20",
       ot: "112 invoices rejected on unit price", os: "824 application advice cites a price mismatch on 9 items since Monday's cost change.",
       bt: "$46,200 in invoices held for price mismatch", bs: "Northfield Stores will not pay the invoices until prices match the order.",
       ev: [["Monday", "New costs sent in the 832 price catalog"], ["04:20", "First 824 rejection on unit price"], ["07:30", "112 rejections on the same 9 items"]],
-      cause: "The new costs were sent to the retailer but not loaded into billing.",
+      cause: "The invoices still carry the costs from before Monday's 832.",
       act: "Correct the billing cost for 9 items and resend the 112 invoices.", appr: "Billing and pricing",
       area: "Rejections", who: ["Finance and treasury", "Master data"] },
     { id: "f7", p: 0, st: 5, sev: "w", mod: "Integration Monitor", how: "Missing document", pil: "Optimize", partner: "Harbor Grocers", n: 1, val: 0, at: "06:00",
@@ -822,7 +844,7 @@
       ot: "Cost change not applied to 61 open orders", os: "Open orders still carry the old cost for 9 items. Invoices from these orders will reject.",
       bt: "$28,400 in invoices likely to reject", bs: "The same price mismatch will hit 61 orders that have not been invoiced yet.",
       ev: [["Monday", "832 cost change sent for 9 items"], ["07:50", "61 open orders found with the old cost"]],
-      cause: "The cost change did not update open orders in the ERP.",
+      cause: "Purchase orders received after Monday's 832 still carry the old cost.",
       act: "Update the cost on the 61 open orders before invoicing.", appr: "Pricing analyst",
       area: "Cross-references and master data", who: ["Master data", "Finance and treasury"] },
     { id: "f10", p: 1, st: 3, sev: "w", mod: "Integration Monitor", how: "Anomaly", pil: "Optimize", partner: "Westline Home", n: 52, val: 0, at: "08:10",
@@ -901,7 +923,7 @@
     0: { n: "Order to cash", owner: "Order management and accounts receivable", outcome: "Turn customer orders into shipped goods, invoices and collected cash.", measures: ["Order acknowledgment rate"] },
     1: { n: "Procure to pay", owner: "Procurement and accounts payable", outcome: "Receive supplier goods against orders, match invoices and pay on terms.", measures: ["Supplier on-time delivery"] },
     3: { n: "Claims and disputes", owner: "Accounts receivable", outcome: "Resolve customer claims and short payments with evidence.", measures: ["Dispute rate"],
-      steps: [["Claim raised", "Portal"], ["Debit memo", "812"], ["Net remittance", "820 / REMADV"], ["Research and classify", "ERP"], ["Dispute", "Portal"], ["Settle", "812, 820 / REMADV"]] }
+      steps: [["Claim raised", "Off network"], ["Debit memo", "812"], ["Net remittance", "820 / REMADV"], ["Research and classify", "Off network"], ["Dispute", "Off network"], ["Settle", "812, 820 / REMADV"]] }
   };
   /* Command Center (owner, Oct 24). Three packages:
      Integration Monitor, standard for every Trading Grid client; Performance Monitor, an industry-neutral add-on;
@@ -920,6 +942,12 @@
   function ccIndustry() { return ccOn("rt") ? "Retail and CPG" : "Trading Grid"; }
   /* Process definitions come from the active package: retail definitions with the Retail pack, generic templates otherwise */
   function ccProc(i) { if (ccOn("rt")) return PROCESSES.retail[i]; var g = CCGEN[i]; return { n: g.n, owner: g.owner, outcome: g.outcome, measures: g.measures, steps: g.steps || PROCESSES.retail[i].steps }; }
+  /* Command Center sees EDI traffic only. Process views show the steps that exchange a document, with names for that document where the reference step is wider. */
+  var CCSTEPN = { "1:2": "Receiving advice" };
+  function ccSteps(i) { return ccProc(i).steps.map(function (s, k) { return [k, s]; }).filter(function (p) { return ccToks(p[1][1]).some(function (t) { return /^(\d{3}|[A-Z]{6})$/.test(t.trim()); }); }); }
+  function ccStepName(i, k) { return (ccOn("rt") && CCSTEPN[i + ":" + k]) || ccProc(i).steps[k][0]; }
+  function ccStepNo(i, k) { var s = ccSteps(i); for (var j = 0; j < s.length; j++) if (s[j][0] === k) return j + 1; return 0; }
+  function ccStepDoc(s) { return s[1].replace(/,?\s*(WMS|ERP)\b/g, ""); }
   function ccShort(i) { return ccOn("rt") ? GENOME.retail.short[i] : CCGEN[i].n; }
 
   /* Icons (Lucide paths) */
@@ -948,7 +976,7 @@
   var CXA = [
     { id: "lex", n: "Lex", r: "Timing and SLA agent", d: "Watches every document clock: acknowledgment windows and ship notice timing.", f: ["f1", "f3"], t: "pm" },
     { id: "nora", n: "Nora", r: "Conformance agent", d: "Checks documents against partner rules before and after they are sent: price, quantity, labels and required fields.", f: ["f4"], t: "pm" },
-    { id: "liz", n: "Liz", r: "Process agent", d: "Follows each business process across documents and systems, and flags steps that will fail later in the process.", f: ["f9"], t: "pm" },
+    { id: "liz", n: "Liz", r: "Process agent", d: "Follows each business process across its EDI documents, and flags steps that will fail later in the process.", f: ["f9"], t: "pm" },
     { id: "reese", n: "Reese", r: "Reconciliation agent", d: "Reconciles values across orders, shipments, invoices and remittances.", f: [], t: "pm" },
     { id: "ivy", n: "Ivy", r: "Volume agent", d: "Compares document volume with its projection by partner and hour, and raises missing documents and volume drops as findings.", f: ["f2", "f7", "f10"], t: "im" }
   ];
@@ -1101,24 +1129,29 @@
     if (cur) return h + cur.h();
     return h + '<div class="cx-k4">' + cxKpi("Total partners", "208", "21 added this year") + cxKpi("Active partners", "163", "Sent or received in 30 days") + cxKpi("Inactive partners", "45", "No activity in 30 days") + cxKpi("Added this month", "3", "4 last month") + '</div>' +
       cxCard("Partners", '<table class="cx-tbl"><thead><tr><th>Partner name</th><th>Partner alias</th><th>Status</th><th>BUID</th><th>Onboarding date</th><th>Last activity</th></tr></thead><tbody>' +
-        cxPartners().map(function (p) { return '<tr><td><b>' + p[0] + '</b></td><td><code>' + p[1] + '</code></td><td><span class="cx-st s-' + (p[2] === "Active" ? "resolved" : "known") + '"><i></i>' + p[2] + '</span></td><td>' + p[3] + '</td><td>' + p[4] + '</td><td>' + p[5] + '</td></tr>'; }).join("") + '</tbody></table>', "", '<span class="cx-note">Showing 10 of 208</span>') +
+        cxPartners().map(function (p) { return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(p[0]) + '"><b>' + p[0] + '</b></button></td><td><code>' + p[1] + '</code></td><td><span class="cx-st s-' + (p[2] === "Active" ? "resolved" : "known") + '"><i></i>' + p[2] + '</span></td><td>' + p[3] + '</td><td>' + p[4] + '</td><td>' + p[5] + '</td></tr>'; }).join("") + '</tbody></table>', "", '<span class="cx-note">Showing 10 of 208</span>') +
       cxCard("Partners over 12 months", cxLine([{ v: [172, 176, 179, 183, 186, 190, 193, 196, 199, 203, 205, 208] }, { v: [3, 4, 3, 4, 3, 4, 3, 3, 3, 4, 2, 3], c: "b2" }], { w: 1060, h: 230, max: 240, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Partners over 12 months" }) + '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>Total partners</li><li><i style="background:#001889"></i>Onboarded</li></ul>');
   };
   var CXPJ = [["Harbor Grocers orders", "Order volume drop", 5, "Inbound", "Purchase order (850)", "X12", "Harbor Grocers", "f2"], ["Westline Home acknowledgments", "Volume drop", 3, "Inbound", "Functional acknowledgment (997)", "X12", "Westline Home", "f10"],
     ["Harbor Grocers remittances", "Document missing", 1, "Inbound", "Remittance advice (820)", "X12", "Harbor Grocers", "f7"], ["Northfield Stores invoices", "Within projection", 0, "Outbound", "Invoice (810)", "X12", "Northfield Stores", null],
-    ["Westline Home orders", "Within projection", 0, "Inbound", "Purchase order (850)", "X12", "Westline Home", null]];
+    ["Westline Home orders", "Within projection", 0, "Inbound", "Purchase order (850)", "X12", "Westline Home", null],
+    ["Failed transactions, all partners", "Failed transactions above threshold", 2, "Both", "All document types", "X12", "All partners", null, 1]];
   var CXPJR = [["Meadowline Care orders", "Order volume drop", 5, "Outbound", "Purchase order (850)", "X12", "Meadowline Care", "f2"], ["Tidewell Home acknowledgments", "Volume drop", 3, "Outbound", "Functional acknowledgment (997)", "X12", "Tidewell Home", "f10"],
     ["Meadowline Care remittances", "Document missing", 1, "Outbound", "Remittance advice (820)", "X12", "Meadowline Care", "f7"], ["Nuvori Beauty invoices", "Within projection", 0, "Inbound", "Invoice (810)", "X12", "Nuvori Beauty", null],
-    ["Copperleaf Living orders", "Within projection", 0, "Outbound", "Purchase order (850)", "X12", "Copperleaf Living", null]];
+    ["Copperleaf Living orders", "Within projection", 0, "Outbound", "Purchase order (850)", "X12", "Copperleaf Living", null],
+    ["Failed transactions, all partners", "Failed transactions above threshold", 2, "Both", "All document types", "X12", "All partners", null, 1]];
   function cxProj() { return ccRole() === "retailer" ? CXPJR : CXPJ; }
   CXS["im-proj"] = function () {
-    var PJ = cxProj(), p = PJ[ccPj], act = ccPj === 0 ? [62, 88, 91, 41, null, null, null, null, null, null] : [70, 72, 75, 74, null, null, null, null, null, null], prj = [null, null, null, 112, 108, 104, 98, 96, 94, 95];
-    return cxOvHead() + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
+    var PJ = cxProj(), p = PJ[ccPj] || PJ[0], fl = !!p[8], act = fl ? [9, 11, 10, 27, null, null, null, null, null, null] : ccPj === 0 ? [62, 88, 91, 41, null, null, null, null, null, null] : [70, 72, 75, 74, null, null, null, null, null, null],
+      prj = fl ? [null, null, null, 11, 10, 10, 11, 10, 9, 10] : [null, null, null, 112, 108, 104, 98, 96, 94, 95];
+    var ex = imExplain ? cxCard("Aviator findings", '<ul class="im-ex">' + [PJ[0][0] + ": volume fell 64% below the projected range at 06:30 and has not recovered. The partner's AS2 messages fail signature checks, so orders are not arriving.",
+      PJ[1][0] + ": acknowledgments dropped while the partner's other documents flow normally. The gap began at 05:00.", "Failed transactions: 27 in the last hour against a threshold of 18. Most are signature failures from one partner and clear when its certificate is updated."].map(function (t) { return '<li>' + ci("spark") + '<span>' + cxe(t) + '</span></li>'; }).join("") + '</ul><p class="cx-note">Written from your watchlists, projections and anomalies. AI can make mistakes. Check important information.</p>', "im-exc") : "";
+    return cxOvHead() + '<div class="im-pjb"><button type="button" class="cx-btn p" data-imexplain aria-pressed="' + imExplain + '">' + ci("spark") + (imExplain ? "Hide Aviator findings" : "Explain with Aviator") + '</button></div>' + ex + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
       return '<button type="button" data-cxpj="' + i + '" aria-pressed="' + (i === ccPj) + '"><b>' + x[0] + '</b><small>' + x[1] + ' · Executed today, 08:00</small>' + (x[2] ? '<em>' + x[2] + ci("warn") + '</em>' : '') + '</button>';
     }).join("") + '</nav><section class="cx-pjd"><header><h3>' + p[0] + '</h3>' + (p[7] ? '<button type="button" class="cx-btn" data-cxf="' + p[7] + '">Open finding</button>' : '') + '</header>' +
       '<div class="cx-chips">' + [["D", "Direction", p[3]], ["D", "Document type", p[4]], ["S", "Document standard", p[5]], ["P", "Partner", p[6]]].map(function (c) { return '<div><i>' + c[0] + '</i><span>' + c[1] + '<b>' + c[2] + '</b></span></div>'; }).join("") + '</div>' +
-      cxLine([{ v: act, c: "act" }, { v: prj, c: "prj" }], { w: 840, h: 210, max: 140, xl: ["Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29"], now: 3, band: prj.map(function (v) { return v == null ? null : [v - 16, v + 16]; }), label: "Projection and actual" }) +
-      '<ul class="cx-lg row"><li><i class="bd"></i>Projected range</li><li><i style="background:#5B8DEF"></i>Projection</li><li><i style="background:#E8590C"></i>Actual</li></ul><h4 class="cx-sh">Heat map: hourly activity projection</h4>' + cxHeat() + '</section></div>';
+      cxLine([{ v: act, c: "act" }, { v: prj, c: "prj" }], { w: 840, h: 210, max: fl ? 30 : 140, xl: ["Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29"], now: 3, band: prj.map(function (v) { return v == null ? null : fl ? [0, 18] : [v - 16, v + 16]; }), label: "Projection and actual" }) +
+      '<ul class="cx-lg row"><li><i class="bd"></i>' + (fl ? "Error threshold" : "Projected range") + '</li><li><i style="background:#5B8DEF"></i>Projection</li><li><i style="background:#E8590C"></i>Actual</li></ul><h4 class="cx-sh">Heat map: hourly activity projection</h4>' + cxHeat() + '</section></div>';
   };
   /* Solution: the business documents behind the client's processes (process indices) */
   var CXSOL = [["Purchase order", "850, 860", "Sales order", [0]], ["Order acknowledgment", "855, 865", "Order confirmation", [0]], ["Price catalog", "832", "Condition record", [0]],
@@ -1213,7 +1246,7 @@
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
   function cxOvHead() {
     var procs = ccOn("pm") ? " · " + [0, 1, 3].map(ccShort).join("; ") : "", cd = wsCurDash();
-    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
+    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Transaction volume"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
       wsDashTabs().map(function (t) { return '<button type="button" data-cxgo="ws-dash" data-wsdash="' + t.key + '" aria-pressed="' + (ccScr === "ws-dash" && cd === t) + '">' + cxe(t.n) + '</button>'; }).join("");
     return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' +
       '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + '<button type="button" class="cx-ovn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></nav>';
@@ -1221,7 +1254,7 @@
   CXS["dash"] = function () {
     var by = function (o) { return CXDASH.filter(function (c) { return c.o === o; })[0]; }, rt = ccOn("rt") && by(35);
     return cxOvHead() + cxHero() +
-      '<div class="cx-dg cx-ovg">' + cxDc(by(10), rt ? 2 : 3) + (rt ? cxDc(rt, 2) : "") + cxDc(by(80), rt ? 2 : 3) + '</div>';
+      '<div class="cx-dg cx-ovg">' + cxDc(by(5)) + cxDc(by(10), rt ? 2 : 3) + (rt ? cxDc(rt, 2) : "") + cxDc(by(80), rt ? 2 : 3) + '</div>';
   };
   CXDASH.push(
     { o: 10, mod: "IM", w: 2, t: "Network activity", h: function () {
@@ -1249,7 +1282,7 @@
         '</div><ul class="cx-lg row"><li><i style="background:#0066FF"></i>850 Purchase order</li><li><i style="background:#001889"></i>856 Ship notice</li><li><i style="background:#5B8DEF"></i>810 Invoice</li><li><i style="background:#9DB7F2"></i>Other</li></ul>'; } },
     { o: 80, mod: "IM", w: 4, t: "Transaction volume", h: function () {
       return cxLine([{ v: [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590], area: true }], { w: 760, h: 220, min: 3000, max: 5000, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Transaction volume, last 12 months" }); },
-      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>'; } },
+      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>' + cxGoBtn("Analyze volume", "im-vol"); } },
     { o: 100, mod: "PM", w: 3, t: "Findings by agent", h: function () {
       return cxBars(cxAgents().map(function (a, k) { return [a.n + " · " + a.r, a.f.filter(function (id) { return !ccDone[id]; }).length + [12, 5, 3, 4, 6][k], "", "b"]; }), { max: 20 }); },
       f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Agents", "ws-agents"); } }
@@ -1300,7 +1333,7 @@
       h = '<header><span><p>Finding · ' + cxe(cxAgentName(f)) + '</p><h3>' + cxe(f.ot) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
         '<p class="cx-chipsr">' + cxSevChip(f.sev) + cxStChip(f) + cxTag(f.mod === "Integration Monitor" ? "IM" : "PM") + '<span class="cx-tg">' + cxe(f.how) + '</span></p><p>' + cxe(f.os) + '</p>' +
         '<div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
-        '<dl class="cx-dl"><div><dt>Partner</dt><dd>' + cxe(f.partner) + '</dd></div>' + (pm ? '<div><dt>Process</dt><dd><button type="button" class="cx-lk" data-cxproc="' + f.p + '">' + cxe(P.n) + '</button>, step ' + (f.st + 1) + ': ' + cxe(P.steps[f.st][0]) + '</dd></div>' : "") +
+        '<dl class="cx-dl"><div><dt>Partner</dt><dd>' + cxe(f.partner) + '</dd></div>' + (pm ? '<div><dt>Process</dt><dd><button type="button" class="cx-lk" data-cxproc="' + f.p + '">' + cxe(P.n) + '</button>, step ' + ccStepNo(f.p, f.st) + ': ' + cxe(ccStepName(f.p, f.st)) + '</dd></div>' : "") +
         '<div><dt>' + (f.mod === "Integration Monitor" ? "Check" : "Rule") + '</dt><dd>' + cxe(CXRULE[f.id]) + '</dd></div><div><dt>Transactions</dt><dd>' + cxe(CXDOC[f.id]) + '</dd></div></dl>' +
         '<h4>Timeline</h4><ol class="cx-tl">' + f.ev.map(function (e) { return '<li><b>' + cxe(e[0]) + '</b><span>' + cxe(e[1]) + '</span></li>'; }).join("") + '</ol>' +
         '<h4>Root cause</h4><p>' + cxe(f.cause) + '</p><h4>Recommended action</h4><div class="cx-rec">' + ci("bot") + '<span>' + cxe(f.act) + '<small>Approver: ' + cxe(f.appr) + '</small></span></div>' +
@@ -1308,7 +1341,7 @@
           '<button type="button" class="cx-btn p" data-cxapp="' + f.id + '">Approve action</button><button type="button" class="cx-btn" data-cxknown="' + f.id + '">Mark as known issue</button>') + '</div>';
     } else if (ccDr[0] === "help") {
       h = '<header><span><p>Clickable prototype</p><h3>Command Center</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
-        '<p>Switch the package in the top bar to see what each client gets.</p><dl class="cx-dl cx-dl1"><div><dt>' + cxTag("IM") + '</dt><dd>Standard for every Trading Grid client: network activity, partners, projections and anomalies, Ivy the volume agent.</dd></div>' +
+        '<p>Switch the package in the top bar to see what each client gets.</p><dl class="cx-dl cx-dl1"><div><dt>' + cxTag("IM") + '</dt><dd>Standard for every Trading Grid client: daily digest, transaction volume, projections and anomalies, partners with network graph and integration analysis, Ivy the volume agent.</dd></div>' +
         '<div><dt>' + cxTag("PM") + '</dt><dd>Add-on for any industry: business processes, agents, rules and the partner scorecard.</dd></div>' +
         '<div><dt>' + cxTag("RT") + '</dt><dd>Includes Performance Monitor and adds retail processes, cases, policy templates, KPIs and the retailer and supplier perspectives.</dd></div></dl>' +
         '<p class="cx-sub">All partners, records and outcomes are illustrative. No live network is connected.</p></div>';
@@ -1342,7 +1375,7 @@
 
   /* Shell. Six entries for every package. Overview gains dashboards and Workspace gains sections as packages are added. */
   var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"], ["im-tp", "Partners", "users"], ["ws", "Workspace", "grid"], ["cfg", "Configuration", "cog"]];
-  var CXOV = ["dash", "im-proj", "ws-dash"];
+  var CXOV = ["dash", "im-proj", "im-vol", "ws-dash"];
   var CXWS = [["ws-proc", "Business processes", "pm"], ["ws-rep", "Reports"], ["ws-not", "Notifications"], ["ws-task", "Tasks and reminders"], ["ws-agents", "Agents"]];
   function cxWsSecs() { return CXWS.filter(function (w) { return !w[2] || ccOn(w[2]); }); }
   function cxNavKey(s) { return CXOV.indexOf(s) >= 0 ? "dash" : s.indexOf("ws-") === 0 ? "ws" : s; }
@@ -1398,6 +1431,132 @@
   function ccFit() { ccEl.classList.toggle("small", window.innerWidth < 1024 || window.innerHeight < 560); }
   function ccStart() { ccFit(); cxRender(); }
   window.addEventListener("resize", ccFit);
+  /* Integration Monitor, generally available capabilities from the Innovation Guide: daily digest, transaction volume analysis,
+     network graph, partner integration analysis (document types, processing errors, protocols), partner details, failed-transaction
+     anomalies and Explain with Aviator. Every client gets these. Illustrative values. */
+  var imBand = -1, imIa = "doc", imExplain = false, imVol = { per: "12", gr: "Day", dt: "All", pt: "All", ad: "All", st: "All", sol: "All" };
+  /* Per partner, in cxPartners() order: protocol, 30-day volume, 30-day errors, top error, second address */
+  var IMPT = [["AS2", 22400, 12, "Signature verification failed"], ["AS2", 18100, 41, "Signature verification failed"], ["SFTP", 9600, 6, "Invalid interchange receiver ID"],
+    ["API", 7400, 3, "Duplicate control number"], ["AS2", 5200, 2, "Unknown trading partner"], ["VAN", 3100, 9, "Missing required segment"], ["AS2", 2400, 1, "Duplicate control number"],
+    ["VAN", 0, 0, "None"], ["SFTP", 1800, 4, "Invalid date format"], ["AS2", 1200, 2, "Missing required segment"]];
+  var IMBANDS = [["20K and above", 3, 20000], ["5K to 20K", 14, 5000], ["1K to 5K", 46, 1000], ["Under 1K", 100, 1], ["No traffic in 30 days", 45, 0]];
+  function imPt(name) { var ps = cxPartners(); for (var k = 0; k < ps.length; k++) if (ps[k][0] === name) return k; return 0; }
+  function imBandOf(v) { for (var b = 0; b < IMBANDS.length; b++) if (v >= IMBANDS[b][2]) return b; return IMBANDS.length - 1; }
+  function imKind(k) { return k === 8 ? "carrier" : k === 9 ? "3pl" : "trade"; }
+  /* Document types seen from the client: In is received, Out is sent */
+  var IMDOCS = ["850", "855", "856", "810", "820", "846", "214", "940", "945"];
+  function imDir(d) {
+    var rcv = ccRole() === "retailer" ? ["855", "856", "810", "214", "945"] : ["850", "820", "214", "945"];
+    return d === "997" ? "Both" : rcv.indexOf(d) >= 0 ? "In" : "Out";
+  }
+  function imCell(k, d) {
+    var kind = imKind(k), inactive = cxPartners()[k][2] !== "Active";
+    if (kind === "carrier") return d === "214" ? (inactive ? "i" : "a") : "";
+    if (kind === "3pl") return ["940", "945", "846"].indexOf(d) >= 0 ? "a" : "";
+    if (["214", "940", "945"].indexOf(d) >= 0) return "";
+    if (inactive) return d === "846" ? "n" : "i";
+    if (d === "846") return k % 3 === 0 ? "a" : k % 3 === 1 ? "n" : "i";
+    if (d === "820") return k === 6 ? "i" : "a";
+    return "a";
+  }
+  var IMCELL = { a: ["Active", "resolved"], i: ["Configured, no traffic in 180 days", "known"], n: ["Not configured", "new"] };
+
+  /* Overview: daily digest card */
+  CXDASH.push({ o: 5, mod: "IM", w: 6, t: "Daily digest · yesterday", h: function () {
+    var ps = cxPartners();
+    return '<div class="im-dg"><div class="cx-k4">' + cxKpi("Documents", "2,184", '<em class="up">↑ 4% vs prior day</em>') + cxKpi("Failed transactions", "37", "Across 9 partners") +
+      cxKpi("Partners onboarded", "2", ps[6][0] + " and 1 more") + cxKpi("Anomalies detected", "3", "2 volume, 1 failed transactions") + '</div>' +
+      '<table class="cx-tbl"><thead><tr><th>Top partners by volume</th><th class="n">Documents</th><th class="n">Errors</th><th>Most common error</th></tr></thead><tbody>' +
+      [0, 1, 2, 3, 5].map(function (k) { return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(ps[k][0]) + '">' + cxe(ps[k][0]) + '</button></td><td class="n">' + Math.round(IMPT[k][1] / 30).toLocaleString("en-US") + '</td><td class="n">' + Math.max(0, Math.round(IMPT[k][2] / 4)) + '</td><td>' + cxe(IMPT[k][3]) + '</td></tr>'; }).join("") + '</tbody></table>' +
+      '<div class="cx-kpi cx-ka2 im-ka"><span>' + ci("spark") + 'Key analysis</span><small>Volume rose 4% on order traffic. Failed transactions doubled at ' + cxe(ps[1][0]) + ' after its signing certificate changed; the other partners stayed within their normal error range.</small></div></div>'; },
+    f: function () { return '<span class="cx-note">Daily Summarizer and Explainer Agent · Generated 06:00</span>'; } });
+
+  /* Overview: transaction volume analysis with the refine panel */
+  CXS["im-vol"] = function () {
+    var ps = cxPartners(), v = imVol, seed = [v.dt, v.pt, v.ad, v.st, v.sol].filter(function (x) { return x !== "All"; }).length;
+    var f = 1 / (1 + seed * 1.6), n = v.per === "1" ? 30 : v.per === "24" ? 24 : 12;
+    var base = v.per === "1" ? [138, 142, 151, 147, 98, 76, 140, 149, 155, 152, 150, 101, 79, 146, 158, 161, 157, 153, 104, 81, 149, 160, 166, 163, 158, 107, 84, 155, 164, 169]
+      : v.per === "24" ? [3410, 3480, 3520, 3600, 3550, 3490, 3620, 3700, 3760, 3740, 3800, 3790, 3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590]
+      : [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590];
+    var wk = v.gr === "Week" ? 7 : 1, vals = base.map(function (x) { return Math.round(x * f * wk); }), mx = Math.max.apply(null, vals);
+    var xl = v.per === "1" ? vals.map(function (_, i) { return i % 5 === 0 ? "Day " + (i + 1) : ""; })
+      : v.per === "24" ? ["Nov", "", "Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", "", "Nov", "", "Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", ""] : ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"];
+    function sel(key, label, opts) { return '<label class="ws-f"><span>' + label + '</span><select data-imvol="' + key + '">' + ["All"].concat(opts).map(function (o) { return '<option' + (o === v[key] ? " selected" : "") + '>' + cxe(o) + '</option>'; }).join("") + '</select></label>'; }
+    function seg(key, opts) { return opts.map(function (o) { return '<button type="button" data-imseg="' + key + ':' + o[0] + '" aria-pressed="' + (v[key] === o[0]) + '">' + o[1] + '</button>'; }).join(""); }
+    var addr = ps.slice(0, 6).map(function (p) { return "ZZ:" + p[1]; });
+    var mix = [["Purchase order (850)", 34], ["Functional acknowledgment (997)", 27], ["Ship notice (856)", 14], ["Invoice (810)", 12], ["Order acknowledgment (855)", 8], ["Remittance advice (820)", 5]];
+    return cxOvHead() + '<div class="im-vol"><aside class="cx-card im-ref"><header><h3>Refine</h3></header>' +
+      sel("dt", "Document type", ["850", "855", "856", "810", "820", "997"]) + sel("pt", "Trading partner", ps.map(function (p) { return p[0]; })) + sel("ad", "EDI address", addr) +
+      sel("st", "Document standard", ["X12", "EDIFACT", "XML"]) + sel("sol", "Solution ID", ["SOL-RET-01", "SOL-RET-02", "SOL-LOG-01"]) +
+      (seed ? '<button type="button" class="cx-btn" data-imclear>Clear refinements</button>' : "") + '</aside><div>' +
+      cxCard("Transaction volume", '<nav class="ws-lens" aria-label="Period"><span>Period</span>' + seg("per", [["1", "1 month"], ["12", "12 months"], ["24", "24 months"]]) + '<span class="im-gap">By</span>' + seg("gr", [["Day", "Day"], ["Week", "Week"]]) + '</nav>' +
+        cxLine([{ v: vals, area: true }], { w: 860, h: 240, min: 0, max: Math.ceil(mx * 1.2 / 100) * 100, xl: xl, label: "Transaction volume" }) +
+        '<p class="cx-note">' + (seed ? seed + " refinement" + (seed > 1 ? "s" : "") + " applied · " : "All traffic · ") + "Documents per " + v.gr.toLowerCase() + ", " + (v.per === "1" ? "last 30 days" : "last " + v.per + " months") + '</p>') +
+      cxCard("By document type", cxBars(mix.map(function (m) { return [m[0], m[1], "", "b"]; }), { max: 40, fmt: function (x) { return x + "%"; } })) + '</div></div>';
+  };
+
+  /* Partners: network graph and partner integration analysis */
+  CXPTAB.push({ k: "graph", n: "Network graph", t: "im", h: function () {
+    var ps = cxPartners(), X = 380, Y = 240, R = 175, svg = '<svg class="im-ng" viewBox="0 0 760 460" role="img" aria-label="Trading community by transaction volume band">';
+    IMBANDS.forEach(function (b, i) {
+      var a = (-90 + i * 72) * Math.PI / 180, x = X + R * Math.cos(a), y = Y + R * Math.sin(a), r = 14 + Math.sqrt(b[1]) * 3.4, on = imBand === i;
+      var x0 = X + 56 * Math.cos(a), y0 = Y + 56 * Math.sin(a), x1 = x - r * Math.cos(a), y1 = y - r * Math.sin(a);
+      svg += '<line x1="' + x0.toFixed(1) + '" y1="' + y0.toFixed(1) + '" x2="' + x1.toFixed(1) + '" y2="' + y1.toFixed(1) + '" class="im-sp' + (on ? " on" : "") + '"/>' +
+        '<g class="im-bn' + (on ? " on" : "") + (i === 4 ? " idle" : "") + '" data-imband="' + i + '" role="button" tabindex="0" aria-label="' + b[0] + ', ' + b[1] + ' partners"><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(1) + '"/>' +
+        '<text x="' + x.toFixed(1) + '" y="' + (y + 5).toFixed(1) + '" text-anchor="middle" class="im-bv">' + b[1] + '</text><text x="' + x.toFixed(1) + '" y="' + (i === 0 ? y - r - 8 : y + r + 16).toFixed(1) + '" text-anchor="middle" class="im-bl">' + b[0] + '</text></g>';
+    });
+    svg += '<circle cx="' + X + '" cy="' + Y + '" r="56" class="im-me"/><text x="' + X + '" y="' + (Y - 2) + '" text-anchor="middle" class="im-mt">' + cxe(ccCompany()) + '</text><text x="' + X + '" y="' + (Y + 14) + '" text-anchor="middle" class="im-ms">208 partners</text></svg>';
+    var list = imBand < 0 ? "" : ps.map(function (p, k) { return [p, k]; }).filter(function (x) { return imBandOf(IMPT[x[1]][1]) === imBand; });
+    var side = imBand < 0 ? '<p class="cx-sub">Partners grouped by documents exchanged in the last 30 days. Select a band to open its partners.</p><ul class="cx-lg">' + IMBANDS.map(function (b) { return '<li>' + b[0] + '<b>' + b[1] + '</b></li>'; }).join("") + '</ul>'
+      : '<button type="button" class="cx-lk" data-imband="-1">' + ci("chev", "im-back") + 'All bands</button><h4 class="cx-sh">' + IMBANDS[imBand][0] + ' · ' + IMBANDS[imBand][1] + ' partners</h4><ul class="im-pl">' +
+        list.map(function (x) { return '<li><button type="button" class="cx-lk" data-impt="' + cxe(x[0][0]) + '">' + cxe(x[0][0]) + '</button><small>' + IMPT[x[1]][1].toLocaleString("en-US") + ' documents · ' + IMPT[x[1]][0] + '</small></li>'; }).join("") + '</ul><p class="cx-note">Showing ' + list.length + ' of ' + IMBANDS[imBand][1] + '</p>';
+    return '<div class="cx-g21">' + cxCard("Network graph", svg) + cxCard(imBand < 0 ? "Volume bands" : "Band partners", side) + '</div>';
+  } });
+  CXPTAB.push({ k: "int", n: "Integration analysis", t: "im", h: function () {
+    var ps = cxPartners(), nav = '<nav class="ws-lens" aria-label="Analysis"><span>View</span>' + [["doc", "Document types"], ["err", "Processing errors"], ["pro", "Protocols"]].map(function (t) { return '<button type="button" data-imia="' + t[0] + '" aria-pressed="' + (imIa === t[0]) + '">' + t[1] + '</button>'; }).join("") + '</nav>';
+    if (imIa === "err") {
+      var rows = ps.map(function (p, k) { return [p, k]; }).filter(function (x) { return IMPT[x[1]][2] > 0; }).sort(function (a, b) { return IMPT[b[1]][2] - IMPT[a[1]][2]; });
+      return nav + cxCard("Transaction processing errors, last 30 days", '<table class="cx-tbl"><thead><tr><th>Partner</th><th class="n">Errors</th><th class="n">Error rate</th><th>Most common error</th><th>Protocol</th></tr></thead><tbody>' + rows.map(function (x) {
+        var e = IMPT[x[1]]; return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(x[0][0]) + '">' + cxe(x[0][0]) + '</button></td><td class="n">' + e[2] + '</td><td class="n">' + (100 * e[2] / Math.max(1, e[1])).toFixed(2) + '%</td><td>' + cxe(e[3]) + '</td><td>' + e[0] + '</td></tr>'; }).join("") + '</tbody></table>');
+    }
+    if (imIa === "pro") {
+      var pro = [["AS2", 96], ["VAN", 52], ["SFTP", 38], ["API", 14], ["Web forms", 8]];
+      return nav + '<div class="cx-g2">' + cxCard("Partners by protocol", cxBars(pro.map(function (p) { return [p[0], p[1], "", "b"]; }), { max: 100 })) +
+        cxCard("Partners shown", '<table class="cx-tbl"><thead><tr><th>Partner</th><th>Protocol</th><th>EDI address</th></tr></thead><tbody>' + ps.map(function (p, k) { return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(p[0]) + '">' + cxe(p[0]) + '</button></td><td>' + IMPT[k][0] + '</td><td><code>ZZ:' + p[1] + '</code></td></tr>'; }).join("") + '</tbody></table>') + '</div>';
+    }
+    return nav + cxCard("Document type analysis", '<p class="cx-sub">Configuration status by partner, document type and direction.</p><div class="im-mx"><table class="cx-tbl"><thead><tr><th>Partner</th>' + IMDOCS.map(function (d) { return '<th class="c">' + d + '<small>' + imDir(d) + '</small></th>'; }).join("") + '</tr></thead><tbody>' +
+      ps.map(function (p, k) { return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(p[0]) + '">' + cxe(p[0]) + '</button></td>' + IMDOCS.map(function (d) { var c = imCell(k, d); return '<td class="c">' + (c ? '<i class="im-c ' + c + '" title="' + IMCELL[c][0] + '"></i>' : '<span class="im-na">·</span>') + '</td>'; }).join("") + '</tr>'; }).join("") +
+      '</tbody></table></div><ul class="cx-lg row"><li><i class="im-c a"></i>Active</li><li><i class="im-c i"></i>Configured, no traffic in 180 days</li><li><i class="im-c n"></i>Not configured</li><li><span class="im-na">·</span> Not exchanged with this partner type</li></ul>');
+  } });
+
+  /* Partner details panel */
+  var imBaseDrawer = cxDrawer;
+  cxDrawer = function () {
+    if (!ccDr || ccDr[0] !== "pt") return imBaseDrawer();
+    var ps = cxPartners(), k = imPt(ccDr[1]), p = ps[k], e = IMPT[k], docs = IMDOCS.filter(function (d) { return imCell(k, d); });
+    var a1 = "ZZ:" + p[1], a2 = "01:" + (100000000 + k * 7316451), split = e[1] ? [Math.round(e[1] * 0.78), e[1] - Math.round(e[1] * 0.78)] : [0, 0];
+    var h = '<header><span><p>Partner details</p><h3>' + cxe(p[0]) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
+      '<dl class="cx-dl"><div><dt>Status</dt><dd>' + p[2] + '</dd></div><div><dt>Alias</dt><dd><code>' + p[1] + '</code></dd></div><div><dt>Protocol</dt><dd>' + e[0] + '</dd></div><div><dt>Onboarded</dt><dd>' + p[4] + '</dd></div><div><dt>Last activity</dt><dd>' + p[5] + '</dd></div></dl>' +
+      '<h4>EDI addresses</h4><table class="cx-tbl"><thead><tr><th>Address</th><th>Protocol</th><th class="n">Documents, 30 days</th></tr></thead><tbody><tr><td><code>' + a1 + '</code></td><td>' + e[0] + '</td><td class="n">' + split[0].toLocaleString("en-US") + '</td></tr><tr><td><code>' + a2 + '</code></td><td>' + e[0] + '</td><td class="n">' + split[1].toLocaleString("en-US") + '</td></tr></tbody></table>' +
+      '<h4>Document relationships</h4><table class="cx-tbl"><thead><tr><th>Document</th><th>Direction</th><th>Status</th></tr></thead><tbody>' + docs.map(function (d) { var c = imCell(k, d); return '<tr><td><code>' + d + '</code></td><td>' + imDir(d) + '</td><td><span class="cx-st s-' + IMCELL[c][1] + '"><i></i>' + IMCELL[c][0] + '</span></td></tr>'; }).join("") + '</tbody></table>' +
+      '<h4>Transaction processing errors, 30 days</h4>' + (e[2] ? '<p><b>' + e[2] + '</b> errors. Most common: ' + cxe(e[3]) + '.</p>' : '<p>No processing errors.</p>') +
+      '<h4>Volume by EDI address, 6 months</h4>' + cxLine([{ v: [0.82, 0.88, 0.91, 0.95, 0.97, 1].map(function (x) { return Math.round(split[0] * x); }) }, { v: [0.9, 0.86, 0.95, 1.02, 0.98, 1].map(function (x) { return Math.round(split[1] * x); }), c: "b2" }], { w: 440, h: 160, xl: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Volume by EDI address" }) +
+      '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>' + a1 + '</li><li><i style="background:#001889"></i>' + a2 + '</li></ul></div>';
+    return '<div class="cx-scrim" data-cxclose></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
+  };
+
+  cx.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-impt],[data-imband],[data-imia],[data-imseg],[data-imclear],[data-imexplain]"); if (!b) return;
+    if (b.hasAttribute("data-impt")) ccDr = ["pt", b.getAttribute("data-impt")];
+    else if (b.hasAttribute("data-imband")) imBand = +b.getAttribute("data-imband");
+    else if (b.hasAttribute("data-imia")) imIa = b.getAttribute("data-imia");
+    else if (b.hasAttribute("data-imseg")) { var s = b.getAttribute("data-imseg").split(":"); imVol[s[0]] = s[1]; }
+    else if (b.hasAttribute("data-imclear")) { ["dt", "pt", "ad", "st", "sol"].forEach(function (k) { imVol[k] = "All"; }); }
+    else if (b.hasAttribute("data-imexplain")) imExplain = !imExplain;
+    cxRender();
+  });
+  cx.addEventListener("keydown", function (e) { var g = e.target.closest && e.target.closest("[data-imband]"); if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); imBand = +g.getAttribute("data-imband"); cxRender(); } });
+  cx.addEventListener("change", function (e) { if (e.target.matches("[data-imvol]")) { imVol[e.target.getAttribute("data-imvol")] = e.target.value; cxRender(); } });
   /* Workspace: business process views, custom dashboards, reports, notifications, tasks and reminders, and agents.
      Configuration: the Performance Monitor rule wizard (job, scope, expected behavior, deviation, reference data, budget, test, confirm).
      Saved items live in this browser only. Illustrative values. */
@@ -1419,7 +1578,7 @@
         { t: "Dispute window closing", ch: "Email", r: "Deductions review", on: true, k: "rt" }],
       tasks: [{ t: "Confirm the new AS2 endpoint with the partner", o: "Alex Morgan", d: "Today", k: "f:f2", done: false, tr: "im" },
         { t: "Update the cost on open orders", o: "Dana Ortiz", d: "Oct 27", k: "f:f9", done: true, tr: "pm" },
-        { t: "Collect receiving evidence for the two deductions", o: "Jamie Brooks", d: "Tomorrow", k: "rt:rt-invoice-deduction", done: false, tr: "rt" }],
+        { t: "Request the 214 and 861 for the two deductions", o: "Jamie Brooks", d: "Tomorrow", k: "rt:rt-invoice-deduction", done: false, tr: "rt" }],
       reminders: [{ t: "Check the remittance advice after the connection fix", w: "Today, 11:30", tr: "im" }, { t: "Check acknowledgments before the 12:00 cutoff", w: "Today, 11:30", tr: "pm" }, { t: "Deduction dispute window closes", w: "Nov 1, 09:00", tr: "rt" }],
       rules: []
     };
@@ -1466,9 +1625,9 @@
     var i = +ccWsProc, P = ccProc(i), F = CCFLOW[i], lenses = ccOn("rt") ? WSLENS : [], lens = lenses.filter(function (l) { return l.k === ccWsLens; })[0];
     var items = cxSort(ccItems().filter(function (x) { return x.proc === i && !x.done && (!lens || lens.match(x)); })), core = cxOpen().filter(function (f) { return f.p === i && ccOn(f.mod === "Integration Monitor" ? "im" : "pm"); });
     var val = core.reduce(function (a, f) { return a + f.val; }, 0);
-    var steps = P.steps.map(function (s, k) {
-      var fs = core.filter(function (f) { return f.st === k; }), sev = fs.some(function (f) { return f.sev === "c"; }) ? "c" : fs.length ? "w" : "ok";
-      return '<li class="' + sev + '"><span class="ws-sn">' + (k + 1) + '</span><b>' + cxe(s[0]) + '</b><code>' + cxe(s[1]) + '</code><strong>' + F.steps[k].toLocaleString("en-US") + '</strong><small>In flight</small>' +
+    var steps = ccSteps(i).map(function (p, n) {
+      var k = p[0], s = p[1], fs = core.filter(function (f) { return f.st === k; }), sev = fs.some(function (f) { return f.sev === "c"; }) ? "c" : fs.length ? "w" : "ok";
+      return '<li class="' + sev + '"><span class="ws-sn">' + (n + 1) + '</span><b>' + cxe(ccStepName(i, k)) + '</b><code>' + cxe(ccStepDoc(s)) + '</code><strong>' + F.steps[k].toLocaleString("en-US") + '</strong><small>In flight</small>' +
         fs.map(function (f) { return '<button type="button" class="cx-lk" data-cxf="' + f.id + '">' + cxe(f.ot) + '</button>'; }).join("") + '</li>';
     }).join("");
     var rules = CXR.filter(function (r) { return r[3].indexOf(i) >= 0 && cxAgents().some(function (a) { return a.id === r[0]; }); });
@@ -1476,7 +1635,7 @@
     var lensNav = lenses.length ? '<nav class="ws-lens" aria-label="Retail lens"><span>Retail lens</span>' + [{ k: "all", n: "All findings" }].concat(lenses).map(function (l) { return '<button type="button" data-wslens="' + l.k + '" aria-pressed="' + ((lens ? lens.k : "all") === l.k) + '">' + l.n + '</button>'; }).join("") + '</nav>' : "";
     return h + '<div class="cx-fsum ws-pk">' + cxKpi("In flight", F.n.toLocaleString("en-US"), Math.round(100 * F.ok / F.n) + "% on track") + cxKpi("At risk or breached", F.risk + F.br, F.br + " breached") +
       cxKpi("Open findings", items.length, items.filter(function (x) { return x.sev === "h"; }).length + " high severity") + cxKpi(cxe(P.measures[CCM[i][0]]), CCM[i][1], val ? "$" + Math.round(val / 1000) + "K value at risk" : "No value at risk") + '</div>' +
-      cxCard("Process flow", '<ol class="ws-flow">' + steps + '</ol>') +
+      cxCard("Process flow", '<ol class="ws-flow">' + steps + '</ol>', "", '<span class="cx-note">EDI steps on Trading Grid</span>') +
       '<div class="cx-g21">' + cxCard("Open findings", lensNav + '<table class="cx-tbl cx-pf"><thead><tr><th>Finding</th><th>Module</th><th>Severity</th><th>Detected</th></tr></thead><tbody>' + items.map(function (x) {
         return '<tr><td>' + cxItemLink(x, "b") + '<small>' + cxe(x.partner) + '</small></td><td>' + cxTag(x.mod) + '</td><td>' + cxSevChip(x.sev) + '</td><td>' + cxe(x.at) + '</td></tr>'; }).join("") +
         (items.length ? "" : '<tr><td colspan="4" class="cx-empty">No open findings.</td></tr>') + '</tbody></table>') +
@@ -1670,7 +1829,7 @@
     workflows: [
       { id: "partners", hidden: true, title: "Partner readiness", subtitle: "Required feeds, configuration and connection health", icon: "users", processes: [0, 1] },
       { id: "orders", title: "Order commitments", subtitle: "Acknowledgments, accepted changes and fulfillment instructions", icon: "flow", processes: [0] },
-      { id: "shipments", title: "Shipment readiness", subtitle: "Notice conformance, routing sequence and receiving evidence", icon: "net", processes: [0, 1] },
+      { id: "shipments", title: "Shipment readiness", subtitle: "Notice conformance, routing sequence and delivery documents", icon: "net", processes: [0, 1] },
       { id: "invoices", title: "Invoice and deduction control", subtitle: "Price matching, settlement evidence and review ownership", icon: "check", processes: [0, 1, 3] }
     ],
     cases: [
@@ -1707,11 +1866,11 @@
           { time: "08:00", title: "Quantity reduction requested", detail: "The order changes from 1,000 to 800 units.", status: "pass" },
           { time: "08:15", title: "Change accepted", detail: "The 865 accepts revision 2 without a counteroffer.", status: "pass" },
           { time: "08:40", title: "Warehouse release conflicts", detail: "WH-45018 retains the original 1,000-unit quantity.", status: "fail" },
-          { time: "09:30", title: "Review window remains", detail: "Planned pick cutoff is 10:00; physical pick status is not connected.", status: "unknown" }
+          { time: "09:30", title: "Review window remains", detail: "Planned pick cutoff is 10:00. No 945 shipping advice received yet.", status: "unknown" }
         ],
         explanation: "Reese correlates the original order, its accepted revision and the warehouse release using order number, line identifier and normalized units. The accepted revision is the comparison baseline. The 200-unit difference is evidenced in instructions; no shipping outcome has been inferred.",
-        evidenceGap: "Current warehouse pick status and actual shipped quantity are not connected.",
-        action: { label: "Prepare fulfillment review", completedLabel: "Fulfillment review prepared", completionNote: "A hold-and-correct request is prepared for the fulfillment owner. No warehouse order was changed and no physical hold was applied." }
+        evidenceGap: "No 945 shipping advice received yet, so the shipped quantity is not known.",
+        action: { label: "Prepare fulfillment review", completedLabel: "Fulfillment review prepared", completionNote: "A hold-and-correct request is prepared for the fulfillment owner. No warehouse order was changed." }
       },
       {
         id: "rt-shipment-labels", workflow: "shipments", title: "Ship notice repeats two carton identifiers",
@@ -1720,8 +1879,8 @@
         reference: "ASN-10482", amount: null, unit: "duplicate carton IDs", value: 2,
         policy: "ASN guide PACK-08: all eight cartons in this shipment require distinct SSCC identifiers. This is the configured receiving requirement for this relationship.",
         roles: {
-          retailer: { partner: "Solara Personal Care", direction: "Inbound supplier ship notice", summary: "ASN-10482 describes eight cartons but has only six distinct carton identifiers. Application advice reports the duplicate references.", impact: "The notice does not meet this relationship's receiving requirements. Actual carton labels and physical receipt are not available.", nextAction: "Prepare the failed carton references for supplier correction and receiving-team review." },
-          supplier: { partner: "Cedar & Coast", direction: "Outbound retailer ship notice", summary: "The ASN sent to Cedar & Coast repeats two carton identifiers. Its application advice rejects the carton-reference content.", impact: "The transmitted notice requires correction. A successful functional acknowledgment did not establish business acceptance.", nextAction: "Prepare a corrected-notice review with the warehouse pack records and the retailer's duplicate-reference errors." }
+          retailer: { partner: "Solara Personal Care", direction: "Inbound supplier ship notice", summary: "ASN-10482 describes eight cartons but has only six distinct carton identifiers. Application advice reports the duplicate references.", impact: "The notice does not meet this relationship's receiving requirements.", nextAction: "Prepare the failed carton references for supplier correction and receiving-team review." },
+          supplier: { partner: "Cedar & Coast", direction: "Outbound retailer ship notice", summary: "The ASN sent to Cedar & Coast repeats two carton identifiers. Its application advice rejects the carton-reference content.", impact: "The transmitted notice requires correction. A successful functional acknowledgment did not establish business acceptance.", nextAction: "Prepare a corrected-notice review with the retailer's duplicate-reference errors." }
         },
         documents: [
           { type: "856", id: "ASN-10482", status: "fail", time: "08:12", detail: "Eight carton records; six distinct SSCC values" },
@@ -1733,12 +1892,12 @@
           { sku: "BL-250", description: "Hydrating body lotion 250 ml", ordered: 192, acknowledged: 192, shipped: 192, invoiced: null, price: 8.4, expectedPrice: 8.4 },
           { sku: "HC-075", description: "Daily hand cream 75 ml", ordered: 192, acknowledged: 192, shipped: 192, invoiced: null, price: 4.8, expectedPrice: 4.8 }
         ],
-        lineNote: "Shipped quantities are the quantities advised in the ASN; they are not independently verified physical receipt.",
+        lineNote: "Shipped quantities are the quantities advised in the ASN.",
         checks: [
           { name: "Required carton references present", expected: "8 carton records with an SSCC value", observed: "8 of 8 carton records populated", status: "pass" },
           { name: "Carton identifier uniqueness", expected: "8 distinct values; 0 duplicate occurrences", observed: "6 distinct values; 2 duplicate occurrences", status: "fail" },
           { name: "Advised item quantity", expected: "576 units across the three order lines", observed: "576 units advised", status: "pass" },
-          { name: "Physical label and receipt check", expected: "Warehouse label scan or receiving evidence", observed: "Not connected", status: "unknown" }
+          { name: "Corrected notice", expected: "Replacement 856 for ASN-10482", observed: "Not received", status: "unknown" }
         ],
         timeline: [
           { time: "08:12", title: "Ship notice exchanged", detail: "ASN-10482 advises 576 units across eight cartons.", status: "pass" },
@@ -1746,8 +1905,8 @@
           { time: "08:22", title: "Application rejection received", detail: "The 824 identifies duplicate carton references.", status: "fail" },
           { time: "08:24", title: "Conformance evidence assembled", detail: "Nora identifies two duplicate occurrences and the configured uniqueness rule.", status: "fail" }
         ],
-        explanation: "Nora checks the carton records within the ASN against the partner's configured guide. Two repeated identifiers explain the application rejection. This evidence does not establish whether the physical labels repeat the same identifiers, whether goods arrived, or whether any fee was assessed.",
-        evidenceGap: "Physical label scans, carrier delivery and receiving records are not available.",
+        explanation: "Nora checks the carton records within the ASN against the partner's configured guide. Two repeated identifiers explain the application rejection. The check covers the ship notice content.",
+        evidenceGap: "No corrected 856 received yet.",
         action: { label: "Prepare ASN correction review", completedLabel: "Correction review prepared", completionNote: "The duplicate references and application advice are prepared for Shipment compliance. No replacement ASN was generated or transmitted." }
       },
       {
@@ -1757,8 +1916,8 @@
         reference: "ROUTE-38106 / WH-45022", amount: null, unit: "minutes before approval", value: 50,
         policy: "Collect-freight program COLLECT-03: retailer routing instructions must be recorded before a warehouse shipping order is released for this program.",
         roles: {
-          retailer: { partner: "Fieldstone Essentials", direction: "Supplier routing request · retailer instructions", summary: "The connected warehouse release was issued at 08:20, while this collect-freight shipment's routing instructions were recorded at 09:10.", impact: "The documented sequence conflicts with the configured collect-freight program. There is no evidence that the truck departed or an appointment was missed.", nextAction: "Prepare a routing review with the supplier's transportation owner before assuming the current warehouse instructions are correct." },
-          supplier: { partner: "Eastbank Market", direction: "Outbound routing request · inbound retailer instructions", summary: "The warehouse shipping order was released 50 minutes before Eastbank Market's routing instructions arrived.", impact: "The warehouse may be working from instructions issued before approval. Physical pickup and actual carrier assignment remain unverified.", nextAction: "Prepare a review of the warehouse instruction against the latest routing approval and confirm the pickup plan with Transportation planning." }
+          retailer: { partner: "Fieldstone Essentials", direction: "Supplier routing request · retailer instructions", summary: "The connected warehouse release was issued at 08:20, while this collect-freight shipment's routing instructions were recorded at 09:10.", impact: "The documented sequence conflicts with the configured collect-freight program. No carrier pickup event (214) is recorded yet.", nextAction: "Prepare a routing review with the supplier's transportation owner before assuming the current warehouse instructions are correct." },
+          supplier: { partner: "Eastbank Market", direction: "Outbound routing request · inbound retailer instructions", summary: "The warehouse shipping order was released 50 minutes before Eastbank Market's routing instructions arrived.", impact: "The warehouse may be working from instructions issued before approval. No carrier pickup event (214) is recorded yet.", nextAction: "Prepare a review of the warehouse instruction against the latest routing approval and confirm the pickup plan with Transportation planning." }
         },
         documents: [
           { type: "753", id: "ROUTE-38106", status: "pass", time: "08:00", detail: "Routing request submitted" },
@@ -1770,7 +1929,7 @@
           { name: "Program applicability", expected: "Collect-freight program assigned", observed: "COLLECT-03 applies to this order", status: "pass" },
           { name: "Routing request correlation", expected: "Request and approval use the same routing reference", observed: "ROUTE-38106 matched", status: "pass" },
           { name: "Approval before warehouse release", expected: "754 timestamp at or before 940 release", observed: "09:10 approval after 08:20 release; 50-minute gap", status: "fail" },
-          { name: "Physical pickup", expected: "Connected carrier or warehouse departure evidence", observed: "Not observed", status: "unknown" }
+          { name: "Carrier pickup", expected: "214 pickup event", observed: "Not received", status: "unknown" }
         ],
         timeline: [
           { time: "08:00", title: "Routing requested", detail: "The supplier asks for instructions under the collect-freight program.", status: "pass" },
@@ -1779,86 +1938,87 @@
           { time: "09:12", title: "Sequence exception confirmed", detail: "Liz compares the recorded step order using the configured program rule.", status: "fail" }
         ],
         explanation: "Liz evaluates the sequence of correlated business events. The routing request, approval and warehouse order are all present, but their order violates the policy configured for this collect-freight program. This is an evidenced sequence exception; transport failure is not established.",
-        evidenceGap: "Actual warehouse execution, carrier pickup and delivery status are not connected.",
+        evidenceGap: "No 945 shipping advice or 214 pickup event received yet.",
         action: { label: "Prepare routing review", completedLabel: "Routing review prepared", completionNote: "The conflicting sequence and current approval are prepared for Transportation planning. No load was held, retendered or rebooked." }
       },
       
       {
-        id: "rt-invoice-deduction", workflow: "invoices", title: "Two deductions need receiving evidence",
+        id: "rt-invoice-deduction", workflow: "invoices", title: "Two deductions without delivery or receipt documents",
         source: "PM", agent: "Reese", severity: "attention", process: 3,
         ruleId: "rt-rule-deduction", partnerId: "pt-meadowline", owner: "Jamie Brooks · Deductions review",
         reference: "REM-88027 / INV-10230", amount: 750, amountLabel: "Observed deductions", unit: "deductions for review", value: 2,
         policy: "Settlement terms REM-10: this account has a 10-calendar-day review window from remittance posting. The 22 Oct posting gives a configured review deadline of 1 Nov 2026, 23:59 ET.",
         roles: {
-          retailer: { partner: "Meadowline Care", direction: "Outbound remittance · supplier settlement review", summary: "A $25,000 invoice was settled for $24,250 with a $450 notice-timing deduction and a $300 shortage deduction. Receiving evidence is absent from the review packet.", impact: "The recorded $750 in deductions needs a supported explanation before the supplier review. The current packet cannot validate either charge.", nextAction: "Prepare a request for receiving and deduction-policy evidence, with the configured review deadline attached." },
-          supplier: { partner: "Harbor Grocers", direction: "Inbound retailer remittance", summary: "Harbor Grocers' remittance deducts $450 for notice timing and $300 for shortage from a $25,000 invoice. The packet lacks receiving evidence.", impact: "The $750 is an observed deduction, not a recoverable amount. Validity and dispute eligibility remain unconfirmed.", nextAction: "Prepare the remittance, invoice and ASN evidence for a deductions analyst and request the missing receiving records before 1 Nov." }
+          retailer: { partner: "Meadowline Care", direction: "Outbound remittance · supplier settlement review", summary: "A $25,000 invoice was settled for $24,250 with a $450 notice-timing deduction and a $300 shortage deduction. No 214 delivery event or 861 receiving advice is on file for the shipment.", impact: "The recorded $750 in deductions needs a supported explanation before the supplier review. The current packet cannot validate either charge.", nextAction: "Request the 214 delivery event and 861 receiving advice, with the configured review deadline attached." },
+          supplier: { partner: "Harbor Grocers", direction: "Inbound retailer remittance", summary: "Harbor Grocers' remittance deducts $450 for notice timing and $300 for shortage from a $25,000 invoice. No 214 delivery event or 861 receiving advice is on file.", impact: "The $750 is an observed deduction, not a recoverable amount. Validity and dispute eligibility remain unconfirmed.", nextAction: "Prepare the remittance, invoice and ASN evidence for a deductions analyst and request the 861 receiving advice before 1 Nov." }
         },
         documents: [
           { type: "856", id: "ASN-10391", status: "pass", time: "19 Oct 15:25", detail: "Ship-notice timestamp available" },
           { type: "997", id: "FA-10391", status: "pass", time: "19 Oct 15:26", detail: "Functional acknowledgment available" },
           { type: "810", id: "INV-10230", status: "pass", time: "20 Oct 12:10", detail: "Invoice total $25,000" },
           { type: "820", id: "REM-88027", status: "pass", time: "22 Oct 07:40", detail: "$24,250 settlement plus two deductions totaling $750" },
-          { type: "Receipt", id: "Not connected", status: "unknown", time: "09:30", detail: "Arrival timestamp and received quantity unavailable" }
+          { type: "214", id: "Not received", status: "unknown", time: "09:30", detail: "No delivery event for ASN-10391" },
+          { type: "861", id: "Not received", status: "unknown", time: "09:30", detail: "No receiving advice for ASN-10391" }
         ],
         deductions: [
-          { code: "ASN-TIME", label: "Notice timing", amount: 450, evidence: "Arrival/receiving timestamp and applicable notice rule", status: "unknown" },
-          { code: "QTY-SHORT", label: "Quantity shortage", amount: 300, evidence: "Received line quantities and discrepancy record", status: "unknown" }
+          { code: "ASN-TIME", label: "Notice timing", amount: 450, evidence: "214 delivery event and the notice-timing rule", status: "unknown" },
+          { code: "QTY-SHORT", label: "Quantity shortage", amount: 300, evidence: "861 received quantities by line", status: "unknown" }
         ],
         checks: [
           { name: "Remittance arithmetic", expected: "Invoice = net settlement + adjustments", observed: "$25,000 = $24,250 + $450 + $300", status: "pass" },
           { name: "Invoice correlation", expected: "Remittance references an identified invoice", observed: "INV-10230 matched", status: "pass" },
-          { name: "Review-packet completeness", expected: "Arrival and received-quantity evidence for both reason codes", observed: "Receiving evidence missing for both deductions", status: "fail" },
-          { name: "Deduction validity", expected: "Applicable policy compared with arrival and receipt evidence", observed: "Cannot determine from the available documents", status: "unknown" }
+          { name: "Review-packet completeness", expected: "214 delivery event and 861 receiving advice", observed: "Neither document on file", status: "fail" },
+          { name: "Deduction validity", expected: "Applicable policy compared with the 214 and 861", observed: "Cannot determine from the available documents", status: "unknown" }
         ],
         timeline: [
           { time: "19 Oct 15:25", title: "Ship notice recorded", detail: "The notice and functional acknowledgment timestamps are available.", status: "pass" },
           { time: "20 Oct 12:10", title: "Invoice recorded", detail: "Invoice value is $25,000.", status: "pass" },
           { time: "22 Oct 07:40", title: "Deductions observed", detail: "The remittance nets $750 across two stated reason codes.", status: "pass" },
-          { time: "24 Oct 09:20", title: "Evidence gap identified", detail: "Reese cannot verify timing or shortage claims without receiving evidence.", status: "fail" }
+          { time: "24 Oct 09:20", title: "Evidence gap identified", detail: "Reese cannot verify timing or shortage without a 214 delivery event or 861 receiving advice.", status: "fail" }
         ],
-        explanation: "Reese reconciles the invoice, net settlement and adjustment amounts, then checks the evidence required by each deduction reason. The arithmetic matches. The missing receiving timestamp and quantity records prevent a conclusion about validity or recovery. The review deadline comes from the configured terms for this relationship.",
-        evidenceGap: "Actual arrival, received quantities, discrepancy records and the applied deduction-policy evidence are missing.",
+        explanation: "Reese reconciles the invoice, net settlement and adjustment amounts, then checks the evidence required by each deduction reason. The arithmetic matches. Without a 214 delivery event and 861 receiving advice, validity cannot be concluded. The review deadline comes from the configured terms for this relationship.",
+        evidenceGap: "No 214 delivery event or 861 receiving advice for ASN-10391.",
         action: { label: "Prepare deduction evidence request", completedLabel: "Evidence request prepared", completionNote: "An internal evidence request and review packet are prepared for Deductions review. No dispute was submitted and no recovery was recorded." }
       }
     ],
     rules: [
       
       
-      { id: "rt-rule-ack", name: "Partner acknowledgment deadline", agent: "Lex", workflow: "orders", scope: "Partner policy ACK-120 and its agreed service window", condition: "Start from confirmed order receipt and seek a correlated business acknowledgment within the configured window.", threshold: 120, unit: "minutes after receipt", evidence: "Order receipt timestamp, order/partner correlation, 855 or equivalent business response and service calendar", guardrail: "Apply this relationship's policy only. A 997 is not a business commitment; missing off-platform evidence remains possible.", test: {
+      { id: "rt-rule-ack", name: "Partner acknowledgment deadline", agent: "Lex", workflow: "orders", scope: "Partner policy ACK-120 and its agreed service window", condition: "Start from confirmed order receipt and seek a correlated business acknowledgment within the configured window.", threshold: 120, unit: "minutes after receipt", evidence: "Order receipt timestamp, order/partner correlation, 855 or equivalent business response and service calendar", guardrail: "Apply this relationship's policy only. A 997 is not a business commitment.", test: {
         operator: "max", measure: "Minutes from receipt to acknowledgment or current observation", passValue: 95, failValue: 140,
         passLabel: "Acknowledgment at 08:45", failLabel: "Still unobserved at 09:30",
         pass: "Order receipt at 07:10; matching 855 at 08:45: 95 minutes elapsed.", fail: "Order receipt at 07:10; no matching 855 by 09:30: 140 minutes elapsed.",
         passDecision: "No acknowledgment deadline breach", failDecision: "Raise an acknowledgment timing finding"
       } },
-      { id: "rt-rule-order-change", name: "Release matches accepted order revision", agent: "Reese", workflow: "orders", scope: "Fulfillment rule REV-01", condition: "Compare released warehouse quantities with the latest accepted revision using order, line, item and normalized unit references.", threshold: 0, unit: "quantity tolerance", evidence: "850, accepted 860/865 revision, 940 release and unit/item reference data", guardrail: "A release mismatch is an instruction exception. Actual shipment requires shipping evidence.", test: {
+      { id: "rt-rule-order-change", name: "Release matches accepted order revision", agent: "Reese", workflow: "orders", scope: "Fulfillment rule REV-01", condition: "Compare released warehouse quantities with the latest accepted revision using order, line, item and normalized unit references.", threshold: 0, unit: "quantity tolerance", evidence: "850, accepted 860/865 revision, 940 release and unit/item reference data", guardrail: "A release mismatch is an instruction exception. The shipped quantity comes from the 945.", test: {
         operator: "max", measure: "Absolute quantity difference from accepted revision", passValue: 0, failValue: 200,
         passLabel: "Release at accepted quantity", failLabel: "Release at original quantity",
         pass: "Revision 2 accepts 800 units; warehouse release requests 800: difference 0.", fail: "Revision 2 accepts 800 units; warehouse release requests 1,000: difference 200.",
         passDecision: "Release quantity is within tolerance", failDecision: "Raise an accepted-revision mismatch"
       } },
-      { id: "rt-rule-sscc", name: "Distinct carton identifiers in the ASN", agent: "Nora", workflow: "shipments", scope: "Receiving guide PACK-08", condition: "Require an SSCC value on each applicable carton and check uniqueness within the shipment notice.", threshold: 0, unit: "duplicate occurrences", evidence: "856 carton hierarchy and SSCC values, assigned partner packing guide and any 824 response", guardrail: "ASN conformance does not verify physical labels, delivery, receipt or assessed charges.", test: {
+      { id: "rt-rule-sscc", name: "Distinct carton identifiers in the ASN", agent: "Nora", workflow: "shipments", scope: "Receiving guide PACK-08", condition: "Require an SSCC value on each applicable carton and check uniqueness within the shipment notice.", threshold: 0, unit: "duplicate occurrences", evidence: "856 carton hierarchy and SSCC values, assigned partner packing guide and any 824 response", guardrail: "The check covers ship notice content only.", test: {
         operator: "max", measure: "Repeated carton-identifier occurrences", passValue: 0, failValue: 2,
         passLabel: "Eight distinct carton identifiers", failLabel: "Six distinct identifiers for eight cartons",
         pass: "8 populated carton records contain 8 distinct identifiers: 0 repeated occurrences.", fail: "8 populated carton records contain 6 distinct identifiers: 2 repeated occurrences.",
         passDecision: "Carton-identifier check passes", failDecision: "Raise a carton conformance finding"
       } },
-      { id: "rt-rule-routing", name: "Routing approval before warehouse release", agent: "Liz", workflow: "shipments", scope: "Collect-freight program COLLECT-03", condition: "For this program, compare the correlated routing approval timestamp with warehouse release time.", threshold: 0, unit: "minutes released before approval", evidence: "753 request, 754 instructions, 940 release and program assignment", guardrail: "Apply only to configured collect-freight relationships. A sequence exception is not proof of physical departure.", test: {
+      { id: "rt-rule-routing", name: "Routing approval before warehouse release", agent: "Liz", workflow: "shipments", scope: "Collect-freight program COLLECT-03", condition: "For this program, compare the correlated routing approval timestamp with warehouse release time.", threshold: 0, unit: "minutes released before approval", evidence: "753 request, 754 instructions, 940 release and program assignment", guardrail: "Apply only to configured collect-freight relationships.", test: {
         operator: "max", measure: "Early-release minutes; zero when approval precedes release", passValue: 0, failValue: 50,
         passLabel: "Approval before warehouse release", failLabel: "Approval after warehouse release",
         pass: "Approval at 08:10; release at 08:20: 0 minutes released early.", fail: "Release at 08:20; approval at 09:10: 50 minutes released early.",
         passDecision: "Release sequence is within policy", failDecision: "Raise a routing-sequence finding"
       } },
-      { id: "rt-rule-price", name: "Invoice matches accepted order price", agent: "Nora", workflow: "invoices", scope: "Pricing agreement PRICE-06", condition: "Compare invoice unit prices with the latest accepted order on the same item, unit and currency basis.", threshold: 0, unit: "USD per-unit price tolerance", evidence: "Accepted order, business acknowledgment, invoice lines, revision history and item/unit references", guardrail: "This is a two-document price check. Three-way matching additionally requires receipt evidence.", test: {
+      { id: "rt-rule-price", name: "Invoice matches accepted order price", agent: "Nora", workflow: "invoices", scope: "Pricing agreement PRICE-06", condition: "Compare invoice unit prices with the latest accepted order on the same item, unit and currency basis.", threshold: 0, unit: "USD per-unit price tolerance", evidence: "Accepted order, business acknowledgment, invoice lines, revision history and item/unit references", guardrail: "This is a two-document price check. Three-way matching adds the 861 where the retailer sends it.", test: {
         operator: "max", measure: "Absolute unit-price variance in USD per each", passValue: 0, failValue: 0.5,
         passLabel: "Invoice at accepted order price", failLabel: "Invoice fifty cents above order price",
         pass: "600 units invoiced and accepted at $12.00 each: $0.00 per-unit variance.", fail: "600 units at $12.50 rather than $12.00: $0.50 per-unit variance, $300 total.",
         passDecision: "Unit price is within tolerance", failDecision: "Raise an invoice price-variance finding"
       } },
-      { id: "rt-rule-deduction", name: "Deduction evidence and review window", agent: "Reese", workflow: "invoices", scope: "Settlement terms REM-10", condition: "Reconcile adjustments to the invoice and require the evidence assigned to each reason code before concluding validity.", threshold: 10, unit: "calendar days in this account's review window", evidence: "820 adjustments, invoice, ASN and acknowledgment, receiving evidence, reason mappings and configured settlement terms", guardrail: "Observed deductions are not recoverable amounts. Preparing evidence is not submitting a dispute or recording recovery.", test: {
+      { id: "rt-rule-deduction", name: "Deduction evidence and review window", agent: "Reese", workflow: "invoices", scope: "Settlement terms REM-10", condition: "Reconcile adjustments to the invoice and require the evidence assigned to each reason code before concluding validity.", threshold: 10, unit: "calendar days in this account's review window", evidence: "820 adjustments, 810 invoice, 856 and 997, 214 delivery event, 861 receiving advice, reason mappings and settlement terms", guardrail: "Observed deductions are not recoverable amounts. Preparing evidence is not submitting a dispute or recording recovery.", test: {
         operator: "max", measure: "Calendar days elapsed since remittance posting", passValue: 2, failValue: 2,
         requireEvidence: true, passEvidenceComplete: true, failEvidenceComplete: false,
         passLabel: "Complete evidence packet on day two", failLabel: "Incomplete evidence packet on day two",
-        pass: "Day 2 after posting. Invoice and settlement reconcile; arrival and receipt evidence is present for both reason codes.", fail: "Day 2 after posting. Amounts reconcile, but arrival and received-quantity evidence is missing for both reason codes.",
+        pass: "Day 2 after posting. Invoice and settlement reconcile; the 214 and 861 are on file.", fail: "Day 2 after posting. Amounts reconcile, but the 214 and 861 are missing.",
         passDecision: "Ready for analyst review; validity still requires a decision", failDecision: "Hold the conclusion; review the deadline and request missing evidence"
       } }
     ],
@@ -1921,8 +2081,8 @@
           { type: "850", label: "Purchase order", status: "healthy", required: true, lastSeen: "08:55", detail: "Order feed is active." },
           { type: "753", label: "Routing request", status: "healthy", required: true, lastSeen: "08:00", detail: "Routing request processed successfully." },
           { type: "754", label: "Routing instructions", status: "healthy", required: true, lastSeen: "09:10", detail: "Approval received; PM identifies its sequence relative to warehouse release." },
-          { type: "856", label: "Ship notice", status: "healthy", required: true, lastSeen: "08:32", detail: "Feed is active; no physical delivery conclusion follows from feed status." },
-          { type: "214", label: "Shipment status", status: "unconfigured", required: false, lastSeen: "Not connected", detail: "Carrier-event coverage is unavailable. Excluded from required integration coverage but shown as a PM evidence gap." }
+          { type: "856", label: "Ship notice", status: "healthy", required: true, lastSeen: "08:32", detail: "Feed is active." },
+          { type: "214", label: "Shipment status", status: "unconfigured", required: false, lastSeen: "No route", detail: "No carrier events configured. Excluded from required integration coverage but shown as a PM evidence gap." }
         ]
       },
       {
@@ -2132,7 +2292,7 @@
   RTDATA.workflows.filter(function (w) { return !w.hidden; }).forEach(function (w) { WSLENS.push({ k: w.id, n: w.title, match: function (x) { return x.wf === w.id; } }); });
   CXACTX.push(function () { return ccOn("rt") ? '<span class="rt-head-actions">' + rtButton("Reset demo", "data-rt-reset") + '</span>' : ""; });
   CXQ.push({ t: "rt", q: function () { return "Which evidence is still missing?"; }, a: function () {
-      return ["Shipping and settlement cases need receiving, approval, or price-authorization evidence. An ASN or functional acknowledgment alone cannot establish physical receipt or deduction validity.",
+      return ["Shipping and settlement cases are waiting on 945 shipping advice, 214 carrier events, 861 receiving advice or a corrected 856. A 997 confirms syntax only.",
         ccItems().filter(function (i) { return /^rt:rt-(shipment|invoice)/.test(i.key); })]; } });
   var rtBaseRender = cxRender, rtBaseDrawer = cxDrawer;
   cxDrawer = function () {

@@ -19,7 +19,7 @@
         { t: "Dispute window closing", ch: "Email", r: "Deductions review", on: true, k: "rt" }],
       tasks: [{ t: "Confirm the new AS2 endpoint with the partner", o: "Alex Morgan", d: "Today", k: "f:f2", done: false, tr: "im" },
         { t: "Update the cost on open orders", o: "Dana Ortiz", d: "Oct 27", k: "f:f9", done: true, tr: "pm" },
-        { t: "Collect receiving evidence for the two deductions", o: "Jamie Brooks", d: "Tomorrow", k: "rt:rt-invoice-deduction", done: false, tr: "rt" }],
+        { t: "Request the 214 and 861 for the two deductions", o: "Jamie Brooks", d: "Tomorrow", k: "rt:rt-invoice-deduction", done: false, tr: "rt" }],
       reminders: [{ t: "Check the remittance advice after the connection fix", w: "Today, 11:30", tr: "im" }, { t: "Check acknowledgments before the 12:00 cutoff", w: "Today, 11:30", tr: "pm" }, { t: "Deduction dispute window closes", w: "Nov 1, 09:00", tr: "rt" }],
       rules: []
     };
@@ -66,9 +66,9 @@
     var i = +ccWsProc, P = ccProc(i), F = CCFLOW[i], lenses = ccOn("rt") ? WSLENS : [], lens = lenses.filter(function (l) { return l.k === ccWsLens; })[0];
     var items = cxSort(ccItems().filter(function (x) { return x.proc === i && !x.done && (!lens || lens.match(x)); })), core = cxOpen().filter(function (f) { return f.p === i && ccOn(f.mod === "Integration Monitor" ? "im" : "pm"); });
     var val = core.reduce(function (a, f) { return a + f.val; }, 0);
-    var steps = P.steps.map(function (s, k) {
-      var fs = core.filter(function (f) { return f.st === k; }), sev = fs.some(function (f) { return f.sev === "c"; }) ? "c" : fs.length ? "w" : "ok";
-      return '<li class="' + sev + '"><span class="ws-sn">' + (k + 1) + '</span><b>' + cxe(s[0]) + '</b><code>' + cxe(s[1]) + '</code><strong>' + F.steps[k].toLocaleString("en-US") + '</strong><small>In flight</small>' +
+    var steps = ccSteps(i).map(function (p, n) {
+      var k = p[0], s = p[1], fs = core.filter(function (f) { return f.st === k; }), sev = fs.some(function (f) { return f.sev === "c"; }) ? "c" : fs.length ? "w" : "ok";
+      return '<li class="' + sev + '"><span class="ws-sn">' + (n + 1) + '</span><b>' + cxe(ccStepName(i, k)) + '</b><code>' + cxe(ccStepDoc(s)) + '</code><strong>' + F.steps[k].toLocaleString("en-US") + '</strong><small>In flight</small>' +
         fs.map(function (f) { return '<button type="button" class="cx-lk" data-cxf="' + f.id + '">' + cxe(f.ot) + '</button>'; }).join("") + '</li>';
     }).join("");
     var rules = CXR.filter(function (r) { return r[3].indexOf(i) >= 0 && cxAgents().some(function (a) { return a.id === r[0]; }); });
@@ -76,7 +76,7 @@
     var lensNav = lenses.length ? '<nav class="ws-lens" aria-label="Retail lens"><span>Retail lens</span>' + [{ k: "all", n: "All findings" }].concat(lenses).map(function (l) { return '<button type="button" data-wslens="' + l.k + '" aria-pressed="' + ((lens ? lens.k : "all") === l.k) + '">' + l.n + '</button>'; }).join("") + '</nav>' : "";
     return h + '<div class="cx-fsum ws-pk">' + cxKpi("In flight", F.n.toLocaleString("en-US"), Math.round(100 * F.ok / F.n) + "% on track") + cxKpi("At risk or breached", F.risk + F.br, F.br + " breached") +
       cxKpi("Open findings", items.length, items.filter(function (x) { return x.sev === "h"; }).length + " high severity") + cxKpi(cxe(P.measures[CCM[i][0]]), CCM[i][1], val ? "$" + Math.round(val / 1000) + "K value at risk" : "No value at risk") + '</div>' +
-      cxCard("Process flow", '<ol class="ws-flow">' + steps + '</ol>') +
+      cxCard("Process flow", '<ol class="ws-flow">' + steps + '</ol>', "", '<span class="cx-note">EDI steps on Trading Grid</span>') +
       '<div class="cx-g21">' + cxCard("Open findings", lensNav + '<table class="cx-tbl cx-pf"><thead><tr><th>Finding</th><th>Module</th><th>Severity</th><th>Detected</th></tr></thead><tbody>' + items.map(function (x) {
         return '<tr><td>' + cxItemLink(x, "b") + '<small>' + cxe(x.partner) + '</small></td><td>' + cxTag(x.mod) + '</td><td>' + cxSevChip(x.sev) + '</td><td>' + cxe(x.at) + '</td></tr>'; }).join("") +
         (items.length ? "" : '<tr><td colspan="4" class="cx-empty">No open findings.</td></tr>') + '</tbody></table>') +

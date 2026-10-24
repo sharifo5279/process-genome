@@ -46,7 +46,7 @@ function loadApp(storage = new Map()) {
   };
   app.window.document = app.document;
   vm.createContext(app);
-  vm.runInContext(['data.js', 'cc.js', 'workspace.js', 'retail-data.js', 'retail.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
+  vm.runInContext(['data.js', 'cc.js', 'im.js', 'workspace.js', 'retail-data.js', 'retail.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
 
   function click(attributes) {
     const target = {

@@ -183,7 +183,7 @@
   RTDATA.workflows.filter(function (w) { return !w.hidden; }).forEach(function (w) { WSLENS.push({ k: w.id, n: w.title, match: function (x) { return x.wf === w.id; } }); });
   CXACTX.push(function () { return ccOn("rt") ? '<span class="rt-head-actions">' + rtButton("Reset demo", "data-rt-reset") + '</span>' : ""; });
   CXQ.push({ t: "rt", q: function () { return "Which evidence is still missing?"; }, a: function () {
-      return ["Shipping and settlement cases need receiving, approval, or price-authorization evidence. An ASN or functional acknowledgment alone cannot establish physical receipt or deduction validity.",
+      return ["Shipping and settlement cases are waiting on 945 shipping advice, 214 carrier events, 861 receiving advice or a corrected 856. A 997 confirms syntax only.",
         ccItems().filter(function (i) { return /^rt:rt-(shipment|invoice)/.test(i.key); })]; } });
   var rtBaseRender = cxRender, rtBaseDrawer = cxDrawer;
   cxDrawer = function () {

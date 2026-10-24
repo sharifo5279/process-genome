@@ -41,7 +41,7 @@ A Package selector in the top bar switches between the three client configuratio
 
 | Package | Adds |
 |---|---|
-| Integration Monitor (every Trading Grid client) | Overview (Summary with failure points, network activity and transaction volume; Projections and anomalies; custom dashboards), Findings, Action queue, Partners, Workspace (Reports, Notifications, Tasks and reminders, Agents with Ivy), Configuration (Monitoring) |
+| Integration Monitor (every Trading Grid client) | Overview (Summary with the daily digest, failure points, network activity and transaction volume; Projections and anomalies with failed-transaction monitors and Explain with Aviator; Transaction volume with the refine panel; custom dashboards), Findings, Action queue, Partners (All partners, Network graph, Integration analysis, partner details), Workspace (Reports, Notifications, Tasks and reminders, Agents with Ivy), Configuration (Monitoring) |
 | + Performance Monitor (any industry) | Process ring on the Overview, Workspace › Business processes with Solution, the Partner scorecard tab on the Overview, agents Lex, Nora, Liz and Reese, Configuration › Rules & Policies with the rule wizard. Generic process templates: Order to cash, Procure to pay, Claims and disputes |
 | + Retail pack (includes Performance Monitor) | Retail process definitions, retail cases with evidence, retail lenses in Business processes, Required documents on Partners, Retail KPIs tab and card on the Overview, retail policy templates, retailer and supplier perspectives |
 
@@ -50,6 +50,8 @@ packages are added; the Retail pack adds content rather than screens. Every find
 
 Modules register through shared lists: `CXITEMS` (findings and actions), `CXDASH` (components), `CXQ` (Aviator),
 `CXCFG` (Configuration cards), `CXPTAB` (Partners tabs), `WSPRE` (prebuilt dashboards) and `WSLENS` (process lenses).
+Integration Monitor capabilities are in `im.js`. Business process views show only the steps that exchange an EDI document on
+Trading Grid; portal, ERP and warehouse-system steps from the reference processes are left out.
 Workspace saved items are kept under `process-genome-cc-workspace-v2`.
 
 ### Perspectives and demo state

@@ -24,7 +24,7 @@ SOURCE_DIR = Path(__file__).resolve().parent
 MARKER_PREFIX = "process-genome:command-center:"
 MODEL = ("data.js", "pv.js")
 PAGE_STYLES = ("cc.css", "retail.css")
-PAGE_SCRIPTS = ("data.js", "cc.js", "workspace.js", "retail-data.js", "retail.js")
+PAGE_SCRIPTS = ("data.js", "cc.js", "im.js", "workspace.js", "retail-data.js", "retail.js")
 
 MODES_ANCHOR = "  /* Modes, fit, open and close */"
 PV_BUTTON = (
