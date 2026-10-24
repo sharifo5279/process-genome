@@ -760,6 +760,11 @@
   .tgr .copy .num i svg { width: 19px; height: 19px; }
   .tgr .copy h2 { margin-top: 16px; font-size: clamp(30px, 3.4vw, 44px); line-height: 1.05; font-weight: 900; letter-spacing: -0.035em; }
   .tgr .copy > p { margin-top: 16px; font-size: 18px; line-height: 1.55; color: var(--muted); max-width: 30em; }
+  .tgr .copy h2.mk-st { display: flex; align-items: center; gap: 14px; margin-top: 0; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.12; }
+  .tgr .copy h2.mk-st i { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--tint); color: var(--accent-ink); }
+  .tgr .copy h2.mk-st i svg { width: 24px; height: 24px; }
+  .tgr .copy > p.mk-sub { margin-top: 12px; font-size: 20px; line-height: 1.35; font-weight: 600; letter-spacing: -0.01em; color: var(--accent-ink); }
+  @media (max-width: 699px) { .tgr .copy h2.mk-st { gap: 12px; } .tgr .copy h2.mk-st i { width: 40px; height: 40px; border-radius: 10px; } .tgr .copy h2.mk-st i svg { width: 20px; height: 20px; } .tgr .copy > p.mk-sub { font-size: 18px; } }
   .tgr .copy ul { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 12px; }
   .tgr .copy li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; font-size: 16px; line-height: 1.45; font-weight: 600; }
   .tgr .copy li svg { width: 20px; height: 20px; color: var(--accent); margin-top: 1px; }
@@ -3769,8 +3774,8 @@ var TRANSLATE = [
       }).join("") + '</div>';
   document.getElementById("mk-stories").innerHTML = P.map(function (p) {
     return '<section class="story" id="mk-' + p[0] + '" aria-labelledby="mk-h-' + p[0] + '"><div class="wrap"><div class="copy">' +
-      '<p class="num"><i>' + icon(p[1]) + '</i><span class="mk-eb">' + esc(p[2]) + '</span></p>' +
-      '<h2 id="mk-h-' + p[0] + '">' + esc(p[3]) + '</h2><p>' + esc(p[4]) + '</p>' +
+      '<h2 class="mk-st" id="mk-h-' + p[0] + '"><i>' + icon(p[1]) + '</i><span>' + esc(p[2]) + '</span></h2>' +
+      '<p class="mk-sub">' + esc(p[3]) + '</p><p>' + esc(p[4]) + '</p>' +
       '<ul>' + p[5].map(function (b) { return '<li>' + icon("badge-check") + '<span>' + esc(b) + '</span></li>'; }).join("") + '</ul>' +
       '<p class="who">' + p[6].map(function (w) { return '<span>' + icon(w[0]) + esc(w[1]) + '</span>'; }).join("") + '</p>' +
       '</div><div class="art">' + ART[p[0]]() + '</div></div></section>';
