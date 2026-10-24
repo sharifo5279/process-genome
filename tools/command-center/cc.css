@@ -438,3 +438,4 @@
   .im-pjb { display: flex; justify-content: flex-end; margin: -4px 0 12px; }
   .im-ex { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; } .im-ex li { display: flex; gap: 10px; align-items: flex-start; } .im-ex li .ci { color: var(--pa); flex: none; }
   @container (max-width: 1080px) { .im-vol { grid-template-columns: 1fr; } }
+  .im-nh { margin-bottom: 16px; }

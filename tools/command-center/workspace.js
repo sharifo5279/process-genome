@@ -10,7 +10,7 @@
   /* Every saved item and option carries the package that brings it: im (all clients), pm, or rt */
   function wsSeed() {
     return {
-      dashboards: [{ n: "Network health", c: [10, 70, 80], t: "im" }, { n: "Order to cash daily", c: [20, 40, 60], t: "pm" }],
+      dashboards: [{ n: "Order to cash daily", c: [20, 40, 60], t: "pm" }],
       reports: [{ n: "Daily findings digest", s: "Findings digest", f: "Email", w: "Daily, 06:30", r: "EDI operations", last: "Today, 06:30", t: "im" },
         { n: "Weekly process performance", s: "Process performance", f: "PDF", w: "Weekly, Monday 07:00", r: "Operations leads", last: "Mon, 07:00", t: "pm" },
         { n: "Retail compliance", s: "Retail compliance", f: "PDF", w: "Weekly, Friday 16:00", r: "Vendor compliance", last: "Fri, 16:00", t: "rt" }],
@@ -36,6 +36,7 @@
     var s = null; try { s = JSON.parse(localStorage.getItem(WSKEY) || "null"); } catch (e) {}
     ccWs = s && typeof s === "object" && Array.isArray(s.dashboards) ? s : wsSeed();
     ["dashboards", "reports", "notifs", "tasks", "reminders", "rules"].forEach(function (k) { if (!Array.isArray(ccWs[k])) ccWs[k] = wsSeed()[k]; });
+    ccWs.dashboards = ccWs.dashboards.filter(function (d) { return d.n !== "Network health"; });
     ccWs.rules.forEach(function (r) { CXR.push(r); });
     return ccWs;
   }

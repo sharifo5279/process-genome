@@ -319,7 +319,7 @@
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
   function cxOvHead() {
     var procs = ccOn("pm") ? " · " + [0, 1, 3].map(ccShort).join("; ") : "", cd = wsCurDash();
-    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Transaction volume"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
+    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Network health"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
       wsDashTabs().map(function (t) { return '<button type="button" data-cxgo="ws-dash" data-wsdash="' + t.key + '" aria-pressed="' + (ccScr === "ws-dash" && cd === t) + '">' + cxe(t.n) + '</button>'; }).join("");
     return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' +
       '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + '<button type="button" class="cx-ovn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></nav>';
@@ -355,7 +355,7 @@
         '</div><ul class="cx-lg row"><li><i style="background:#0066FF"></i>850 Purchase order</li><li><i style="background:#001889"></i>856 Ship notice</li><li><i style="background:#5B8DEF"></i>810 Invoice</li><li><i style="background:#9DB7F2"></i>Other</li></ul>'; } },
     { o: 80, mod: "IM", w: 4, t: "Transaction volume", h: function () {
       return cxLine([{ v: [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590], area: true }], { w: 760, h: 220, min: 3000, max: 5000, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Transaction volume, last 12 months" }); },
-      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>' + cxGoBtn("Analyze volume", "im-vol"); } },
+      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>' + cxGoBtn("Network health", "im-vol"); } },
     { o: 100, mod: "PM", w: 3, t: "Findings by agent", h: function () {
       return cxBars(cxAgents().map(function (a, k) { return [a.n + " · " + a.r, a.f.filter(function (id) { return !ccDone[id]; }).length + [12, 5, 3, 4, 6][k], "", "b"]; }), { max: 20 }); },
       f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Agents", "ws-agents"); } }

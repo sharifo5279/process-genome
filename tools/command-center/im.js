@@ -38,7 +38,7 @@
       '<div class="cx-kpi cx-ka2 im-ka"><span>' + ci("spark") + 'Key analysis</span><small>Volume rose 4% on order traffic. Failed transactions doubled at ' + cxe(ps[1][0]) + ' after its signing certificate changed; the other partners stayed within their normal error range.</small></div></div>'; },
     f: function () { return '<span class="cx-note">Daily Summarizer and Explainer Agent · Generated 06:00</span>'; } });
 
-  /* Overview: transaction volume analysis with the refine panel */
+  /* Overview: Network health. Network activity, document summary and transaction volume analysis with the refine panel */
   CXS["im-vol"] = function () {
     var ps = cxPartners(), v = imVol, seed = [v.dt, v.pt, v.ad, v.st, v.sol].filter(function (x) { return x !== "All"; }).length;
     var f = 1 / (1 + seed * 1.6), n = v.per === "1" ? 30 : v.per === "24" ? 24 : 12;
@@ -52,7 +52,8 @@
     function seg(key, opts) { return opts.map(function (o) { return '<button type="button" data-imseg="' + key + ':' + o[0] + '" aria-pressed="' + (v[key] === o[0]) + '">' + o[1] + '</button>'; }).join(""); }
     var addr = ps.slice(0, 6).map(function (p) { return "ZZ:" + p[1]; });
     var mix = [["Purchase order (850)", 34], ["Functional acknowledgment (997)", 27], ["Ship notice (856)", 14], ["Invoice (810)", 12], ["Order acknowledgment (855)", 8], ["Remittance advice (820)", 5]];
-    return cxOvHead() + '<div class="im-vol"><aside class="cx-card im-ref"><header><h3>Refine</h3></header>' +
+    var by = function (o) { return CXDASH.filter(function (c) { return c.o === o; })[0]; };
+    return cxOvHead() + '<div class="cx-dg im-nh">' + cxDc(by(10), 3) + cxDc(by(70), 3) + '</div><div class="im-vol"><aside class="cx-card im-ref"><header><h3>Refine</h3></header>' +
       sel("dt", "Document type", ["850", "855", "856", "810", "820", "997"]) + sel("pt", "Trading partner", ps.map(function (p) { return p[0]; })) + sel("ad", "EDI address", addr) +
       sel("st", "Document standard", ["X12", "EDIFACT", "XML"]) + sel("sol", "Solution ID", ["SOL-RET-01", "SOL-RET-02", "SOL-LOG-01"]) +
       (seed ? '<button type="button" class="cx-btn" data-imclear>Clear refinements</button>' : "") + '</aside><div>' +

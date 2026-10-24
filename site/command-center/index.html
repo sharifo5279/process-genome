@@ -466,6 +466,7 @@
   .im-pjb { display: flex; justify-content: flex-end; margin: -4px 0 12px; }
   .im-ex { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; } .im-ex li { display: flex; gap: 10px; align-items: flex-start; } .im-ex li .ci { color: var(--pa); flex: none; }
   @container (max-width: 1080px) { .im-vol { grid-template-columns: 1fr; } }
+  .im-nh { margin-bottom: 16px; }
   /* Retail and CPG workspaces: additive, scoped to the Command Center. */
   .cx.rt-app {
     --rt-navy: #102b56;
@@ -1246,7 +1247,7 @@
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
   function cxOvHead() {
     var procs = ccOn("pm") ? " · " + [0, 1, 3].map(ccShort).join("; ") : "", cd = wsCurDash();
-    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Transaction volume"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
+    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Network health"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
       wsDashTabs().map(function (t) { return '<button type="button" data-cxgo="ws-dash" data-wsdash="' + t.key + '" aria-pressed="' + (ccScr === "ws-dash" && cd === t) + '">' + cxe(t.n) + '</button>'; }).join("");
     return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' +
       '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + '<button type="button" class="cx-ovn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></nav>';
@@ -1282,7 +1283,7 @@
         '</div><ul class="cx-lg row"><li><i style="background:#0066FF"></i>850 Purchase order</li><li><i style="background:#001889"></i>856 Ship notice</li><li><i style="background:#5B8DEF"></i>810 Invoice</li><li><i style="background:#9DB7F2"></i>Other</li></ul>'; } },
     { o: 80, mod: "IM", w: 4, t: "Transaction volume", h: function () {
       return cxLine([{ v: [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590], area: true }], { w: 760, h: 220, min: 3000, max: 5000, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Transaction volume, last 12 months" }); },
-      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>' + cxGoBtn("Analyze volume", "im-vol"); } },
+      f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>' + cxGoBtn("Network health", "im-vol"); } },
     { o: 100, mod: "PM", w: 3, t: "Findings by agent", h: function () {
       return cxBars(cxAgents().map(function (a, k) { return [a.n + " · " + a.r, a.f.filter(function (id) { return !ccDone[id]; }).length + [12, 5, 3, 4, 6][k], "", "b"]; }), { max: 20 }); },
       f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Agents", "ws-agents"); } }
@@ -1471,7 +1472,7 @@
       '<div class="cx-kpi cx-ka2 im-ka"><span>' + ci("spark") + 'Key analysis</span><small>Volume rose 4% on order traffic. Failed transactions doubled at ' + cxe(ps[1][0]) + ' after its signing certificate changed; the other partners stayed within their normal error range.</small></div></div>'; },
     f: function () { return '<span class="cx-note">Daily Summarizer and Explainer Agent · Generated 06:00</span>'; } });
 
-  /* Overview: transaction volume analysis with the refine panel */
+  /* Overview: Network health. Network activity, document summary and transaction volume analysis with the refine panel */
   CXS["im-vol"] = function () {
     var ps = cxPartners(), v = imVol, seed = [v.dt, v.pt, v.ad, v.st, v.sol].filter(function (x) { return x !== "All"; }).length;
     var f = 1 / (1 + seed * 1.6), n = v.per === "1" ? 30 : v.per === "24" ? 24 : 12;
@@ -1485,7 +1486,8 @@
     function seg(key, opts) { return opts.map(function (o) { return '<button type="button" data-imseg="' + key + ':' + o[0] + '" aria-pressed="' + (v[key] === o[0]) + '">' + o[1] + '</button>'; }).join(""); }
     var addr = ps.slice(0, 6).map(function (p) { return "ZZ:" + p[1]; });
     var mix = [["Purchase order (850)", 34], ["Functional acknowledgment (997)", 27], ["Ship notice (856)", 14], ["Invoice (810)", 12], ["Order acknowledgment (855)", 8], ["Remittance advice (820)", 5]];
-    return cxOvHead() + '<div class="im-vol"><aside class="cx-card im-ref"><header><h3>Refine</h3></header>' +
+    var by = function (o) { return CXDASH.filter(function (c) { return c.o === o; })[0]; };
+    return cxOvHead() + '<div class="cx-dg im-nh">' + cxDc(by(10), 3) + cxDc(by(70), 3) + '</div><div class="im-vol"><aside class="cx-card im-ref"><header><h3>Refine</h3></header>' +
       sel("dt", "Document type", ["850", "855", "856", "810", "820", "997"]) + sel("pt", "Trading partner", ps.map(function (p) { return p[0]; })) + sel("ad", "EDI address", addr) +
       sel("st", "Document standard", ["X12", "EDIFACT", "XML"]) + sel("sol", "Solution ID", ["SOL-RET-01", "SOL-RET-02", "SOL-LOG-01"]) +
       (seed ? '<button type="button" class="cx-btn" data-imclear>Clear refinements</button>' : "") + '</aside><div>' +
@@ -1569,7 +1571,7 @@
   /* Every saved item and option carries the package that brings it: im (all clients), pm, or rt */
   function wsSeed() {
     return {
-      dashboards: [{ n: "Network health", c: [10, 70, 80], t: "im" }, { n: "Order to cash daily", c: [20, 40, 60], t: "pm" }],
+      dashboards: [{ n: "Order to cash daily", c: [20, 40, 60], t: "pm" }],
       reports: [{ n: "Daily findings digest", s: "Findings digest", f: "Email", w: "Daily, 06:30", r: "EDI operations", last: "Today, 06:30", t: "im" },
         { n: "Weekly process performance", s: "Process performance", f: "PDF", w: "Weekly, Monday 07:00", r: "Operations leads", last: "Mon, 07:00", t: "pm" },
         { n: "Retail compliance", s: "Retail compliance", f: "PDF", w: "Weekly, Friday 16:00", r: "Vendor compliance", last: "Fri, 16:00", t: "rt" }],
@@ -1595,6 +1597,7 @@
     var s = null; try { s = JSON.parse(localStorage.getItem(WSKEY) || "null"); } catch (e) {}
     ccWs = s && typeof s === "object" && Array.isArray(s.dashboards) ? s : wsSeed();
     ["dashboards", "reports", "notifs", "tasks", "reminders", "rules"].forEach(function (k) { if (!Array.isArray(ccWs[k])) ccWs[k] = wsSeed()[k]; });
+    ccWs.dashboards = ccWs.dashboards.filter(function (d) { return d.n !== "Network health"; });
     ccWs.rules.forEach(function (r) { CXR.push(r); });
     return ccWs;
   }
