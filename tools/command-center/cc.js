@@ -3,8 +3,8 @@
      extended with business process monitoring and AI agents. Illustrative values for the concept preview.
      Two perspectives of the same network: a retailer (Northfield Stores) and a CPG supplier (Nuvori Beauty). */
   var ccEl = document.getElementById("cc"), cx = document.getElementById("cx");
-  var ccScr = "dash", ccGrp = { im: true, pm: true, rt: true }, ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccTpt = "Customer", ccPj = 0, ccAvLog = [];
-  var ccCfgTab = "rp", ccProcTab = "pr", ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "open";
+  var ccScr = "dash", ccGrp = { ws: true, im: true, pm: true, rt: true }, ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccTpt = "Customer", ccPj = 0, ccAvLog = [];
+  var ccCfgTab = "rp", ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "open";
   var CC_GENOME = "../#retail/map";
   function ccRole() { return typeof rtRole === "string" ? rtRole : "supplier"; }
   function ccCompany() { return ccRole() === "retailer" ? "Northfield Stores" : "Nuvori Beauty"; }
@@ -219,38 +219,74 @@
         return '<tr class="gh"><td colspan="7">' + a.n + ' · ' + a.r + '</td></tr>' + CXR.filter(function (r) { return r[0] === a.id; }).map(function (r) {
           return '<tr><td><b class="cx-lkt">' + cxe(r[1]) + '</b></td><td>' + cxe(r[2]) + '</td><td>' + cxe(r[3]) + '</td><td class="n">' + r[4].toFixed(1) + '%</td><td class="n">' + r[5] + '</td><td>' + r[6] + '</td><td><span class="cx-st s-' + (r[7] === "Active" ? "resolved" : r[7] === "Paused" ? "acknowledged" : "new") + '"><i></i>' + r[7] + '</span></td></tr>';
         }).join("");
-      }).join("") + '</tbody></table>', "", '<span class="cx-note">Grouped by agent</span>' + cxTag("PM")) + CXCFG.map(function (f) { return f(); }).join("");
+      }).join("") + '</tbody></table>', "", '<span class="cx-note">Grouped by agent</span>' + cxTag("PM") + '<button type="button" class="cx-btn p" data-rwnew>' + ci("plus") + 'Create rule</button>') + CXCFG.map(function (f) { return f(); }).join("");
   };
-  CXS["pm-proc"] = function () {
-    var op = cxOpen();
-    var tabs = '<nav class="cx-tabs"><button type="button" data-cxpt="pr" aria-pressed="' + (ccProcTab !== "sol") + '">Processes</button><button type="button" data-cxpt="sol" aria-pressed="' + (ccProcTab === "sol") + '">Solution</button></nav>';
-    if (ccProcTab === "sol") return cxHead("Business processes", '<span class="cx-new">New</span>') + tabs + '<p class="cx-lead">Business documents in the client solution, with their EDI and ERP equivalents.</p>' +
-      cxCard("", '<table class="cx-tbl"><thead><tr><th>Business document</th><th>EDI documents</th><th>ERP document</th><th>Processes</th></tr></thead><tbody>' + CXSOL.map(function (r) {
-        return '<tr><td><b>' + r[0] + '</b></td><td><code>' + r[1] + '</code></td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>'; }).join("") + '</tbody></table>');
-    return cxHead("Business processes", '<span class="cx-new">New</span>') + tabs + '<p class="cx-lead">The client solution covers three processes. Each shows its steps, the agents watching it and its open findings.</p>' +
-      cxCard("", '<table class="cx-tbl cx-pt"><thead><tr><th>Process</th><th>Steps</th><th>Key measure</th><th>Agents</th><th>Open findings</th><th>Value at risk</th><th>Health</th></tr></thead><tbody>' + CCSTG.map(function (g) {
-        return '<tr class="gh"><td colspan="7">' + g[0] + '</td></tr>' + g[1].map(function (i) {
-          var P = PROCESSES.retail[i], n = op.filter(function (f) { return f.p === i; }), sev = n.some(function (f) { return f.sev === "c"; }) ? "c" : n.length ? "w" : "ok", ag = {}, v = n.reduce(function (a, f) { return a + f.val; }, 0);
-          CCF.filter(function (f) { return f.p === i; }).forEach(function (f) { ag[CXAF[f.id].n] = 1; });
-          var steps = P.steps.map(function (s, k) { var fs = n.filter(function (f) { return f.st === k; }); return '<i class="' + (fs.some(function (f) { return f.sev === "c"; }) ? "c" : fs.length ? "w" : "ok") + '" title="' + cxe(s[0]) + '"></i>'; }).join("");
-          return '<tr><td><button type="button" class="cx-lk b" data-cxproc="' + i + '">' + cxe(P.n) + '</button></td><td><span class="cx-steps">' + steps + '</span></td><td>' + cxe(P.measures[CCM[i][0]]) + ' <b>' + CCM[i][1] + '</b></td><td>' + (Object.keys(ag).join(", ") || "Lex, Nora") + '</td><td>' + (n.length || "None") + '</td><td>' + (v ? "$" + v.toLocaleString("en-US") : "None") + '</td><td><span class="cx-hl ' + sev + '"><i></i>' + { c: "Critical", w: "Warning", ok: "Healthy" }[sev] + '</span></td></tr>';
-        }).join("");
-      }).join("") + '</tbody></table>');
-  };
-  CXS["ws"] = function () {
-    return cxHead("Workspace", '<span class="cx-new">New</span>') + '<p class="cx-lead">Agents inspect documents and processes, raise findings and recommend actions. A person approves each action before it runs.</p><div class="cx-ag">' + CXA.map(function (a) {
-      var rs = CXR.filter(function (r) { return r[0] === a.id; }), op = a.f.filter(function (id) { return !ccDone[id]; });
-      return '<section class="cx-card"><header class="cx-agh"><span class="cx-agi">' + a.n[0] + '</span><div><h3>' + a.n + '</h3><span>' + a.r + (a.nw ? ' <em class="cx-new">New</em>' : '') + '</span></div></header><p class="cx-sub">' + a.d + '</p>' +
-        '<dl class="cx-dl"><div><dt>Rules</dt><dd>' + rs.length + '</dd></div><div><dt>Open findings</dt><dd>' + op.length + '</dd></div><div><dt>Approval</dt><dd>Required</dd></div></dl><ul class="cx-agr">' + rs.map(function (r) { return '<li>' + ci("check") + cxe(r[1]) + '</li>'; }).join("") + '</ul></section>';
-    }).join("") + '</div>';
-  };
-
   /* Dashboard: one view of the network. Each component names the module that produces it. */
   var CXDASH = [];
   function cxDc(c) { return '<section class="cx-card cx-dc w' + c.w + '" data-mod="' + (c.mod || "all") + '"><header><h3>' + c.t + '</h3>' + cxTag(c.mod) + '</header><div class="cx-dcb">' + c.h() + '</div>' + (c.f ? '<footer class="cx-dcf">' + c.f() + '</footer>' : "") + '</section>'; }
+  /* Overview hero: the client's processes stream into the ring of process instances; ribbons split what needs action from what was resolved */
+  function cxBez(p0, p1, p2, p3, t) { var u = 1 - t; return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3; }
+  function cxHero() {
+    var X = 548, Y = 270, R = 128, items = ccItems(), open = items.filter(function (i) { return !i.done; }), hi = cxSort(open.filter(function (i) { return i.sev === "h"; }));
+    var tot = 0, ok = 0, rk = 0, br = 0; [0, 1, 3].forEach(function (i) { var F = CCFLOW[i]; tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
+    var svg = '<svg class="cx-ring" viewBox="0 0 820 560" role="img" aria-label="' + tot.toLocaleString("en-US") + ' process instances in flight, ' + open.length + ' findings need action"><defs>' +
+      '<filter id="cxbl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+      '<filter id="cxsf" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="28"/></filter>' +
+      '<radialGradient id="cxdisc" cx="50%" cy="40%" r="62%"><stop offset="0" style="stop-color:var(--g-disc2)"/><stop offset="1" style="stop-color:var(--g-disc)"/></radialGradient>' +
+      '<linearGradient id="cxrr" x1="0" x2="1"><stop offset="0" style="stop-color:var(--g-red);stop-opacity:0"/><stop offset=".45" style="stop-color:var(--g-red);stop-opacity:.85"/><stop offset="1" style="stop-color:var(--g-red)"/></linearGradient>' +
+      '<linearGradient id="cxrb" x1="0" x2="1"><stop offset="0" style="stop-color:var(--g-blue);stop-opacity:0"/><stop offset=".45" style="stop-color:var(--g-blue);stop-opacity:.85"/><stop offset="1" style="stop-color:var(--g-blue)"/></linearGradient></defs>' +
+      '<circle cx="' + X + '" cy="' + Y + '" r="190" class="g-halo" filter="url(#cxsf)"/>' +
+      '<text x="0" y="20" class="g-eb">BUSINESS PROCESSES</text><text x="276" y="20" class="g-fn" text-anchor="end">In flight</text>';
+    [0, 1, 3].forEach(function (i, k) {
+      var F = CCFLOW[i], P = PROCESSES.retail[i], y = 92 + k * 150, n = open.filter(function (x) { return x.proc === i; }), sev = n.some(function (x) { return x.sev === "h"; }) ? "red" : n.length ? "amb" : "blue";
+      var ang = (200 - k * 22) * Math.PI / 180, tx = X + (R + 22) * Math.cos(ang), ty = Y + (R + 22) * Math.sin(ang), d = "M304 " + y + " C400 " + y + " " + (tx - 90).toFixed(1) + " " + ty.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1);
+      var w = 80, okw = w * F.ok / F.n, rw = w * F.risk / F.n, bw = w * F.br / F.n, docs = [].concat.apply([], P.steps.map(function (s) { return s[1].split(" / ")[0].split(/,\s*/); })).filter(function (v, j, a) { return /^\d/.test(v) && a.indexOf(v) === j; }).join(", ");
+      svg += '<path d="' + d + '" class="g-st ' + sev + '"/>' + [0, 1, 2].map(function (q) { return '<circle r="2.4" class="g-pt ' + sev + '"><animateMotion dur="3.6s" begin="-' + (q * 1.2) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
+        '<text x="0" y="' + (y - 6) + '" class="g-pn">' + cxe(GENOME.retail.short[i]) + '</text><text x="0" y="' + (y + 12) + '" class="g-fn">' + cxe(docs) + '</text>' +
+        '<text x="276" y="' + (y - 6) + '" class="g-pc" text-anchor="end">' + F.n.toLocaleString("en-US") + '</text>' +
+        '<rect x="196" y="' + (y + 22) + '" width="' + w + '" height="4" rx="2" class="g-tr"/><rect x="196" y="' + (y + 22) + '" width="' + okw.toFixed(1) + '" height="4" rx="2" class="g-f blue"/>' +
+        '<rect x="' + (196 + okw).toFixed(1) + '" y="' + (y + 22) + '" width="' + rw.toFixed(1) + '" height="4" class="g-f amb"/><rect x="' + (196 + okw + rw).toFixed(1) + '" y="' + (y + 22) + '" width="' + bw.toFixed(1) + '" height="4" class="g-f red"/>' +
+        '<circle cx="300" cy="' + y + '" r="9" class="g-f ' + sev + '" opacity=".18"/><circle cx="300" cy="' + y + '" r="4.5" class="g-nd ' + sev + '"/>' +
+        (n.length ? '<text x="0" y="' + (y + 44) + '" class="g-fs ' + sev + '">' + n.length + ' open finding' + (n.length > 1 ? "s" : "") + '</text>' : "");
+    });
+    for (var a = 0; a < 360; a += 3) { var rd = a * Math.PI / 180, big = a % 30 === 0, r1 = R + 38, r2 = r1 + (big ? 11 : 5);
+      svg += '<line x1="' + (X + r1 * Math.cos(rd)).toFixed(1) + '" y1="' + (Y + r1 * Math.sin(rd)).toFixed(1) + '" x2="' + (X + r2 * Math.cos(rd)).toFixed(1) + '" y2="' + (Y + r2 * Math.sin(rd)).toFixed(1) + '" class="g-tk" opacity="' + (0.18 + 0.5 * Math.pow(Math.cos((a - 300) * Math.PI / 360), 2)).toFixed(2) + '"/>'; }
+    svg += '<circle cx="' + X + '" cy="' + Y + '" r="' + (R + 18) + '" class="g-l2"/><circle cx="' + X + '" cy="' + Y + '" r="' + (R - 18) + '" fill="url(#cxdisc)" class="g-l2s"/><circle cx="' + X + '" cy="' + Y + '" r="' + (R - 42) + '" class="g-l1"/>';
+    var S = [["On track", ok, "blue", 5], ["At risk", rk, "amb", 8], ["Breached", br, "red", 9]], at = -96, gap = 2.6, mids = [];
+    S.forEach(function (sg) {
+      var span = Math.max(360 * sg[1] / tot, 7), a0 = (at + gap / 2) * Math.PI / 180, a1 = (at + span - gap / 2) * Math.PI / 180, dd; mids.push((at + span / 2) * Math.PI / 180); at += span;
+      dd = "M" + (X + R * Math.cos(a0)).toFixed(1) + " " + (Y + R * Math.sin(a0)).toFixed(1) + "A" + R + " " + R + " 0 " + (span > 180 ? 1 : 0) + " 1 " + (X + R * Math.cos(a1)).toFixed(1) + " " + (Y + R * Math.sin(a1)).toFixed(1);
+      svg += '<path d="' + dd + '" class="g-arc-t"/><path d="' + dd + '" class="g-arc ' + sg[2] + '" style="stroke-width:' + sg[3] + 'px"/>';
+    });
+    [1, 2].forEach(function (k, j) {
+      var m = mids[k], x0 = X + (R + 10) * Math.cos(m), y0 = Y + (R + 10) * Math.sin(m), ly = 34 + j * 40, lx = 640;
+      svg += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'L' + (x0 + 26).toFixed(1) + ' ' + ly + 'H' + (lx - 8) + '" class="g-cl ' + S[k][2] + '"/><circle cx="' + (lx - 8) + '" cy="' + ly + '" r="3" class="g-f ' + S[k][2] + '"/>' +
+        '<text x="' + lx + '" y="' + (ly - 3) + '" class="g-cn">' + S[k][0] + ' · ' + S[k][1] + '</text><text x="' + lx + '" y="' + (ly + 12) + '" class="g-cs ' + S[k][2] + '">' + ["Expected document due soon", "Window passed"][j] + '</text>';
+    });
+    svg += '<text x="' + X + '" y="' + (Y - 46) + '" class="g-eb" text-anchor="middle">IN FLIGHT</text><text x="' + X + '" y="' + (Y + 10) + '" class="g-big" text-anchor="middle">' + tot.toLocaleString("en-US") + '</text>' +
+      '<text x="' + X + '" y="' + (Y + 33) + '" class="g-ok" text-anchor="middle">' + (100 * ok / tot).toFixed(1) + '% on track</text><line x1="' + (X - 66) + '" y1="' + (Y + 48) + '" x2="' + (X + 66) + '" y2="' + (Y + 48) + '" class="g-l2"/>' +
+      '<text x="' + (X - 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">1,930</text><text x="' + (X - 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Closed today</text>' +
+      '<text x="' + (X + 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">' + open.length + '</text><text x="' + (X + 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Need action</text>';
+    function rib(y0, y1, cls, grad, lbl) {
+      var d = "M" + (X + R - 4) + " " + y0 + " C" + (X + R + 70) + " " + y0 + " 720 " + y1 + " 816 " + y1;
+      return '<path d="' + d + '" class="g-rg ' + cls + '" filter="url(#cxsf)"/><path d="' + d + '" stroke="' + grad + '" class="g-rb"/>' + [0, 1, 2, 3].map(function (q) { return '<circle r="2.2" class="g-rp"><animateMotion dur="2.8s" begin="-' + (q * 0.7) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
+        '<text x="816" y="' + (y1 + (y1 < Y ? -22 : 34)) + '" class="g-cn" text-anchor="end">' + lbl + '</text>';
+    }
+    svg += rib(Y - 30, 210, "red", "url(#cxrr)", open.length + " need action") + rib(Y + 36, 452, "blue", "url(#cxrb)", "24 resolved today");
+    svg += '<text x="0" y="552" class="g-fn">Ring: process instances by state · Strands: live document flow per process</text></svg>';
+    var done = Object.keys(ccDone).filter(function (k) { return ccDone[k] === 1; }).length;
+    function spark(v) { var mx = Math.max.apply(null, v), l = v.map(function (y, i) { return (i ? "L" : "M") + (i * 64 / (v.length - 1)).toFixed(1) + " " + (26 - y / (mx || 1) * 24).toFixed(1); }).join(" "); return '<svg viewBox="0 0 64 26" width="64" height="26" aria-hidden="true"><path d="' + l + 'L64 26L0 26Z" class="g-sa"/><path d="' + l + '" class="g-sl"/></svg>'; }
+    var side = '<div class="cx-hs"><h3 class="cx-hh"><span class="cx-hi r">' + ci("warn") + '</span>Failure points now<small>' + open.length + ' open</small></h3>' + hi.slice(0, 3).map(function (i) {
+      return '<button type="button" class="cx-gc' + (i === hi[0] ? " crit" : "") + '" ' + i.open + '><span class="cx-gct">' + cxTag(i.mod) + cxSevChip(i.sev) + '</span><b>' + cxe(i.title) + '</b><small>' + cxe(i.partner) + '</small><span class="cx-gca">' + ci("spark") + '<span><b>' + cxe(i.agent.split(" · ")[0]) + '</b> ' + cxe(i.act) + '</span></span></button>'; }).join("") +
+      '<h3 class="cx-hh"><span class="cx-hi b">' + ci("ok") + '</span>Resolved today<small>' + (24 + done) + '</small></h3>' +
+      [["14", "Recovered by Integration Monitor", [1, 3, 4, 6, 8, 11, 13, 14]], [String(7 + done), "Agent actions approved", [0, 1, 1, 2, 4, 5, 6, 7 + done]], ["3", "Awaiting partner confirmation", [0, 0, 1, 1, 2, 3, 3, 3]]].map(function (d) {
+        return '<div class="cx-gc cx-gr"><div><b class="cx-gv">' + d[0] + '</b><small>' + d[1] + '</small></div>' + spark(d[2]) + '</div>'; }).join("") + '</div>';
+    return '<section class="cx-hero2" aria-label="Process health"><div class="cx-hv">' + svg + '</div>' + side + '</section>';
+  }
   CXS["dash"] = function () {
     var list = CXDASH.slice().sort(function (a, b) { return a.o - b.o; }).filter(function (c) { return ccModF === "all" || !c.mod || c.mod === ccModF; });
-    return '<header class="cx-ph cx-dh"><div><h2>Overview</h2><p>' + cxe(ccCompany()) + ' · Retail and CPG · ' + CCSNAP + ' · Illustrative data</p></div>' + cxModSeg() + '</header><div class="cx-dg">' + list.map(cxDc).join("") + '</div>';
+    return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>Retail and CPG · Order to cash; Receive, match and pay; Deductions · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' + cxHero() +
+      '<header class="cx-ph cx-dh cx-ms"><div><h2>By module</h2><p>Each component names the module that produces it.</p></div>' + cxModSeg() + '</header><div class="cx-dg">' + list.map(cxDc).join("") + '</div>';
   };
   CXDASH.push(
     { o: 10, mod: "IM", w: 2, t: "Network activity", h: function () {
@@ -259,7 +295,7 @@
     { o: 20, mod: "PM", w: 2, t: "Process performance", h: function () {
       var op = cxOpen().filter(function (f) { return f.mod === "Performance Monitor"; }), hi = op.filter(function (f) { return f.sev === "c"; }).length, val = op.reduce(function (a, f) { return a + f.val; }, 0);
       return '<div class="cx-k2">' + cxKpi("Open findings", op.length, hi + " high severity") + cxKpi("Value at risk", "$" + Math.round(val / 1000) + "K", "Across open findings") +
-        cxKpi("Average conformance", "95.8%", "Last 30 days") + cxKpi("Active rules", CXR.filter(function (r) { return r[7] === "Active"; }).length, "Across " + CXA.length + " agents") + '</div>'; }, f: function () { return cxGoBtn("Business processes", "pm-proc"); } },
+        cxKpi("Average conformance", "95.8%", "Last 30 days") + cxKpi("Active rules", CXR.filter(function (r) { return r[7] === "Active"; }).length, "Across " + CXA.length + " agents") + '</div>'; }, f: function () { return cxGoBtn("Business processes", "ws-proc"); } },
     { o: 40, mod: "", w: 4, t: "Priority findings", h: function () {
       var op = cxSort(cxModF(ccItems()).filter(function (i) { return !i.done; })).slice(0, 6);
       return '<table class="cx-tbl cx-pf"><thead><tr><th>Finding</th><th>Module</th><th>Severity</th><th>Detected</th></tr></thead><tbody>' + op.map(function (i) {
@@ -275,7 +311,7 @@
       return '<p class="cx-sub">Open findings by retail business process</p><ul class="cx-ph2">' + CCSTG.map(function (g) {
         return '<li><b>' + g[0] + '</b>' + g[1].map(function (i) { var n = op.filter(function (f) { return f.p === i; }), sev = n.some(function (f) { return f.sev === "c"; }) ? "c" : n.length ? "w" : "ok";
           return '<button type="button" class="cx-pc ' + sev + '" data-cxproc="' + i + '"><i></i>' + cxe(GENOME.retail.short[i]) + (n.length ? '<em>' + n.length + '</em>' : '') + '</button>'; }).join("") + '</li>'; }).join("") + '</ul>'; },
-      f: function () { return cxGoBtn("View processes", "pm-proc"); } },
+      f: function () { return cxGoBtn("View processes", "ws-proc"); } },
     { o: 70, mod: "IM", w: 3, t: "Document transaction summary", h: function () {
       return '<div class="cx-g2 in">' + [["Yesterday", "Friday, October 23, 2026", "2,056"], ["Last month", "September 1 to 30, 2026", "45,231"]].map(function (p) {
         return '<div><b class="cx-pl">' + p[0] + '</b><small class="cx-pd">' + p[1] + '</small>' + cxDonut([["850", 34, "#0066FF"], ["856", 27, "#001889"], ["810", 25, "#5B8DEF"], ["Other", 14, "#9DB7F2"]], 54, p[2], "Total") + '</div>'; }).join("") +
@@ -285,7 +321,7 @@
       f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>'; } },
     { o: 100, mod: "PM", w: 3, t: "Findings by agent", h: function () {
       return cxBars(CXA.map(function (a, k) { return [a.n + " · " + a.r, a.f.filter(function (id) { return !ccDone[id]; }).length + [12, 5, 3, 4, 6][k], "", "b"]; }), { max: 20 }); },
-      f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Workspace", "ws"); } },
+      f: function () { return '<span class="cx-note">Last 30 days</span>' + cxGoBtn("Agents", "ws-agents"); } },
     { o: 110, mod: "IM", w: 3, t: "Community", h: function () {
       return '<ul class="cx-stl">' + [["Total partners", "208"], ["Added this year", "21"], ["Added this month", "3"], ["Added last month", "4"], ["Active partners", "163"]].map(function (r) { return '<li><span>' + r[0] + '</span><b>' + r[1] + '</b></li>'; }).join("") + '</ul>'; },
       f: function () { return cxGoBtn("Community", "im-com"); } }
@@ -345,7 +381,7 @@
         '<dl class="cx-dl"><div><dt>Owner</dt><dd>' + cxe(Q.owner || "") + '</dd></div><div><dt>' + cxe(Q.measures[CCM[i][0]]) + '</dt><dd>' + CCM[i][1] + '</dd></div><div><dt>Open findings</dt><dd>' + op.length + '</dd></div></dl><h4>Steps</h4><ol class="cx-sp">' +
         Q.steps.map(function (s, k) { var fs = op.filter(function (x) { return x.st === k; }), sev = fs.some(function (x) { return x.sev === "c"; }) ? "c" : fs.length ? "w" : "ok";
           return '<li class="' + sev + '"><i>' + (k + 1) + '</i><div><b>' + cxe(s[0]) + '</b><code>' + cxe(s[1]) + '</code>' + fs.map(function (x) { return '<button type="button" class="cx-lk" data-cxf="' + x.id + '">' + cxe(x.ot) + '</button>'; }).join("") + '</div></li>'; }).join("") +
-        '</ol></div><div class="cx-ft"><a class="cx-btn" href="' + CC_GENOME + '">Open in Process Genome</a></div>';
+        '</ol></div><div class="cx-ft"><button type="button" class="cx-btn p" data-cxwsproc="' + i + '">Open process view</button><a class="cx-btn" href="' + CC_GENOME + '">Open in Process Genome</a></div>';
     }
     return '<div class="cx-scrim" data-cxclose></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
   }
@@ -375,30 +411,32 @@
   }
 
   /* Shell */
-  var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"], ["ws", "Workspace", "bot"],
+  var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"],
+    ["ws", "Workspace", "grid", [["ws-proc", "Business processes", "flow"], ["ws-dash", "Dashboards", "dash"], ["ws-rep", "Reports", "doc"], ["ws-not", "Notifications", "bell"], ["ws-task", "Tasks and reminders", "clock"], ["ws-agents", "Agents", "bot"]]],
     ["im", "Integration Monitor", "im", [["im-tp", "Partners", "users"], ["im-com", "Community", "net"], ["im-proj", "Projections and anomalies", "trend"]]],
-    ["pm", "Performance Monitor", "pm", [["pm-proc", "Business processes", "flow", 1], ["an", "Performance Analytics", "chart"]]]];
+    ["pm", "Performance Monitor", "pm", [["an", "Performance Analytics", "chart"]]]];
   var CXNAVEND = [["cfg", "Configuration", "cog"]];
-  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "pm-act": "act", "rt-actions": "act", "pm-agents": "ws", "pm-rules": "cfg", "rt-rules": "cfg", "im-cfg": "cfg", "im-map": "pm-proc" };
+  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "pm-act": "act", "rt-actions": "act", "pm-agents": "ws-agents", "ws": "ws-agents", "pm-rules": "cfg", "rt-rules": "cfg", "im-cfg": "cfg", "im-map": "ws-proc", "pm-proc": "ws-proc" };
   function cxMod() { var m = cxModKey(); return m ? CCMOD[m][0] : ""; }
   function cxBadge(k) { var it = ccItems(); var n = k === "find" ? it.filter(function (i) { return !i.done; }).length : k === "act" ? it.filter(function (i) { return !i.actDone; }).length : 0; return n ? '<em class="cx-nb">' + n + '</em>' : ""; }
   function cxTheme() { return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"; }
   function cxRender() {
     var nav = CXNAV.concat(CXNAVEND).map(function (g) {
       if (!g[3]) return '<li><button type="button" class="cx-n1' + (ccScr === g[0] ? " on" : "") + '" data-cxgo="' + g[0] + '" title="' + g[1] + '"' + (ccScr === g[0] ? ' aria-current="page"' : "") + '>' + ci(g[2]) + '<span>' + g[1] + '</span>' + cxBadge(g[0]) + '</button></li>';
-      return '<li class="cx-ng"><button type="button" class="cx-n1 cx-grp" data-cxgrp="' + g[0] + '" aria-expanded="' + !!ccGrp[g[0]] + '" title="' + g[1] + '">' + ci("chev", "cv") + ci(g[2]) + '<span>' + g[1] + '</span><i class="cx-md ' + g[0] + '" aria-hidden="true"></i></button>' + (ccGrp[g[0]] ? '<ul>' + g[3].map(function (s) {
+      return '<li class="cx-ng"><button type="button" class="cx-n1 cx-grp" data-cxgrp="' + g[0] + '" aria-expanded="' + !!ccGrp[g[0]] + '" title="' + g[1] + '">' + ci("chev", "cv") + ci(g[2]) + '<span>' + g[1] + '</span>' + (g[0] !== "ws" ? '<i class="cx-md ' + g[0] + '" aria-hidden="true"></i>' : "") + '</button>' + (ccGrp[g[0]] ? '<ul>' + g[3].map(function (s) {
         return '<li><button type="button" class="cx-n2' + (ccScr === s[0] ? " on" : "") + '" data-cxgo="' + s[0] + '" title="' + s[1] + '"' + (ccScr === s[0] ? ' aria-current="page"' : "") + '>' + ci(s[2]) + '<span>' + s[1] + (s[3] ? ' <em class="cx-new">New</em>' : '') + '</span></button></li>'; }).join("") + '</ul>' : '') + '</li>';
     }).join("");
     var th = cxTheme();
+    cx.classList.toggle("glass", ccScr === "dash");
     cx.innerHTML = '<header class="cx-top"><span class="cx-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#0066FF"/><path d="M22.5 13.6h1.8l1.3-2.1h-3.1V8.1h-3.9v5.9a6.8 6.8 0 1 0 0 6.3c0 1 .1 1.7.6 2.4.8 1.2 2.3 1.3 3.6 1.3.7 0 1.1-.1 1.8-.2v-2.8l-1 .1c-1 0-1-.7-1-1.5zM12.6 20.2a3.1 3.1 0 1 1 0-6.1 3.1 3.1 0 0 1 0 6.1z" fill="#fff"/></svg>Command Center' + (cxMod() ? '<em>' + cxMod() + '</em>' : '') + '</span>' +
       '<span class="cx-cust">' + cxe(ccCompany()) + ' · Retail and CPG</span><span class="cx-tb"><button type="button" class="cx-avt" data-cxav aria-pressed="' + ccAv + '">' + ci("spark") + 'Aviator</button><button type="button" class="cx-ic" data-cxgo="act" aria-label="Open action queue">' + ci("bell") + '</button><button type="button" class="cx-ic" data-cxhelp aria-label="Help">' + ci("help") + '</button>' +
       '<button type="button" class="cx-ic" data-cxtheme aria-label="' + (th === "dark" ? "Switch to light theme" : "Switch to dark theme") + '">' + ci(th === "dark" ? "sun" : "moon") + '</button><button type="button" class="cx-ic" data-cxfs aria-label="Full screen">' + ci("full") + '</button><span class="cx-me" title="' + cxe(ccCompany()) + '">' + (ccRole() === "retailer" ? "NS" : "NB") + '</span></span></header>' +
       '<div class="cx-body' + (ccNavMin ? " min" : "") + (ccAv ? " av" : "") + '"><nav class="cx-nav" aria-label="Command Center"><ul>' + nav + '</ul><a class="cx-n1 cx-col" href="' + CC_GENOME + '" title="Open Process Genome">' + ci("gen") + '<span>Open Process Genome</span></a><button type="button" class="cx-n1 cx-col" data-cxmin title="' + (ccNavMin ? "Expand panel" : "Collapse panel") + '">' + ci("side") + '<span>Collapse panel</span></button></nav>' +
       '<main class="cx-main" id="cx-main">' + CXS[ccScr]() + '</main>' + cxAviator() + '</div>' + cxDrawer();
   }
-  function cxGo(s) { if (s === "im-map") ccProcTab = "sol"; if (s === "rt-rules") ccCfgTab = "rp"; s = CXALIAS[s] || s; if (!CXS[s]) s = "dash"; ccScr = s; ccDr = null; var m = cxModKey(s); if (m) ccGrp[CCMOD[m][1]] = true; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
+  function cxGo(s) { if (s === "im-map") ccWsProc = "sol"; if (s === "rt-rules") ccCfgTab = "rp"; s = CXALIAS[s] || s; if (!CXS[s]) s = "dash"; ccScr = s; ccDr = null; var m = cxModKey(s); if (m) ccGrp[CCMOD[m][1]] = true; if (s.indexOf("ws-") === 0) ccGrp.ws = true; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-cxgo],[data-cxgrp],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxseg],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt]"); if (!b) return;
+    var b = e.target.closest("[data-cxgo],[data-cxgrp],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxseg],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg]"); if (!b) return;
     if (b.hasAttribute("data-cxgo")) cxGo(b.getAttribute("data-cxgo"));
     else if (b.hasAttribute("data-cxgrp")) { var g = b.getAttribute("data-cxgrp"); ccGrp[g] = !ccGrp[g]; if (ccNavMin) { ccNavMin = false; ccGrp[g] = true; } cxRender(); }
     else if (b.hasAttribute("data-cxmin")) { ccNavMin = !ccNavMin; cxRender(); }
@@ -414,7 +452,6 @@
     else if (b.hasAttribute("data-cxq")) { cxAsk(+b.getAttribute("data-cxq")); cxRender(); var l = cx.querySelector(".cx-avb"); if (l) l.scrollTop = l.scrollHeight; }
     else if (b.hasAttribute("data-cxmod")) { ccModF = b.getAttribute("data-cxmod"); cxRender(); var f = cx.querySelector('[data-cxmod="' + ccModF + '"]'); if (f) f.focus({ preventScroll: true }); }
     else if (b.hasAttribute("data-cxcfg")) { ccCfgTab = b.getAttribute("data-cxcfg"); cxRender(); }
-    else if (b.hasAttribute("data-cxpt")) { ccProcTab = b.getAttribute("data-cxpt"); cxRender(); }
     else if (b.hasAttribute("data-cxat")) { ccActTab = b.getAttribute("data-cxat"); cxRender(); }
     else if (b.hasAttribute("data-cxtheme")) { var n = cxTheme() === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", n); try { localStorage.setItem("edi-guide-theme", n); } catch (err) {} cxRender(); }
     else if (b.hasAttribute("data-cxfs")) { if (document.fullscreenElement) document.exitFullscreen(); else if (ccEl.requestFullscreen) ccEl.requestFullscreen().catch(function () {}); }

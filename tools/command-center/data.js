@@ -134,3 +134,5 @@
   var ccDone = {};
   var CCNET = /^(\d{3}|GDSN)/;
   function ccToks(lbl) { return lbl.split(" / ")[0].replace(/^GDSN /, "").split(/,\s*| or /); }
+  /* Process instances in flight for the client solution, with documents waiting at each step (illustrative) */
+  var CCFLOW = { 0: { n: 1284, ok: 1150, risk: 84, br: 50, steps: [310, 262, 248, 92, 226, 146] }, 1: { n: 284, ok: 262, risk: 16, br: 6, steps: [58, 41, 66, 52, 39, 28] }, 3: { n: 188, ok: 171, risk: 13, br: 4, steps: [22, 46, 38, 41, 25, 16] } };

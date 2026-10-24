@@ -20,7 +20,7 @@ links its prototypes. Sources live in `tools/command-center/`; do not hand-edit 
 | Output | Source files, in load order |
 |---|---|
 | Process Genome page: one managed block | `data.js` (shared findings data), `pv.js` (Product overlay) |
-| Command Center page | `cc.css`, `retail.css`; `data.js`, `cc.js`, `retail-data.js`, `retail.js`; page template in `apply.py` |
+| Command Center page | `cc.css`, `retail.css`; `data.js`, `cc.js`, `workspace.js`, `retail-data.js`, `retail.js`; page template in `apply.py` |
 
 Build both after a master rebuild, or after editing any module:
 
@@ -38,9 +38,12 @@ Process Genome page. All checks run before anything is written.
 
 - One dashboard, one findings list and one action queue. Every dashboard component, finding and action
   names its module: Integration Monitor, Performance Monitor or Retail add-on. A module filter narrows all three.
-- Root: Overview, Findings, Action queue, Workspace (all agents) and Configuration (Rules & Policies, partner settings).
-- Integration Monitor: Partners, Community, Projections and anomalies. Performance Monitor: Business processes
-  (with the Solution tab, the client's documents mapped to EDI and ERP), Performance Analytics.
+- Root: Overview (glass landing: process ring, failure points, components by module), Findings, Action queue,
+  Workspace and Configuration (Rules & Policies with the eight-step rule wizard, partner settings).
+- Workspace (`workspace.js`): process-centric views and Solution, dashboards built from Overview components, reports,
+  notifications, tasks and reminders, and agents with a "Build your own agent" link to Aviator Studio. Saved under
+  `process-genome-cc-workspace-v1` in this browser.
+- Integration Monitor: Partners, Community, Projections and anomalies. Performance Monitor: Performance Analytics.
 - Demo data covers one client solution of three processes: Order to cash; Receive, match and pay; Deductions.
 - Retail add-on (`retail-data.js`, `retail.js`): partner participation, orders and commitments, ASNs and
   readiness, invoices and deductions; its policy templates appear under Configuration (`CXCFG`). It registers its cases with `CXITEMS`,

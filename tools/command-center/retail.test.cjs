@@ -8,7 +8,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const CORE_SCREENS = ['dash', 'find', 'act', 'ws', 'cfg', 'im-tp', 'im-com', 'im-proj', 'pm-proc', 'an'];
+const CORE_SCREENS = ['dash', 'find', 'act', 'ws-proc', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg', 'im-tp', 'im-com', 'im-proj', 'an'];
 const RETAIL_SCREENS = ['rt-partners', 'rt-orders', 'rt-shipments', 'rt-invoices'];
 const source = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
 const textOf = html => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -26,7 +26,7 @@ function loadApp(storage = new Map()) {
     addEventListener(type, handler) { (listeners[type] ||= []).push(handler); },
     querySelector(selector) { return controls.get(selector) || null; },
     querySelectorAll() { return []; },
-    classList: { add() {} },
+    classList: { add() {}, toggle() {} },
     insertAdjacentHTML() {}
   };
   const app = {
@@ -46,7 +46,7 @@ function loadApp(storage = new Map()) {
   };
   app.window.document = app.document;
   vm.createContext(app);
-  vm.runInContext(['data.js', 'cc.js', 'retail-data.js', 'retail.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
+  vm.runInContext(['data.js', 'cc.js', 'workspace.js', 'retail-data.js', 'retail.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
 
   function click(attributes) {
     const target = {
@@ -236,7 +236,7 @@ test('one dashboard, findings list and action queue attribute every record to it
     for (const i of items) assert.ok(find.includes(textOf(i.title)), `${role} findings list ${i.key}`);
     assert.ok(textOf(screen('dash')).includes(role === 'retailer' ? 'Northfield Stores' : 'Nuvori Beauty'));
   }
-  for (const id of ['rt-home', 'rt-actions', 'rt-rules', 'im-dash', 'pm-dash', 'pm-find', 'pm-act', 'pm-agents', 'pm-rules', 'im-map', 'im-cfg']) assert.equal(app.CXS[id], undefined, `${id} is folded into the shared screens`);
+  for (const id of ['rt-home', 'rt-actions', 'rt-rules', 'im-dash', 'pm-dash', 'pm-find', 'pm-act', 'pm-agents', 'pm-rules', 'im-map', 'im-cfg', 'pm-proc']) assert.equal(app.CXS[id], undefined, `${id} is folded into the shared screens`);
 });
 
 test('module filter narrows the dashboard, findings and action queue', () => {
@@ -262,8 +262,9 @@ test('demo findings stay inside the three processes of the client solution', () 
   const cfg = screen('cfg');
   assert.ok(cfg.includes('Rules &amp; Policies') && cfg.includes('Retail policies'));
   for (const r of app.RTDATA.rules) assert.ok(cfg.includes(`data-rt-rule="${r.id}"`), `${r.id} sits in Configuration`);
-  app.ccProcTab = 'sol';
-  assert.match(screen('pm-proc'), /Business document/);
+  app.ccWsProc = 'sol';
+  assert.match(screen('ws-proc'), /Business document/);
+  for (const p of ['0', '1', '3']) { app.ccWsProc = p; assert.match(screen('ws-proc'), /Process flow/); }
 });
 
 test('approving a core finding closes it and moves its action to Completed', () => {
@@ -274,4 +275,33 @@ test('approving a core finding closes it and moves its action to Completed', () 
   assert.equal(item.actDone, true);
   app.ccActTab = 'done';
   assert.ok(screen('act').includes('Action approved'));
+});
+
+test('rule wizard walks eight steps and deploys a Performance Monitor rule', () => {
+  const { app, click } = loadApp();
+  const before = app.CXR.length;
+  click({ 'data-rwnew': '' });
+  assert.equal(app.ccRw.step, 0);
+  click({ 'data-rwagent': 'lex' });
+  for (let k = 0; k < 6; k++) click({ 'data-rwgo': '1' });
+  assert.equal(app.ccRw.step, 6);
+  click({ 'data-rwtest': '' });
+  assert.ok(app.ccRw.test.d > 0);
+  click({ 'data-rwgo': '1' });
+  assert.match(app.cxDrawer(), /Deploy rule/);
+  click({ 'data-rwdeploy': '' });
+  assert.equal(app.CXR.length, before + 1);
+  assert.equal(app.CXR[app.CXR.length - 1][0], 'lex');
+});
+
+test('workspace saves dashboards, reports, notifications, tasks and reminders', () => {
+  const { app, click, screen, storage } = loadApp();
+  const W = app.wsLoad();
+  assert.ok(screen('ws-dash').includes('Order to cash daily'));
+  click({ 'data-wstog': '3' });
+  assert.equal(W.notifs[3].on, true);
+  click({ 'data-wsdone': '0' });
+  assert.equal(W.tasks[0].done, true);
+  assert.ok(JSON.parse(storage.get('process-genome-cc-workspace-v1')).tasks[0].done);
+  assert.match(screen('ws-agents'), /Build your own agent/);
 });
