@@ -46,7 +46,7 @@ function loadApp(storage = new Map()) {
   };
   app.window.document = app.document;
   vm.createContext(app);
-  vm.runInContext(['data.js', 'cc.js', 'im.js', 'workspace.js', 'retail-data.js', 'retail.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
+  vm.runInContext(['data.js', 'cc.js', 'fu.js', 'im.js', 'workspace.js', 'retail-data.js', 'retail.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
 
   function click(attributes) {
     const target = {
@@ -142,7 +142,7 @@ test('assignment preserves Prepare and does not claim a prepared handoff', () =>
     assert.ok(!html.includes(c.action.completedLabel));
     assert.ok(!html.includes(c.action.completionNote));
   }
-  assert.match(textOf(queue), /Completed 0/);
+  assert.match(textOf(queue), /Waiting 0/);
 });
 
 test('preparing records a distinct local action while the business exception stays open', () => {
@@ -154,12 +154,12 @@ test('preparing records a distinct local action while the business exception sta
   const detail = app.rtCaseDialog(c);
   assert.ok(!detail.includes(`data-rt-prepare="${c.id}"`));
   assert.ok(detail.includes('business exception remains open'));
-  app.ccActTab = 'done';
+  app.ccActTab = 'wait';
   const done = screen('act');
   assert.ok(done.includes(c.action.completedLabel));
   assert.ok(done.includes(c.action.completionNote));
-  assert.match(textOf(done), /Completed 1/);
-  app.ccActTab = 'open';
+  assert.match(textOf(done), /Waiting 1/);
+  app.ccActTab = 'need';
   assert.ok(textOf(screen('find')).includes('Action prepared'), 'the finding stays open after preparation');
 });
 
@@ -258,14 +258,22 @@ test('demo findings stay inside the three processes of the client solution', () 
   assert.match(screen('ws-proc'), /Business document/);
 });
 
-test('approving a core finding closes it and moves its action to Completed', () => {
+test('a follow-up closes only when the network confirms it', () => {
   const { app, click, screen } = loadApp();
-  click({ 'data-cxapp': 'f1' });
-  const item = app.ccItems().find(i => i.key === 'f:f1');
-  assert.equal(item.done, true);
-  assert.equal(item.actDone, true);
-  app.ccActTab = 'done';
-  assert.ok(screen('act').includes('Task created for'));
+  const item = () => app.ccItems().find(i => i.key === 'f:f1');
+  click({ 'data-cxclk': '' });
+  assert.equal(item().done, false, 'the clock plays nothing before someone acts');
+  click({ 'data-cxfu': 'assign:f1' });
+  assert.equal(app.cxFu('f1').st, 'Assigned');
+  click({ 'data-cxfu': 'send-us:f1' });
+  assert.equal(app.cxFu('f1').st, 'Waiting on us');
+  for (let k = 0; k < 6 && !item().done; k++) click({ 'data-cxclk': '' });
+  assert.equal(app.cxFu('f1').st, 'Verified');
+  assert.equal(item().done, true);
+  assert.ok(app.cxFu('f1').log.some(e => e[1] === 'net'), 'verification comes from network events');
+  app.ccActTab = 'ver';
+  assert.match(textOf(screen('act')), /Verified today 1/);
+  for (const k of ['dash', 'act', 'find']) assert.doesNotMatch(textOf(screen(k)), /Approve and run|Runs on Trading Grid|reprocess/i, k);
 });
 
 test('rule wizard walks eight steps and deploys a Performance Monitor rule', () => {

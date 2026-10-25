@@ -58,14 +58,12 @@
   /* Agents. Ivy belongs to Integration Monitor; the others come with Performance Monitor. */
   var CXA = [
     { id: "lex", n: "Lex", r: "Timing and SLA agent", d: "Watches every document clock: acknowledgment windows and ship notice timing.", f: ["f1", "f3"], t: "pm" },
-    { id: "nora", n: "Nora", r: "Conformance agent", d: "Checks documents against partner rules before and after they are sent: price, quantity, labels and required fields.", f: ["f4"], t: "pm" },
+    { id: "nora", n: "Nora", r: "Conformance agent", d: "Checks documents on the network against partner rules: price, quantity, labels and required fields.", f: ["f4"], t: "pm" },
     { id: "liz", n: "Liz", r: "Process agent", d: "Follows each business process across its EDI documents, and flags steps that will fail later in the process.", f: ["f9"], t: "pm" },
     { id: "reese", n: "Reese", r: "Reconciliation agent", d: "Reconciles values across orders, shipments, invoices and remittances.", f: [], t: "pm" },
     { id: "ivy", n: "Ivy", r: "Volume agent", d: "Compares document volume with its projection by partner and hour, and raises missing documents and volume drops as findings.", f: ["f2", "f7", "f10"], t: "im" }
   ];
   var CXAF = {}; CXA.forEach(function (a) { a.f.forEach(function (id) { CXAF[id] = a; }); });
-  var CXST = { f1: "New", f2: "New", f3: "Acknowledged", f4: "New", f7: "New", f9: "New", f10: "New" };
-  var CXAS = { f3: "Dana Ortiz", f4: "Dana Ortiz" };
   var CXDOC = { f1: "Ship notice (856)", f2: "Purchase order (850)", f3: "Order acknowledgment (855)", f4: "Invoice (810)", f7: "Remittance advice (820)", f9: "Price catalog (832)", f10: "Functional acknowledgment (997)" };
   var CXRULE = { f1: "Ship notice within 1 hour of shipment", f2: "Order volume against projection", f3: "Acknowledgment within 24 hours", f4: "Invoice matches order price",
     f7: "Remittance advice on schedule", f9: "Cost change applied to open orders", f10: "Functional acknowledgments on time" };
@@ -144,24 +142,22 @@
   function cxOpen() { return cxAll().filter(function (f) { return !ccDone[f.id]; }); }
   function cxSevChip(s) { return s === "c" || s === "h" ? '<span class="cx-sev h">' + ci("warn") + 'High</span>' : '<span class="cx-sev m">' + ci("warn") + 'Medium</span>'; }
   function cxStPill(st) { return '<span class="cx-st s-' + st.replace(/ /g, "").toLowerCase() + '"><i></i>' + st + '</span>'; }
-  function cxStChip(f) { return cxStPill(ccDone[f.id] ? (ccDone[f.id] === 2 ? "Known issue" : "Resolved") : CXST[f.id]); }
+  function cxStChip(f) { return fuChip(cxFu(f.id).st, cxFu(f.id)); }
   function cxAt(f) { return /^\d/.test(f.at) ? "Today, " + f.at : f.at; }
   function cxAgentName(f) { var a = CXAF[f.id]; return a.n + " · " + a.r; }
   function cxOrd(t) { var m = /^(\d\d):(\d\d)/.exec(String(t)); return m ? +m[1] * 60 + +m[2] : -1; }
   function cxProcName(i) { return ccProc(i).n; }
 
   /* Item providers: the core monitors register here, and industry add-ons append their own. One record shape for findings and actions. */
-  /* Actions Command Center can run on Trading Grid after approval; everything else is a handoff to the approver */
-  var CXRUN = { supplier: { f2: 1, f7: 1 }, retailer: { f2: 1, f7: 1, f10: 1 } };
-  function cxRun(id) { return !!CXRUN[ccRole()][id]; }
+  /* Command Center observes the network: people notify partners and teams, and the next documents confirm the outcome */
   function cxDocOf(f) { var s = CCFLOW[ccRole()][f.p] && CCFLOW[ccRole()][f.p].steps[f.st], m = /\((\d{3})\)/.exec(CXDOC[f.id] || ""); var dir = s ? s[0] : ""; if (m && m[1] === "997" && dir) dir = dir === "Out" ? "In" : "Out"; return (m ? m[1] : "") + (dir ? " " + dir : ""); }
   var CXITEMS = [function () {
     return cxAll().map(function (f) {
-      var d = ccDone[f.id], a = CXAF[f.id], run = cxRun(f.id);
-      return { key: "f:" + f.id, mod: f.mod === "Integration Monitor" ? "IM" : "PM", title: f.ot, partner: f.partner, check: CXRULE[f.id], doc: cxDocOf(f), run: run, proc: f.p, sev: f.sev === "c" ? "h" : "m",
-        agent: a.n + " · " + a.r, owner: CXAS[f.id] || "Unassigned", status: d ? (d === 2 ? "Known issue" : "Resolved") : CXST[f.id], done: !!d, at: cxAt(f), ord: cxOrd(f.at), val: f.val,
-        open: 'data-cxf="' + f.id + '"', act: f.act, appr: f.appr, actDone: !!d, actState: d === 2 ? "Marked as known issue" : run ? "Approved. Runs on Trading Grid; closes when the documents are exchanged." : "Task created for " + (f.appr || "the owner") + ".",
-        actBtn: '<button type="button" class="cx-btn p" data-cxapp="' + f.id + '">' + (run ? "Approve and run" : "Create task for " + cxe(f.appr || "owner")) + '</button>' };
+      var d = ccDone[f.id], a = CXAF[f.id], u = cxFu(f.id);
+      return { key: "f:" + f.id, mod: f.mod === "Integration Monitor" ? "IM" : "PM", title: f.ot, partner: f.partner, check: CXRULE[f.id], doc: cxDocOf(f), proc: f.p, sev: f.sev === "c" ? "h" : "m",
+        agent: a.n + " · " + a.r, owner: u.owner || "Unassigned", status: u.st, done: !!d, at: cxAt(f), ord: cxOrd(f.at), val: f.val,
+        open: 'data-cxf="' + f.id + '"', act: f.act, appr: f.appr, actDone: !!d, actState: u.st,
+        actBtn: u.st === "New" ? '<button type="button" class="cx-btn p" data-cxfu="assign:' + f.id + '">Assign to me</button>' : "" };
     });
   }];
   function ccItems() { return [].concat.apply([], CXITEMS.map(function (p) { return p(); })).filter(function (i) { return ccOn(i.mod); }); }
@@ -289,8 +285,11 @@
   function cxDc(c, w) { return '<section class="cx-card cx-dc w' + (w || c.w) + '" data-mod="' + (c.mod || "all") + '"><header><h3>' + c.t + '</h3>' + cxTag(c.mod) + '</header><div class="cx-dcb">' + c.h() + '</div>' + (c.f ? '<footer class="cx-dcf">' + c.f() + '</footer>' : "") + '</section>'; }
   function cxComps() { return CXDASH.slice().sort(function (a, b) { return a.o - b.o; }).filter(function (c) { return !c.mod || ccOn(c.mod); }); }
   function cxHero() {
-    var X = 548, Y = 270, R = 128, items = ccItems(), open = items.filter(function (i) { return !i.done; }), hi = cxSort(open);
+    var X = 548, Y = 270, R = 128, items = ccItems(), open = items.filter(function (i) { return fuBucket(i) === "need"; }), waiting = items.filter(function (i) { return fuBucket(i) === "wait"; });
+    var ver = 24 + items.filter(function (i) { return fuBucket(i) === "ver"; }).length;
     var tot = 0, ok = 0, rk = 0, br = 0; ccSol().forEach(function (i) { var F = ccFlow(i); tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
+    /* Documents verified from the network move from breached or at risk back to on track */
+    cxAll().forEach(function (f) { if (ccDone[f.id] !== 1 || !f.n) return; var sg = FUSEG[f.id] || "rk", m = Math.min(f.n, sg === "br" ? br : rk); if (sg === "br") br -= m; else rk -= m; ok += m; });
     var svg = '<svg class="cx-ring" viewBox="0 0 820 560" role="img" aria-label="' + tot.toLocaleString("en-US") + ' documents today, ' + open.length + ' findings need action"><defs>' +
       '<filter id="cxbl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
       '<filter id="cxsf" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="28"/></filter>' +
@@ -300,7 +299,7 @@
       '<circle cx="' + X + '" cy="' + Y + '" r="190" class="g-halo" filter="url(#cxsf)"/>' +
       '<text x="0" y="20" class="g-eb">BUSINESS PROCESSES</text><text x="276" y="20" class="g-fn" text-anchor="end">Documents today</text>';
     ccSol().forEach(function (i, k) {
-      var F = ccFlow(i), P = ccProc(i), y = 92 + k * 150, n = open.filter(function (x) { return x.proc === i; }), sev = n.some(function (x) { return x.sev === "h"; }) ? "red" : n.length ? "amb" : "blue";
+      var F = ccFlow(i), P = ccProc(i), y = 92 + k * 150, n = open.filter(function (x) { return x.proc === i; }), wn = waiting.filter(function (x) { return x.proc === i; }), sev = n.length ? "red" : wn.length ? "amb" : "blue";
       var ang = (200 - k * 22) * Math.PI / 180, tx = X + (R + 22) * Math.cos(ang), ty = Y + (R + 22) * Math.sin(ang), d = "M304 " + y + " C400 " + y + " " + (tx - 90).toFixed(1) + " " + ty.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1);
       var w = 80, okw = w * F.ok / F.n, rw = w * F.risk / F.n, bw = w * F.br / F.n, docs = [].concat.apply([], ccSteps(i).map(function (p) { return p[1][1].split(" / ")[0].split(/,\s*/); })).filter(function (v, j, a) { return /^\d/.test(v) && a.indexOf(v) === j; }).join(", ");
       svg += '<path d="' + d + '" class="g-st ' + sev + '"/>' + [0, 1, 2].map(function (q) { return '<circle r="2.4" class="g-pt ' + sev + '"><animateMotion dur="3.6s" begin="-' + (q * 1.2) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
@@ -309,8 +308,9 @@
         '<rect x="196" y="' + (y + 22) + '" width="' + w + '" height="4" rx="2" class="g-tr"/><rect x="196" y="' + (y + 22) + '" width="' + okw.toFixed(1) + '" height="4" rx="2" class="g-f blue"/>' +
         '<rect x="' + (196 + okw).toFixed(1) + '" y="' + (y + 22) + '" width="' + rw.toFixed(1) + '" height="4" class="g-f amb"/><rect x="' + (196 + okw + rw).toFixed(1) + '" y="' + (y + 22) + '" width="' + bw.toFixed(1) + '" height="4" class="g-f red"/>' +
         '<circle cx="300" cy="' + y + '" r="9" class="g-f ' + sev + '" opacity=".18"/><circle cx="300" cy="' + y + '" r="4.5" class="g-nd ' + sev + '"/>' +
-        (n.length ? '<text x="0" y="' + (y + 44) + '" class="g-fs ' + sev + '">' + n.length + ' open finding' + (n.length > 1 ? "s" : "") + '</text>' : "") +
-        '<text x="0" y="' + (y + 60) + '" class="g-fn">' + F.ack + ' 997 overdue · ' + F.rej + ' 824 rejects</text>';
+        (n.length || wn.length ? '<text x="0" y="' + (y + 44) + '" class="g-fs ' + sev + '">' + [n.length ? n.length + " need action" : "", wn.length ? wn.length + " waiting" : ""].filter(Boolean).join(" · ") + '</text>' : '<text x="0" y="' + (y + 44) + '" class="g-fs blue">No open follow-ups</text>') +
+        '<text x="0" y="' + (y + 60) + '" class="g-fn">' + F.ack + ' 997 overdue · ' + F.rej + ' 824 rejects</text>' +
+        '<rect x="-6" y="' + (y - 26) + '' + '" width="320" height="94" rx="8" class="g-hit' + (ccOvF && ccOvF.k === "proc" && +ccOvF.v === i ? " on" : "") + '" data-cxov="proc:' + i + '"><title>Filter follow-ups to ' + cxe(ccShort(i)) + '</title></rect>';
     });
     for (var a = 0; a < 360; a += 3) { var rd = a * Math.PI / 180, big = a % 30 === 0, r1 = R + 38, r2 = r1 + (big ? 11 : 5);
       svg += '<line x1="' + (X + r1 * Math.cos(rd)).toFixed(1) + '" y1="' + (Y + r1 * Math.sin(rd)).toFixed(1) + '" x2="' + (X + r2 * Math.cos(rd)).toFixed(1) + '" y2="' + (Y + r2 * Math.sin(rd)).toFixed(1) + '" class="g-tk" opacity="' + (0.18 + 0.5 * Math.pow(Math.cos((a - 300) * Math.PI / 360), 2)).toFixed(2) + '"/>'; }
@@ -319,36 +319,30 @@
     S.forEach(function (sg) {
       var span = Math.max(360 * sg[1] / tot, 7), a0 = (at + gap / 2) * Math.PI / 180, a1 = (at + span - gap / 2) * Math.PI / 180, dd; mids.push((at + span / 2) * Math.PI / 180); at += span;
       dd = "M" + (X + R * Math.cos(a0)).toFixed(1) + " " + (Y + R * Math.sin(a0)).toFixed(1) + "A" + R + " " + R + " 0 " + (span > 180 ? 1 : 0) + " 1 " + (X + R * Math.cos(a1)).toFixed(1) + " " + (Y + R * Math.sin(a1)).toFixed(1);
-      svg += '<path d="' + dd + '" class="g-arc-t"/><path d="' + dd + '" class="g-arc ' + sg[2] + '" style="stroke-width:' + sg[3] + 'px"/>';
+      svg += '<path d="' + dd + '" class="g-arc-t"/><path d="' + dd + '" class="g-arc ' + sg[2] + '" style="stroke-width:' + sg[3] + 'px"/><path d="' + dd + '" class="g-hit-a" data-cxov="seg:' + ["ok", "rk", "br"][S.indexOf(sg)] + '"><title>Filter follow-ups: ' + sg[0] + '</title></path>';
     });
     [1, 2].forEach(function (k, j) {
       var m = mids[k], x0 = X + (R + 10) * Math.cos(m), y0 = Y + (R + 10) * Math.sin(m), ly = 34 + j * 40, lx = 640;
       svg += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'L' + (x0 + 26).toFixed(1) + ' ' + ly + 'H' + (lx - 8) + '" class="g-cl ' + S[k][2] + '"/><circle cx="' + (lx - 8) + '" cy="' + ly + '" r="3" class="g-f ' + S[k][2] + '"/>' +
-        '<text x="' + lx + '" y="' + (ly - 3) + '" class="g-cn">' + S[k][0] + ' · ' + S[k][1] + '</text><text x="' + lx + '" y="' + (ly + 12) + '" class="g-cs ' + S[k][2] + '">' + ["Expected document due soon", "Window passed"][j] + '</text>';
+        '<text x="' + lx + '" y="' + (ly - 3) + '" class="g-cn g-lk" data-cxov="seg:' + ["ok", "rk", "br"][k] + '">' + S[k][0] + ' · ' + S[k][1].toLocaleString("en-US") + '</text><text x="' + lx + '" y="' + (ly + 12) + '" class="g-cs ' + S[k][2] + '">' + ["Expected document due soon", "Window passed"][j] + '</text>';
     });
     svg += '<text x="' + X + '" y="' + (Y - 46) + '" class="g-eb" text-anchor="middle">DOCUMENTS TODAY</text><text x="' + X + '" y="' + (Y + 10) + '" class="g-big" text-anchor="middle">' + tot.toLocaleString("en-US") + '</text>' +
       '<text x="' + X + '" y="' + (Y + 33) + '" class="g-ok" text-anchor="middle">' + (100 * ok / tot).toFixed(1) + '% on track</text><line x1="' + (X - 66) + '" y1="' + (Y + 48) + '" x2="' + (X + 66) + '" y2="' + (Y + 48) + '" class="g-l2"/>' +
-      '<text x="' + (X - 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">212</text><text x="' + (X - 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Closed today</text>' +
+      '<text x="' + (X - 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">' + ver + '</text><text x="' + (X - 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Verified today</text>' +
       '<text x="' + (X + 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">' + open.length + '</text><text x="' + (X + 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Need action</text>';
-    function rib(y0, y1, cls, grad, lbl) {
+    function rib(y0, y1, cls, grad, lbl, tab) {
       var d = "M" + (X + R - 4) + " " + y0 + " C" + (X + R + 70) + " " + y0 + " 720 " + y1 + " 816 " + y1;
-      return '<path d="' + d + '" class="g-rg ' + cls + '" filter="url(#cxsf)"/><path d="' + d + '" stroke="' + grad + '" class="g-rb"/>' + [0, 1, 2, 3].map(function (q) { return '<circle r="2.2" class="g-rp"><animateMotion dur="2.8s" begin="-' + (q * 0.7) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
-        '<text x="816" y="' + (y1 + (y1 < Y ? -22 : 34)) + '" class="g-cn" text-anchor="end">' + lbl + '</text>';
+      return '<path d="' + d + '" class="g-rg ' + cls + '" filter="url(#cxsf)"/><path d="' + d + '" stroke="' + grad + '" class="g-rb"/><path d="' + d + '" class="g-hit-r" data-cxov="tab:' + tab + '"/>' + [0, 1, 2, 3].map(function (q) { return '<circle r="2.2" class="g-rp"><animateMotion dur="2.8s" begin="-' + (q * 0.7) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
+        '<text x="816" y="' + (y1 + (y1 < Y ? -22 : 34)) + '" class="g-cn g-lk" text-anchor="end" data-cxov="tab:' + tab + '">' + lbl + '</text>';
     }
-    svg += rib(Y - 30, 210, "red", "url(#cxrr)", open.length + " need action") + rib(Y + 36, 452, "blue", "url(#cxrb)", "24 resolved today");
-    svg += '<text x="0" y="552" class="g-fn">Ring: documents today by state · Strands: live document flow per process</text></svg>';
-    var done = Object.keys(ccDone).filter(function (k) { return ccDone[k] === 1; }).length;
-    function spark(v) { var mx = Math.max.apply(null, v), l = v.map(function (y, i) { return (i ? "L" : "M") + (i * 64 / (v.length - 1)).toFixed(1) + " " + (26 - y / (mx || 1) * 24).toFixed(1); }).join(" "); return '<svg viewBox="0 0 64 26" width="64" height="26" aria-hidden="true"><path d="' + l + 'L64 26L0 26Z" class="g-sa"/><path d="' + l + '" class="g-sl"/></svg>'; }
-    var side = '<div class="cx-hs"><h3 class="cx-hh"><span class="cx-hi r">' + ci("warn") + '</span>Failure points now<small>' + open.length + ' open</small></h3>' + hi.slice(0, 3).map(function (i) {
-      return '<button type="button" class="cx-gc' + (i === hi[0] && i.sev === "h" ? " crit" : "") + '" ' + i.open + '><span class="cx-gct">' + cxTag(i.mod) + cxSevChip(i.sev) + '</span><b>' + cxe(i.title) + '</b><small>' + cxe(i.partner) + '</small><span class="cx-gca">' + ci("spark") + '<span><b>' + cxe(i.agent.split(" · ")[0]) + '</b> ' + cxe(i.act) + '</span></span></button>'; }).join("") +
-      '<h3 class="cx-hh"><span class="cx-hi b">' + ci("ok") + '</span>Resolved today<small>' + (24 + done) + '</small></h3>' +
-      [["14", "Cleared after partner resend", [1, 3, 4, 6, 8, 11, 13, 14]], [String(7 + done), "Actions approved", [0, 1, 1, 2, 4, 5, 6, 7 + done]], ["3", "Awaiting partner confirmation", [0, 0, 1, 1, 2, 3, 3, 3]]].map(function (d) {
-        return '<div class="cx-gc cx-gr"><div><b class="cx-gv">' + d[0] + '</b><small>' + d[1] + '</small></div>' + spark(d[2]) + '</div>'; }).join("") + '</div>';
+    svg += rib(Y - 30, 210, "red", "url(#cxrr)", open.length + " need action · " + waiting.length + " waiting", "need") + rib(Y + 36, 452, "blue", "url(#cxrb)", ver + " verified today", "ver");
+    svg += '<text x="0" y="552" class="g-fn">Ring: documents today by state · Strands: follow-ups per process · Select any part to filter the follow-ups</text></svg>';
+    var side = fuSide();
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';
     /* Two views of the same health: the process ring, or the trading network as a globe (WebGL) */
     var tog = '<span class="cx-seg cx-hvt" role="group" aria-label="Overview view">' + [["ring", "Process ring"], ["globe", "Network globe"]].map(function (o) { return '<button type="button" data-cxhv="' + o[0] + '" aria-pressed="' + (ccHeroV === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</span>';
     var globe = '<div class="cx-globe" role="img" aria-label="' + cxe(ccCompany()) + ' trading network: each arc is a document route colored by its health"><div class="cx-gll"></div>' +
-      '<p class="cx-glh"><b>' + cxe(ccCompany()) + ' trading network</b><span>Arc color shows route health. Beads are documents in flight.</span></p><p class="cx-glf">The network globe needs WebGL in this browser.</p></div>';
+      '<p class="cx-glh"><b>' + cxe(ccCompany()) + ' trading network</b><span>Arc color shows follow-up state. Select a partner to filter the follow-ups.</span></p><p class="cx-glf">The network globe needs WebGL in this browser.</p></div>';
     return '<section class="cx-hero2" aria-label="Process health"><div class="cx-hv' + (ccHeroV === "globe" ? " gv" : "") + '">' + tog + (ccHeroV === "globe" ? globe : '<div class="cx-hvb">' + svg + '</div>') + '</div>' + side + '</section>';
   }
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
@@ -356,7 +350,7 @@
     var procs = ccOn("pm") ? " · " + ccSol().map(ccShort).join("; ") : "", cd = wsCurDash();
     var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Network health"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
       wsDashTabs().map(function (t) { return '<button type="button" data-cxgo="ws-dash" data-wsdash="' + t.key + '" aria-pressed="' + (ccScr === "ws-dash" && cd === t) + '">' + cxe(t.n) + '</button>'; }).join("");
-    return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' +
+    return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="fu-clkg"><span class="cx-live"><i></i>Network time ' + fuT(ccNow) + '</span>' + fuClockBtn() + '</span></header>' +
       '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + '<button type="button" class="cx-ovn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></nav>';
   }
   /* Integration Monitor document transaction summary, as in the shipped product: yesterday and last month, top 3 documents each */
@@ -437,13 +431,16 @@
   /* Action queue: recommendations waiting for a decision */
   var CXACTX = [];
   CXS["act"] = function () {
-    var it = cxModF(ccItems()), wait = cxSort(it.filter(function (i) { return !i.actDone; })), done = it.filter(function (i) { return i.actDone; }), list = ccActTab === "open" ? wait : done;
-    return cxHead("Action queue", CXACTX.map(function (f) { return f(); }).join("") + cxModSeg()) + '<p class="cx-lead">Recommended actions from agents' + (ccOn("rt") ? " and retail workflows" : "") + '. An action runs only after a person approves it.</p>' +
-      '<nav class="cx-tabs"><button type="button" data-cxat="open" aria-pressed="' + (ccActTab === "open") + '">Awaiting decision <em>' + wait.length + '</em></button><button type="button" data-cxat="done" aria-pressed="' + (ccActTab === "done") + '">Completed <em>' + done.length + '</em></button></nav>' +
+    var it = cxModF(ccItems()), B = { need: [], wait: [], ver: [] };
+    it.forEach(function (i) { var k = fuBucket(i); if (B[k]) B[k].push(i); });
+    var tab = B[ccActTab] ? ccActTab : "need", list = cxSort(B[tab]);
+    return cxHead("Action queue", CXACTX.map(function (f) { return f(); }).join("") + cxModSeg()) + '<p class="cx-lead">Follow-ups that need an owner or a next step. People notify partners and teams; the next documents on the network confirm the outcome.</p>' +
+      '<nav class="cx-tabs">' + [["need", "Need action"], ["wait", "Waiting"], ["ver", "Verified today"]].map(function (t) { return '<button type="button" data-cxat="' + t[0] + '" aria-pressed="' + (tab === t[0]) + '">' + t[1] + ' <em>' + B[t[0]].length + '</em></button>'; }).join("") + '</nav>' +
       '<ul class="cx-acl">' + list.map(function (i) {
-        return '<li class="' + (i.sev === "h" ? "c" : "w") + '"><div><header>' + cxTag(i.mod) + cxSevChip(i.sev) + '<span>' + cxe(i.agent) + ' · ' + cxe(i.at) + '</span></header>' + cxItemLink(i, "b") + '<p>' + cxe(i.act) + '</p><small>' + (i.run === undefined ? "" : (i.run ? "Runs on Trading Grid · " : "Handoff · ")) + cxe(i.partner) + (ccOn("pm") ? ' · ' + cxe(cxProcName(i.proc)) : "") + ' · ' + (i.mod === "RT" ? "Owner: " + cxe(i.owner) : "Approver: " + cxe(i.appr)) + '</small></div>' +
-          '<div class="cx-acb">' + (i.actDone ? '<span class="cx-done">' + ci("ok") + cxe(i.actState) + '</span>' : i.actBtn) + '<button type="button" class="cx-btn" ' + i.open + '>Review</button></div></li>';
-      }).join("") + (list.length ? "" : '<li class="cx-empty">' + (ccActTab === "open" ? "No actions waiting." : "No completed actions yet.") + '</li>') + '</ul>';
+        var u = i.key.indexOf("f:") === 0 ? cxFu(i.key.slice(2)) : null;
+        return '<li class="' + (i.sev === "h" ? "c" : "w") + '"><div><header>' + cxTag(i.mod) + cxSevChip(i.sev) + (u ? fuChip(u.st, u) : cxStPill(i.status)) + '<span>' + cxe(i.agent) + ' · ' + cxe(i.at) + '</span></header>' + cxItemLink(i, "b") + '<p>' + cxe(fuFact(i)) + '</p><small>' + cxe(i.partner) + (ccOn("pm") ? ' · ' + cxe(cxProcName(i.proc)) : "") + ' · Owner: ' + cxe(i.owner) + ' · Suggested: ' + cxe(i.act) + '</small></div>' +
+          '<div class="cx-acb">' + (!u && i.actDone ? '<span class="cx-done">' + ci("ok") + cxe(i.actState) + '</span>' : "") + (tab === "need" && i.actBtn ? i.actBtn : "") + '<button type="button" class="cx-btn" ' + i.open + '>Open follow-up</button></div></li>';
+      }).join("") + (list.length ? "" : '<li class="cx-empty">' + { need: "Nothing needs an owner.", wait: "Nothing is waiting.", ver: "Nothing verified yet today." }[tab] + '</li>') + '</ul>';
   };
 
   /* The first transactions behind a finding, with control numbers and acknowledgment status. Illustrative. */
@@ -460,24 +457,12 @@
   function cxDrawer() {
     if (!ccDr) return "";
     var h;
-    if (ccDr[0] === "f") {
-      var f = cxById(ccDr[1]), P = ccProc(f.p), done = ccDone[f.id], pm = ccOn("pm");
-      h = '<header><span><p>Finding · ' + cxe(cxAgentName(f)) + '</p><h3>' + cxe(f.ot) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
-        '<p class="cx-chipsr">' + cxSevChip(f.sev) + cxStChip(f) + cxTag(f.mod === "Integration Monitor" ? "IM" : "PM") + '<span class="cx-tg">' + cxe(f.how) + '</span></p><p>' + cxe(f.os) + '</p>' +
-        '<div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
-        '<dl class="cx-dl"><div><dt>Partner</dt><dd>' + cxe(f.partner) + '</dd></div>' + (pm ? '<div><dt>Process</dt><dd><button type="button" class="cx-lk" data-cxproc="' + f.p + '">' + cxe(P.n) + '</button>, step ' + ccStepNo(f.p, f.st) + ': ' + cxe(ccStepName(f.p, f.st)) + '</dd></div>' : "") +
-        '<div><dt>' + (f.mod === "Integration Monitor" ? "Check" : "Rule") + '</dt><dd>' + cxe(CXRULE[f.id]) + '</dd></div><div><dt>Transactions</dt><dd>' + cxe(CXDOC[f.id]) + '</dd></div></dl>' +
-        '<h4>Affected transactions</h4>' + cxAffected(f) +
-        '<h4>Timeline</h4><ol class="cx-tl">' + f.ev.map(function (e) { return '<li><b>' + cxe(e[0]) + '</b><span>' + cxe(e[1]) + '</span></li>'; }).join("") + '</ol>' +
-        '<h4>Root cause</h4><p>' + cxe(f.cause) + '</p><h4>Recommended action</h4><div class="cx-rec">' + ci("bot") + '<span>' + cxe(f.act) + '<small>Approver: ' + cxe(f.appr) + '</small></span></div>' +
-        '<h4>Teams involved</h4><p>' + f.who.map(cxe).join(", ") + '</p></div><div class="cx-ft">' + (done ? '<span class="cx-done">' + ci("ok") + (done === 2 ? "Marked as known issue" : (cxRun(f.id) ? "Approved. Runs on Trading Grid; closes when the documents are exchanged." : "Task created for " + (f.appr || "the owner") + ".")) + '</span>' :
-          '<button type="button" class="cx-btn p" data-cxapp="' + f.id + '">' + (cxRun(f.id) ? "Approve and run" : "Create task for " + cxe(f.appr || "owner")) + '</button><button type="button" class="cx-btn" data-cxknown="' + f.id + '">Mark as known issue</button>') + '</div>';
-    } else if (ccDr[0] === "help") {
+    if (ccDr[0] === "help") {
       h = '<header><span><p>Clickable prototype</p><h3>Command Center</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
         '<p>Switch the package in the top bar to see what each client gets.</p><dl class="cx-dl cx-dl1"><div><dt>' + cxTag("IM") + '</dt><dd>Standard for every Trading Grid client: daily digest, transaction volume, projections and anomalies, partners with network graph and integration analysis, Ivy the volume agent.</dd></div>' +
         '<div><dt>' + cxTag("PM") + '</dt><dd>Add-on for any industry: business processes, agents, rules and the partner scorecard.</dd></div>' +
         '<div><dt>' + cxTag("RT") + '</dt><dd>Includes Performance Monitor and adds retail processes, cases, policy templates, KPIs and the retailer and supplier perspectives.</dd></div></dl>' +
-        '<p class="cx-sub">All partners, records and outcomes are illustrative. No live network is connected.</p></div>';
+        '<p class="cx-sub">All partners, records and outcomes are illustrative. No live network is connected.</p><p class="cx-sub">Advance the network clock from the Overview to play the documents that confirm each follow-up.</p><button type="button" class="cx-btn" data-cxfureset>Reset demo to 09:30</button></div>';
     } else return "";
     return '<div class="cx-scrim" data-cxclose></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
   }
@@ -491,9 +476,9 @@
       var t = ccRole() === "retailer" ? "Ivy found outbound order volume to Meadowline Care 64% below projection since 05:52. Meadowline Care moved its AS2 endpoint in a maintenance window, so deliveries to the previous address fail. The weekly remittance advice to Meadowline Care is blocked by the same change."
         : "Ivy found order volume 64% below projection since 05:52. AS2 receipts from Harbor Grocers fail signature checks because the partner rotated its signing certificate. The weekly remittance advice is missing for the same reason.";
       return [t, ccItems().filter(function (i) { return i.key === "f:f2" || i.key === "f:f7"; })]; } },
-    { q: function () { return "What needs my approval?"; }, a: function () {
-      var w = cxSort(ccItems().filter(function (i) { return !i.actDone; }));
-      return [w.length + " actions wait for a decision. The most urgent:", w.slice(0, 3)]; } }
+    { q: function () { return "What is waiting on partners?"; }, a: function () {
+      var w = ccItems().filter(function (i) { return i.key.indexOf("f:") === 0 && cxFu(i.key.slice(2)).st === "Waiting on partner"; });
+      return [w.length ? w.length + " follow-ups wait on partners. Oldest expect-by time first:" : "Nothing is waiting on a partner. Notify a partner from a follow-up to start tracking.", w.sort(function (a, b) { return cxFu(a.key.slice(2)).exp - cxFu(b.key.slice(2)).exp; }).slice(0, 3)]; } }
   ];
   function cxAviator() {
     if (!ccAv) return "";
@@ -516,7 +501,7 @@
     "im-map": "ws-proc", "pm-proc": "ws-proc", "im-com": "im-tp", "an": "ws-dash", "rt-partners": "im-tp", "rt-orders": "ws-proc", "rt-shipments": "ws-proc", "rt-invoices": "ws-proc" };
   function cxNavOk(s) { return CXOV.indexOf(s) >= 0 || cxWsSecs().some(function (w) { return w[0] === s; }) || s !== "ws" && CXNAV.some(function (g) { return g[0] === s; }); }
   function cxMod() { var m = cxModKey(); return m ? CCMOD[m][0] : ""; }
-  function cxBadge(k) { var it = ccItems(); var n = k === "find" ? it.filter(function (i) { return !i.done; }).length : k === "act" ? it.filter(function (i) { return !i.actDone; }).length : 0; return n ? '<em class="cx-nb">' + n + '</em>' : ""; }
+  function cxBadge(k) { var it = ccItems(); var n = k === "find" ? it.filter(function (i) { return !i.done; }).length : k === "act" ? it.filter(function (i) { return fuBucket(i) === "need"; }).length : 0; return n ? '<em class="cx-nb">' + n + '</em>' : ""; }
   function cxTheme() { return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"; }
   function cxRender() {
     if (!cxNavOk(ccScr)) ccScr = "dash";
@@ -534,7 +519,7 @@
   }
   function cxGo(s) { if (s === "ws") s = cxWsSecs()[0][0]; if (s === "im-map") ccWsProc = "sol"; if (s === "an") ccWsDash = "p:pm"; if (s === "rt-partners") ccPtTab = "req"; s = CXALIAS[s] || s; if (!CXS[s] || !cxNavOk(s)) s = "dash"; ccScr = s; ccDr = null; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-cxgo],[data-cxhv],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt],[data-cxhelp]"); if (!b) return;
+    var b = e.target.closest("[data-cxgo],[data-cxhv],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxtab],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt],[data-cxhelp]"); if (!b) return;
     if (b.hasAttribute("data-cxgo")) cxGo(b.getAttribute("data-cxgo"));
     else if (b.hasAttribute("data-cxmin")) { ccNavMin = !ccNavMin; cxRender(); }
     else if (b.hasAttribute("data-cxhv")) { ccHeroV = b.getAttribute("data-cxhv"); try { localStorage.setItem("process-genome-cc-hero", ccHeroV); } catch (err) {} cxRender(); }
@@ -543,8 +528,6 @@
     else if (b.hasAttribute("data-cxproc")) { if (ccOn("pm")) { ccWsProc = b.getAttribute("data-cxproc"); cxGo("ws-proc"); } }
     else if (b.hasAttribute("data-cxclose")) { ccDr = null; cxRender(); }
     else if (b.hasAttribute("data-cxhelp")) { ccDr = ["help"]; cxRender(); }
-    else if (b.hasAttribute("data-cxapp")) { ccDone[b.getAttribute("data-cxapp")] = 1; cxRender(); }
-    else if (b.hasAttribute("data-cxknown")) { ccDone[b.getAttribute("data-cxknown")] = 2; cxRender(); }
     else if (b.hasAttribute("data-cxtab")) { ccTab = b.getAttribute("data-cxtab"); cxRender(); }
     else if (b.hasAttribute("data-cxpj")) { ccPj = +b.getAttribute("data-cxpj"); cxRender(); }
     else if (b.hasAttribute("data-cxq")) { cxAsk(+b.getAttribute("data-cxq")); cxRender(); var l = cx.querySelector(".cx-avb"); if (l) l.scrollTop = l.scrollHeight; }

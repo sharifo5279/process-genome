@@ -513,3 +513,36 @@
   /* Overview tabs stay on one line; long dashboard names scroll instead of wrapping */
   .cx-ovt { overflow-x: auto; scrollbar-width: none; } .cx-ovt::-webkit-scrollbar { display: none; }
   .cx-ovt button { white-space: nowrap; flex: none; } .cx-ovt .cx-ovn { flex: none; white-space: nowrap; }
+  /* Follow-ups: side panel, drawer, compose, states */
+  .fu-side { gap: 10px; }
+  .fu-tabs { display: flex; width: 100%; } .fu-tabs button { flex: 1; justify-content: center; white-space: nowrap; } .fu-tabs em { font-style: normal; font-weight: 700; margin-left: 2px; }
+  .fu-fl { display: flex; align-items: center; gap: 10px; margin: 0; } .fu-fc { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 8px; border: 2px solid var(--pa); border-radius: 999px; background: var(--pc); color: var(--pai) !important; font-size: 12px; font-weight: 600; cursor: pointer; } .fu-fc .ci { width: 13px; height: 13px; }
+  .fu-strip { margin: 0; font-size: 12px; color: var(--pmu); } .fu-strip b { color: var(--pf); }
+  .fu-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .fu-row { width: 100%; display: flex; flex-direction: column; gap: 3px; padding: 11px 12px; border: 1px solid var(--pl); border-radius: 12px; background: var(--pc); text-align: left; cursor: pointer; }
+  .cx.glass .fu-row { background: var(--g-tile, var(--pc)); border-color: var(--g-line, var(--pl)); }
+  .fu-row:hover { border-color: var(--pa); } .fu-row.crit { border-left: 3px solid #E5484D; padding-left: 10px; }
+  .fu-r1 { display: flex; align-items: flex-start; gap: 8px; } .fu-r1 b { flex: 1; min-width: 0; font-size: 13.5px; line-height: 18px; } .fu-r1 .cx-st { flex: none; font-size: 11px; padding: 0 8px; }
+  .fu-row small { font-size: 12px; color: var(--pmu); } .fu-r3 { font-size: 12px; line-height: 16px; color: var(--pf); }
+  .cx-st.s-assigned i, .cx-st.s-waitingonpartner i, .cx-st.s-waitingonus i { background: #F4B740; } .cx-st.s-recovering i { background: #2F6BFF; } .cx-st.s-verified i { background: #15803D; } .cx-st.s-closed i { background: var(--pmu); }
+  .fu-od { color: #C4320A; font-weight: 600; }
+  .fu-ck-l { list-style: none; margin: 0 0 6px; padding: 0; display: grid; gap: 8px; } .fu-ck-l li { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--pmu); } .fu-ck-l li .ci { width: 16px; height: 16px; margin-top: 1px; }
+  .fu-ck-l li.on { color: var(--pf); } .fu-ck-l li.on .ci { color: #15803D; } .fu-ck-l small { display: block; font-size: 11.5px; color: var(--pmu); }
+  .fu-act { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; } .fu-act li { display: grid; grid-template-columns: 24px 44px minmax(0, 1fr); gap: 8px; align-items: start; font-size: 13px; } .fu-act li > b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .fu-ai { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--pcl); color: var(--pmu); } .fu-ai .ci { width: 13px; height: 13px; } .fu-ai.me { background: var(--psel); color: var(--pai); font-size: 10px; } .fu-ai.ag { color: var(--pa); }
+  .fu-det { margin-top: 14px; border-top: 1px solid var(--pl); padding-top: 10px; } .fu-det summary { cursor: pointer; font-weight: 600; } .fu-det dd small { display: block; color: var(--pmu); }
+  .fu-ev { margin: 4px 0 0; }
+  .fu-cmp { display: grid; gap: 10px; padding: 14px 18px; border-top: 2px solid var(--pa); background: var(--pc); } .fu-cmp h4 { margin: 0; }
+  .fu-cmp input, .fu-cmp select, .fu-cmp textarea { width: 100%; padding: 7px 9px; border: 1px solid var(--pl2); border-radius: 8px; background: var(--pc); color: var(--pf); font: 400 13px/18px var(--font); }
+  .fu-ck { display: flex; align-items: center; gap: 8px; font-size: 13px; } .fu-ck input { width: 16px !important; height: 16px; }
+  .fu-cb { display: flex; gap: 8px; }
+  .fu-ft { align-items: center; flex-wrap: wrap; } .fu-chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--pmu); margin-right: auto; } .fu-chk .ci { width: 16px; height: 16px; }
+  .fu-more { position: relative; } .fu-more summary { list-style: none; } .fu-more summary::-webkit-details-marker { display: none; }
+  .fu-more > div { position: absolute; bottom: calc(100% + 6px); right: 0; z-index: 3; display: grid; gap: 4px; min-width: 220px; padding: 6px; border: 1px solid var(--pl2); border-radius: 10px; background: var(--pc); box-shadow: 0 8px 24px rgba(0, 24, 137, .12); }
+  .fu-more > div .cx-btn { justify-content: flex-start; border: 0; }
+  .fu-clk { margin-left: 10px; } .fu-clk .ci { width: 15px; height: 15px; }
+  .cx-ring .g-hit { fill: transparent; cursor: pointer; } .cx-ring .g-hit:hover, .cx-ring .g-hit.on { fill: var(--pa); fill-opacity: .06; stroke: var(--pa); stroke-opacity: .5; }
+  .cx-ring .g-hit-a { fill: none; stroke: transparent; stroke-width: 30; cursor: pointer; pointer-events: stroke; } .cx-ring .g-hit-a:hover { stroke: var(--pa); stroke-opacity: .12; }
+  .cx-ring .g-hit-r { fill: none; stroke: transparent; stroke-width: 30; cursor: pointer; pointer-events: stroke; } .cx-ring .g-lk { cursor: pointer; text-decoration: underline; text-decoration-color: transparent; } .cx-ring .g-lk:hover { text-decoration-color: currentColor; }
+  .cx-gll button.c { border-color: rgba(57, 217, 138, .8); } .cx-gll button.sel { border: 2px solid var(--pa); }
+  .fu-clkg { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; } .fu-clkg .cx-live { margin: 0; } .fu-clkg .fu-clk { margin-left: 0; }

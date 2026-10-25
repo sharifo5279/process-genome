@@ -79,7 +79,7 @@
     return L.map(function (c) {
       var f = c.f ? cxById(c.f) : null, rc = c.rt && ccOn("rt") ? bdCase(c.rt) : null, a = f ? CXAF[f.id] : null;
       return { c: c, k: c.k, f: f, rc: rc, partner: f ? f.partner : c.p, sev: f ? (f.sev === "c" ? "h" : "m") : rc ? (rc.severity === "critical" ? "h" : "m") : c.c === "cl" ? "" : c.sla && c.sla[2] > 100 ? "m" : "",
-        agent: a ? a.n : c.ag || "", run: f ? cxRun(f.id) : false, done: f ? ccDone[f.id] : ccBdTask[c.k] ? 1 : 0, val: f ? f.val : c.val || 0, act: f ? f.act : rc ? rc.roles[ccRole()].nextAction : c.act, appr: f ? f.appr : c.appr,
+        agent: a ? a.n : c.ag || "", run: false, done: f ? ccDone[f.id] : ccBdTask[c.k] ? 1 : 0, val: f ? f.val : c.val || 0, act: f ? f.act : rc ? rc.roles[ccRole()].nextAction : c.act, appr: f ? f.appr : c.appr,
         wf: rc ? rc.workflow : BDWF[c.s] || "", mod: f ? (f.mod === "Integration Monitor" ? "IM" : "PM") : rc && c.only ? "RT" : c.ag === "Ivy" ? "IM" : "PM" };
     });
   }
@@ -103,7 +103,7 @@
   }
   function bdCard(v) {
     var c = v.c, code = c.d, ack = code === "997" || code === "824", nm = ack ? "for " + c.s + " " + (wsDocName(c.s) || "").toLowerCase() : wsDocName(code), sla = c.sla, over = sla && sla[2] > 100;
-    var state = v.done ? (v.done === 2 ? "Known issue" : v.run ? "Approved · running on Trading Grid" : "Task created for " + (v.appr || "the owner")) : c.c === "cl" ? "Cleared " + c.at : c.pred ? "Predicted · " + (v.appr ? "handoff to " + v.appr : "") : v.run ? "Runs on Trading Grid after approval" : v.appr ? "Handoff to " + v.appr : "";
+    var fu = v.f ? cxFu(v.f.id) : null, state = fu ? fu.st + (fuOverdue(fu) ? " · overdue" : fu.exp ? " · expect by " + fuT(fu.exp) : "") : v.done ? "Note sent to " + (v.appr || "the owner") : c.c === "cl" ? "Cleared " + c.at : c.pred ? "Predicted · usually handled by " + (v.appr || "") : v.appr ? "Usually handled by " + v.appr : "";
     return '<li><button type="button" class="bd-c' + (ccDr && ccDr[0] === "bd" && ccDr[1] === c.k ? " on" : "") + (v.done ? " dn" : "") + '" data-wsbd="' + c.k + '">' +
       '<span class="bd-h"><code>' + cxe(code) + '</code><span class="bd-dir">' + c.dir + '</span><span class="bd-dn">' + cxe(nm) + '</span>' + (v.sev === "h" ? cxSevChip("h") : "") + '</span>' +
       '<b class="bd-t">' + cxe(c.t) + '</b><span class="bd-p">' + cxe(v.partner || "") + (c.age ? ' · oldest ' + cxe(c.age) : "") + (v.val ? ' · $' + v.val.toLocaleString("en-US") : "") + '</span>' +
@@ -167,9 +167,8 @@
     var dl = [["Partner", cxe(v.partner || "")], ["Document", '<code>' + cxe(c.d) + '</code> ' + (is997 || is824 ? (is997 ? "Functional acknowledgment" : "Application advice") + ' for the ' + c.s + ' ' + cxe((wsDocName(c.s) || "").toLowerCase()) : cxe(wsDocName(code))) + ', ' + (out ? "outbound" : "inbound")],
       c.sla ? ["Service level", cxe(c.sla[0]) + ' · ' + cxe(c.sla[1])] : null, c.ack ? ["Acknowledgment", cxe(c.ack)] : null, c.rej ? ["Application advice", 'OTI01 TR · TED01 ' + c.rej[0] + ' ' + cxe(c.rej[1]) + ' · ' + cxe(c.rej[2])] : null,
       v.agent ? ["Agent", cxe(v.agent)] : null, v.val ? ["Value at risk", "$" + v.val.toLocaleString("en-US")] : null, c.age ? ["Oldest open", cxe(c.age)] : c.at ? ["Cleared", "Today, " + c.at] : null].filter(Boolean);
-    var foot = v.f ? (v.done ? '<span class="cx-done">' + ci("ok") + (v.done === 2 ? "Marked as known issue" : v.run ? "Approved. Runs on Trading Grid; closes when the documents are exchanged." : "Task created for " + cxe(v.appr || "the owner") + ".") + '</span>' :
-        '<button type="button" class="cx-btn p" data-cxapp="' + v.f.id + '">' + (v.run ? "Approve and run" : "Create task for " + cxe(v.appr || "owner")) + '</button>') + '<button type="button" class="cx-btn" data-cxf="' + v.f.id + '">Open finding</button>' :
-      v.rc ? '<button type="button" class="cx-btn p" data-rt-case="' + cxe(v.rc.id) + '">Open case</button>' : c.c !== "cl" && v.appr ? '<button type="button" class="cx-btn p" data-wsbdtask="' + c.k + '">Create task for ' + cxe(v.appr) + '</button>' : "";
+    var foot = v.f ? '<button type="button" class="cx-btn p" data-cxf="' + v.f.id + '">Open follow-up</button>' :
+      v.rc ? '<button type="button" class="cx-btn p" data-rt-case="' + cxe(v.rc.id) + '">Open case</button>' : c.c !== "cl" && v.appr ? (v.done ? '<span class="cx-done">' + ci("ok") + 'Note sent to ' + cxe(v.appr) + '</span>' : '<button type="button" class="cx-btn p" data-wsbdtask="' + c.k + '">Send note to ' + cxe(v.appr) + '</button>') : "";
     var h = '<header><span><p>' + cxe(ccShort(i)) + ' · ' + col[1] + '</p><h3>' + cxe(c.t) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
       '<p class="cx-chipsr">' + (v.sev === "h" ? cxSevChip("h") : v.sev === "m" ? cxSevChip("m") : "") + cxTag(v.mod) + (c.pred ? '<span class="cx-tg">Prediction</span>' : "") + '</p>' +
       '<dl class="cx-dl">' + dl.map(function (d) { return '<div><dt>' + d[0] + '</dt><dd>' + d[1] + '</dd></div>'; }).join("") + '</dl>' +
@@ -233,11 +232,11 @@
 
   /* Agents: Ivy with Integration Monitor, the others with Performance Monitor; Build your own agent links to Aviator Studio */
   CXS["ws-agents"] = function () {
-    return wsHead("Agents", "Agents inspect documents" + (ccOn("pm") ? " and processes" : "") + ", raise findings and recommend actions. A person approves each action before it runs.",
+    return wsHead("Agents", "Agents watch documents" + (ccOn("pm") ? " and processes" : "") + " on the network, raise findings and suggest the next step. People send every notice.",
       '<button type="button" class="cx-btn p ws-studio" data-wsstudio>' + ci("spark") + 'Build your own agent' + ci("ext") + '</button>') + '<div class="cx-ag">' + cxAgents().map(function (a) {
       var rs = CXR.filter(function (r) { return r[0] === a.id; }), op = a.f.filter(function (id) { return !ccDone[id]; });
       return '<section class="cx-card"><header class="cx-agh"><span class="cx-agi">' + a.n[0] + '</span><div><h3>' + a.n + '</h3><span>' + a.r + '</span></div>' + cxTag(a.t.toUpperCase()) + '</header><p class="cx-sub">' + a.d + '</p>' +
-        '<dl class="cx-dl"><div><dt>' + (a.t === "im" ? "Checks" : "Rules") + '</dt><dd>' + rs.length + '</dd></div><div><dt>Open findings</dt><dd>' + op.length + '</dd></div><div><dt>Approval</dt><dd>Required</dd></div></dl></section>';
+        '<dl class="cx-dl"><div><dt>' + (a.t === "im" ? "Checks" : "Rules") + '</dt><dd>' + rs.length + '</dd></div><div><dt>Open findings</dt><dd>' + op.length + '</dd></div><div><dt>Notices</dt><dd>Sent by people</dd></div></dl></section>';
     }).join("") + '<button type="button" class="cx-card ws-new-agent" data-wsstudio>' + ci("plus") + '<b>Build your own agent</b><span>Design, test and publish an agent in Aviator Studio.</span><em>Open Aviator Studio' + ci("ext") + '</em></button></div>';
   };
 
@@ -344,14 +343,14 @@
   cx.addEventListener("click", function (e) {
     var b = e.target.closest("[data-xrmap],[data-xrfile],[data-wsproc],[data-wsbd],[data-wsbddoc],[data-wsbddir],[data-wsbdclr],[data-wsbdtask],[data-wstgi],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
     var W = wsLoad(), v;
-    if (b.hasAttribute("data-xrmap")) { var xs = cx.querySelector('[data-xrsel="' + b.getAttribute("data-xrmap") + '"]'); if (!xs || !xs.value) { cxToast("Select an item, then save the mapping."); cxRender(); return; } ccXr[b.getAttribute("data-xrmap")] = xs.value; cxToast("Mapping saved. Documents with this identifier are reprocessed."); }
+    if (b.hasAttribute("data-xrmap")) { var xs = cx.querySelector('[data-xrsel="' + b.getAttribute("data-xrmap") + '"]'); if (!xs || !xs.value) { cxToast("Select an item, then save the mapping."); cxRender(); return; } ccXr[b.getAttribute("data-xrmap")] = xs.value; cxToast("Mapping saved. It applies to documents received from now on. Find earlier failures in TG Insights."); }
     else if (b.hasAttribute("data-xrfile")) { cxToast("File upload is not connected in this prototype."); }
     else if (b.hasAttribute("data-wsproc")) { ccWsProc = b.getAttribute("data-wsproc"); ccBd = { dir: "All", doc: "", pt: "", q: "" }; }
     else if (b.hasAttribute("data-wsbd")) { ccDr = ["bd", b.getAttribute("data-wsbd")]; }
     else if (b.hasAttribute("data-wsbddoc")) { v = b.getAttribute("data-wsbddoc"); ccBd.doc = ccBd.doc === v ? "" : v; }
     else if (b.hasAttribute("data-wsbddir")) { ccBd.dir = b.getAttribute("data-wsbddir"); }
     else if (b.hasAttribute("data-wsbdclr")) { ccBd = { dir: "All", doc: "", pt: "", q: "" }; ccWsLens = "all"; }
-    else if (b.hasAttribute("data-wsbdtask")) { v = bdItems(+ccWsProc).filter(function (x) { return x.c.k === b.getAttribute("data-wsbdtask"); })[0]; ccBdTask[v.c.k] = 1; cxToast("Task created for " + v.appr + "."); }
+    else if (b.hasAttribute("data-wsbdtask")) { v = bdItems(+ccWsProc).filter(function (x) { return x.c.k === b.getAttribute("data-wsbdtask"); })[0]; ccBdTask[v.c.k] = 1; cxToast("Note sent to " + v.appr + " with the evidence. Command Center watches for the documents."); }
     else if (b.hasAttribute("data-wstgi")) { cxToast("TG Insights opens with these transactions in the product. It is not connected in this prototype."); }
     else if (b.hasAttribute("data-cxwsproc")) { ccWsProc = b.getAttribute("data-cxwsproc"); cxGo("ws-proc"); return; }
     else if (b.hasAttribute("data-wsform")) { ccWsForm = b.getAttribute("data-wsform"); }

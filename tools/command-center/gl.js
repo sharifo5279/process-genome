@@ -96,17 +96,20 @@
   var GLLL = [[-18, 15], [50, 20], [58, 120], [-10, 135], [20, 160], [-38, 80], [35, -20]], GLRG = 260;
   function glLL(la, lo) { var T = GL.T; la *= Math.PI / 180; lo *= Math.PI / 180; return new T.Vector3(Math.cos(la) * Math.cos(lo), Math.sin(la), Math.cos(la) * Math.sin(lo)).multiplyScalar(GLRG); }
   function glPartners() {
-    var it = ccItems().filter(function (i) { return !i.done; });
+    var it = ccItems();
     return cxPartners().filter(function (p) { return p[2] === "Active"; }).slice(0, 7).map(function (p) {
-      var mine = it.filter(function (i) { return i.partner === p[0]; }), sev = mine.some(function (i) { return i.sev === "h"; }) ? "r" : mine.length ? "a" : "b";
-      var t = mine.length ? mine[0].title : "Documents flowing"; return { n: p[0], sev: sev, sub: t.length > 38 ? t.slice(0, 37).replace(/\s+\S*$/, "") + "…" : t };
+      var mine = it.filter(function (i) { return i.partner === p[0] && fuBucket(i) !== "off"; }), need = mine.filter(function (i) { return fuBucket(i) === "need"; }), wait = mine.filter(function (i) { return fuBucket(i) === "wait"; });
+      var rec = wait.filter(function (i) { return i.key.indexOf("f:") === 0 && cxFu(i.key.slice(2)).st === "Recovering"; });
+      var sev = need.length ? "r" : wait.length > rec.length ? "a" : rec.length ? "c" : "b", top = need[0] || wait[0];
+      var st = top ? (top.key.indexOf("f:") === 0 ? cxFu(top.key.slice(2)).st : top.status) : "", t = top ? st + " · " + top.title : "Documents flowing";
+      return { n: p[0], sev: sev, sub: t.length > 44 ? t.slice(0, 43).replace(/\s+\S*$/, "") + "…" : t };
     });
   }
   function glGlobeBuild() {
-    var T = GL.T, dark = glDark(), P = glPartners(), key = ccRole() + (dark ? "d" : "l") + P.map(function (p) { return p.sev; }).join("");
+    var T = GL.T, dark = glDark(), P = glPartners(), key = ccRole() + (dark ? "d" : "l") + P.map(function (p) { return p.sev + p.sub; }).join("");
     if (GL.gkey === key && GL.gs) return;
     GL.gkey = key;
-    var S = new T.Scene(), g = new T.Group(), col = { r: 0xFF4D5A, a: 0xF4B740, b: dark ? 0x6E9BFF : 0x2F6BFF };
+    var S = new T.Scene(), g = new T.Group(), col = { r: 0xFF4D5A, a: 0xF4B740, b: dark ? 0x6E9BFF : 0x2F6BFF, c: dark ? 0x39D98A : 0x15803D };
     GL.gcam = new T.PerspectiveCamera(38, 820 / 560, 1, 5000); GL.gcam.position.set(-120, 140, 1120); GL.gcam.lookAt(-120, 0, 0);
     S.add(new T.AmbientLight(0xffffff, dark ? 0.35 : 1.1)); var dl = new T.DirectionalLight(0xffffff, dark ? 0.8 : 1.6); dl.position.set(-400, 500, 600); S.add(dl);
     g.add(new T.Mesh(new T.SphereGeometry(GLRG - 2, 96, 96), new T.MeshStandardMaterial(dark ? { color: 0x10267A, roughness: 0.7, metalness: 0.1, emissive: 0x0A1A5C, emissiveIntensity: 1 } : { color: 0xF2F6FF, roughness: 0.9, metalness: 0, emissive: 0x2F6BFF, emissiveIntensity: 0.06 })));
@@ -140,7 +143,7 @@
   }
   function glLabels(g) {
     var l = g.querySelector(".cx-gll"); if (!l) return;
-    l.innerHTML = GL.gp.map(function (p, k) { return '<button type="button" class="' + (k ? p.sev : "h") + '"' + (k ? ' data-impt="' + cxe(p.n) + '"' : "") + '>' + cxe(p.n) + '<small>' + cxe(p.sub) + '</small></button>'; }).join("");
+    l.innerHTML = GL.gp.map(function (p, k) { var on = ccOvF && ccOvF.k === "pt" && ccOvF.v === p.n; return '<button type="button" class="' + (k ? p.sev : "h") + (on ? " sel" : "") + '" data-cxov="' + (k ? "pt:" + cxe(p.n) : "clear") + '" title="' + (k ? "Filter follow-ups to " + cxe(p.n) : "Show all follow-ups") + '">' + cxe(p.n) + '<small>' + cxe(k ? p.sub : (ccOvF ? "Show all follow-ups" : "Your company")) + '</small></button>'; }).join("");
   }
   function glGlobeFrame(k) {
     var T = GL.T, g = GL.gg; if (!g) return;
