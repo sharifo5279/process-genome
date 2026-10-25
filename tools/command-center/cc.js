@@ -6,7 +6,7 @@
   var ccEl = document.getElementById("cc"), cx = document.getElementById("cx");
   var ccHeroV = "ring"; try { if (localStorage.getItem("process-genome-cc-hero") === "globe") ccHeroV = "globe"; } catch (e) {}
   var ccScr = "dash", ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccPj = 0, ccAvLog = [];
-  var ccCfgTab = "", ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "open", ccPtTab = "all";
+  var ccCfgTab = "", ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "need", ccPtTab = "all", ccAgF = "";
   var CC_GENOME = "../#retail/map";
   var CCPKG = { im: ["im"], pm: ["im", "pm"], rt: ["im", "pm", "rt"] }, CCPKGN = { im: "Integration Monitor", pm: "+ Performance Monitor", rt: "+ Retail pack" };
   var ccPkg = "rt"; try { var ccPk0 = localStorage.getItem("process-genome-cc-package"); if (CCPKG[ccPk0]) ccPkg = ccPk0; } catch (e) {}
@@ -97,11 +97,12 @@
 
   /* Small chart helpers */
   function cxLine(series, o) {
-    var W = o.w || 900, H = o.h || 220, L = 44, B = 26, T = 12, R = 12, n = series[0].v.length, mx = o.max || Math.max.apply(null, [].concat.apply([], series.map(function (s) { return s.v; }))) * 1.15, mn = o.min || 0;
+    var W = o.w || 900, H = o.h || 220, L = 44, B = 26, T = 12, R = 28, n = series[0].v.length, mx = o.max || Math.max.apply(null, [].concat.apply([], series.map(function (s) { return s.v; }))) * 1.15, mn = o.min || 0;
+    if (!(mx > mn)) mx = mn + 1;
     var x = function (i) { return L + (W - L - R) * i / (n - 1); }, y = function (v) { return T + (H - T - B) * (1 - (v - mn) / (mx - mn)); };
     var s = '<svg class="cx-ch" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + cxe(o.label || "Chart") + '">';
     for (var g = 0; g <= 4; g++) { var gv = mn + (mx - mn) * g / 4, gy = y(gv); s += '<line class="g" x1="' + L + '" x2="' + (W - R) + '" y1="' + gy + '" y2="' + gy + '"/><text class="t" x="' + (L - 8) + '" y="' + (gy + 4) + '" text-anchor="end">' + (o.fmt ? o.fmt(gv) : Math.round(gv)) + '</text>'; }
-    (o.xl || []).forEach(function (t, i) { s += '<text class="t" x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="middle">' + t + '</text>'; });
+    (o.xl || []).forEach(function (t, i) { s += '<text class="t" x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="' + (i === n - 1 ? "end" : i === 0 ? "start" : "middle") + '">' + t + '</text>'; });
     if (o.band) s += '<path class="band" d="M' + o.band.map(function (b, i) { return b == null ? "" : x(i) + " " + y(b[1]); }).filter(Boolean).join(" L") + " L" + o.band.map(function (b, i) { return b == null ? "" : x(i) + " " + y(b[0]); }).filter(Boolean).reverse().join(" L") + 'Z"/>';
     series.forEach(function (sr) {
       var pts = sr.v.map(function (v, i) { return v == null ? null : [x(i), y(v)]; }).filter(Boolean);
@@ -175,6 +176,8 @@
   var CCSNAP = "24 Oct 2026, 09:30 ET";
   function cxHead(t, extra) { var m = cxModKey(); return '<header class="cx-ph"><h2>' + t + '</h2>' + (m ? cxTag(m) : "") + (extra || "") + '</header>'; }
   function cxCard(t, body, cls, right) { return '<section class="cx-card' + (cls ? " " + cls : "") + '">' + (t ? '<header><h3>' + t + '</h3>' + (right || "") + '</header>' : "") + body + '</section>'; }
+  /* KPI tile that opens the detail behind it */
+  function cxKpiL(l, v, s, attr, off) { return '<button type="button" class="cx-kpi cx-kpl' + (off ? " off" : "") + '" ' + attr + '><span>' + l + (off ? '<em class="w">' + ci("warn") + 'Off target</em>' : "") + '</span><b>' + v + '</b>' + (s ? '<small>' + s + '</small>' : "") + '</button>'; }
   function cxKpi(l, v, s, cls) { return '<div class="cx-kpi' + (cls ? " " + cls : "") + '"><span>' + l + '</span><b>' + v + '</b>' + (s ? '<small>' + s + '</small>' : "") + '</div>'; }
   function cxSeg(name, opts, cur) { return '<span class="cx-seg" role="group">' + opts.map(function (o) { return '<button type="button" data-cxseg="' + name + '" data-v="' + o + '" aria-pressed="' + (o === cur) + '">' + o + '</button>'; }).join("") + '</span>'; }
   function cxGoBtn(label, scr) { return '<button type="button" class="cx-lk" data-cxgo="' + scr + '">' + label + ci("chev", "cx-lki") + '</button>'; }
@@ -189,7 +192,7 @@
   function cxOff(m) { var v = parseFloat(m[2]), t = parseFloat(String(m[3]).replace(/[^\d.]/g, "")); return isNaN(v) || isNaN(t) ? !!m[6] : String(m[3]).indexOf("≥") >= 0 ? v < t : v > t; }
   function cxCatList(cats) {
     return cats.map(function (c, k) {
-      return '<details class="cx-cat"' + (k === 0 ? " open" : "") + '><summary>' + ci("down") + '<b>' + c[0] + '</b><span>' + c[1] + '</span><em class="' + (c[2] < 88 ? "w" : "g") + '">avg score ' + c[2] + '</em></summary>' + c[3].map(function (m) {
+      return '<details class="cx-cat"' + (k === 0 ? " open" : "") + '><summary>' + ci("down") + '<b>' + c[0] + '</b><span>' + c[1] + '</span><em class="' + (c[2] < 88 ? "w" : "g") + '">Avg. score ' + c[2] + '</em></summary>' + c[3].map(function (m) {
         return '<div class="cx-mt"><div><b>' + m[0] + '</b><span><code>' + m[1] + '</code>' + (cxOff(m) ? '<em class="w">' + ci("warn") + 'Off target</em>' : '<em class="g">' + ci("ok") + 'On target</em>') + '</span></div><div class="cx-mb"><span>Target: ' + m[3] + '</span><span>Score: ' + m[4] + '</span><span>Weight: ' + m[5] + '%</span><span class="cx-pb ' + (m[6] ? "w" : "") + '"><i style="width:' + m[4] + '%"></i></span></div><strong class="' + (m[6] ? "w" : "g") + '">' + m[2] + '</strong></div>';
       }).join("") + '</details>';
     }).join("");
@@ -203,7 +206,7 @@
       }).join("") + '</section><h4 class="cx-sh">Performance by category</h4>' + cxCatList(CXCAT);
     var cs = CXCAT, col = ["#0066FF", "#001889", "#5B8DEF", "#9DB7F2"];
     return h + '<div class="cx-g2">' + cxCard("Where to focus", '<p class="cx-sub">Lowest-scoring KPIs pulling the rating down</p>' + cxBars([["Transaction rejection rate", 70, "", "y"], ["PO acknowledgment cycle time", 73, "", "y"], ["Invoice accuracy rate", 92, "", "y"], ["First-pass acceptance", 94, "", "g"], ["Ship notice timeliness", 96, "", "g"]], {})) +
-      cxCard("Category health", '<p class="cx-sub">Average score by KPI group</p><div class="cx-dw">' + cxDonut(cs.map(function (c, i) { return [c[0], c[2], col[i]]; }), 80, "90", "avg score") + '<ul class="cx-lg">' + cs.map(function (c, i) { return '<li><i style="background:' + col[i] + '"></i>' + c[0] + '<b>' + c[2] + '</b></li>'; }).join("") + '</ul></div>') + '</div>' +
+      cxCard("Category health", '<p class="cx-sub">Average score by KPI group</p><div class="cx-dw">' + cxDonut(cs.map(function (c, i) { return [c[0], c[2], col[i]]; }), 80, "90", "Avg. score") + '<ul class="cx-lg">' + cs.map(function (c, i) { return '<li><i style="background:' + col[i] + '"></i>' + c[0] + '<b>' + c[2] + '</b></li>'; }).join("") + '</ul></div>') + '</div>' +
       '<div class="cx-g2">' + cxCard("Weighted partner score trend", cxLine([{ v: [86.2, 87.1, 87.0, 88.4, 89.9, 91.3], area: true }], { w: 600, h: 220, min: 80, max: 100, xl: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Score trend" })) +
       cxCard("Score contribution by KPI", '<p class="cx-sub">Weighted points contributed to the 91.3 overall score</p>' + cxBars([["Ship notice timeliness", 5.8, "", "g"], ["Invoice accuracy rate", 5.5, "", "y"], ["PO acknowledgment rate", 4.9, "", "g"], ["Ship notice accuracy", 4.9, "", "g"], ["First-pass acceptance", 4.7, "", "g"]], { max: 8, fmt: function (v) { return v.toFixed(1); } })) + '</div>';
   }
@@ -233,8 +236,8 @@
     var ex = imExplain ? cxCard("Aviator findings", '<ul class="im-ex">' + [PJ[0][0] + (rr ? ": deliveries fell 64% below the projected range at 06:30. AS2 deliveries fail since the partner moved its endpoint, so purchase orders are held on Trading Grid."
         : ": volume fell 64% below the projected range at 06:30 and has not recovered. The partner's AS2 messages fail signature checks, so orders are not arriving."),
       PJ[1][0] + (rr ? ": Northfield Stores stopped sending 997s for Tidewell Home invoices at 05:00; the inbound invoice queue on Trading Grid is paused." : ": acknowledgments dropped while the partner's other documents flow normally. The gap began at 05:00."), "Failed transactions: 27 in the last hour against a threshold of 18, and 74 since 05:52. Most come from one partner's AS2 connection and clear when it is restored."].map(function (t) { return '<li>' + ci("spark") + '<span>' + cxe(t) + '</span></li>'; }).join("") + '</ul><p class="cx-note">Written from your watchlists, projections and anomalies. AI can make mistakes. Check important information.</p>', "im-exc") : "";
-    return cxOvHead() + '<div class="im-pjb"><button type="button" class="cx-btn p" data-imexplain aria-pressed="' + imExplain + '">' + ci("spark") + (imExplain ? "Hide Aviator findings" : "Explain with Aviator") + '</button></div>' + ex + '<div class="cx-pj"><nav class="cx-pjl"><header><b>Projections</b><span>Anomalies</span></header>' + PJ.map(function (x, i) {
-      return '<button type="button" data-cxpj="' + i + '" aria-pressed="' + (i === ccPj) + '"><b>' + x[0] + '</b><small>' + x[1] + ' · Executed today, 08:00</small>' + (x[2] ? '<em>' + x[2] + ci("warn") + '</em>' : '') + '</button>';
+    return cxOvHead() + '<div class="im-pjb"><button type="button" class="cx-btn p" data-imexplain aria-pressed="' + imExplain + '">' + ci("spark") + (imExplain ? "Hide Aviator findings" : "Explain with Aviator") + '</button></div>' + ex + '<div class="cx-pj"><nav class="cx-pjl" aria-label="Projections"><header><b>Projections and anomalies</b></header>' + PJ.map(function (x, i) {
+      return '<button type="button" data-cxpj="' + i + '" aria-pressed="' + (i === ccPj) + '"><b>' + x[0] + '</b><small>' + x[1] + ' · Run today, 08:00</small>' + (x[2] ? '<em>' + x[2] + ci("warn") + '</em>' : '') + '</button>';
     }).join("") + '</nav><section class="cx-pjd"><header><h3>' + p[0] + '</h3>' + (p[7] ? '<button type="button" class="cx-btn" data-cxf="' + p[7] + '">Open finding</button>' : '') + '</header>' +
       '<div class="cx-chips">' + [["D", "Direction", p[3]], ["D", "Document type", p[4]], ["S", "Document standard", p[5]], ["P", "Partner", p[6]]].map(function (c) { return '<div><i>' + c[0] + '</i><span>' + c[1] + '<b>' + c[2] + '</b></span></div>'; }).join("") + '</div>' +
       cxLine([{ v: act, c: "act" }, { v: prj, c: "prj" }], { w: 840, h: 210, max: fl ? 30 : 140, xl: ["Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29"], now: 4, band: prj.map(function (v) { return v == null ? null : fl ? [0, 18] : [v - 16, v + 16]; }), label: "Projection and actual" }) +
@@ -259,24 +262,24 @@
   /* Configuration: Integration Monitor monitoring settings for every client; Rules & Policies with Performance Monitor */
   var CXCFG = [];
   function cxRuleTable(rows, agents) {
-    return '<table class="cx-tbl"><thead><tr><th>Rule</th><th>Transaction</th><th>Process</th><th class="n">Conformance</th><th class="n">Findings (30d)</th><th>Last executed</th><th>Status</th></tr></thead><tbody>' + agents.map(function (a) {
+    return '<table class="cx-tbl"><thead><tr><th>Rule</th><th>Transaction</th><th>Process</th><th class="n">Conformance</th><th class="n">Findings, 30 days</th><th>Last run</th><th>Status</th></tr></thead><tbody>' + agents.map(function (a) {
       return '<tr class="gh"><td colspan="7">' + a.n + ' · ' + a.r + '</td></tr>' + rows.filter(function (r) { return r[0] === a.id; }).map(function (r) {
-        return '<tr><td><b class="cx-lkt">' + cxe(r[1]) + '</b></td><td>' + cxe(r[2]) + '</td><td>' + cxe(cxProcNames(cxRuleP(r))) + '</td><td class="n">' + r[4].toFixed(1) + '%</td><td class="n">' + r[5] + '</td><td>' + r[6] + '</td><td><span class="cx-st s-' + (r[7] === "Active" ? "resolved" : r[7] === "Paused" ? "acknowledged" : "new") + '"><i></i>' + r[7] + '</span></td></tr>';
+        return '<tr><td><button type="button" class="cx-lk b" data-cxrule="' + cxe(r[1]) + '">' + cxe(r[1]) + '</button></td><td>' + cxe(r[2]) + '</td><td>' + cxe(cxProcNames(cxRuleP(r))) + '</td><td class="n">' + r[4].toFixed(1) + '%</td><td class="n">' + r[5] + '</td><td>' + r[6] + '</td><td><span class="cx-st s-' + (r[7] === "Active" ? "resolved" : r[7] === "Paused" ? "acknowledged" : "new") + '"><i></i>' + r[7] + '</span></td></tr>';
       }).join("");
     }).join("") + '</tbody></table>';
   }
   CXS["cfg"] = function () {
     var pm = ccOn("pm"), tab = ccCfgTab === "xr" || ccCfgTab === "mon" ? ccCfgTab : pm ? "rp" : "mon";
-    var h = cxHead("Configuration") + '<nav class="cx-tabs">' + (pm ? '<button type="button" data-cxcfg="rp" aria-pressed="' + (tab === "rp") + '">Rules &amp; Policies</button>' : "") + '<button type="button" data-cxcfg="mon" aria-pressed="' + (tab === "mon") + '">Monitoring</button><button type="button" data-cxcfg="xr" aria-pressed="' + (tab === "xr") + '">Cross-references</button></nav>';
+    var h = cxHead("Configuration") + '<nav class="cx-tabs">' + (pm ? '<button type="button" data-cxcfg="rp" aria-pressed="' + (tab === "rp") + '">Rules and policies</button>' : "") + '<button type="button" data-cxcfg="mon" aria-pressed="' + (tab === "mon") + '">Monitoring</button><button type="button" data-cxcfg="xr" aria-pressed="' + (tab === "xr") + '">Cross-references</button></nav>';
     if (tab === "xr") return h + cxXref();
     if (tab === "mon") {
       var ivy = CXA.filter(function (a) { return a.t === "im"; });
       return h + cxCard("Monitoring checks", '<p class="cx-sub">Volume, missing-document and acknowledgment checks run by Ivy for every partner.</p>' + cxRuleTable(CXR, ivy), "", cxTag("IM")) +
-        cxCard("Partner activity", '<p class="cx-sub">Days without activity before a partner is marked inactive.</p><label class="cx-fl">Threshold (days)<input type="number" value="30" min="1"></label><button type="button" class="cx-btn p">Save</button>', "", cxTag("IM"));
+        cxCard("Partner activity", '<p class="cx-sub">Days without activity before a partner is marked inactive.</p><label class="cx-fl">Threshold (days)<input type="number" value="' + ccInact + '" min="1" data-cxinact></label><button type="button" class="cx-btn p" data-cxinsave>Save threshold</button>', "", cxTag("IM"));
     }
     var ag = CXA.filter(function (a) { return a.t === "pm"; }), rows = CXR.filter(function (r) { return ag.some(function (a) { return a.id === r[0]; }); });
     return h + '<section class="cx-card cx-rh"><div><span>Total rules</span><b>' + rows.length + '</b><small><i class="g"></i>' + rows.filter(function (r) { return r[7] === "Active"; }).length + ' active <i class="r"></i>' + rows.filter(function (r) { return r[7] === "Over budget"; }).length + ' over budget <i class="y"></i>' + rows.filter(function (r) { return r[7] === "Paused"; }).length + ' paused</small></div>' +
-      cxKpi("Total findings", rows.reduce(function (s, r) { return s + r[5]; }, 0)) + cxKpi("Total inspections", "159.9K") + cxKpi("Average conformance", "95.8%") + cxKpi("Total deviation", "6,653") + '</section>' +
+      cxKpi("Total findings", rows.reduce(function (s, r) { return s + r[5]; }, 0)) + cxKpi("Total inspections", "159.9K") + cxKpi("Avg. conformance", "95.8%") + cxKpi("Total deviations", "6,653") + '</section>' +
       cxCard("Rules", cxRuleTable(rows, ag), "", '<span class="cx-note">Grouped by agent</span>' + cxTag("PM") + '<button type="button" class="cx-btn p" data-rwnew>' + ci("plus") + 'Create rule</button>') + CXCFG.map(function (f) { return f(); }).join("");
   };
 
@@ -284,9 +287,20 @@
   var CXDASH = [];
   function cxDc(c, w) { return '<section class="cx-card cx-dc w' + (w || c.w) + '" data-mod="' + (c.mod || "all") + '"><header><h3>' + c.t + '</h3>' + cxTag(c.mod) + '</header><div class="cx-dcb">' + c.h() + '</div>' + (c.f ? '<footer class="cx-dcf">' + c.f() + '</footer>' : "") + '</section>'; }
   function cxComps() { return CXDASH.slice().sort(function (a, b) { return a.o - b.o; }).filter(function (c) { return !c.mod || ccOn(c.mod); }); }
+  /* Partners with an open follow-up, for the network globe and its list. Highest need first. */
+  function cxGlobePts() {
+    var it = ccItems(), names = [];
+    it.forEach(function (i) { var b = fuBucket(i); if ((b === "need" || b === "wait") && i.partner && names.indexOf(i.partner) < 0) names.push(i.partner); });
+    return names.map(function (n) {
+      var mine = it.filter(function (i) { return i.partner === n; }), need = mine.filter(function (i) { return fuBucket(i) === "need"; }), wait = mine.filter(function (i) { return fuBucket(i) === "wait"; });
+      var rec = wait.filter(function (i) { return i.key.indexOf("f:") === 0 && cxFu(i.key.slice(2)).st === "Recovering"; });
+      var sev = need.length ? "r" : wait.length > rec.length ? "a" : "c", top = need[0] || wait[0], t = (top.key.indexOf("f:") === 0 ? cxFu(top.key.slice(2)).st : top.status) + " · " + top.title;
+      return { n: n, sev: sev, cnt: need.length + wait.length, sub: t.length > 44 ? t.slice(0, 43).replace(/\s+\S*$/, "") + "…" : t };
+    }).sort(function (a, b) { return "rac".indexOf(a.sev) - "rac".indexOf(b.sev) || b.cnt - a.cnt; }).slice(0, 10);
+  }
   function cxHero() {
     var X = 548, Y = 270, R = 128, items = ccItems(), open = items.filter(function (i) { return fuBucket(i) === "need"; }), waiting = items.filter(function (i) { return fuBucket(i) === "wait"; });
-    var ver = 24 + items.filter(function (i) { return fuBucket(i) === "ver"; }).length;
+    var ver = items.filter(function (i) { return fuBucket(i) === "ver"; }).length;
     var tot = 0, ok = 0, rk = 0, br = 0; ccSol().forEach(function (i) { var F = ccFlow(i); tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
     /* Documents verified from the network move from breached or at risk back to on track */
     cxAll().forEach(function (f) { if (ccDone[f.id] !== 1 || !f.n) return; var sg = FUSEG[f.id] || "rk", m = Math.min(f.n, sg === "br" ? br : rk); if (sg === "br") br -= m; else rk -= m; ok += m; });
@@ -297,7 +311,7 @@
       '<linearGradient id="cxrr" x1="0" x2="1"><stop offset="0" style="stop-color:var(--g-red);stop-opacity:0"/><stop offset=".45" style="stop-color:var(--g-red);stop-opacity:.85"/><stop offset="1" style="stop-color:var(--g-red)"/></linearGradient>' +
       '<linearGradient id="cxrb" x1="0" x2="1"><stop offset="0" style="stop-color:var(--g-blue);stop-opacity:0"/><stop offset=".45" style="stop-color:var(--g-blue);stop-opacity:.85"/><stop offset="1" style="stop-color:var(--g-blue)"/></linearGradient></defs>' +
       '<circle cx="' + X + '" cy="' + Y + '" r="190" class="g-halo" filter="url(#cxsf)"/>' +
-      '<text x="0" y="20" class="g-eb">BUSINESS PROCESSES</text><text x="276" y="20" class="g-fn" text-anchor="end">Documents today</text>';
+      '<text x="0" y="20" class="g-eb">Business processes</text><text x="276" y="20" class="g-fn" text-anchor="end">Documents today</text>';
     ccSol().forEach(function (i, k) {
       var F = ccFlow(i), P = ccProc(i), y = 92 + k * 150, n = open.filter(function (x) { return x.proc === i; }), wn = waiting.filter(function (x) { return x.proc === i; }), sev = n.length ? "red" : wn.length ? "amb" : "blue";
       var ang = (200 - k * 22) * Math.PI / 180, tx = X + (R + 22) * Math.cos(ang), ty = Y + (R + 22) * Math.sin(ang), d = "M304 " + y + " C400 " + y + " " + (tx - 90).toFixed(1) + " " + ty.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1);
@@ -310,7 +324,7 @@
         '<circle cx="300" cy="' + y + '" r="9" class="g-f ' + sev + '" opacity=".18"/><circle cx="300" cy="' + y + '" r="4.5" class="g-nd ' + sev + '"/>' +
         (n.length || wn.length ? '<text x="0" y="' + (y + 44) + '" class="g-fs ' + sev + '">' + [n.length ? n.length + " need action" : "", wn.length ? wn.length + " waiting" : ""].filter(Boolean).join(" · ") + '</text>' : '<text x="0" y="' + (y + 44) + '" class="g-fs blue">No open follow-ups</text>') +
         '<text x="0" y="' + (y + 60) + '" class="g-fn">' + F.ack + ' 997 overdue · ' + F.rej + ' 824 rejects</text>' +
-        '<rect x="-6" y="' + (y - 26) + '' + '" width="320" height="94" rx="8" class="g-hit' + (ccOvF && ccOvF.k === "proc" && +ccOvF.v === i ? " on" : "") + '" data-cxov="proc:' + i + '"><title>Filter follow-ups to ' + cxe(ccShort(i)) + '</title></rect>';
+        '<rect x="-6" y="' + (y - 26) + '' + '" width="320" height="94" rx="8" class="g-hit' + (ccOvF && ccOvF.k === "proc" && +ccOvF.v === i ? " on" : "") + '" data-cxov="proc:' + i + '" tabindex="0" role="button" aria-label="Filter follow-ups to ' + cxe(ccShort(i)) + '"><title>Filter follow-ups to ' + cxe(ccShort(i)) + '</title></rect>';
     });
     for (var a = 0; a < 360; a += 3) { var rd = a * Math.PI / 180, big = a % 30 === 0, r1 = R + 38, r2 = r1 + (big ? 11 : 5);
       svg += '<line x1="' + (X + r1 * Math.cos(rd)).toFixed(1) + '" y1="' + (Y + r1 * Math.sin(rd)).toFixed(1) + '" x2="' + (X + r2 * Math.cos(rd)).toFixed(1) + '" y2="' + (Y + r2 * Math.sin(rd)).toFixed(1) + '" class="g-tk" opacity="' + (0.18 + 0.5 * Math.pow(Math.cos((a - 300) * Math.PI / 360), 2)).toFixed(2) + '"/>'; }
@@ -319,39 +333,45 @@
     S.forEach(function (sg) {
       var span = Math.max(360 * sg[1] / tot, 7), a0 = (at + gap / 2) * Math.PI / 180, a1 = (at + span - gap / 2) * Math.PI / 180, dd; mids.push((at + span / 2) * Math.PI / 180); at += span;
       dd = "M" + (X + R * Math.cos(a0)).toFixed(1) + " " + (Y + R * Math.sin(a0)).toFixed(1) + "A" + R + " " + R + " 0 " + (span > 180 ? 1 : 0) + " 1 " + (X + R * Math.cos(a1)).toFixed(1) + " " + (Y + R * Math.sin(a1)).toFixed(1);
-      svg += '<path d="' + dd + '" class="g-arc-t"/><path d="' + dd + '" class="g-arc ' + sg[2] + '" style="stroke-width:' + sg[3] + 'px"/><path d="' + dd + '" class="g-hit-a" data-cxov="seg:' + ["ok", "rk", "br"][S.indexOf(sg)] + '"><title>Filter follow-ups: ' + sg[0] + '</title></path>';
+      svg += '<path d="' + dd + '" class="g-arc-t"/><path d="' + dd + '" class="g-arc ' + sg[2] + '" style="stroke-width:' + sg[3] + 'px"/><path d="' + dd + '" class="g-hit-a" data-cxov="seg:' + ["ok", "rk", "br"][S.indexOf(sg)] + '" tabindex="0" role="button" aria-label="Filter follow-ups: ' + sg[0] + '"><title>Filter follow-ups: ' + sg[0] + '</title></path>';
     });
     [1, 2].forEach(function (k, j) {
       var m = mids[k], x0 = X + (R + 10) * Math.cos(m), y0 = Y + (R + 10) * Math.sin(m), ly = 34 + j * 40, lx = 640;
-      svg += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'L' + (x0 + 26).toFixed(1) + ' ' + ly + 'H' + (lx - 8) + '" class="g-cl ' + S[k][2] + '"/><circle cx="' + (lx - 8) + '" cy="' + ly + '" r="3" class="g-f ' + S[k][2] + '"/>' +
-        '<text x="' + lx + '" y="' + (ly - 3) + '" class="g-cn g-lk" data-cxov="seg:' + ["ok", "rk", "br"][k] + '">' + S[k][0] + ' · ' + S[k][1].toLocaleString("en-US") + '</text><text x="' + lx + '" y="' + (ly + 12) + '" class="g-cs ' + S[k][2] + '">' + ["Expected document due soon", "Window passed"][j] + '</text>';
+      svg += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'V' + ly + 'H' + (lx - 8) + '" class="g-cl ' + S[k][2] + '"/><circle cx="' + (lx - 8) + '" cy="' + ly + '" r="3" class="g-f ' + S[k][2] + '"/>' +
+        '<text x="' + lx + '" y="' + (ly - 3) + '" class="g-cn g-lk" data-cxov="seg:' + ["ok", "rk", "br"][k] + '" tabindex="0" role="button">' + S[k][0] + ' · ' + S[k][1].toLocaleString("en-US") + '</text><text x="' + lx + '" y="' + (ly + 12) + '" class="g-cs ' + S[k][2] + '">' + ["Expected document due soon", "Window passed"][j] + '</text>';
     });
-    svg += '<text x="' + X + '" y="' + (Y - 46) + '" class="g-eb" text-anchor="middle">DOCUMENTS TODAY</text><text x="' + X + '" y="' + (Y + 10) + '" class="g-big" text-anchor="middle">' + tot.toLocaleString("en-US") + '</text>' +
+    svg += '<text x="' + X + '" y="' + (Y - 46) + '" class="g-eb" text-anchor="middle">Documents today</text><text x="' + X + '" y="' + (Y + 10) + '" class="g-big" text-anchor="middle">' + tot.toLocaleString("en-US") + '</text>' +
       '<text x="' + X + '" y="' + (Y + 33) + '" class="g-ok" text-anchor="middle">' + (100 * ok / tot).toFixed(1) + '% on track</text><line x1="' + (X - 66) + '" y1="' + (Y + 48) + '" x2="' + (X + 66) + '" y2="' + (Y + 48) + '" class="g-l2"/>' +
       '<text x="' + (X - 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">' + ver + '</text><text x="' + (X - 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Verified today</text>' +
       '<text x="' + (X + 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">' + open.length + '</text><text x="' + (X + 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Need action</text>';
     function rib(y0, y1, cls, grad, lbl, tab) {
       var d = "M" + (X + R - 4) + " " + y0 + " C" + (X + R + 70) + " " + y0 + " 720 " + y1 + " 816 " + y1;
       return '<path d="' + d + '" class="g-rg ' + cls + '" filter="url(#cxsf)"/><path d="' + d + '" stroke="' + grad + '" class="g-rb"/><path d="' + d + '" class="g-hit-r" data-cxov="tab:' + tab + '"/>' + [0, 1, 2, 3].map(function (q) { return '<circle r="2.2" class="g-rp"><animateMotion dur="2.8s" begin="-' + (q * 0.7) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
-        '<text x="816" y="' + (y1 + (y1 < Y ? -22 : 34)) + '" class="g-cn g-lk" text-anchor="end" data-cxov="tab:' + tab + '">' + lbl + '</text>';
+        '<text x="816" y="' + (y1 + (y1 < Y ? -32 : 44)) + '" class="g-cn g-lk" text-anchor="end" data-cxov="tab:' + tab + '" tabindex="0" role="button" aria-label="Show ' + lbl + '">' + lbl + '</text>';
     }
     svg += rib(Y - 30, 210, "red", "url(#cxrr)", open.length + " need action · " + waiting.length + " waiting", "need") + rib(Y + 36, 452, "blue", "url(#cxrb)", ver + " verified today", "ver");
-    svg += '<text x="0" y="552" class="g-fn">Ring: documents today by state · Strands: follow-ups per process · Select any part to filter the follow-ups</text></svg>';
+    svg += '<text x="0" y="552" class="g-fn">Ring: documents today by state. Strands: follow-ups per process. Select a process, segment or label to filter.</text></svg>';
     var side = fuSide();
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';
     /* Two views of the same health: the process ring, or the trading network as a globe (WebGL) */
     var tog = '<span class="cx-seg cx-hvt" role="group" aria-label="Overview view">' + [["ring", "Process ring"], ["globe", "Network globe"]].map(function (o) { return '<button type="button" data-cxhv="' + o[0] + '" aria-pressed="' + (ccHeroV === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</span>';
-    var globe = '<div class="cx-globe" role="img" aria-label="' + cxe(ccCompany()) + ' trading network: each arc is a document route colored by its health"><div class="cx-gll"></div>' +
-      '<p class="cx-glh"><b>' + cxe(ccCompany()) + ' trading network</b><span>Arc color shows follow-up state. Select a partner to filter the follow-ups.</span></p><p class="cx-glf">The network globe needs WebGL in this browser.</p></div>';
+    var GP = cxGlobePts(), stl = { r: "Need action", a: "Waiting", c: "Recovering" };
+    var globe = '<div class="cx-globe"><div class="cx-gll" aria-hidden="true"></div>' +
+      '<p class="cx-glh"><b>' + cxe(ccCompany()) + ' trading network</b><span>Partners with open follow-ups. Arc color shows the follow-up state.</span></p>' +
+      '<ul class="cx-glg" aria-label="Partners with open follow-ups">' + GP.map(function (p) { var on = ccOvF && ccOvF.k === "pt" && ccOvF.v === p.n; return '<li><button type="button" class="' + p.sev + (on ? " sel" : "") + '" data-cxov="pt:' + cxe(p.n) + '" aria-pressed="' + !!on + '"><i></i><b>' + cxe(p.n) + '</b><small>' + stl[p.sev] + ' · ' + p.cnt + '</small></button></li>'; }).join("") +
+      (GP.length ? "" : '<li class="cx-empty">No open follow-ups.</li>') + '</ul><p class="cx-glf">The network globe needs WebGL in this browser.</p></div>';
     return '<section class="cx-hero2" aria-label="Process health"><div class="cx-hv' + (ccHeroV === "globe" ? " gv" : "") + '">' + tog + (ccHeroV === "globe" ? globe : '<div class="cx-hvb">' + svg + '</div>') + '</div>' + side + '</section>';
   }
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
   function cxOvHead() {
-    var procs = ccOn("pm") ? " · " + ccSol().map(ccShort).join("; ") : "", cd = wsCurDash();
-    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Network health"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("") +
-      wsDashTabs().map(function (t) { return '<button type="button" data-cxgo="ws-dash" data-wsdash="' + t.key + '" aria-pressed="' + (ccScr === "ws-dash" && cd === t) + '">' + cxe(t.n) + '</button>'; }).join("");
-    return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="fu-clkg"><span class="cx-live"><i></i>Network time ' + fuT(ccNow) + '</span>' + fuClockBtn() + '</span></header>' +
-      '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + '<button type="button" class="cx-ovn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></nav>';
+    var procs = ccOn("pm") ? " · " + ccSol().map(ccShort).join("; ") : "", cd = wsCurDash(), dt = wsDashTabs(), onD = ccScr === "ws-dash" && cd;
+    var tabs = [["dash", "Summary"], ["im-proj", "Projections and anomalies"], ["im-vol", "Network health"]].map(function (t) { return '<button type="button" data-cxgo="' + t[0] + '" aria-pressed="' + (ccScr === t[0]) + '">' + t[1] + '</button>'; }).join("");
+    var menu = '<details class="cx-dm"><summary class="cx-ovn' + (onD ? " on" : "") + '"' + (onD ? ' aria-current="page"' : "") + '>' + ci("dash") + (onD ? cxe(cd.n) : "Dashboards") + ci("down") + '</summary><div role="menu">' +
+      dt.map(function (t) { return '<button type="button" role="menuitem" data-cxgo="ws-dash" data-wsdash="' + t.key + '"' + (onD && cd === t ? ' aria-current="true"' : "") + '>' + cxe(t.n) + '</button>'; }).join("") +
+      '<button type="button" role="menuitem" class="cx-dmn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></div></details>';
+    return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div>' +
+      (ccScr === "dash" ? '<span class="fu-clkg"><span class="cx-live">' + ci("clock") + 'Network time ' + fuT(ccNow) + '</span>' + fuClockBtn() + '</span>' : "") + '</header>' +
+      '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + menu + '</nav>';
   }
   /* Integration Monitor document transaction summary, as in the shipped product: yesterday and last month, top 3 documents each */
   var CXDS = [["Yesterday", "Friday, October 23, 2026", [["997", "Functional acknowledgment", 1384], ["850", "Purchase order", 1180], ["856", "Ship notice", 922]], 1126],
@@ -370,12 +390,12 @@
     var by = function (o) { return CXDASH.filter(function (c) { return c.o === o; })[0]; }, rt = ccOn("rt") && by(35);
     /* Integration Monitor alone: the document summary leads. With Performance Monitor, the process ring leads and the summary follows. */
     return cxOvHead() + (ccOn("pm") ? cxHero() + cxDocSum() : cxDocSum() + cxHero()) +
-      '<div class="cx-dg cx-ovg">' + cxDc(by(5)) + cxDc(by(10), rt ? 2 : 3) + (rt ? cxDc(rt, 2) : "") + cxDc(by(80), rt ? 2 : 3) + '</div>';
+      '<div class="cx-dg cx-ovg">' + cxDc(by(5)) + cxDc(by(10), rt ? 3 : 6) + (rt ? cxDc(rt, 3) : "") + '</div>';
   };
   CXDASH.push(
     { o: 10, mod: "IM", w: 2, t: "Network activity", h: function () {
-      return '<div class="cx-k2">' + cxKpi("Documents this week", "27,400", '<em class="up">↑ 11% vs last week</em>') + cxKpi("Volume anomalies", "3", '<em class="dn">↑ 2 vs yesterday</em>') +
-        cxKpi("Failed transactions", "111", "Last 24 hours") + cxKpi("Active partners", "163", "Of 208 connected") + '</div>'; }, f: function () { return cxGoBtn("Projections and anomalies", "im-proj"); } },
+      return '<div class="cx-k2">' + cxKpiL("Documents this week", "27,400", '<em class="up">↑ 11% vs last week</em>', 'data-cxgo="im-vol"') + cxKpiL("Open anomalies", "3", "Projections out of range", 'data-cxgo="im-proj"') +
+        cxKpiL("Failed today", "74", "Since 05:52, one partner", 'data-cxgo="im-proj" data-cxpj="5"') + cxKpiL("Active partners", "163", "Of 208 connected", 'data-cxgo="im-tp"') + '</div>'; }, f: function () { return cxGoBtn("Projections and anomalies", "im-proj"); } },
     { o: 20, mod: "PM", w: 2, t: "Process performance", h: function () {
       var op = cxOpen().filter(function (f) { return f.mod === "Performance Monitor"; }), hi = op.filter(function (f) { return f.sev === "c"; }).length, val = op.reduce(function (a, f) { return a + f.val; }, 0);
       return '<div class="cx-k2">' + cxKpi("Open findings", op.length, hi + " high severity") + cxKpi("Value at risk", "$" + Math.round(val / 1000) + "K", "Across open findings") +
@@ -396,8 +416,8 @@
       return '<div class="cx-g2 in">' + [["Yesterday", "Friday, October 23, 2026", "4,612"], ["Last month", "September 1 to 30, 2026", "138,200"]].map(function (p) {
         return '<div><b class="cx-pl">' + p[0] + '</b><small class="cx-pd">' + p[1] + '</small>' + cxDonut([["850", 22, "#0066FF"], ["997", 30, "#001889"], ["856", 20, "#5B8DEF"], ["810", 18, "#9DB7F2"], ["Other", 10, "#C9D0DA"]], 54, p[2], "Total") + '</div>'; }).join("") +
         '</div><ul class="cx-lg row"><li><i style="background:#0066FF"></i>850 Purchase order</li><li><i style="background:#001889"></i>997 Functional acknowledgment</li><li><i style="background:#5B8DEF"></i>856 Ship notice</li><li><i style="background:#9DB7F2"></i>810 Invoice</li><li><i style="background:#C9D0DA"></i>Other</li></ul>'; } },
-    { o: 80, mod: "IM", w: 4, t: "Transaction volume", h: function () {
-      return cxLine([{ v: [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590], area: true }], { w: 760, h: 220, min: 3000, max: 5000, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Transaction volume, last 12 months" }); },
+    { o: 80, mod: "IM", w: 6, t: "Transaction volume", h: function () {
+      return cxLine([{ v: [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590], area: true }], { w: 1100, h: 240, min: 3000, max: 5000, xl: ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Transaction volume, last 12 months" }); },
       f: function () { return '<span class="cx-note">Documents per day, last 12 months</span>' + cxGoBtn("Network health", "im-vol"); } },
     { o: 100, mod: "PM", w: 3, t: "Findings by agent", h: function () {
       return cxBars(cxAgents().map(function (a, k) { return [a.n + " · " + a.r, cxAgentFind(a.id), "", "b"]; }), { max: 100 }); },
@@ -410,37 +430,25 @@
     if (!hi.length) return op.length + " open findings, none high severity.";
     return hi.length + " high-severity findings are open. Start with " + hi.slice(0, 2).map(function (i) { return i.title.charAt(0).toLowerCase() + i.title.slice(1) + " (" + i.partner + ")"; }).join(" and ") + ".";
   }
+  /* Findings: every module's findings with their follow-up. Tabs by what the follow-up needs next. */
   CXS["find"] = function () {
-    var all = cxModF(ccItems()), op = all.filter(function (i) { return !i.done; }), hi = op.filter(function (i) { return i.sev === "h"; }).length, pm = ccOn("pm");
-    var list = cxSort(all.filter(function (i) { return (ccStF === "all" || !i.done) && (ccSevF === "all" || i.sev === ccSevF); }));
-    var by = function (m) { return op.filter(function (i) { return i.mod === m; }).length; };
-    var sel = function (name, opts, cur, label) { return '<label class="cx-sel"><span class="sr-only">' + label + '</span><select data-' + name + ' aria-label="' + label + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select></label>'; };
+    var agn = ccAgF ? CXA.filter(function (a) { return a.id === ccAgF; })[0] : null;
+    var all = cxModF(ccItems()).filter(function (i) { return !agn || i.agent.indexOf(agn.n + " ·") === 0; }), B = { need: [], wait: [], ver: [], all: all }, pm = ccOn("pm");
+    all.forEach(function (i) { var k = fuBucket(i); if (B[k]) B[k].push(i); });
+    var tab = B[ccActTab] ? ccActTab : "need", list = cxSort(B[tab].filter(function (i) { return ccSevF === "all" || i.sev === ccSevF; })), op = all.filter(function (i) { return !i.done; });
     var mods = cxMods().filter(function (m) { return ccModF === "all" || ccModF === m; }), cols = pm ? 7 : 6;
     var groups = mods.map(function (m) { return [m, list.filter(function (i) { return i.mod === m; })]; }).filter(function (g) { return g[1].length; });
-    return cxHead("Findings", cxModSeg()) +
-      '<div class="cx-fsum">' + cxKpi("Open findings", op.length, hi + " high severity") + (mods.length > 1 ? mods.map(function (m) {
-        return '<div class="cx-kpi cx-km"><span>' + cxTag(m) + '</span><b>' + by(m) + '</b><small>Open</small></div>'; }).join("") : "") +
+    var sel = '<label class="cx-sel"><span class="sr-only">Severity</span><select data-cxsev aria-label="Severity">' + [["all", "All severities"], ["h", "High"], ["m", "Medium"]].map(function (o) { return '<option value="' + o[0] + '"' + (ccSevF === o[0] ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select></label>';
+    function st(i) { var u = i.key.indexOf("f:") === 0 ? cxFu(i.key.slice(2)) : null; return u ? fuChip(u.st, u) : fuChip(i.status); }
+    return cxHead("Findings", cxModSeg()) + (agn ? '<p class="fu-fl"><button type="button" class="fu-fc" data-cxagf="" aria-label="Clear agent filter ' + agn.n + '">Agent: ' + agn.n + ' ' + ci("x") + '</button></p>' : "") +
+      '<div class="cx-fsum">' + cxKpi("Need action", B.need.length, B.need.filter(function (i) { return i.sev === "h"; }).length + " high severity") + cxKpi("Waiting", B.wait.length, "On partners and teams") + cxKpi("Verified today", B.ver.length, "Since 09:30") +
       '<div class="cx-kpi cx-ka2"><span>' + ci("spark") + 'Key analysis</span><small>' + cxe(cxAnalysis(op)) + '</small></div></div>' +
-      cxCard("All findings", '<table class="cx-tbl cx-ftb"><thead><tr><th>Finding</th><th>Document</th>' + (pm ? '<th>Process</th>' : '') + '<th>Owner</th><th>Status</th><th>Detected</th><th>Severity</th></tr></thead><tbody>' + groups.map(function (g) {
+      '<nav class="cx-tabs" aria-label="Findings">' + [["need", "Need action"], ["wait", "Waiting"], ["ver", "Verified today"], ["all", "All"]].map(function (t) { return '<button type="button" data-cxat="' + t[0] + '" aria-pressed="' + (tab === t[0]) + '">' + t[1] + ' <em>' + B[t[0]].length + '</em></button>'; }).join("") + '</nav>' +
+      cxCard("", '<table class="cx-tbl cx-ftb"><thead><tr><th>Finding</th><th>Document</th>' + (pm ? '<th>Process</th>' : '') + '<th>State</th><th>Owner</th><th>Detected</th><th><span class="sr-only">Action</span></th></tr></thead><tbody>' + groups.map(function (g) {
         return (mods.length > 1 ? '<tr class="gh"><td colspan="' + cols + '">' + cxTag(g[0]) + '<span>' + g[1].length + ' shown</span></td></tr>' : "") + g[1].map(function (i) {
-          return '<tr><td>' + cxItemLink(i, "b") + '<small>' + cxe(i.partner) + ' · ' + cxe(i.agent) + (i.check ? ' · ' + cxe(i.check) : '') + '</small></td><td>' + cxe(i.doc || "") + '</td>' + (pm ? '<td>' + cxe(ccShort(i.proc)) + '</td>' : '') + '<td>' + cxe(i.owner) + '</td><td>' + cxStPill(i.status) + '</td><td>' + cxe(i.at) + '</td><td>' + cxSevChip(i.sev) + '</td></tr>'; }).join("");
-      }).join("") + (list.length ? "" : '<tr><td colspan="' + cols + '" class="cx-empty">No findings match these filters.</td></tr>') + '</tbody></table>', "",
-        sel("cxsev", [["all", "All severities"], ["h", "High"], ["m", "Medium"]], ccSevF, "Severity") + sel("cxstf", [["open", "Open"], ["all", "Open and closed"]], ccStF, "Status"));
-  };
-
-  /* Action queue: recommendations waiting for a decision */
-  var CXACTX = [];
-  CXS["act"] = function () {
-    var it = cxModF(ccItems()), B = { need: [], wait: [], ver: [] };
-    it.forEach(function (i) { var k = fuBucket(i); if (B[k]) B[k].push(i); });
-    var tab = B[ccActTab] ? ccActTab : "need", list = cxSort(B[tab]);
-    return cxHead("Action queue", CXACTX.map(function (f) { return f(); }).join("") + cxModSeg()) + '<p class="cx-lead">Follow-ups that need an owner or a next step. People notify partners and teams; the next documents on the network confirm the outcome.</p>' +
-      '<nav class="cx-tabs">' + [["need", "Need action"], ["wait", "Waiting"], ["ver", "Verified today"]].map(function (t) { return '<button type="button" data-cxat="' + t[0] + '" aria-pressed="' + (tab === t[0]) + '">' + t[1] + ' <em>' + B[t[0]].length + '</em></button>'; }).join("") + '</nav>' +
-      '<ul class="cx-acl">' + list.map(function (i) {
-        var u = i.key.indexOf("f:") === 0 ? cxFu(i.key.slice(2)) : null;
-        return '<li class="' + (i.sev === "h" ? "c" : "w") + '"><div><header>' + cxTag(i.mod) + cxSevChip(i.sev) + (u ? fuChip(u.st, u) : cxStPill(i.status)) + '<span>' + cxe(i.agent) + ' · ' + cxe(i.at) + '</span></header>' + cxItemLink(i, "b") + '<p>' + cxe(fuFact(i)) + '</p><small>' + cxe(i.partner) + (ccOn("pm") ? ' · ' + cxe(cxProcName(i.proc)) : "") + ' · Owner: ' + cxe(i.owner) + ' · Suggested: ' + cxe(i.act) + '</small></div>' +
-          '<div class="cx-acb">' + (!u && i.actDone ? '<span class="cx-done">' + ci("ok") + cxe(i.actState) + '</span>' : "") + (tab === "need" && i.actBtn ? i.actBtn : "") + '<button type="button" class="cx-btn" ' + i.open + '>Open follow-up</button></div></li>';
-      }).join("") + (list.length ? "" : '<li class="cx-empty">' + { need: "Nothing needs an owner.", wait: "Nothing is waiting.", ver: "Nothing verified yet today." }[tab] + '</li>') + '</ul>';
+          return '<tr><td>' + cxItemLink(i, "b") + '<small><button type="button" class="cx-lk" data-impt="' + cxe(i.partner) + '">' + cxe(i.partner) + '</button> · ' + cxe(i.agent) + ' · ' + cxe(fuFact(i)) + '</small></td><td>' + cxe(i.doc || "") + '</td>' + (pm ? '<td>' + cxe(ccShort(i.proc)) + '</td>' : '') +
+            '<td><span class="cx-stk">' + cxSevChip(i.sev) + st(i) + '</span></td><td>' + cxe(i.owner) + '</td><td>' + cxe(String(i.at).replace(/^Today, /, "")) + '</td><td class="cx-fa">' + (fuBucket(i) === "need" && i.actBtn ? i.actBtn : '<button type="button" class="cx-btn" ' + i.open + '>Open follow-up</button>') + '</td></tr>'; }).join("");
+      }).join("") + (list.length ? "" : '<tr><td colspan="' + cols + '" class="cx-empty">' + { need: "Nothing needs an owner or a next step.", wait: "Nothing is waiting on a partner or team.", ver: "Nothing verified since 09:30.", all: "No findings match these filters." }[tab] + '</td></tr>') + '</tbody></table>', "cx-ftc", sel);
   };
 
   /* The first transactions behind a finding, with control numbers and acknowledgment status. Illustrative. */
@@ -451,21 +459,40 @@
       var seed = f.id.charCodeAt(1) * 977 + j * 131 + 3301, t = 9 * 60 + 20 - j * 23 - seed % 9;
       rows.push('<tr><td>' + (notSent ? "Not sent" : '<code>' + String(100000000 + seed * 17).slice(-9) + '</code>') + '</td><td>' + (notSent ? "" : '<code>' + ("000" + (j + 1)).slice(-4) + '</code>') + '</td><td>' + pre + (40000 + seed % 59999) + '</td><td>' + ("0" + Math.floor(t / 60)).slice(-2) + ':' + ("0" + t % 60).slice(-2) + '</td><td>' + cxe(f.how) + '</td></tr>');
     }
-    return '<table class="cx-tbl cx-aff"><thead><tr><th>ISA13</th><th>ST02</th><th>Reference</th><th>Time</th><th>Check</th></tr></thead><tbody>' + rows.join("") + '</tbody></table><p class="cx-note">' + (f.n > 5 ? "First 5 of " + f.n + " · " : "") + code + " " + s[0] + ' · <button type="button" class="cx-lk" data-wstgi>Open in TG Insights</button></p>';
+    return '<table class="cx-tbl cx-aff"><thead><tr><th>ISA13</th><th>ST02</th><th>Reference</th><th>Time</th><th>Check</th></tr></thead><tbody>' + rows.join("") + '</tbody></table><p class="cx-note">' + (f.n > 5 ? "First 5 of " + f.n + " · " : "") + code + " " + s[0] + '</p>';
   }
   /* Drawers: a finding, or help */
   function cxDrawer() {
     if (!ccDr) return "";
     var h;
     if (ccDr[0] === "help") {
-      h = '<header><span><p>Clickable prototype</p><h3>Command Center</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
+      h = '<header><span><p>Help</p><h3>Command Center</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
         '<p>Switch the package in the top bar to see what each client gets.</p><dl class="cx-dl cx-dl1"><div><dt>' + cxTag("IM") + '</dt><dd>Standard for every Trading Grid client: daily digest, transaction volume, projections and anomalies, partners with network graph and integration analysis, Ivy the volume agent.</dd></div>' +
         '<div><dt>' + cxTag("PM") + '</dt><dd>Add-on for any industry: business processes, agents, rules and the partner scorecard.</dd></div>' +
         '<div><dt>' + cxTag("RT") + '</dt><dd>Includes Performance Monitor and adds retail processes, cases, policy templates, KPIs and the retailer and supplier perspectives.</dd></div></dl>' +
-        '<p class="cx-sub">All partners, records and outcomes are illustrative. No live network is connected.</p><p class="cx-sub">Advance the network clock from the Overview to play the documents that confirm each follow-up.</p><button type="button" class="cx-btn" data-cxfureset>Reset demo to 09:30</button></div>';
+        '<h4>Prototype</h4><p class="cx-sub">All partners, records and outcomes are illustrative. No live network is connected. Owners, notes and settings stay in this browser.</p><p class="cx-sub">Play next event on the Overview runs the scripted documents that confirm each follow-up. Command Center observes the network; people notify partners and teams.</p>' +
+        '<div class="cx-hb"><button type="button" class="cx-btn" data-cxfureset>Reset follow-ups to 09:30</button>' + (ccOn("rt") ? '<button type="button" class="cx-btn" data-rtresetask>Reset Retail perspective</button>' : "") + '</div></div>';
     } else return "";
-    return '<div class="cx-scrim" data-cxclose></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
+    return '<div class="cx-scrim" data-ovesc></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
   }
+
+  /* Rule sheet: definition, scope, last run, conformance and the findings it raised */
+  var CXRULEF = {}; Object.keys(CXRULE).forEach(function (id) { CXRULEF[CXRULE[id]] = id; });
+  function cxRuleSheet(name) {
+    var r = CXR.filter(function (x) { return x[1] === name; })[0]; if (!r) { ccDr = null; return ""; }
+    var a = CXA.filter(function (x) { return x.id === r[0]; })[0], im = a.t === "im", fid = CXRULEF[name], f = fid && cxById(fid), items = ccItems().filter(function (i) { return i.key === "f:" + fid; });
+    var h = '<header><span><p>' + (im ? "Check · Integration Monitor" : "Rule · Performance Monitor") + ' · ' + a.n + '</p><h3>' + cxe(name) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header>' +
+      '<p class="cx-chipsr"><span class="cx-st s-' + (r[7] === "Active" ? "resolved" : r[7] === "Paused" ? "acknowledged" : "new") + '"><i></i>' + r[7] + '</span>' + cxTag(im ? "IM" : "PM") + '</p><div class="cx-db">' +
+      '<dl class="cx-dl"><div><dt>Agent</dt><dd>' + a.n + ' · ' + a.r + '</dd></div><div><dt>Transactions</dt><dd>' + cxe(r[2]) + '</dd></div><div><dt>Processes</dt><dd>' + cxe(cxProcNames(cxRuleP(r))) + '</dd></div><div><dt>Last run</dt><dd>' + r[6] + '</dd></div>' +
+      '<div><dt>Conformance</dt><dd>' + r[4].toFixed(1) + '%</dd></div><div><dt>Findings, 30 days</dt><dd>' + r[5] + '</dd></div></dl>' +
+      '<h4>What it checks</h4><p>' + cxe(a.d) + '</p>' +
+      '<h4>Open findings from this ' + (im ? "check" : "rule") + '</h4>' + (items.length ? '<ul class="cx-rl">' + items.map(function (i) { return '<li>' + cxItemLink(i, "b") + '<span>' + fuChip(i.status) + cxe(i.partner) + '</span></li>'; }).join("") + '</ul>' : '<p>No open findings today.</p>') + '</div>' +
+      '<div class="cx-ft">' + (items.length ? '<button type="button" class="cx-btn" data-cxgo="find" data-cxagf="' + a.id + '">Show all from ' + a.n + '</button>' : "") + '<button type="button" class="cx-btn p" data-cxrtog="' + cxe(name) + '">' + (r[7] === "Paused" ? "Resume" : "Pause") + ' ' + (im ? "check" : "rule") + '</button></div>';
+    return '<div class="cx-scrim" data-ovesc></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
+  }
+  var cxBaseDrawer0 = cxDrawer;
+  cxDrawer = function () { return ccDr && ccDr[0] === "rl" ? cxRuleSheet(ccDr[1]) : cxBaseDrawer0(); };
+  var ccInact = 30;
 
   /* Aviator: scripted answers over the shared findings. Packages append questions. */
   var CXQ = [
@@ -483,8 +510,8 @@
   function cxAviator() {
     if (!ccAv) return "";
     var log = ccAvLog.map(function (m) { return '<li class="' + m[0] + '">' + m[1] + '</li>'; }).join("");
-    return '<aside class="cx-av"><header>' + ci("spark") + '<b>Aviator</b><button type="button" class="cx-ic" data-cxav aria-label="Close Aviator">' + ci("x") + '</button></header><div class="cx-avb"><p class="cx-hi">Ask about partners, findings and anomalies' + (ccOn("pm") ? ", processes or agents" : "") + ' for ' + cxe(ccCompany()) + '.</p><ul class="cx-avl">' + log + '</ul>' +
-      '<ul class="cx-avq">' + CXQ.filter(function (q) { return !q.t || ccOn(q.t); }).map(function (q) { return '<li><button type="button" data-cxq="' + CXQ.indexOf(q) + '">' + cxe(q.q()) + '</button></li>'; }).join("") + '</ul></div><div class="cx-ft"><span>Ask Aviator. Use @ to add agents.</span><button type="button" class="cx-ic" aria-label="Send" disabled>' + ci("send") + '</button><small>Scripted answers over illustrative data. AI can make mistakes. Check important information.</small></div></aside>';
+    return '<aside class="cx-av"><header>' + ci("spark") + '<b>Aviator</b><button type="button" class="cx-ic" data-cxav aria-label="Close Aviator">' + ci("x") + '</button></header><div class="cx-avb"><p class="cx-av-intro">Ask about partners, findings and anomalies' + (ccOn("pm") ? ", processes or agents" : "") + ' for ' + cxe(ccCompany()) + '. Choose a question.</p><ul class="cx-avl">' + log + '</ul>' +
+      '<ul class="cx-avq">' + CXQ.filter(function (q) { return !q.t || ccOn(q.t); }).map(function (q) { return '<li><button type="button" data-cxq="' + CXQ.indexOf(q) + '">' + cxe(q.q()) + '</button></li>'; }).join("") + '</ul></div><div class="cx-ft"><small>Scripted answers over illustrative data. AI can make mistakes. Check important information.</small></div></aside>';
   }
   function cxAsk(k) {
     var q = CXQ[k], r = q.a();
@@ -492,16 +519,16 @@
   }
 
   /* Shell. Six entries for every package. Overview gains dashboards and Workspace gains sections as packages are added. */
-  var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["act", "Action queue", "check"], ["im-tp", "Partners", "users"], ["ws", "Workspace", "grid"], ["cfg", "Configuration", "cog"]];
+  var CXNAV = [["dash", "Overview", "dash"], ["find", "Findings", "search"], ["im-tp", "Partners", "users"], ["ws", "Workspace", "grid"], ["cfg", "Configuration", "cog"]];
   var CXOV = ["dash", "im-proj", "im-vol", "ws-dash"];
   var CXWS = [["ws-proc", "Business processes", "pm"], ["ws-rep", "Reports"], ["ws-not", "Notifications"], ["ws-task", "Tasks and reminders"], ["ws-agents", "Agents"]];
   function cxWsSecs() { return CXWS.filter(function (w) { return !w[2] || ccOn(w[2]); }); }
   function cxNavKey(s) { return CXOV.indexOf(s) >= 0 ? "dash" : s.indexOf("ws-") === 0 ? "ws" : s; }
-  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "pm-act": "act", "rt-actions": "act", "pm-agents": "ws-agents", "pm-rules": "cfg", "rt-rules": "cfg", "im-cfg": "cfg",
+  var CXALIAS = { "im-dash": "dash", "pm-dash": "dash", "rt-home": "dash", "pm-find": "find", "act": "find", "pm-act": "find", "rt-actions": "find", "pm-agents": "ws-agents", "pm-rules": "cfg", "rt-rules": "cfg", "im-cfg": "cfg",
     "im-map": "ws-proc", "pm-proc": "ws-proc", "im-com": "im-tp", "an": "ws-dash", "rt-partners": "im-tp", "rt-orders": "ws-proc", "rt-shipments": "ws-proc", "rt-invoices": "ws-proc" };
   function cxNavOk(s) { return CXOV.indexOf(s) >= 0 || cxWsSecs().some(function (w) { return w[0] === s; }) || s !== "ws" && CXNAV.some(function (g) { return g[0] === s; }); }
   function cxMod() { var m = cxModKey(); return m ? CCMOD[m][0] : ""; }
-  function cxBadge(k) { var it = ccItems(); var n = k === "find" ? it.filter(function (i) { return !i.done; }).length : k === "act" ? it.filter(function (i) { return fuBucket(i) === "need"; }).length : 0; return n ? '<em class="cx-nb">' + n + '</em>' : ""; }
+  function cxBadge(k) { var n = k === "find" ? ccItems().filter(function (i) { return fuBucket(i) === "need"; }).length : 0; return n ? '<em class="cx-nb" aria-hidden="true">' + n + '</em><span class="sr-only">, ' + n + ' need action</span>' : ""; }
   function cxTheme() { return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"; }
   function cxRender() {
     if (!cxNavOk(ccScr)) ccScr = "dash";
@@ -510,17 +537,23 @@
     }).join("");
     var th = cxTheme();
     cx.classList.toggle("glass", CXOV.indexOf(ccScr) >= 0);
-    cx.innerHTML = '<header class="cx-top"><span class="cx-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#0066FF"/><path d="M22.5 13.6h1.8l1.3-2.1h-3.1V8.1h-3.9v5.9a6.8 6.8 0 1 0 0 6.3c0 1 .1 1.7.6 2.4.8 1.2 2.3 1.3 3.6 1.3.7 0 1.1-.1 1.8-.2v-2.8l-1 .1c-1 0-1-.7-1-1.5zM12.6 20.2a3.1 3.1 0 1 1 0-6.1 3.1 3.1 0 0 1 0 6.1z" fill="#fff"/></svg>Command Center' + (cxMod() ? '<em>' + cxMod() + '</em>' : '') + '</span>' +
+    cx.innerHTML = '<a class="cx-skip" href="#cx-main" data-cxskip>Skip to content</a><header class="cx-top"><span class="cx-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#0066FF"/><path d="M22.5 13.6h1.8l1.3-2.1h-3.1V8.1h-3.9v5.9a6.8 6.8 0 1 0 0 6.3c0 1 .1 1.7.6 2.4.8 1.2 2.3 1.3 3.6 1.3.7 0 1.1-.1 1.8-.2v-2.8l-1 .1c-1 0-1-.7-1-1.5zM12.6 20.2a3.1 3.1 0 1 1 0-6.1 3.1 3.1 0 0 1 0 6.1z" fill="#fff"/></svg>Command Center</span>' +
       '<span class="cx-cust">' + cxe(ccCompany()) + (ccOn("rt") ? ' · Retail and CPG' : '') + '</span><label class="cx-pkg"><span>Package</span><select data-cxpkg aria-label="Package">' + Object.keys(CCPKG).map(function (k) { return '<option value="' + k + '"' + (k === ccPkg ? " selected" : "") + '>' + CCPKGN[k] + '</option>'; }).join("") + '</select></label>' +
-      '<span class="cx-tb"><button type="button" class="cx-avt" data-cxav aria-pressed="' + ccAv + '">' + ci("spark") + 'Aviator</button><button type="button" class="cx-ic" data-cxgo="act" aria-label="Open action queue">' + ci("bell") + '</button><button type="button" class="cx-ic" data-cxhelp aria-label="Help">' + ci("help") + '</button>' +
+      '<span class="cx-tb"><button type="button" class="cx-avt" data-cxav aria-pressed="' + ccAv + '">' + ci("spark") + 'Aviator</button><button type="button" class="cx-ic" data-cxhelp aria-label="Help">' + ci("help") + '</button>' +
       '<button type="button" class="cx-ic" data-cxtheme aria-label="' + (th === "dark" ? "Switch to light theme" : "Switch to dark theme") + '">' + ci(th === "dark" ? "sun" : "moon") + '</button><button type="button" class="cx-ic" data-cxfs aria-label="Full screen">' + ci("full") + '</button><span class="cx-me" title="' + cxe(ccCompany()) + '">' + (ccRole() === "retailer" ? "NS" : "NB") + '</span></span></header>' +
       '<div class="cx-body' + (ccNavMin ? " min" : "") + (ccAv ? " av" : "") + '"><nav class="cx-nav" aria-label="Command Center"><ul>' + nav + '</ul><a class="cx-n1 cx-col" href="' + CC_GENOME + '" title="Open Process Genome">' + ci("gen") + '<span>Open Process Genome</span></a><button type="button" class="cx-n1 cx-col" data-cxmin title="' + (ccNavMin ? "Expand panel" : "Collapse panel") + '">' + ci("side") + '<span>Collapse panel</span></button></nav>' +
-      '<main class="cx-main" id="cx-main">' + CXS[ccScr]() + '</main>' + cxAviator() + '</div>' + cxDrawer();
+      '<main class="cx-main" id="cx-main" tabindex="-1">' + CXS[ccScr]() + '</main>' + cxAviator() + '</div>' + cxDrawer();
   }
   function cxGo(s) { if (s === "ws") s = cxWsSecs()[0][0]; if (s === "im-map") ccWsProc = "sol"; if (s === "an") ccWsDash = "p:pm"; if (s === "rt-partners") ccPtTab = "req"; s = CXALIAS[s] || s; if (!CXS[s] || !cxNavOk(s)) s = "dash"; ccScr = s; ccDr = null; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-cxgo],[data-cxhv],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxtab],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt],[data-cxhelp]"); if (!b) return;
-    if (b.hasAttribute("data-cxgo")) cxGo(b.getAttribute("data-cxgo"));
+    var b = e.target.closest("[data-cxgo],[data-cxhv],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxtab],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt],[data-cxhelp],[data-cxrule],[data-cxrtog],[data-cxagf],[data-cxinsave],[data-rtresetask],[data-cxskip]"); if (!b) return;
+    if (b.hasAttribute("data-cxskip")) { e.preventDefault(); var mn = document.getElementById("cx-main"); if (mn) mn.focus(); return; }
+    if (b.hasAttribute("data-cxgo")) { if (b.hasAttribute("data-cxat")) ccActTab = b.getAttribute("data-cxat"); if (b.hasAttribute("data-cxpj")) ccPj = +b.getAttribute("data-cxpj"); if (b.hasAttribute("data-cxcfgt")) ccCfgTab = b.getAttribute("data-cxcfgt"); if (b.hasAttribute("data-cxagf")) { ccAgF = b.getAttribute("data-cxagf"); ccActTab = "all"; ccModF = "all"; } var dm = b.closest("details"); if (dm) dm.open = false; cxGo(b.getAttribute("data-cxgo")); }
+    else if (b.hasAttribute("data-cxrule")) { ccDr = ["rl", b.getAttribute("data-cxrule")]; cxRender(); }
+    else if (b.hasAttribute("data-cxrtog")) { var rr = CXR.filter(function (x) { return x[1] === b.getAttribute("data-cxrtog"); })[0]; rr[7] = rr[7] === "Paused" ? "Active" : "Paused"; cxToast(rr[1] + (rr[7] === "Paused" ? " paused." : " resumed.")); cxRender(); }
+    else if (b.hasAttribute("data-cxagf")) { ccAgF = b.getAttribute("data-cxagf"); cxRender(); }
+    else if (b.hasAttribute("data-cxinsave")) { var iv = +(cx.querySelector("[data-cxinact]") || {}).value; if (!(iv >= 1)) { cxToast("Enter a threshold of 1 day or more."); cxRender(); return; } ccInact = iv; cxToast("Inactivity threshold saved: " + iv + " days."); cxRender(); }
+    else if (b.hasAttribute("data-rtresetask")) ovConfirm("Reset the Retail perspective?", "Owners, notes, watchlist entries and activated policies for " + rtProfile().label + " are cleared.", "Cancel", "Reset perspective", "data-rt-confirm-reset");
     else if (b.hasAttribute("data-cxmin")) { ccNavMin = !ccNavMin; cxRender(); }
     else if (b.hasAttribute("data-cxhv")) { ccHeroV = b.getAttribute("data-cxhv"); try { localStorage.setItem("process-genome-cc-hero", ccHeroV); } catch (err) {} cxRender(); }
     else if (b.hasAttribute("data-cxav")) { ccAv = !ccAv; cxRender(); }
@@ -541,10 +574,10 @@
   function ccSetPkg(k) { if (!CCPKG[k]) return; ccPkg = k; ccModF = "all"; ccDr = null; ccAvLog = []; try { localStorage.setItem("process-genome-cc-package", k); } catch (err) {} cxRender(); }
   cx.addEventListener("change", function (e) {
     if (e.target.matches("[data-cxsev]")) { ccSevF = e.target.value; cxRender(); }
-    else if (e.target.matches("[data-cxstf]")) { ccStF = e.target.value; cxRender(); }
     else if (e.target.matches("[data-cxpkg]")) ccSetPkg(e.target.value);
   });
-  document.addEventListener("keydown", function (e) { if (e.key !== "Escape" || !ccDr || ccDr[0] !== "f" && ccDr[0] !== "help") return; e.preventDefault(); ccDr = null; cxRender(); });
+  /* SVG filters on the Overview ring are buttons for the keyboard too */
+  cx.addEventListener("keydown", function (e) { var t = e.target; if ((e.key === "Enter" || e.key === " ") && t.getAttribute && t.getAttribute("role") === "button" && t.namespaceURI === "http://www.w3.org/2000/svg") { e.preventDefault(); t.dispatchEvent(new MouseEvent("click", { bubbles: true })); } });
   function ccFit() { ccEl.classList.toggle("small", window.innerWidth < 1024 || window.innerHeight < 560); }
   function ccStart() { ccFit(); cxRender(); }
   window.addEventListener("resize", ccFit);

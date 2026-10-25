@@ -105,7 +105,7 @@
     var c = v.c, code = c.d, ack = code === "997" || code === "824", nm = ack ? "for " + c.s + " " + (wsDocName(c.s) || "").toLowerCase() : wsDocName(code), sla = c.sla, over = sla && sla[2] > 100;
     var fu = v.f ? cxFu(v.f.id) : null, state = fu ? fu.st + (fuOverdue(fu) ? " · overdue" : fu.exp ? " · expect by " + fuT(fu.exp) : "") : v.done ? "Note sent to " + (v.appr || "the owner") : c.c === "cl" ? "Cleared " + c.at : c.pred ? "Predicted · usually handled by " + (v.appr || "") : v.appr ? "Usually handled by " + v.appr : "";
     return '<li><button type="button" class="bd-c' + (ccDr && ccDr[0] === "bd" && ccDr[1] === c.k ? " on" : "") + (v.done ? " dn" : "") + '" data-wsbd="' + c.k + '">' +
-      '<span class="bd-h"><code>' + cxe(code) + '</code><span class="bd-dir">' + c.dir + '</span><span class="bd-dn">' + cxe(nm) + '</span>' + (v.sev === "h" ? cxSevChip("h") : "") + '</span>' +
+      (v.sev === "h" ? '<span class="bd-sv">' + cxSevChip("h") + '</span>' : "") + '<span class="bd-h"><code>' + cxe(code) + '</code><span class="bd-dir">' + c.dir + '</span><span class="bd-dn">' + cxe(nm) + '</span></span>' +
       '<b class="bd-t">' + cxe(c.t) + '</b><span class="bd-p">' + cxe(v.partner || "") + (c.age ? ' · oldest ' + cxe(c.age) : "") + (v.val ? ' · $' + v.val.toLocaleString("en-US") : "") + '</span>' +
       (sla ? '<span class="bd-sla"><span>' + cxe(sla[0]) + '</span><em' + (over ? ' class="w"' : "") + '>' + cxe(sla[1]) + '</em></span><span class="cx-pb bd-pb' + (over ? " w" : "") + '"><i style="width:' + Math.min(100, sla[2]) + '%"></i></span>' : "") +
       (c.rej ? '<span class="bd-rj"><code>TED01 ' + c.rej[0] + '</code>' + cxe(c.rej[2]) + '</span>' : "") +
@@ -148,7 +148,7 @@
       cxKpi(cols[2][1], rj[1].toLocaleString("en-US"), rj[0] + " items · 824") + cxKpi(cxe(K[0]), K[1], "Last 30 days") + '</div>' +
       cxCard("Document flow", '<ol class="bd-flow">' + steps + '</ol>', "bd-fc", '<span class="cx-note">EDI documents on Trading Grid. Select a document to filter the board.</span>') +
       filt + board +
-      cxCard("Rules on this process", '<ul class="cx-agr bd-rules">' + rules.map(function (r) { var a = CXA.filter(function (x) { return x.id === r[0]; })[0]; return '<li>' + ci("check") + cxe(r[1]) + ' <small class="ws-mu">' + a.n + '</small></li>'; }).join("") + '</ul>', "", cxGoBtn("Rules", "cfg"));
+      cxCard("Rules on this process", '<ul class="cx-agr bd-rules">' + rules.map(function (r) { var a = CXA.filter(function (x) { return x.id === r[0]; })[0]; return '<li>' + ci("check") + '<button type="button" class="cx-lk" data-cxrule="' + cxe(r[1]) + '">' + cxe(r[1]) + '</button> <small class="ws-mu">' + a.n + '</small></li>'; }).join("") + '</ul>', "", cxGoBtn("Rules", "cfg"));
   };
   /* Item drawer: control numbers, acknowledgment and application advice detail, segments, and the next action */
   function bdDrawer() {
@@ -160,26 +160,27 @@
     var tx = '<table class="cx-tbl bd-tx"><thead><tr><th>ISA13</th><th>GS06</th><th>ST02</th><th>Reference</th><th>Time</th><th>' + ackCol + '</th></tr></thead><tbody>' + rows.map(function (r) {
       var st = is824 ? "TR" : c.c === "cl" ? "A" : missing ? "None" : "A";
       return '<tr><td>' + (r.isa ? '<code>' + r.isa + '</code>' : "Not sent") + '</td><td>' + (r.gs ? '<code>' + r.gs + '</code>' : "") + '</td><td>' + (r.st ? '<code>' + r.st + '</code>' : "") + '</td><td>' + r.ref + '</td><td>' + r.tm + '</td><td>' + st + '</td></tr>'; }).join("") +
-      '</tbody></table><p class="cx-note">' + (c.n > 5 ? "First 5 of " + c.n.toLocaleString("en-US") + " · " : "") + cxe(c.d) + ' ' + (out ? "outbound" : "inbound") + ' · <button type="button" class="cx-lk" data-wstgi>Open in TG Insights</button></p>';
+      '</tbody></table><p class="cx-note">' + (c.n > 5 ? "First 5 of " + c.n.toLocaleString("en-US") + " · " : "") + cxe(c.d) + ' ' + (out ? "outbound" : "inbound") + '</p>';
     var r0 = rows[0], seg = "";
     if (is824) seg = "ST*824*0001~\nBGN*00*" + r0.ref.replace(/\D/g, "") + "*20261024~\nOTI*TR*" + (c.s === "856" ? "SI" : "IV") + "*" + r0.ref + "~\nTED*" + c.rej[0] + "*" + c.rej[2].toUpperCase() + "~\nSE*5*0001~";
     else if (is997 && missing) seg = "Expected, not " + (out ? "sent" : "received") + ":\nST*997*0001~\nAK1*" + fid + "*" + (r0.gs || "4521") + "~\nAK9*A*" + Math.min(5, c.n) + "*" + Math.min(5, c.n) + "*" + Math.min(5, c.n) + "~\nSE*4*0001~";
-    var dl = [["Partner", cxe(v.partner || "")], ["Document", '<code>' + cxe(c.d) + '</code> ' + (is997 || is824 ? (is997 ? "Functional acknowledgment" : "Application advice") + ' for the ' + c.s + ' ' + cxe((wsDocName(c.s) || "").toLowerCase()) : cxe(wsDocName(code))) + ', ' + (out ? "outbound" : "inbound")],
+    var dl = [["Partner", v.partner && v.partner.indexOf(",") < 0 ? '<button type="button" class="cx-lk" data-impt="' + cxe(v.partner) + '">' + cxe(v.partner) + '</button>' : cxe(v.partner || "")], ["Document", '<code>' + cxe(c.d) + '</code> ' + (is997 || is824 ? (is997 ? "Functional acknowledgment" : "Application advice") + ' for the ' + c.s + ' ' + cxe((wsDocName(c.s) || "").toLowerCase()) : cxe(wsDocName(code))) + ', ' + (out ? "outbound" : "inbound")],
       c.sla ? ["Service level", cxe(c.sla[0]) + ' · ' + cxe(c.sla[1])] : null, c.ack ? ["Acknowledgment", cxe(c.ack)] : null, c.rej ? ["Application advice", 'OTI01 TR · TED01 ' + c.rej[0] + ' ' + cxe(c.rej[1]) + ' · ' + cxe(c.rej[2])] : null,
       v.agent ? ["Agent", cxe(v.agent)] : null, v.val ? ["Value at risk", "$" + v.val.toLocaleString("en-US")] : null, c.age ? ["Oldest open", cxe(c.age)] : c.at ? ["Cleared", "Today, " + c.at] : null].filter(Boolean);
-    var foot = v.f ? '<button type="button" class="cx-btn p" data-cxf="' + v.f.id + '">Open follow-up</button>' :
-      v.rc ? '<button type="button" class="cx-btn p" data-rt-case="' + cxe(v.rc.id) + '">Open case</button>' : c.c !== "cl" && v.appr ? (v.done ? '<span class="cx-done">' + ci("ok") + 'Note sent to ' + cxe(v.appr) + '</span>' : '<button type="button" class="cx-btn p" data-wsbdtask="' + c.k + '">Send note to ' + cxe(v.appr) + '</button>') : "";
+    var tgi = c.c !== "cl" ? '<button type="button" class="cx-btn" data-wstgi="' + (c.n || 1) + '">Open in TG Insights</button>' : "";
+    var foot = tgi + (v.f ? '<button type="button" class="cx-btn p" data-cxf="' + v.f.id + '">Open follow-up</button>' :
+      v.rc ? '<button type="button" class="cx-btn p" data-rt-case="' + cxe(v.rc.id) + '">Open follow-up</button>' : c.c !== "cl" && v.appr ? (v.done ? '<span class="cx-done">' + ci("ok") + 'Note sent to ' + cxe(v.appr) + '</span>' : '<button type="button" class="cx-btn p" data-wsbdtask="' + c.k + '">Send note to ' + cxe(v.appr) + '</button>') : "");
     var h = '<header><span><p>' + cxe(ccShort(i)) + ' · ' + col[1] + '</p><h3>' + cxe(c.t) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
       '<p class="cx-chipsr">' + (v.sev === "h" ? cxSevChip("h") : v.sev === "m" ? cxSevChip("m") : "") + cxTag(v.mod) + (c.pred ? '<span class="cx-tg">Prediction</span>' : "") + '</p>' +
       '<dl class="cx-dl">' + dl.map(function (d) { return '<div><dt>' + d[0] + '</dt><dd>' + d[1] + '</dd></div>'; }).join("") + '</dl>' +
       '<h4>Transactions</h4>' + tx + (seg ? '<h4>' + (is824 ? "824 segments" : "997 segments") + '</h4><pre class="bd-x12">' + cxe(seg) + '</pre>' : "") +
       (v.act ? '<h4>Recommended action</h4><div class="cx-rec">' + ci("bot") + '<span>' + cxe(v.act) + (v.appr ? '<small>Approver: ' + cxe(v.appr) + '</small>' : "") + '</span></div>' : "") +
       '</div>' + (foot ? '<div class="cx-ft">' + foot + '</div>' : "");
-    return '<div class="cx-scrim" data-cxclose></div><aside class="cx-dr bd-dr" role="dialog" aria-modal="true">' + h + '</aside>';
+    return '<div class="cx-scrim" data-ovesc></div><aside class="cx-dr bd-dr" role="dialog" aria-modal="true">' + h + '</aside>';
   }
 
   /* Dashboards: Overview tabs. Prebuilt by package, plus custom dashboards from the component library */
-  var WSPRE = [{ k: "pm", n: function () { return ccRole() === "retailer" ? "Supplier scorecard" : ccOn("rt") ? "Scorecard with retail accounts" : "Scorecard with customers"; }, t: "pm", h: function () { return cxScorecard(); } }];
+  var WSPRE = [{ k: "pm", n: "Scorecard", t: "pm", h: function () { return cxScorecard(); } }];
   function wsDashTabs() {
     var W = wsLoad();
     return WSPRE.filter(function (d) { return ccOn(d.t); }).map(function (d) { return { key: "p:" + d.k, n: typeof d.n === "function" ? d.n() : d.n, pre: d }; })
@@ -226,7 +227,7 @@
       wsForm("rem", "New reminder", wsField("Reminder", '<input type="text" data-wsname placeholder="Remind me to">') + wsField("When", '<input type="datetime-local" data-wsd value="2026-10-24T15:00">'), "Save reminder") +
       cxCard("Open follow-ups", '<table class="cx-tbl"><thead><tr><th>Follow-up</th><th>State</th><th>Owner</th><th>Waiting on</th><th>Expect by</th></tr></thead><tbody>' + its.filter(function (i) { return i.key.indexOf("f:") === 0 && ["need", "wait"].indexOf(fuBucket(i)) >= 0; }).map(function (i) {
         var id = i.key.slice(2), u = cxFu(id), f = cxById(id);
-        return '<tr><td>' + cxItemLink(i, "b") + '<small>' + cxe(i.partner) + '</small></td><td>' + fuChip(u.st, u) + '</td><td>' + cxe(u.owner || "Unassigned") + '</td><td>' + cxe(fuWaitTxt(u, f)) + '</td><td>' + (u.exp ? fuT(u.exp) : "Not set") + '</td></tr>'; }).join("") + '</tbody></table>', "", cxGoBtn("Action queue", "act")) +
+        return '<tr><td>' + cxItemLink(i, "b") + '<small>' + cxe(i.partner) + '</small></td><td>' + fuChip(u.st, u) + '</td><td>' + cxe(u.owner || "Unassigned") + '</td><td>' + cxe(fuWaitTxt(u, f)) + '</td><td>' + (u.exp ? fuT(u.exp) : "Not set") + '</td></tr>'; }).join("") + '</tbody></table>', "", cxGoBtn("Findings", "find")) +
       '<div class="cx-g21">' + cxCard("Tasks", '<ul class="ws-tl">' + wsIdx(W.tasks).map(function (p) { var t = p[0], k = p[1];
         var it = its.filter(function (i) { return i.key === t.k; })[0];
         return '<li class="' + (t.done ? "dn" : "") + '"><button type="button" class="ws-cb" role="checkbox" aria-checked="' + !!t.done + '" data-wsdone="' + k + '" aria-label="Mark done">' + (t.done ? ci("ok") : "") + '</button><div><b>' + cxe(t.t) + '</b><small>' + cxe(t.o) + ' · Due ' + cxe(t.d) + '</small>' + (it ? cxItemLink(it) : "") + '</div><button type="button" class="cx-ic" data-wsdel="tasks:' + k + '" aria-label="Delete task">' + ci("trash") + '</button></li>'; }).join("") + '</ul>') +
@@ -235,16 +236,17 @@
 
   /* Agents: Ivy with Integration Monitor, the others with Performance Monitor; Build your own agent links to Aviator Studio */
   CXS["ws-agents"] = function () {
-    return wsHead("Agents", "Agents watch documents" + (ccOn("pm") ? " and processes" : "") + " on the network, raise findings and suggest the next step. People send every notice.",
+    return wsHead("Agents", "Agents watch documents" + (ccOn("pm") ? " and processes" : "") + " on the network and raise findings.",
       '<button type="button" class="cx-btn p ws-studio" data-wsstudio>' + ci("spark") + 'Build your own agent' + ci("ext") + '</button>') + '<div class="cx-ag">' + cxAgents().map(function (a) {
-      var rs = CXR.filter(function (r) { return r[0] === a.id; }), op = a.f.filter(function (id) { return !ccDone[id]; });
-      return '<section class="cx-card"><header class="cx-agh"><span class="cx-agi">' + a.n[0] + '</span><div><h3>' + a.n + '</h3><span>' + a.r + '</span></div>' + cxTag(a.t.toUpperCase()) + '</header><p class="cx-sub">' + a.d + '</p>' +
-        '<dl class="cx-dl"><div><dt>' + (a.t === "im" ? "Checks" : "Rules") + '</dt><dd>' + rs.length + '</dd></div><div><dt>Open findings</dt><dd>' + op.length + '</dd></div><div><dt>Notices</dt><dd>Sent by people</dd></div></dl></section>';
-    }).join("") + '<button type="button" class="cx-card ws-new-agent" data-wsstudio>' + ci("plus") + '<b>Build your own agent</b><span>Design, test and publish an agent in Aviator Studio.</span><em>Open Aviator Studio' + ci("ext") + '</em></button></div>';
+      var rs = CXR.filter(function (r) { return r[0] === a.id; }), op = ccItems().filter(function (i) { return !i.done && i.agent.indexOf(a.n + " ·") === 0; });
+      return '<section class="cx-card"><header class="cx-agh"><span class="cx-agi">' + a.n[0] + '</span><div><h3>' + a.n + '</h3><span>' + a.r + '</span>' + cxTag(a.t.toUpperCase()) + '</div></header><p class="cx-sub">' + a.d + '</p>' +
+        '<dl class="cx-dl"><div><dt>' + (a.t === "im" ? "Checks" : "Rules") + '</dt><dd><button type="button" class="cx-lk" data-cxgo="cfg" data-cxcfgt="' + (a.t === "im" ? "mon" : "rp") + '">' + rs.length + '</button></dd></div><div><dt>Open findings</dt><dd><button type="button" class="cx-lk" data-cxgo="find" data-cxagf="' + a.id + '">' + op.length + '</button></dd></div></dl>' +
+        '<div class="ws-ra"><button type="button" class="cx-btn" data-cxgo="find" data-cxagf="' + a.id + '">Show findings</button></div></section>';
+    }).join("") + '</div>';
   };
 
   /* Rule wizard, as in the Performance Monitor prototype */
-  var RWSTEPS = ["Job", "Scope", "Expected behavior", "Deviation", "Reference data", "Budget", "Test", "Confirm"];
+  var RWSTEPS = ["Job", "Scope and behavior", "Thresholds and budget", "Test and deploy"];
   var RWJOBS = [["nora", "Catch wrong fields in single documents", "Wrong codes, off-contract prices, missing or invalid values on one document at a time.", "Required field present and valid", "percent of documents failing", 1, 3],
     ["liz", "Check multi-document business processes", "Missing steps, out-of-sequence documents or premature steps across a PO, ASN and invoice.", "Documents follow the expected sequence", "cohorts out of sequence", 5, 20],
     ["lex", "Watch timing and SLAs between transactions", "Late acknowledgments, missed ship windows, or any flow running behind its expected cadence.", "Response within the agreed window", "minutes late", 30, 120],
@@ -257,29 +259,27 @@
       var a = CXA.filter(function (y) { return y.id === x[0]; })[0];
       return '<button type="button" class="rw-job" data-rwagent="' + x[0] + '" aria-pressed="' + (ccRw.agent === x[0]) + '"><b>' + x[1] + '</b><span>' + x[2] + '</span><em><i class="cx-agi">' + a.n[0] + '</i>' + a.n + ' · ' + a.r + '</em></button>'; }).join("") + '</div>';
     if (s === 1) return '<h4 class="rw-q">Where should the rule apply?</h4><div class="ws-fg">' + wsField("Business process", wsSel("data-rw=proc", procs, ccRw.proc)) +
-      wsField("Partners", wsSel("data-rw=partner", ["All partners"].concat(cxPartners().map(function (p) { return p[0]; })), ccRw.partner)) + wsField("Document", wsSel("data-rw=doc", cxSol().map(function (r) { return r[0] + " (" + r[1].split(",")[0] + ")"; }), ccRw.doc)) + '</div>';
-    if (s === 2) return '<h4 class="rw-q">What should happen?</h4><div class="ws-fg">' + wsField("Rule name", '<input type="text" data-rw="name" value="' + cxe(ccRw.name) + '">') + wsField("Expected behavior", '<textarea data-rw="expect" rows="3">' + cxe(ccRw.expect) + '</textarea>') + '</div>';
-    if (s === 3) return '<h4 class="rw-q">When is it a deviation?</h4><div class="ws-fg">' + wsField("Medium severity from (" + j[4] + ")", '<input type="number" step="any" min="0" data-rw="med" value="' + ccRw.med + '">') +
-      wsField("High severity from (" + j[4] + ")", '<input type="number" step="any" min="0" data-rw="high" value="' + ccRw.high + '">') + '</div>';
-    if (s === 4) return '<h4 class="rw-q">Add reference data</h4><p class="cx-sub">Optional. Give the agent a list to check against.</p><div class="rw-refs">' + ["None", "Carrier codes", "SKU list", "SLA grace periods"].map(function (r) {
-      return '<button type="button" class="rw-ref" data-rwref="' + r + '" aria-pressed="' + (ccRw.ref === r) + '">' + r + '</button>'; }).join("") + '</div>' + wsField("Or upload a file (CSV or XLSX)", '<input type="file" accept=".csv,.xlsx" data-rwfile>') + (ccRw.file ? '<p class="cx-sub">Attached: ' + cxe(ccRw.file) + '</p>' : "");
-    if (s === 5) return '<h4 class="rw-q">Set a budget</h4><div class="ws-fg">' + wsField("Inspections per month", '<input type="number" min="1000" step="1000" data-rw="budget" value="' + ccRw.budget + '">') +
+      wsField("Partners", wsSel("data-rw=partner", ["All partners"].concat(cxPartners().map(function (p) { return p[0]; })), ccRw.partner)) + wsField("Document", wsSel("data-rw=doc", cxSol().map(function (r) { return r[0] + " (" + r[1].split(",")[0] + ")"; }), ccRw.doc)) + '</div>' +
+      '<h4 class="rw-q">What should happen?</h4><div class="ws-fg">' + wsField("Rule name", '<input type="text" data-rw="name" value="' + cxe(ccRw.name) + '">') + wsField("Expected behavior", '<textarea data-rw="expect" rows="3">' + cxe(ccRw.expect) + '</textarea>') + '</div>';
+    if (s === 2) return '<h4 class="rw-q">When is it a deviation?</h4><div class="ws-fg">' + wsField("Medium severity from (" + j[4] + ")", '<input type="number" step="any" min="0" data-rw="med" value="' + ccRw.med + '">') +
+      wsField("High severity from (" + j[4] + ")", '<input type="number" step="any" min="0" data-rw="high" value="' + ccRw.high + '">') + '</div>' +
+      '<h4 class="rw-q">Reference data (optional)</h4><div class="rw-refs">' + ["None", "Carrier codes", "SKU list", "SLA grace periods"].map(function (r) {
+      return '<button type="button" class="rw-ref" data-rwref="' + r + '" aria-pressed="' + (ccRw.ref === r) + '">' + r + '</button>'; }).join("") + '</div>' + wsField("Or upload a file (CSV or XLSX)", '<input type="file" accept=".csv,.xlsx" data-rwfile>') + (ccRw.file ? '<p class="cx-sub">Attached: ' + cxe(ccRw.file) + '</p>' : "") +
+      '<h4 class="rw-q">Budget</h4><div class="ws-fg">' + wsField("Inspections per month", '<input type="number" min="1000" step="1000" data-rw="budget" value="' + ccRw.budget + '">') +
       wsField("When the budget is reached", wsSel("data-rw=onb", ["Pause the rule and notify", "Notify and continue"], ccRw.onb)) + '</div>';
-    if (s === 6) {
-      var t = ccRw.test;
-      return '<h4 class="rw-q">Test against recent transactions</h4><p class="cx-sub">Runs the rule on the last 7 days of ' + cxe(ccRw.proc) + ' documents. Nothing is changed.</p><button type="button" class="cx-btn p" data-rwtest>Run test</button>' +
-        (t ? '<div class="cx-k3 rw-tr">' + cxKpi("Inspected", t.n.toLocaleString("en-US"), "Last 7 days") + cxKpi("Deviations", t.d, t.h + " high severity") + cxKpi("Conformance", t.c.toFixed(1) + "%", "Projected") + '</div>' : "");
-    }
-    return '<h4 class="rw-q">Confirm and deploy</h4><dl class="rt-kv">' + [["Agent", CXA.filter(function (a) { return a.id === ccRw.agent; })[0].n + " · " + j[1]], ["Rule", ccRw.name], ["Scope", ccRw.proc + " · " + ccRw.partner + " · " + ccRw.doc], ["Expected behavior", ccRw.expect],
-      ["Deviation", "Medium from " + ccRw.med + ", high from " + ccRw.high + " " + j[4]], ["Reference data", ccRw.file || ccRw.ref], ["Budget", Number(ccRw.budget).toLocaleString("en-US") + " inspections per month. " + ccRw.onb], ["Test", ccRw.test ? ccRw.test.d + " deviations in " + ccRw.test.n.toLocaleString("en-US") + " transactions" : "Not run"]].map(function (r) {
+    var t = ccRw.test;
+    return '<h4 class="rw-q">Test against recent transactions</h4><p class="cx-sub">Runs the rule on the last 7 days of ' + cxe(ccRw.proc) + ' documents. Nothing is changed.</p><button type="button" class="cx-btn' + (t ? "" : " p") + '" data-rwtest>' + (t ? "Run test again" : "Run test") + '</button>' +
+      (t ? '<div class="cx-k3 rw-tr">' + cxKpi("Inspected", t.n.toLocaleString("en-US"), "Last 7 days") + cxKpi("Deviations", t.d, t.h + " high severity") + cxKpi("Conformance", t.c.toFixed(1) + "%", "Projected") + '</div>' : "") +
+      '<h4 class="rw-q">Summary</h4><dl class="cx-dl cx-dl1">' + [["Agent", CXA.filter(function (a) { return a.id === ccRw.agent; })[0].n + " · " + j[1]], ["Rule", ccRw.name], ["Scope", ccRw.proc + " · " + ccRw.partner + " · " + ccRw.doc], ["Expected behavior", ccRw.expect],
+      ["Deviation", "Medium from " + ccRw.med + ", high from " + ccRw.high + " " + j[4]], ["Reference data", ccRw.file || ccRw.ref], ["Budget", Number(ccRw.budget).toLocaleString("en-US") + " inspections per month. " + ccRw.onb]].map(function (r) {
       return '<div><dt>' + r[0] + '</dt><dd>' + cxe(r[1]) + '</dd></div>'; }).join("") + '</dl>';
   }
   function rwDrawer() {
     var s = ccRw.step, j = rwJob();
-    return '<div class="cx-scrim" data-rwclose></div><aside class="cx-dr rw" role="dialog" aria-modal="true" aria-label="Create rule"><header><span><p>Step ' + (s + 1) + ' of 8' + (j ? ' · ' + CXA.filter(function (a) { return a.id === j[0]; })[0].n : "") + '</p><h3>Create rule</h3></span><button type="button" class="cx-ic" data-rwclose aria-label="Close">' + ci("x") + '</button></header>' +
+    return '<div class="cx-scrim" data-ovesc></div><aside class="cx-dr rw" role="dialog" aria-modal="true"><header><span><p>Step ' + (s + 1) + ' of 4' + (j && s ? ' · ' + CXA.filter(function (a) { return a.id === j[0]; })[0].n : "") + '</p><h3>Create rule</h3></span><button type="button" class="cx-ic" data-rwclose aria-label="Close">' + ci("x") + '</button></header>' +
       '<ol class="rw-steps">' + RWSTEPS.map(function (t, k) { return '<li class="' + (k < s ? "dn" : k === s ? "on" : "") + '"><i>' + (k < s ? "✓" : k + 1) + '</i>' + t + '</li>'; }).join("") + '</ol><div class="cx-db">' + rwStep() + '</div>' +
       '<div class="cx-ft"><button type="button" class="cx-btn" data-rwclose>Cancel</button><span class="ws-sp"></span>' + (s ? '<button type="button" class="cx-btn" data-rwgo="-1">Back</button>' : "") +
-      (s < 7 ? '<button type="button" class="cx-btn p" data-rwgo="1"' + (s === 6 && !ccRw.test ? " disabled" : "") + '>Continue</button>' : '<button type="button" class="cx-btn p" data-rwdeploy>Deploy rule</button>') + '</div></aside>';
+      (s < 3 ? '<button type="button" class="cx-btn p" data-rwgo="1">Continue</button>' : '<button type="button" class="cx-btn p" data-rwdeploy' + (!ccRw.test ? ' disabled title="Run the test first"' : "") + '>Deploy rule</button>') + '</div></aside>';
   }
   function rwRead() {
     cx.querySelectorAll("[data-rw]").forEach(function (el) { ccRw[el.getAttribute("data-rw")] = el.value; });
@@ -327,7 +327,7 @@
     h += cxCard("Item cross-reference", '<div class="xr-bar"><label class="bd-q">' + ci("search") + '<input type="search" data-xrq value="' + cxe(ccXrQ) + '" placeholder="GTIN, item number or description" aria-label="Search items"></label><span class="cx-note">' + rows.length + ' of ' + (r ? "2,318" : "1,184") + ' shown</span></div>' +
       '<table class="cx-tbl"><thead><tr><th>GTIN</th><th>' + P + ' item number</th><th>Our item number</th><th>Description</th><th>' + P + '</th><th>Source</th><th>Updated</th></tr></thead><tbody>' + rows.map(function (x) {
         return '<tr><td>' + (x[0] ? '<code>' + xrGtin(x[0]) + '</code>' : "") + '</td><td><code>' + cxe(x[1]) + '</code></td><td><code>' + cxe(x[2]) + '</code></td><td>' + cxe(x[3]) + '</td><td>' + cxe(x[4]) + '</td><td>' + (x[5] === "832" ? "832 catalog" : x[5]) + '</td><td>' + cxe(x[6]) + '</td></tr>'; }).join("") + (rows.length ? "" : '<tr><td colspan="7" class="cx-empty">No items match the search.</td></tr>') + '</tbody></table>',
-      "", '<span class="ws-hb"><button type="button" class="cx-btn" data-xrfile>Download template</button><button type="button" class="cx-btn p" data-xrfile>' + ci("plus") + 'Upload file</button></span>');
+      "", '<span class="ws-hb"><button type="button" class="cx-btn" data-xrtpl>Download template</button><button type="button" class="cx-btn p" data-xrfile>' + ci("plus") + 'Upload file</button></span>');
     if (!r) h += cxCard("Location cross-reference", '<table class="cx-tbl"><thead><tr><th>' + P + '</th><th>Location code (N104)</th><th>Type</th><th>Name</th><th>City</th><th>Source</th><th>Updated</th></tr></thead><tbody>' + XRL.map(function (l) {
         return '<tr><td>' + cxe(l[0]) + '</td><td><code>' + cxe(l[1]) + '</code></td><td>' + l[2] + '</td><td>' + cxe(l[3]) + '</td><td>' + cxe(l[4]) + '</td><td>' + (l[5] === "816" ? "816 location list" : l[5]) + '</td><td>' + cxe(l[6]) + '</td></tr>'; }).join("") + '</tbody></table>',
       "", '<span class="cx-note">Store and ship-to codes in 850, 856 and 852</span><button type="button" class="cx-btn p" data-xrfile>' + ci("plus") + 'Upload file</button>');
@@ -344,25 +344,26 @@
     var dr = cx.querySelector(".cx-dr.rw"); if (dr) { var f = dr.querySelector(".cx-db input, .cx-db select, .cx-db textarea, .cx-db button"); if (f && document.activeElement === document.body) f.focus({ preventScroll: true }); }
   };
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-xrmap],[data-xrfile],[data-wsproc],[data-wsbd],[data-wsbddoc],[data-wsbddir],[data-wsbdclr],[data-wsbdtask],[data-wstgi],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
+    var b = e.target.closest("[data-xrmap],[data-xrfile],[data-xrtpl],[data-wsproc],[data-wsbd],[data-wsbddoc],[data-wsbddir],[data-wsbdclr],[data-wsbdtask],[data-wstgi],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
     var W = wsLoad(), v;
     if (b.hasAttribute("data-xrmap")) { var xs = cx.querySelector('[data-xrsel="' + b.getAttribute("data-xrmap") + '"]'); if (!xs || !xs.value) { cxToast("Select an item, then save the mapping."); cxRender(); return; } ccXr[b.getAttribute("data-xrmap")] = xs.value; cxToast("Mapping saved. It applies to documents received from now on. Find earlier failures in TG Insights."); }
-    else if (b.hasAttribute("data-xrfile")) { cxToast("File upload is not connected in this prototype."); }
+    else if (b.hasAttribute("data-xrfile")) { cxToast("File upload is not available in this preview."); }
+    else if (b.hasAttribute("data-xrtpl")) { rtDownload("cross-reference-template.csv", '\ufeff' + rtCSV([["GTIN", "Partner item number", "Our item number", "Description", "Partner"], ["00084512300013", "418820", "NB-30001", "Hydrating serum 30 ml", "Northfield Stores"]]), "text/csv;charset=utf-8"); cxToast("Template downloaded."); }
     else if (b.hasAttribute("data-wsproc")) { ccWsProc = b.getAttribute("data-wsproc"); ccBd = { dir: "All", doc: "", pt: "", q: "" }; }
     else if (b.hasAttribute("data-wsbd")) { ccDr = ["bd", b.getAttribute("data-wsbd")]; }
     else if (b.hasAttribute("data-wsbddoc")) { v = b.getAttribute("data-wsbddoc"); ccBd.doc = ccBd.doc === v ? "" : v; }
     else if (b.hasAttribute("data-wsbddir")) { ccBd.dir = b.getAttribute("data-wsbddir"); }
     else if (b.hasAttribute("data-wsbdclr")) { ccBd = { dir: "All", doc: "", pt: "", q: "" }; ccWsLens = "all"; }
     else if (b.hasAttribute("data-wsbdtask")) { v = bdItems(+ccWsProc).filter(function (x) { return x.c.k === b.getAttribute("data-wsbdtask"); })[0]; ccBdTask[v.c.k] = 1; cxToast("Note sent to " + v.appr + " with the evidence. Command Center watches for the documents."); }
-    else if (b.hasAttribute("data-wstgi")) { cxToast("TG Insights opens with these transactions in the product. It is not connected in this prototype."); }
+    else if (b.hasAttribute("data-wstgi")) { fuTgi(+b.getAttribute("data-wstgi") || 1); }
     else if (b.hasAttribute("data-cxwsproc")) { ccWsProc = b.getAttribute("data-cxwsproc"); cxGo("ws-proc"); return; }
     else if (b.hasAttribute("data-wsform")) { ccWsForm = b.getAttribute("data-wsform"); }
     else if (b.hasAttribute("data-wsdash")) { ccWsDash = b.getAttribute("data-wsdash"); }
     else if (b.hasAttribute("data-wslens")) { ccWsLens = b.getAttribute("data-wslens"); }
-    else if (b.hasAttribute("data-wsstudio")) { cxToast("Aviator Studio opens in the product. It is not connected in this prototype."); }
+    else if (b.hasAttribute("data-wsstudio")) { cxToast("Aviator Studio is not connected in this preview."); }
     else if (b.hasAttribute("data-wstog")) { v = W.notifs[+b.getAttribute("data-wstog")]; v.on = !v.on; wsSave(); }
     else if (b.hasAttribute("data-wsdone")) { v = W.tasks[+b.getAttribute("data-wsdone")]; v.done = !v.done; wsSave(); }
-    else if (b.hasAttribute("data-wsrun")) { v = W.reports[+b.getAttribute("data-wsrun")]; v.last = "Today, 09:30"; wsSave(); cxToast(v.n + " generated. Delivery is off in this prototype."); }
+    else if (b.hasAttribute("data-wsrun")) { v = W.reports[+b.getAttribute("data-wsrun")]; v.last = "Today, 09:30"; wsSave(); cxToast(v.n + " generated. Delivery is off in this preview."); }
     else if (b.hasAttribute("data-wsdel")) { v = b.getAttribute("data-wsdel").split(":"); W[v[0]].splice(+v[1], 1); if (v[0] === "dashboards") ccWsDash = ""; wsSave(); }
     else if (b.hasAttribute("data-wssave")) {
       var f = b.getAttribute("data-wssave"), n = wsVal("[data-wsname]");
@@ -375,10 +376,10 @@
       ccWsForm = ""; wsSave(); cxToast("Saved.");
     }
     else if (b.hasAttribute("data-rwnew")) { ccRw = { step: 0, proc: ccProc(ccSol()[0]).n, partner: "All partners", doc: cxSol()[0][0] + " (850)", ref: "None", file: "", budget: 50000, onb: "Pause the rule and notify", test: null }; rwPick("nora"); ccDr = ["rule"]; }
-    else if (b.hasAttribute("data-rwclose")) { ccRw = null; ccDr = null; }
+    else if (b.hasAttribute("data-rwclose")) { ovEsc(); return; }
     else if (b.hasAttribute("data-rwagent")) { rwPick(b.getAttribute("data-rwagent")); }
     else if (b.hasAttribute("data-rwref")) { ccRw.ref = b.getAttribute("data-rwref"); ccRw.file = ""; }
-    else if (b.hasAttribute("data-rwgo")) { rwRead(); ccRw.step = Math.max(0, Math.min(7, ccRw.step + +b.getAttribute("data-rwgo"))); }
+    else if (b.hasAttribute("data-rwgo")) { rwRead(); ccRw.step = Math.max(0, Math.min(3, ccRw.step + +b.getAttribute("data-rwgo"))); }
     else if (b.hasAttribute("data-rwtest")) { rwRead(); var k = RWJOBS.map(function (x) { return x[0]; }).indexOf(ccRw.agent) + 1, nn = 3800 + 431 * k, d = 9 + 7 * k; ccRw.test = { n: nn, d: d, h: Math.ceil(d / 5), c: 100 - 100 * d / nn }; }
     else if (b.hasAttribute("data-rwdeploy")) {
       /* Rule scopes are stored on the supplier solution; a retailer rule is mapped back through the inverse of CCPMAP */
@@ -398,4 +399,4 @@
     }
     if (el.hasAttribute && el.hasAttribute("data-rwfile") && ccRw) { rwRead(); ccRw.file = el.files && el.files[0] ? el.files[0].name : ""; ccRw.ref = ccRw.file ? "Uploaded file" : "None"; cxRender(); }
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && ccDr && ccDr[0] === "rule") { e.preventDefault(); ccRw = null; ccDr = null; cxRender(); } else if (e.key === "Escape" && ccDr && ccDr[0] === "bd") { e.preventDefault(); ccDr = null; cxRender(); } });
+

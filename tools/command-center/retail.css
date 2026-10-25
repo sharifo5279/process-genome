@@ -27,7 +27,7 @@
   .rt-app .cx-n2 > span { white-space: normal; }
   .rt-app .cx-body.min .cx-nav { width: 52px; }
   .rt-app .cx-n1.on, .rt-app .cx-n2.on { border-left-color: var(--pa); background: var(--psel); }
-  .rt-nav-caption { padding: 12px 16px 5px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--pfa); }
+  .rt-nav-caption { padding: 12px 16px 5px; font-size: 12px; font-weight: 600; color: var(--pfa); }
   .rt-role { display: inline-flex; align-items: center; gap: 2px; padding: 3px; margin-left: auto; background: var(--pcl); border: 1px solid var(--pl); border-radius: 7px; white-space: nowrap; }
   .rt-role > span, .rt-role > label { color: var(--pmu); font-size: 10px; font-weight: 600; padding: 0 6px; }
   .rt-role button { min-height: 28px; padding: 0 10px; border: 0; border-radius: 4px; background: transparent; color: var(--pmu); font-size: 11px; font-weight: 600; cursor: pointer; }
@@ -38,7 +38,7 @@
   .rt-page { max-width: 1360px; margin: 0 auto; }
   .rt-page h2, .rt-page h3, .rt-dialog h2, .rt-dialog h3, .rt-dialog h4 { color: var(--pf); }
   .rt-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin: 0 0 20px; }
-  .rt-eyebrow { display: block; margin-bottom: 5px; color: var(--pai); font-size: 10px; line-height: 15px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
+  .rt-eyebrow { display: block; margin-bottom: 5px; color: var(--pmu); font-size: 12px; line-height: 16px; font-weight: 600; }
   .rt-heading h2 { margin: 0; font-size: 27px; line-height: 34px; letter-spacing: -.035em; font-weight: 650; }
   .rt-heading p { margin: 5px 0 0; max-width: 660px; color: var(--pmu); font-size: 12px; line-height: 18px; }
   .rt-head-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding-top: 5px; flex-shrink: 0; }
@@ -171,7 +171,7 @@
   .rt-matrix th:first-child, .rt-matrix td:first-child { text-align: left; min-width: 165px; }
   .rt-matrix td button { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; min-height: 26px; padding: 4px 7px; border: 1px solid transparent; border-radius: 5px; background: transparent; cursor: pointer; }
   .rt-matrix td button:hover { border-color: var(--pl2); background: var(--pc); }
-  .rt-matrix .rt-chip { font-size: 9px; padding: 2px 5px; }
+  .rt-matrix .rt-chip { font-size: 11px; padding: 2px 6px; }
   .rt-partner-row { display: flex; align-items: center; gap: 10px; }
   .rt-partner-row > .ci { width: 27px; height: 27px; padding: 5px; color: var(--pai); background: var(--psel); border-radius: 6px; }
   .rt-stat-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--pl); font-size: 12px; }
@@ -322,3 +322,12 @@
   :root[data-theme="dark"] .rt-app .rt-chip.attention { border-color: #645336; }
   :root[data-theme="dark"] .rt-app .rt-source.im { color: #a6c6fc; background: #1a2c47; border-color: #35537a; }
   :root[data-theme="dark"] .rt-app .rt-source.pm { color: #c1d0e3; background: #243347; border-color: #3b4e67; }
+
+  /* Retail detail lives in the shared sheet */
+  .cx-dr > .rt-dialog-body h3 { font-size: 14px; line-height: 20px; font-weight: 600; margin: 0 0 10px; }
+  .cx-dr > .rt-dialog-body .rt-evidence-layout { grid-template-columns: 1fr; }
+  .cx-dr > .rt-dialog-body .rt-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rt-na { display: inline-block; width: 100%; min-height: 20px; }
+  .rt-field > span .cx-st { margin-top: 4px; }
+  .rt-role > span { font-size: 11px; }
+  .rt-chip { font-size: 11px; line-height: 16px; }

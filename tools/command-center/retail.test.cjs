@@ -8,7 +8,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const CORE_SCREENS = ['dash', 'find', 'act', 'im-tp', 'im-proj', 'ws-proc', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg'];
+const CORE_SCREENS = ['dash', 'find', 'im-tp', 'im-proj', 'ws-proc', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg'];
 
 const source = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
 const textOf = html => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -46,7 +46,7 @@ function loadApp(storage = new Map()) {
   };
   app.window.document = app.document;
   vm.createContext(app);
-  vm.runInContext(['data.js', 'cc.js', 'fu.js', 'im.js', 'workspace.js', 'retail-data.js', 'retail.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
+  vm.runInContext(['data.js', 'cc.js', 'fu.js', 'im.js', 'workspace.js', 'retail-data.js', 'retail.js', 'ov.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
 
   function click(attributes) {
     const target = {
@@ -128,39 +128,40 @@ test('perspectives switch labels and case context while isolating saved work', (
   assert.equal(restored.rtCS(restored.rtCase(c.id)).note, 'Retailer-only note');
 });
 
-test('assignment preserves Prepare and does not claim a prepared handoff', () => {
+test('retail follow-ups use the shared lifecycle: assigned cases still owe a notice', () => {
   const { app, form, screen } = loadApp(), c = app.rtCase('rt-order-change');
   form('Order management lead', 'Awaiting the current acknowledgment.');
   app.rtSaveCase(c);
   assert.equal(app.rtCS(c).status, 'assigned');
-  app.rtCaseTab = 'action';
-  const detail = app.rtCaseDialog(c), queue = screen('act');
-  assert.ok(detail.includes(`data-rt-prepare="${c.id}"`));
-  assert.ok(queue.includes(`data-rt-prepare="${c.id}"`), 'an assigned case still awaits its prepared action');
-  assert.ok(textOf(screen('find')).includes('Assigned'));
-  for (const html of [detail, queue]) {
-    assert.ok(!html.includes(c.action.completedLabel));
-    assert.ok(!html.includes(c.action.completionNote));
-  }
-  assert.match(textOf(queue), /Waiting 0/);
+  assert.equal(app.rtSt(c), 'Assigned');
+  const detail = app.rtCaseDialog(c);
+  assert.ok(detail.includes(`data-rt-prepare="${c.id}"`), 'the notice is the next action');
+  assert.ok(!detail.includes(c.action.completedLabel));
+  app.ccActTab = 'need';
+  const find = textOf(screen('find'));
+  assert.ok(find.includes(textOf(c.title)) && find.includes('Assigned'));
+  assert.match(find, /Waiting 0/);
 });
 
-test('preparing records a distinct local action while the business exception stays open', () => {
+test('a retail notice moves the case to waiting and records the handoff', () => {
   const { app, click, form, screen } = loadApp(), c = app.rtCase('rt-order-change');
   form('Order management lead', 'Prepare the evidence for review.');
   click({ 'data-rt-prepare': c.id });
   assert.equal(app.rtCS(c).status, 'prepared');
   assert.equal(app.rtCS(c).note, 'Prepare the evidence for review.');
+  assert.match(app.rtSt(c), /^Waiting on/);
   const detail = app.rtCaseDialog(c);
   assert.ok(!detail.includes(`data-rt-prepare="${c.id}"`));
-  assert.ok(detail.includes('business exception remains open'));
+  assert.ok(detail.includes('Close follow-up'));
+  assert.ok(app.rtCS(c).history.some(h => /evidence packet/.test(h.title)));
   app.ccActTab = 'wait';
-  const done = screen('act');
-  assert.ok(done.includes(c.action.completedLabel));
-  assert.ok(done.includes(c.action.completionNote));
-  assert.match(textOf(done), /Waiting 1/);
-  app.ccActTab = 'need';
-  assert.ok(textOf(screen('find')).includes('Action prepared'), 'the finding stays open after preparation');
+  const done = textOf(screen('find'));
+  assert.ok(done.includes(textOf(c.title)));
+  assert.match(done, /Waiting 1/);
+  click({ 'data-rt-st': 'closed:' + c.id });
+  assert.equal(app.rtSt(c), 'Closed');
+  app.ccActTab = 'ver';
+  assert.ok(textOf(screen('find')).includes(textOf(c.title)), 'closed today lists under Verified today');
 });
 
 test('deductions keep observed amounts separate from validity in both perspectives', () => {
@@ -208,7 +209,7 @@ test('the Retail pack adds content, not screens; every case tab renders in both 
   }
 });
 
-test('one dashboard, findings list and action queue attribute every record to its module', () => {
+test('one dashboard and one findings list attribute every record to its module', () => {
   const { app, click, screen } = loadApp();
   for (const role of ['retailer', 'supplier']) {
     click({ 'data-rt-role': role });
@@ -220,6 +221,7 @@ test('one dashboard, findings list and action queue attribute every record to it
     const items = app.ccItems();
     assert.equal(items.length, app.CCF.length + app.RTDATA.cases.length);
     assert.deepEqual([...new Set(items.map(i => i.mod))].sort(), ['IM', 'PM', 'RT']);
+    app.ccActTab = 'all';
     const findHtml = screen('find');
     for (const mod of ['Integration Monitor', 'Performance Monitor', 'Retail pack']) assert.ok(findHtml.includes(mod), `${role} findings name ${mod}`);
     const find = textOf(findHtml);
@@ -229,8 +231,9 @@ test('one dashboard, findings list and action queue attribute every record to it
   for (const id of ['rt-home', 'rt-actions', 'rt-rules', 'im-dash', 'pm-dash', 'pm-find', 'pm-act', 'pm-agents', 'pm-rules', 'im-map', 'im-cfg', 'pm-proc', 'an', 'im-com', 'rt-partners', 'rt-orders', 'rt-shipments', 'rt-invoices']) assert.equal(app.CXS[id], undefined, `${id} is folded into the shared screens`);
 });
 
-test('module filter narrows findings and the action queue', () => {
+test('module filter narrows the findings list', () => {
   const { app, screen } = loadApp();
+  app.ccActTab = 'all';
   for (const mod of ['IM', 'PM', 'RT']) {
     app.ccModF = mod;
     const html = screen('find');
@@ -238,8 +241,6 @@ test('module filter narrows findings and the action queue', () => {
       if (i.mod === mod) assert.ok(html.includes(i.open), `${mod} keeps ${i.key}`);
       else assert.ok(!html.includes(i.open), `${mod} hides ${i.key}`);
     }
-    const act = screen('act');
-    for (const i of app.ccItems()) if (i.mod !== mod) assert.ok(!act.includes(i.open), `${mod} queue hides ${i.key}`);
   }
 });
 
@@ -252,7 +253,7 @@ test('demo findings stay inside the three processes of the client solution', () 
     for (const p of sol) { app.ccWsProc = String(p); assert.match(screen('ws-proc'), /Waiting on us/); assert.match(screen('ws-proc'), /Document flow/); }
   }
   const cfg = screen('cfg');
-  assert.ok(cfg.includes('Rules &amp; Policies') && cfg.includes('Retail policy templates'));
+  assert.ok(cfg.includes('Rules and policies') && cfg.includes('Retail policy templates'));
   for (const r of app.RTDATA.rules) assert.equal(cfg.includes(`data-rt-rule="${r.id}"`), !r.roles || r.roles.includes(app.rtRole), `${r.id} shows for its perspective only`);
   app.ccWsProc = 'sol';
   assert.match(screen('ws-proc'), /Business document/);
@@ -272,21 +273,21 @@ test('a follow-up closes only when the network confirms it', () => {
   assert.equal(item().done, true);
   assert.ok(app.cxFu('f1').log.some(e => e[1] === 'net'), 'verification comes from network events');
   app.ccActTab = 'ver';
-  assert.match(textOf(screen('act')), /Verified today 1/);
-  for (const k of ['dash', 'act', 'find']) assert.doesNotMatch(textOf(screen(k)), /Approve and run|Runs on Trading Grid|reprocess/i, k);
+  assert.match(textOf(screen('find')), /Verified today 1/);
+  for (const k of ['dash', 'find']) assert.doesNotMatch(textOf(screen(k)), /Approve and run|Runs on Trading Grid|reprocess/i, k);
 });
 
-test('rule wizard walks eight steps and deploys a Performance Monitor rule', () => {
+test('rule wizard walks four steps and deploys a Performance Monitor rule', () => {
   const { app, click } = loadApp();
   const before = app.CXR.length;
   click({ 'data-rwnew': '' });
   assert.equal(app.ccRw.step, 0);
   click({ 'data-rwagent': 'lex' });
-  for (let k = 0; k < 6; k++) click({ 'data-rwgo': '1' });
-  assert.equal(app.ccRw.step, 6);
+  for (let k = 0; k < 3; k++) click({ 'data-rwgo': '1' });
+  assert.equal(app.ccRw.step, 3);
+  assert.match(app.cxDrawer(), /data-rwdeploy disabled/);
   click({ 'data-rwtest': '' });
   assert.ok(app.ccRw.test.d > 0);
-  click({ 'data-rwgo': '1' });
   assert.match(app.cxDrawer(), /Deploy rule/);
   click({ 'data-rwdeploy': '' });
   assert.equal(app.CXR.length, before + 1);
@@ -312,7 +313,7 @@ test('packages: Integration Monitor alone, plus Performance Monitor, plus the Re
   assert.deepEqual([...new Set(app.ccItems().map(i => i.mod))], ['IM']);
   assert.equal(app.cxNavOk('ws-proc'), false);
   assert.equal(app.cxAgents().map(a => a.id).join(), 'ivy');
-  for (const key of ['dash', 'find', 'act', 'im-tp', 'im-proj', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg']) {
+  for (const key of ['dash', 'find', 'im-tp', 'im-proj', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg']) {
     const t = textOf(screen(key));
     assert.doesNotMatch(t, leak, `im/${key} shows retail content`);
     assert.doesNotMatch(t, /Performance Monitor|Business process|\bLex\b|\bNora\b|\bLiz\b|\bReese\b/, `im/${key} shows Performance Monitor content`);
@@ -322,7 +323,7 @@ test('packages: Integration Monitor alone, plus Performance Monitor, plus the Re
   app.ccSetPkg('pm');
   assert.deepEqual([...new Set(app.ccItems().map(i => i.mod))].sort(), ['IM', 'PM']);
   assert.equal(app.ccProc(3).n, 'Claims and disputes');
-  for (const key of ['dash', 'find', 'act', 'im-tp', 'ws-proc', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg']) assert.doesNotMatch(textOf(screen(key)), leak, `pm/${key} shows retail content`);
+  for (const key of ['dash', 'find', 'im-tp', 'ws-proc', 'ws-dash', 'ws-rep', 'ws-not', 'ws-task', 'ws-agents', 'cfg']) assert.doesNotMatch(textOf(screen(key)), leak, `pm/${key} shows retail content`);
   assert.match(screen('cfg'), /data-rwnew/);
 
   app.ccSetPkg('rt');

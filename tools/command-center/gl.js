@@ -92,21 +92,13 @@
     GL.r.setClearColor(0x000000, 0); GL.cv.width = 0; glSize();
     if (!GL.raf) GL.raf = requestAnimationFrame(glFrame);
   }
-  /* Network globe: the client at the hub, one arc per trading partner, arc color from the partner's open findings */
-  var GLLL = [[-18, 15], [50, 20], [58, 120], [-10, 135], [20, 160], [-38, 80], [35, -20]], GLRG = 260;
+  /* Network globe: the client at the hub, one arc per partner with an open follow-up, arc color from its state.
+     The globe holds still so every label stays readable and clickable; positions are chosen on the visible face. */
+  var GLLL = [[-20, 10], [35, -20], [60, 55], [15, 25], [-10, 55], [35, 35], [0, -10], [55, 0], [10, 55], [20, -5]], GLRG = 260, GLRY = -1.1;
   function glLL(la, lo) { var T = GL.T; la *= Math.PI / 180; lo *= Math.PI / 180; return new T.Vector3(Math.cos(la) * Math.cos(lo), Math.sin(la), Math.cos(la) * Math.sin(lo)).multiplyScalar(GLRG); }
-  function glPartners() {
-    var it = ccItems();
-    return cxPartners().filter(function (p) { return p[2] === "Active"; }).slice(0, 7).map(function (p) {
-      var mine = it.filter(function (i) { return i.partner === p[0] && fuBucket(i) !== "off"; }), need = mine.filter(function (i) { return fuBucket(i) === "need"; }), wait = mine.filter(function (i) { return fuBucket(i) === "wait"; });
-      var rec = wait.filter(function (i) { return i.key.indexOf("f:") === 0 && cxFu(i.key.slice(2)).st === "Recovering"; });
-      var sev = need.length ? "r" : wait.length > rec.length ? "a" : rec.length ? "c" : "b", top = need[0] || wait[0];
-      var st = top ? (top.key.indexOf("f:") === 0 ? cxFu(top.key.slice(2)).st : top.status) : "", t = top ? st + " · " + top.title : "Documents flowing";
-      return { n: p[0], sev: sev, sub: t.length > 44 ? t.slice(0, 43).replace(/\s+\S*$/, "") + "…" : t };
-    });
-  }
+  function glPartners() { return cxGlobePts(); }
   function glGlobeBuild() {
-    var T = GL.T, dark = glDark(), P = glPartners(), key = ccRole() + (dark ? "d" : "l") + P.map(function (p) { return p.sev + p.sub; }).join("");
+    var T = GL.T, dark = glDark(), P = glPartners(), key = ccRole() + (dark ? "d" : "l") + P.map(function (p) { return p.n + p.sev + p.sub; }).join("");
     if (GL.gkey === key && GL.gs) return;
     GL.gkey = key;
     var S = new T.Scene(), g = new T.Group(), col = { r: 0xFF4D5A, a: 0xF4B740, b: dark ? 0x6E9BFF : 0x2F6BFF, c: dark ? 0x39D98A : 0x15803D };
@@ -133,7 +125,7 @@
       var m = new T.Mesh(new T.SphereGeometry(7, 20, 20), em(c, 2.6)); m.position.copy(e); g.add(m);
       GL.gp.push({ n: p.n, sev: p.sev, sub: p.sub, v: e });
     });
-    g.rotation.set(0.25, -1.9, 0); S.add(g); GL.gs = S; GL.gg = g;
+    g.rotation.set(0.25, GLRY, 0); S.add(g); GL.gs = S; GL.gg = g;
     GL.comp = null;
     if (dark && GL.X) {
       var w = GL.cv.clientWidth || 820, h = GL.cv.clientHeight || 560, c2 = new GL.X.EffectComposer(GL.r);
@@ -143,11 +135,10 @@
   }
   function glLabels(g) {
     var l = g.querySelector(".cx-gll"); if (!l) return;
-    l.innerHTML = GL.gp.map(function (p, k) { var on = ccOvF && ccOvF.k === "pt" && ccOvF.v === p.n; return '<button type="button" class="' + (k ? p.sev : "h") + (on ? " sel" : "") + '" data-cxov="' + (k ? "pt:" + cxe(p.n) : "clear") + '" title="' + (k ? "Filter follow-ups to " + cxe(p.n) : "Show all follow-ups") + '">' + cxe(p.n) + '<small>' + cxe(k ? p.sub : (ccOvF ? "Show all follow-ups" : "Your company")) + '</small></button>'; }).join("");
+    l.innerHTML = GL.gp.map(function (p, k) { var on = ccOvF && ccOvF.k === "pt" && ccOvF.v === p.n; return '<button type="button" tabindex="-1" aria-hidden="true" class="' + (k ? p.sev : "h") + (on ? " sel" : "") + '" data-cxov="' + (k ? "pt:" + cxe(p.n) : "clear") + '" title="' + (k ? "Filter follow-ups to " + cxe(p.n) : "Show all follow-ups") + '">' + cxe(p.n) + '</button>'; }).join("");
   }
   function glGlobeFrame(k) {
     var T = GL.T, g = GL.gg; if (!g) return;
-    g.rotation.y = -1.9 + Math.sin(k * 0.12) * 0.22;
     GL.beads.forEach(function (b) { b[0].position.copy(b[1].getPoint((b[2] + k * b[3]) % 1)); });
     g.updateMatrixWorld(); GL.gcam.updateMatrixWorld();
     if (GL.comp) GL.comp.render(); else GL.r.render(GL.gs, GL.gcam);
@@ -157,7 +148,7 @@
       var v = GL.gp[i].v.clone().applyMatrix4(g.matrixWorld), n = v.clone().normalize(), front = n.dot(cp.clone().sub(v).normalize()) > 0.15;
       var p = v.clone().multiplyScalar(1.1).project(GL.gcam), x = (p.x + 1) / 2 * w, y = (1 - p.y) / 2 * h;
       /* keep labels from stacking: push down until clear of labels already placed */
-      if (front) { for (var q = 0; q < 6; q++) { var hit = placed.some(function (o) { return Math.abs(o[0] - x) < 190 && Math.abs(o[1] - y) < 40; }); if (!hit) break; y += 42; } placed.push([x, y]); }
+      if (front) { for (var q = 0; q < 6; q++) { var hit = placed.some(function (o) { return Math.abs(o[0] - x) < 150 && Math.abs(o[1] - y) < 28; }); if (!hit) break; y += 30; } placed.push([x, y]); }
       bs[i].style.left = x.toFixed(1) + "px"; bs[i].style.top = y.toFixed(1) + "px";
       bs[i].classList.toggle("off", !front);
     }

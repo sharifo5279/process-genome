@@ -32,14 +32,14 @@
   var IMCELL = { a: ["Active", "resolved"], i: ["Configured, no traffic in 180 days", "known"], n: ["Not configured", "new"] };
 
   /* Overview: daily digest card */
-  CXDASH.push({ o: 5, mod: "IM", w: 6, t: "Daily digest · yesterday", h: function () {
+  CXDASH.push({ o: 5, mod: "IM", w: 6, t: "Daily digest", h: function () {
     var ps = cxPartners();
     return '<div class="im-dg"><div class="cx-k4">' + cxKpi("Documents", "4,612", '<em class="up">↑ 4% vs prior day</em>') + cxKpi("Failed transactions", "37", "Across 9 partners") +
       cxKpi("Partners in onboarding", "1", ps[6][0] + ", testing since Oct 20") + cxKpi("Anomalies detected", "3", "2 volume, 1 failed transactions") + '</div>' +
       '<table class="cx-tbl"><thead><tr><th>Top partners by volume</th><th class="n">Documents</th><th class="n">Errors</th><th>Most common error</th></tr></thead><tbody>' +
       [[0, 4], [1, 3], [2, 4], [3, 2], [5, 5]].map(function (x) { var k = x[0]; return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(ps[k][0]) + '">' + cxe(ps[k][0]) + '</button></td><td class="n">' + Math.round(IMPT[k][1] / 30).toLocaleString("en-US") + '</td><td class="n">' + x[1] + '</td><td>' + cxe(imE(k)[3]) + '</td></tr>'; }).join("") + '</tbody></table>' +
       '<div class="cx-kpi cx-ka2 im-ka"><span>' + ci("spark") + 'Key analysis</span><small>Volume rose 4% on order traffic. Failed transactions stayed within the normal range; ' + cxe(ps[5][0]) + ' had the most, all for a missing required segment.</small></div></div>'; },
-    f: function () { return '<span class="cx-note">Daily Summarizer and Explainer Agent · Generated 06:00</span>'; } });
+    f: function () { return '<span class="cx-note">Yesterday, Friday, October 23 · Generated 06:00 by the Daily Summarizer and Explainer Agent</span>'; } });
 
   /* Overview: Network health. Network activity, document summary and transaction volume analysis with the refine panel */
   CXS["im-vol"] = function () {
@@ -100,25 +100,41 @@
       '</tbody></table></div><ul class="cx-lg row"><li><i class="im-c a"></i>Active</li><li><i class="im-c i"></i>Configured, no traffic in 180 days</li><li><i class="im-c n"></i>Not configured</li><li><span class="im-na">·</span> Not exchanged with this partner type</li></ul>');
   } });
 
-  /* Partner details panel */
+  /* Partner sheet: one view of a partner from every entry point. Overview, Documents (required coverage with the Retail pack), Connection. */
+  var ccPtSheet = "ov";
   var imBaseDrawer = cxDrawer;
   cxDrawer = function () {
     if (!ccDr || ccDr[0] !== "pt") return imBaseDrawer();
-    var ps = cxPartners(), k = imPt(ccDr[1]), p = ps[k], e = imE(k), docs = IMDOCS.filter(function (d) { return imCell(k, d); });
+    var ps = cxPartners(), name = ccDr[1], k = imPt(name), p = ps[k][0] === name ? ps[k] : [name, "", "Active", "", "", ""], e = imE(k), docs = IMDOCS.filter(function (d) { return imCell(k, d); });
+    var rp = ccOn("rt") ? rtPartners().filter(function (x) { return x.names[rtRole] === name; })[0] : null, cv = rp ? rtCoverage(rp) : null, tab = ccPtSheet;
+    var its = ccItems().filter(function (i) { return i.partner === name && (fuBucket(i) === "need" || fuBucket(i) === "wait"); }), fn = its.filter(function (i) { return i.key.indexOf("f:") === 0 && ["New", "Assigned"].indexOf(cxFu(i.key.slice(2)).st) >= 0; })[0];
     var a1 = "ZZ:" + p[1], a2 = "01:" + (100000000 + k * 7316451), split = e[1] ? [Math.round(e[1] * 0.78), e[1] - Math.round(e[1] * 0.78)] : [0, 0];
-    var h = '<header><span><p>Partner details</p><h3>' + cxe(p[0]) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
-      '<dl class="cx-dl"><div><dt>Status</dt><dd>' + p[2] + '</dd></div><div><dt>Alias</dt><dd><code>' + p[1] + '</code></dd></div><div><dt>Protocol</dt><dd>' + e[0] + '</dd></div><div><dt>Onboarded</dt><dd>' + p[4] + '</dd></div><div><dt>Last activity</dt><dd>' + p[5] + '</dd></div></dl>' +
+    var stc = p[2] === "Active" ? "resolved" : "known", body;
+    if (tab === "docs") body = rp ? '<p class="cx-sub">Required documents for this partner, from the documents observed today.</p><table class="cx-tbl"><thead><tr><th>Document</th><th>Required</th><th>Status</th><th>Last seen</th></tr></thead><tbody>' + rp.documents.map(function (d) {
+        return '<tr><td><b>' + cxe(d.type) + '</b><small>' + cxe(d.label) + '</small></td><td>' + (d.required ? "Required" : "Optional") + '</td><td>' + rtChip(d.status === "healthy" && rp.status === "onboarding" ? "Test observed" : rtLabel(d.status), ({ healthy: "ready", late: "attention", missing: "critical", unconfigured: "unknown", "not-required": "neutral" })[d.status]) + '</td><td>' + cxe(d.lastSeen || "Not observed") + '<small>' + cxe(d.detail) + '</small></td></tr>'; }).join("") + '</tbody></table>'
+      : '<table class="cx-tbl"><thead><tr><th>Document</th><th>Direction</th><th>Status</th></tr></thead><tbody>' + docs.map(function (d) { var c = imCell(k, d); return '<tr><td><code>' + d + '</code></td><td>' + imDir(d, k) + '</td><td><span class="cx-st s-' + IMCELL[c][1] + '"><i></i>' + IMCELL[c][0] + '</span></td></tr>'; }).join("") + '</tbody></table>';
+    else if (tab === "conn") body = '<dl class="cx-dl"><div><dt>Alias</dt><dd><code>' + cxe(p[1]) + '</code></dd></div><div><dt>BUID</dt><dd>' + cxe(p[3]) + '</dd></div><div><dt>Protocol</dt><dd>' + e[0] + '</dd></div><div><dt>Onboarded</dt><dd>' + cxe(p[4]) + '</dd></div></dl>' +
       '<h4>EDI addresses</h4><table class="cx-tbl"><thead><tr><th>Address</th><th>Protocol</th><th class="n">Documents, 30 days</th></tr></thead><tbody><tr><td><code>' + a1 + '</code></td><td>' + e[0] + '</td><td class="n">' + split[0].toLocaleString("en-US") + '</td></tr><tr><td><code>' + a2 + '</code></td><td>' + e[0] + '</td><td class="n">' + split[1].toLocaleString("en-US") + '</td></tr></tbody></table>' +
-      '<h4>Document relationships</h4><table class="cx-tbl"><thead><tr><th>Document</th><th>Direction</th><th>Status</th></tr></thead><tbody>' + docs.map(function (d) { var c = imCell(k, d); return '<tr><td><code>' + d + '</code></td><td>' + imDir(d, k) + '</td><td><span class="cx-st s-' + IMCELL[c][1] + '"><i></i>' + IMCELL[c][0] + '</span></td></tr>'; }).join("") + '</tbody></table>' +
-      '<h4>Transaction processing errors, 30 days</h4>' + (e[2] ? '<p><b>' + e[2] + '</b> errors. Most common: ' + cxe(e[3]) + '.</p>' : '<p>No processing errors.</p>') +
-      '<h4>Volume by EDI address, 6 months</h4>' + cxLine([{ v: [0.82, 0.88, 0.91, 0.95, 0.97, 1].map(function (x) { return Math.round(split[0] * x); }) }, { v: [0.9, 0.86, 0.95, 1.02, 0.98, 1].map(function (x) { return Math.round(split[1] * x); }), c: "b2" }], { w: 440, h: 160, xl: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Volume by EDI address" }) +
-      '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>' + a1 + '</li><li><i style="background:#001889"></i>' + a2 + '</li></ul></div>';
-    return '<div class="cx-scrim" data-cxclose></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
+      '<h4>Volume by EDI address, 6 months</h4>' + (e[1] ? cxLine([{ v: [0.82, 0.88, 0.91, 0.95, 0.97, 1].map(function (x) { return Math.round(split[0] * x); }) }, { v: [0.9, 0.86, 0.95, 1.02, 0.98, 1].map(function (x) { return Math.round(split[1] * x); }), c: "b2" }], { w: 560, h: 180, xl: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"], label: "Volume by EDI address" }) +
+      '<ul class="cx-lg row"><li><i style="background:var(--pa)"></i>' + a1 + '</li><li><i style="background:#001889"></i>' + a2 + '</li></ul>' : '<p>No traffic in 6 months.</p>');
+    else body = '<dl class="cx-dl"><div><dt>Last activity</dt><dd>' + cxe(rp ? rtLast(rp) : p[5]) + '</dd></div><div><dt>Protocol</dt><dd>' + e[0] + '</dd></div>' + (rp ? '<div><dt>Required documents active</dt><dd>' + cv.healthy + ' of ' + cv.total + '</dd></div><div><dt>Owner</dt><dd>' + cxe(rp.owner) + '</dd></div>' : '<div><dt>Onboarded</dt><dd>' + cxe(p[4]) + '</dd></div>') + '</dl>' +
+      '<h4>Open follow-ups</h4>' + (its.length ? '<ul class="cx-rl">' + its.map(function (i) { var u = i.key.indexOf("f:") === 0 ? cxFu(i.key.slice(2)) : null; return '<li>' + cxItemLink(i, "b") + '<span>' + (u ? fuChip(u.st, u) : fuChip(i.status)) + cxe(fuFact(i)) + '</span></li>'; }).join("") + '</ul>' : '<p>No open follow-ups. Documents are flowing.</p>') +
+      '<h4>Transaction processing errors, 30 days</h4>' + (e[2] ? '<p><b>' + e[2] + '</b> errors. Most common: ' + cxe(e[3]) + '.</p>' : '<p>No processing errors.</p>');
+    var tabs = '<div class="rt-dialog-tabs" role="group" aria-label="Partner detail">' + [["ov", "Overview"], ["docs", rp ? "Required documents" : "Documents"], ["conn", "Connection"]].map(function (t) { return '<button type="button" class="' + (tab === t[0] ? "on" : "") + '" aria-pressed="' + (tab === t[0]) + '" data-ptsh="' + t[0] + '">' + t[1] + '</button>'; }).join("") + '</div>';
+    var w = rp && rtBag().watches[rp.id];
+    var foot = (rp ? '<button type="button" class="cx-btn" data-rt-watch="' + rp.id + '">' + (w ? "Remove from watchlist" : "Add to watchlist") + '</button>' : "") + '<button type="button" class="cx-btn' + (fn ? "" : " p") + '" data-pttgi="' + cxe(name) + '">Open in TG Insights</button>' +
+      (fn ? '<button type="button" class="cx-btn p" data-ptnotify="' + fn.key.slice(2) + '">Notify partner</button>' : "");
+    var h = '<header><span><p>Partner · Integration Monitor</p><h3>' + cxe(name) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header>' +
+      '<p class="cx-chipsr"><span class="cx-st s-' + stc + '"><i></i>' + cxe(p[2]) + '</span>' + (its.length ? '<span class="cx-tg">' + its.length + ' open follow-up' + (its.length > 1 ? "s" : "") + '</span>' : "") + (w ? '<span class="cx-tg">On your watchlist</span>' : "") + '</p>' + tabs + '<div class="cx-db">' + body + '</div><div class="cx-ft">' + foot + '</div>';
+    return '<div class="cx-scrim" data-ovesc></div><aside class="cx-dr" role="dialog" aria-modal="true">' + h + '</aside>';
   };
 
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-impt],[data-imband],[data-imia],[data-imseg],[data-imclear],[data-imexplain]"); if (!b) return;
-    if (b.hasAttribute("data-impt")) ccDr = ["pt", b.getAttribute("data-impt")];
+    var b = e.target.closest("[data-impt],[data-imband],[data-imia],[data-imseg],[data-imclear],[data-imexplain],[data-ptsh],[data-pttgi],[data-ptnotify]"); if (!b) return;
+    if (b.hasAttribute("data-impt")) { ccDr = ["pt", b.getAttribute("data-impt")]; ccPtSheet = "ov"; ccFuForm = null; }
+    else if (b.hasAttribute("data-ptsh")) ccPtSheet = b.getAttribute("data-ptsh");
+    else if (b.hasAttribute("data-pttgi")) cxToast("Handed off " + b.getAttribute("data-pttgi") + " to TG Insights. TG Insights is not connected in this preview.");
+    else if (b.hasAttribute("data-ptnotify")) { var nid = b.getAttribute("data-ptnotify"); ccDr = ["f", nid]; ccFuForm = { id: nid, k: "pt" }; }
     else if (b.hasAttribute("data-imband")) imBand = +b.getAttribute("data-imband");
     else if (b.hasAttribute("data-imia")) imIa = b.getAttribute("data-imia");
     else if (b.hasAttribute("data-imseg")) { var s = b.getAttribute("data-imseg").split(":"); imVol[s[0]] = s[1]; }
