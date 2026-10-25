@@ -486,3 +486,13 @@
   .cx-hv .cx-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
   .cx-hv.gl .cx-ring { position: relative; }
   .cx-hv.gl .g-arc, .cx-hv.gl .g-arc-t { display: none; }
+  /* Document transaction summary (Integration Monitor): two periods, donut and top 3 documents each */
+  .cx-dsc { margin: 0 0 16px; }
+  .cx-ds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+  .cx-dsh { padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--pl); } .cx-dsh b { display: block; font-size: 15px; } .cx-dsh small { color: var(--pmu); font-size: 13px; }
+  .cx-dsb { display: flex; align-items: center; gap: 28px; } .cx-dsb .cx-dn { width: 170px; height: 170px; } .cx-dsb .cx-dn .dv { font-size: 17px; }
+  .cx-dsl { flex: 1; min-width: 0; } .cx-dsl h4 { margin: 0 0 10px; font-size: 14px; }
+  .cx-dsl ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; } .cx-dsl li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 13px; }
+  .cx-dsl li i { width: 12px; height: 12px; border-radius: 2px; } .cx-dsl li em { font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .cx-dsl li.o { padding-top: 12px; border-top: 1px solid var(--pl); }
+  @container (max-width: 1000px) { .cx-ds { grid-template-columns: 1fr; } }

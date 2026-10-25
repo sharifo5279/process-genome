@@ -354,9 +354,23 @@
     return '<header class="cx-ph cx-dh cx-gh"><div><p class="cx-gk">Command Center · Overview</p><h2>' + cxe(ccCompany()) + '</h2><p>' + ccIndustry() + procs + ' · Illustrative data</p></div><span class="cx-live"><i></i>Live · updated ' + CCSNAP.split(", ")[1] + '</span></header>' +
       '<nav class="cx-tabs cx-ovt" aria-label="Overview">' + tabs + '<button type="button" class="cx-ovn" data-cxgo="ws-dash" data-wsform="dash">' + ci("plus") + 'Create dashboard</button></nav>';
   }
+  /* Integration Monitor document transaction summary, as in the shipped product: yesterday and last month, top 3 documents each */
+  var CXDS = [["Yesterday", "Friday, October 23, 2026", [["997", "Functional acknowledgment", 1384], ["850", "Purchase order", 1180], ["856", "Ship notice", 922]], 1126],
+    ["Last month", "Tuesday, September 1 to Wednesday, September 30, 2026", [["997", "Functional acknowledgment", 41460], ["850", "Purchase order", 30400], ["856", "Ship notice", 27640]], 38700]];
+  var CXDSC = ["#E5004C", "#0A3FD6", "#7B3FE4", "#FF5C66"];
+  function cxDocSum() {
+    return cxCard("Document transaction summary", '<div class="cx-ds">' + CXDS.map(function (p) {
+      var tot = p[2].reduce(function (a, d) { return a + d[2]; }, p[3]);
+      return '<div class="cx-dsp"><div class="cx-dsh"><b>' + p[0] + '</b><small>' + p[1] + '</small></div><div class="cx-dsb">' +
+        cxDonut(p[2].map(function (d, k) { return [d[0], d[2], CXDSC[k]]; }).concat([["Other", p[3], CXDSC[3]]]), 58, tot.toLocaleString("en-US"), "Total") +
+        '<div class="cx-dsl"><h4>Top 3 documents</h4><ul>' + p[2].map(function (d, k) { return '<li><i style="background:' + CXDSC[k] + '"></i><span>' + d[0] + ' ' + d[1] + '</span><em>' + d[2].toLocaleString("en-US") + '</em></li>'; }).join("") +
+        '<li class="o"><i style="background:' + CXDSC[3] + '"></i><span>Other documents</span><em>' + p[3].toLocaleString("en-US") + '</em></li></ul></div></div></div>';
+    }).join("") + '</div>', "cx-dsc", cxTag("IM"));
+  }
   CXS["dash"] = function () {
     var by = function (o) { return CXDASH.filter(function (c) { return c.o === o; })[0]; }, rt = ccOn("rt") && by(35);
-    return cxOvHead() + cxHero() +
+    /* Integration Monitor alone: the document summary leads. With Performance Monitor, the process ring leads and the summary follows. */
+    return cxOvHead() + (ccOn("pm") ? cxHero() + cxDocSum() : cxDocSum() + cxHero()) +
       '<div class="cx-dg cx-ovg">' + cxDc(by(5)) + cxDc(by(10), rt ? 2 : 3) + (rt ? cxDc(rt, 2) : "") + cxDc(by(80), rt ? 2 : 3) + '</div>';
   };
   CXDASH.push(
