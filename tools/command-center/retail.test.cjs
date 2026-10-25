@@ -249,7 +249,7 @@ test('demo findings stay inside the three processes of the client solution', () 
     click({ 'data-rt-role': role });
     const sol = app.ccSol();
     for (const p of new Set(app.ccItems().map(i => i.proc))) assert.ok(sol.includes(p), `${role}: process ${p} is in the solution ${sol}`);
-    for (const p of sol) { app.ccWsProc = String(p); assert.match(screen('ws-proc'), /Document flow/); }
+    for (const p of sol) { app.ccWsProc = String(p); assert.match(screen('ws-proc'), /Waiting on us/); assert.match(screen('ws-proc'), /Document flow/); }
   }
   const cfg = screen('cfg');
   assert.ok(cfg.includes('Rules &amp; Policies') && cfg.includes('Retail policy templates'));
@@ -321,4 +321,33 @@ test('packages: Integration Monitor alone, plus Performance Monitor, plus the Re
   assert.deepEqual([...new Set(app.ccItems().map(i => i.mod))].sort(), ['IM', 'PM', 'RT']);
   assert.equal(app.ccProc(3).n, app.ccRole() === 'retailer' ? 'Chargebacks and deductions' : app.PROCESSES.retail[3].n);
   assert.equal(app.ccProc(0).n, app.PROCESSES.retail[0].n);
+});
+
+test('process board: every finding sits on its own process board, and items open with transactions', () => {
+  const { app, click, screen } = loadApp();
+  for (const role of ['retailer', 'supplier']) {
+    click({ 'data-rt-role': role });
+    for (const p of app.ccSol()) {
+      const items = app.bdItems(p);
+      for (const v of items) {
+        if (v.c.f) assert.equal(v.f.p, p, `${role} ${v.c.k}: ${v.c.f} belongs to process ${p}`);
+        if (v.c.rt) assert.ok(app.rtCase(v.c.rt), `${v.c.rt} exists`);
+        app.ccWsProc = String(p); app.ccDr = ['bd', v.c.k];
+        const dr = app.cxDrawer();
+        assert.match(dr, /Transactions/, `${role} ${v.c.k} drawer`);
+        if (v.c.d === '824') assert.match(dr, /OTI\*TR\*/);
+      }
+      app.ccDr = null;
+      const onBoard = new Set(items.filter(v => v.f).map(v => v.f.id));
+      for (const f of app.cxAll().filter(f => f.p === p)) assert.ok(onBoard.has(f.id), `${role}: ${f.id} is on the board for process ${p}`);
+    }
+  }
+  click({ 'data-wsproc': '0' });
+  const all = screen('ws-proc');
+  click({ 'data-wsbddir': 'Inbound' });
+  const inbound = screen('ws-proc');
+  assert.ok((inbound.match(/data-wsbd="/g) || []).length < (all.match(/data-wsbd="/g) || []).length, 'direction filter narrows the board');
+  click({ 'data-wsbdclr': '' });
+  click({ 'data-wsbddoc': '856' });
+  assert.ok(app.bdItems(0).filter(app.bdMatch).every(v => v.c.s === '856'));
 });

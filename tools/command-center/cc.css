@@ -439,9 +439,44 @@
   .im-ex { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; } .im-ex li { display: flex; gap: 10px; align-items: flex-start; } .im-ex li .ci { color: var(--pa); flex: none; }
   @container (max-width: 1080px) { .im-vol { grid-template-columns: 1fr; } }
   .im-nh { margin-bottom: 16px; }
-  /* Business processes: document flow table and transactions */
-  .ws-ft tbody tr { cursor: pointer; } .ws-ft tbody tr.on td { background: var(--psel); } .ws-ft tbody tr.on td:first-child { box-shadow: inset 3px 0 0 var(--pa); }
-  .ws-ft td small { display: block; font-size: 12px; color: var(--pmu); font-weight: 400; } .ws-ft td.w { color: #B54708; font-weight: 700; } .ws-ft td.c { color: #C4320A; font-weight: 700; }
-  .ws-ft td .cx-lk { display: block; text-align: left; font-size: 12px; }
-  .ws-tx td { font-size: 13px; white-space: nowrap; }
+  /* Business processes: document flow, filters and the board by who is waiting */
+  .bd-k { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .bd-fc { margin-bottom: 12px; }
+  .bd-flow { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(132px, 1fr); gap: 8px; overflow-x: auto; }
+  .bd-flow button { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 12px; border: 1px solid var(--pl); border-radius: 10px; background: var(--pc); text-align: left; cursor: pointer; }
+  .bd-flow button:hover { border-color: var(--pl2); } .bd-flow button[aria-pressed="true"] { border: 2px solid var(--pa); padding: 9px 11px; }
+  .bd-sh { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--pmu); }
+  .bd-flow b { font-size: 13px; line-height: 17px; } .bd-sn { font-size: 12px; color: var(--pmu); } .bd-sn strong { font-size: 16px; font-weight: 600; color: var(--pf); font-variant-numeric: tabular-nums; }
+  .bd-so { font-size: 12px; color: var(--pmu); } .bd-so.w { color: #B54708; font-weight: 600; }
+  .bd-fb { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 12px; }
+  .bd-sel { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--pmu); }
+  .bd-sel select { height: 32px; padding: 0 8px; border: 1px solid var(--pl2); border-radius: 8px; background: var(--pc); color: var(--pf); font: 400 13px/16px var(--font); }
+  .bd-q { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid var(--pl2); border-radius: 8px; background: var(--pc); color: var(--pmu); }
+  .bd-q .ci { width: 16px; height: 16px; } .bd-q input { width: 240px; border: 0; outline: 0; background: transparent; color: var(--pf); font: 400 13px/16px var(--font); }
+  .bd-q:focus-within { border: 2px solid var(--pa); padding: 0 9px; }
+  .bd-n { margin-left: auto; }
+  .bd-b { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start; margin: 0 0 16px; }
+  .bd-col { min-width: 0; padding: 12px; border: 1px solid var(--pl); border-radius: 12px; background: var(--pcl); }
+  .bd-col header { display: flex; align-items: center; gap: 8px; } .bd-col h3 { margin: 0; font-size: 15px; font-weight: 600; }
+  .bd-col header em { min-width: 22px; padding: 0 7px; border: 1px solid var(--pl2); border-radius: 999px; background: var(--pc); font: 700 12px/20px var(--font); font-style: normal; text-align: center; }
+  .bd-col > p { margin: 2px 0 10px; font-size: 12px; line-height: 16px; color: var(--pmu); }
+  .bd-col ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; } .bd-col li { min-width: 0; } .bd-col .cx-empty { padding: 14px 8px; font-size: 13px; }
+  .bd-c { width: 100%; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding: 11px 12px; border: 1px solid var(--pl); border-radius: 10px; background: var(--pc); text-align: left; cursor: pointer; }
+  .bd-c > span { display: flex; } .bd-c:hover { border-color: var(--pl2); } .bd-c.on { border: 2px solid var(--pa); padding: 10px 11px; } .bd-c.dn { opacity: .72; }
+  .bd-h { align-items: center; gap: 6px; font-size: 12px; color: var(--pmu); } .bd-dir { font-weight: 600; } .bd-dn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bd-h .cx-sev { flex: none; }
+  .bd-t { font-size: 14px; line-height: 19px; font-weight: 600; }
+  .bd-p { font-size: 12px; line-height: 16px; color: var(--pmu); }
+  .bd-sla { justify-content: space-between; gap: 8px; font-size: 12px; line-height: 16px; color: var(--pmu); } .bd-sla em { flex: none; font-style: normal; font-weight: 600; color: var(--pf); } .bd-sla em.w { color: #B54708; }
+  .bd-pb { display: block !important; width: 100%; height: 4px; margin-top: 0; } .bd-pb i { background: var(--pa); } .bd-pb.w i { background: #E8590C; }
+  .bd-rj { flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; } .bd-rj code { font-size: 11px !important; }
+  .bd-m { flex-direction: column; font-size: 12px; line-height: 16px; color: var(--pmu); } .bd-m:empty { display: none !important; }
+  .bd-f { align-items: center; gap: 6px; margin-top: 2px; padding-top: 7px; border-top: 1px solid var(--pl); font-size: 12px; font-weight: 600; }
+  .bd-f .cx-agi { width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-style: normal; }
+  .bd-f em { margin-left: auto; font-style: normal; font-weight: 500; color: var(--pai); text-align: right; }
+  .bd-rules { columns: 2; column-gap: 24px; } .bd-rules li { break-inside: avoid; }
+  .bd-tx td { font-size: 13px; white-space: nowrap; }
+  .bd-x12 { margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--pl); border-radius: 8px; background: var(--pcl); font: 500 12px/18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; color: var(--pf); }
+  @container (max-width: 1080px) { .bd-b { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bd-k { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @container (max-width: 640px) { .bd-b, .bd-k { grid-template-columns: 1fr; } .bd-q input { width: 160px; } .bd-rules { columns: 1; } }
   .rt-flist { list-style: none; margin: 0 0 12px; padding: 0; } .rt-flist li { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--pl); }

@@ -55,62 +55,129 @@
     return ccWsForm === form ? '<section class="cx-card ws-form"><header><h3>' + title + '</h3></header><div class="ws-fg">' + fields + '</div><div class="ws-fa"><button type="button" class="cx-btn p" data-wssave="' + form + '">' + saveLabel + '</button><button type="button" class="cx-btn" data-wsform="">Cancel</button></div></section>' : "";
   }
 
-  var ccWsStep = -1;
   var WSDOCN = { "850": "Purchase order", "855": "Order acknowledgment", "860, 865": "Order change and acknowledgment", "856": "Ship notice", "856, 824": "Ship notice", "861": "Receiving advice", "810": "Invoice", "820": "Remittance advice",
     "812": "Debit memo", "812, 820": "Debit memo and remittance", "753": "Routing request", "754": "Routing instructions", "204, 990": "Load tender and response", "214": "Shipment status", "210": "Freight invoice",
-    "944": "Warehouse stock receipt", "940": "Warehouse shipping order", "945": "Warehouse shipping advice", "846, 947": "Warehouse inventory" };
+    "944": "Warehouse stock receipt", "860": "Order change", "865": "Order change acknowledgment", "990": "Load tender response", "846": "Inventory advice", "947": "Inventory adjustment", "940": "Warehouse shipping order", "945": "Warehouse shipping advice", "846, 947": "Warehouse inventory" };
   function wsDocName(c) { return WSDOCN[c] || ""; }
   var WSREF = { "850": "PO-", "855": "PO-", "860": "PO-", "856": "ASN-", "861": "RCV-", "810": "INV-", "820": "REM-", "812": "DM-", "753": "ROUTE-", "754": "ROUTE-", "204": "LOAD-", "214": "PRO-", "210": "FRT-", "944": "RCV-", "940": "WH-", "945": "WH-", "846": "INVRPT-" };
   var WSREJ = { "856": "Duplicate SSCC in carton loop", "856, 824": "Duplicate SSCC in carton loop", "810": "Unit price differs from the PO", "850": "Unknown ship-to location" };
-  /* Transactions at the selected step: control numbers, partner, business reference, acknowledgment and application advice status. Illustrative. */
-  function wsTx(i, k, s, code) {
-    var all = cxPartners(), first = code.split(",")[0], pre = WSREF[first] || "DOC-", fs = cxOpen().filter(function (f) { return f.p === i && f.st === k; });
-    /* Warehouse documents go to the 3PL, freight documents to the carrier, everything else to trading partners in production */
-    var ps = /^94/.test(first) ? [all[9]] : /^(204|214|210)/.test(first) ? [all[8]] : all.slice(0, 8).filter(function (p) { return p[2] === "Active"; });
-    var rows = [0, 1, 2, 3, 4, 5].map(function (j) {
-      var seed = i * 7919 + k * 613 + j * 97 + 4521, late = j < Math.min(2, s[2]), ack = j === 2 && s[3] > 0, rej = j === 3 && s[4] > 0, ex = late || ack || rej;
-      var f = ex && fs.length ? fs[Math.min(j, fs.length - 1)] : null, partner = f ? f.partner : ps[(j + k) % ps.length][0], mins = 9 * 60 + 29 - j * 47 - seed % 20;
-      var none = late && s[0] === "Out", tm = ("0" + Math.floor(mins / 60)).slice(-2) + ":" + ("0" + mins % 60).slice(-2);
-      var st = none ? '<span class="cx-st s-new"><i></i>Not sent</span>' : late ? '<span class="cx-st s-new"><i></i>Past SLA</span>' : rej ? '<span class="cx-st s-new"><i></i>Rejected</span>' : ack ? '<span class="cx-st s-known"><i></i>Awaiting 997</span>' : '<span class="cx-st s-resolved"><i></i>Accepted</span>';
-      return '<tr><td>' + (none ? "" : '<code>' + String(100000000 + seed * 13).slice(-9) + '</code>') + '</td><td>' + (none ? "" : '<code>' + (1000 + seed % 9000) + '</code>') + '</td><td>' + (none ? "" : '<code>' + ("000" + (j + 1)).slice(-4) + '</code>') + '</td><td>' + cxe(partner) + '</td>' +
-        '<td>' + pre + (10000 + seed % 89999) + '</td><td>' + tm + '</td><td>' + (none ? "" : ack ? "Overdue" : s[0] === "Out" ? "Received" : "Sent") + '</td><td>' + (rej ? cxe(WSREJ[code] || "Rejected") : "None") + '</td><td>' + st + '</td></tr>';
-    }).join("");
-    return cxCard("Transactions · " + code + " " + wsDocName(code), '<table class="cx-tbl ws-tx"><thead><tr><th>ISA13</th><th>GS06</th><th>ST02</th><th>Partner</th><th>Reference</th><th>Time</th><th>997</th><th>824</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table>',
-      "", '<span class="cx-note">' + s[1].toLocaleString("en-US") + ' today · showing 6</span><button type="button" class="cx-btn" data-wstgi>' + ci("ext") + 'Open in TG Insights</button>');
-  }
-  /* Business processes (Performance Monitor): one view per process in the client solution, plus the Solution document map.
-     The Retail pack adds retail process definitions and lenses for its workflows. */
+  /* Business processes (Performance Monitor): one board per process in the client solution, plus the Solution document map.
+     The board groups open EDI work by who must act next. The Retail pack adds its cases and a workflow lens. */
   var WSLENS = [];
+  var ccBd = { dir: "All", doc: "", pt: "", q: "" }, ccBdTask = {};
+  var BDFID = { "850": "PO", "855": "PR", "860": "PC", "865": "CA", "856": "SH", "810": "IN", "820": "RA", "812": "CD", "940": "OW", "945": "SW", "846": "IB", "753": "RF", "754": "RG", "204": "SM", "990": "GF", "214": "QM", "210": "IM", "861": "RC" };
+  var BDWF = { "850": "orders", "855": "orders", "860": "orders", "865": "orders", "940": "orders", "856": "shipments", "945": "shipments", "846": "shipments", "753": "shipments", "754": "shipments", "204": "shipments", "214": "shipments", "210": "invoices", "810": "invoices", "820": "invoices", "812": "invoices", "861": "invoices" };
+  function bdCols() {
+    var r = ccRole() === "retailer";
+    return [["us", "Waiting on us", "Documents we owe, must fix or must acknowledge"], ["pt", "Waiting on partner", "Documents and 997s owed to us"],
+      ["rj", r ? "Rejected by us" : "Rejected by partner", r ? "824 application advice sent" : "824 application advice received"], ["cl", "Cleared today", "Closed since 00:00 ET"]];
+  }
+  function bdCase(id) { return typeof RTDATA !== "undefined" ? RTDATA.cases.filter(function (c) { return c.id === id; })[0] : null; }
+  /* One view record per board item: the curated item merged with its finding or case */
+  function bdItems(i) {
+    var L = ((CCBOARD[ccRole()] || {})[i] || []).filter(function (c) { return !c.only || ccOn(c.only); });
+    return L.map(function (c) {
+      var f = c.f ? cxById(c.f) : null, rc = c.rt && ccOn("rt") ? bdCase(c.rt) : null, a = f ? CXAF[f.id] : null;
+      return { c: c, k: c.k, f: f, rc: rc, partner: f ? f.partner : c.p, sev: f ? (f.sev === "c" ? "h" : "m") : rc ? (rc.severity === "critical" ? "h" : "m") : c.c === "cl" ? "" : c.sla && c.sla[2] > 100 ? "m" : "",
+        agent: a ? a.n : c.ag || "", run: f ? cxRun(f.id) : false, done: f ? ccDone[f.id] : ccBdTask[c.k] ? 1 : 0, val: f ? f.val : c.val || 0, act: f ? f.act : rc ? rc.roles[ccRole()].nextAction : c.act, appr: f ? f.appr : c.appr,
+        wf: rc ? rc.workflow : BDWF[c.s] || "", mod: f ? (f.mod === "Integration Monitor" ? "IM" : "PM") : rc && c.only ? "RT" : c.ag === "Ivy" ? "IM" : "PM" };
+    });
+  }
+  /* Sample transactions behind an item: control numbers, business reference, acknowledgment state. Deterministic per item. */
+  function bdTx(v) {
+    var c = v.c, code = c.d.split(",")[0], ref = WSREF[code === "997" || code === "824" ? c.s : code] || "DOC-", rows = [];
+    var notSent = /^(Not sent|No \d{3} sent)/.test(c.ack || ""), notRecv = /^(Not received|No \d{3} received)/.test(c.ack || "");
+    for (var j = 0; j < Math.min(5, c.n || 1); j++) {
+      var seed = 0; for (var q = 0; q < c.k.length; q++) seed = seed * 31 + c.k.charCodeAt(q); seed = Math.abs(seed % 99991) + j * 977;
+      var mins = 9 * 60 + 25 - j * 17 - seed % 13, none = notSent || notRecv;
+      rows.push({ isa: none ? "" : String(100000000 + seed * 37).slice(-9), gs: none ? "" : String(1000 + seed % 9000), st: none ? "" : ("000" + (j + 1)).slice(-4),
+        ref: ref + (10000 + (seed * 7) % 89999), tm: ("0" + Math.floor(mins / 60)).slice(-2) + ":" + ("0" + mins % 60).slice(-2) });
+    }
+    return rows;
+  }
+  function bdText(v) { return [v.c.t, v.partner, v.c.d, v.c.s, v.c.ack, v.agent].concat(bdTx(v).map(function (r) { return r.ref + " " + r.isa + " " + r.gs; })).join(" ").toLowerCase(); }
+  function bdMatch(v) {
+    var lens = ccOn("rt") && ccWsLens !== "all" ? ccWsLens : "";
+    return (ccBd.dir === "All" || (ccBd.dir === "Inbound") === (v.c.dir === "In")) && (!ccBd.doc || v.c.s === ccBd.doc) && (!ccBd.pt || (v.partner || "").indexOf(ccBd.pt) >= 0) &&
+      (!ccBd.q || bdText(v).indexOf(ccBd.q.toLowerCase()) >= 0) && (!lens || v.wf === lens);
+  }
+  function bdCard(v) {
+    var c = v.c, code = c.d, ack = code === "997" || code === "824", nm = ack ? "for " + c.s + " " + (wsDocName(c.s) || "").toLowerCase() : wsDocName(code), sla = c.sla, over = sla && sla[2] > 100;
+    var state = v.done ? (v.done === 2 ? "Known issue" : v.run ? "Approved · running on Trading Grid" : "Task created for " + (v.appr || "the owner")) : c.c === "cl" ? "Cleared " + c.at : c.pred ? "Predicted · " + (v.appr ? "handoff to " + v.appr : "") : v.run ? "Runs on Trading Grid after approval" : v.appr ? "Handoff to " + v.appr : "";
+    return '<li><button type="button" class="bd-c' + (ccDr && ccDr[0] === "bd" && ccDr[1] === c.k ? " on" : "") + (v.done ? " dn" : "") + '" data-wsbd="' + c.k + '">' +
+      '<span class="bd-h"><code>' + cxe(code) + '</code><span class="bd-dir">' + c.dir + '</span><span class="bd-dn">' + cxe(nm) + '</span>' + (v.sev === "h" ? cxSevChip("h") : "") + '</span>' +
+      '<b class="bd-t">' + cxe(c.t) + '</b><span class="bd-p">' + cxe(v.partner || "") + (c.age ? ' · oldest ' + cxe(c.age) : "") + (v.val ? ' · $' + v.val.toLocaleString("en-US") : "") + '</span>' +
+      (sla ? '<span class="bd-sla"><span>' + cxe(sla[0]) + '</span><em' + (over ? ' class="w"' : "") + '>' + cxe(sla[1]) + '</em></span><span class="cx-pb bd-pb' + (over ? " w" : "") + '"><i style="width:' + Math.min(100, sla[2]) + '%"></i></span>' : "") +
+      (c.rej ? '<span class="bd-rj"><code>TED01 ' + c.rej[0] + '</code>' + cxe(c.rej[2]) + '</span>' : "") +
+      '<span class="bd-m">' + (c.ack ? '<span>' + cxe(c.ack) + '</span>' : "") + (c.nt ? '<span>' + cxe(c.nt) + '</span>' : "") + '</span>' +
+      '<span class="bd-f">' + (v.agent ? '<span class="cx-agi">' + cxe(v.agent.charAt(0)) + '</span>' + cxe(v.agent) : "") + (state ? '<em>' + cxe(state) + '</em>' : "") + '</span></button></li>';
+  }
+  function bdSum(list) { return list.reduce(function (a, v) { return a + (v.c.n || 0); }, 0); }
   CXS["ws-proc"] = function () {
+    if (ccWsProc !== "sol" && ccSol().indexOf(+ccWsProc) < 0) ccWsProc = String(ccSol()[0]);
     var seg = '<nav class="ws-lens ws-pseg" aria-label="Business process"><span>Process</span>' + ccSol().map(function (i) { return '<button type="button" data-wsproc="' + i + '" aria-pressed="' + (ccWsProc === String(i)) + '">' + cxe(ccShort(i)) + '</button>'; }).join("") +
       '<button type="button" data-wsproc="sol" aria-pressed="' + (ccWsProc === "sol") + '">Solution</button></nav>';
     var h = wsHead("Business processes", "") + seg;
     if (ccWsProc === "sol") return h + '<p class="cx-lead">Business documents in the client solution, with their EDI and ERP equivalents.</p>' +
       cxCard("", '<table class="cx-tbl"><thead><tr><th>Business document</th><th>EDI documents</th><th>Typical ERP document (not monitored)</th><th>Processes</th></tr></thead><tbody>' + cxSol().map(function (r) {
         return '<tr><td><b>' + r[0] + '</b></td><td><code>' + r[1] + '</code></td><td>' + (r[2] || "None") + '</td><td>' + cxe(cxProcNames(r[3])) + '</td></tr>'; }).join("") + '</tbody></table>');
-    if (ccSol().indexOf(+ccWsProc) < 0) ccWsProc = String(ccSol()[0]);
-    var i = +ccWsProc, P = ccProc(i), F = ccFlow(i), K = CCKPI[ccRole()][i], lenses = ccOn("rt") ? WSLENS : [], lens = lenses.filter(function (l) { return l.k === ccWsLens; })[0];
-    var items = cxSort(ccItems().filter(function (x) { return x.proc === i && !x.done && (!lens || lens.match(x)); })), core = cxOpen().filter(function (f) { return f.p === i && ccOn(f.mod === "Integration Monitor" ? "im" : "pm"); });
-    var vis = ccSteps(i), exc = function (k) { var s = F.steps[k]; return s[2] + s[3] + s[4]; };
-    if (!vis.some(function (p) { return p[0] === ccWsStep; })) ccWsStep = vis.slice().sort(function (a, b) { return exc(b[0]) - exc(a[0]); })[0][0];
-    var rows = vis.map(function (p, n) {
-      var k = p[0], s = F.steps[k], code = ccStepDoc(p[1]).split(" / ")[0], fs = core.filter(function (f) { return f.st === k; }), sev = fs.some(function (f) { return f.sev === "c"; }) ? "c" : exc(k) ? "w" : "ok";
-      function c(v, cls) { return '<td class="n' + (v ? " " + cls : "") + '">' + (v ? v.toLocaleString("en-US") : "0") + '</td>'; }
-      return '<tr class="ws-st ' + sev + (k === ccWsStep ? " on" : "") + '" data-wsstep="' + k + '"><td><span class="ws-sn">' + (n + 1) + '</span></td><td><b><code>' + cxe(code) + '</code> ' + cxe(wsDocName(code)) + '</b><small>' + cxe(ccStepName(i, k)) + '</small></td><td>' + s[0] + '</td>' +
-        c(s[1], "") + c(s[2], "w") + c(s[3], "w") + c(s[4], "c") + '<td>' + s[5] + '</td><td>' + fs.map(function (f) { return '<button type="button" class="cx-lk" data-cxf="' + f.id + '">' + cxe(f.ot) + '</button>'; }).join("") + '</td></tr>';
+    var i = +ccWsProc, F = ccFlow(i), K = CCKPI[ccRole()][i], all = bdItems(i), vis = all.filter(bdMatch), cols = bdCols();
+    var by = function (list, k) { return list.filter(function (v) { return v.c.c === k; }); };
+    /* Document flow: one step per EDI document on Trading Grid; selecting a step filters the board */
+    var steps = ccSteps(i).map(function (p) {
+      var k = p[0], s = F.steps[k], code = ccStepDoc(p[1]).split(" / ")[0], first = code.split(",")[0].trim(), open = all.filter(function (v) { return v.c.s === first && v.c.c !== "cl"; }).length;
+      return '<li><button type="button" data-wsbddoc="' + first + '" aria-pressed="' + (ccBd.doc === first) + '"><span class="bd-sh"><code>' + cxe(code) + '</code><span>' + s[0] + '</span></span><b>' + cxe(ccStepName(i, k)) + '</b>' +
+        '<span class="bd-sn"><strong>' + s[1].toLocaleString("en-US") + '</strong> today</span><span class="bd-so' + (open ? " w" : "") + '">' + (open ? open + (open === 1 ? " open item" : " open items") : "No open items") + '</span></button></li>';
     }).join("");
-    var flow = '<table class="cx-tbl ws-ft"><thead><tr><th></th><th>Document and step</th><th>Direction</th><th class="n">Today</th><th class="n">Past SLA</th><th class="n">997 overdue</th><th class="n">824 rejects</th><th>Oldest open</th><th>Findings</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    var pts = all.map(function (v) { return v.partner; }).join(", ").split(/,\s*/).filter(function (p, n, a) { return p && a.indexOf(p) === n && !/^\d/.test(p); }).sort();
+    var lenses = ccOn("rt") ? WSLENS : [];
+    var filt = '<div class="bd-fb"><span class="cx-seg" role="group" aria-label="Direction">' + ["All", "Inbound", "Outbound"].map(function (o) { return '<button type="button" data-wsbddir="' + o + '" aria-pressed="' + (ccBd.dir === o) + '">' + o + '</button>'; }).join("") + '</span>' +
+      '<label class="bd-sel"><span>Partner</span><select data-wsbdpt aria-label="Partner"><option value="">All partners</option>' + pts.map(function (p) { return '<option' + (p === ccBd.pt ? " selected" : "") + '>' + cxe(p) + '</option>'; }).join("") + '</select></label>' +
+      (lenses.length ? '<label class="bd-sel"><span>Retail workflow</span><select data-wsbdlens aria-label="Retail workflow"><option value="all">All workflows</option>' + lenses.map(function (l) { return '<option value="' + l.k + '"' + (ccWsLens === l.k ? " selected" : "") + '>' + cxe(l.n) + '</option>'; }).join("") + '</select></label>' : "") +
+      '<label class="bd-q">' + ci("search") + '<input type="search" data-wsbdq value="' + cxe(ccBd.q) + '" placeholder="PO, ASN, invoice or control number" aria-label="Search references and control numbers"></label>' +
+      (ccBd.dir !== "All" || ccBd.doc || ccBd.pt || ccBd.q || ccWsLens !== "all" && lenses.length ? '<button type="button" class="cx-lk" data-wsbdclr>Clear filters</button>' : "") + '<span class="cx-note bd-n">' + vis.length + ' of ' + all.length + ' items</span></div>';
+    var board = '<div class="bd-b">' + cols.map(function (col) {
+      var L = by(vis, col[0]), n = bdSum(L);
+      return '<section class="bd-col" aria-label="' + col[1] + '"><header><h3>' + col[1] + '</h3><em>' + L.length + '</em></header><p>' + col[2] + (L.length ? ' · ' + n.toLocaleString("en-US") + (n === 1 ? " document" : " documents") : "") + '</p>' +
+        '<ul>' + (L.length ? L.map(bdCard).join("") : '<li class="cx-empty">' + (all.some(function (v) { return v.c.c === col[0]; }) ? "No items match the filters." : col[0] === "rj" ? "No 824 rejections today." : "Nothing waiting.") + '</li>') + '</ul></section>';
+    }).join("") + '</div>';
     var rules = CXR.filter(function (r) { return cxRuleP(r).indexOf(i) >= 0 && cxAgents().some(function (a) { return a.id === r[0]; }); });
-    var docs = cxSol().filter(function (r) { return r[3].indexOf(i) >= 0; });
-    var lensNav = lenses.length ? '<nav class="ws-lens" aria-label="Retail lens"><span>Retail lens</span>' + [{ k: "all", n: "All findings" }].concat(lenses).map(function (l) { return '<button type="button" data-wslens="' + l.k + '" aria-pressed="' + ((lens ? lens.k : "all") === l.k) + '">' + l.n + '</button>'; }).join("") + '</nav>' : "";
-    return h + '<div class="cx-fsum ws-pk">' + cxKpi("Documents today", F.n.toLocaleString("en-US"), Math.round(100 * F.ok / F.n) + "% on track") + cxKpi("At risk or breached", F.risk + F.br, F.br + " breached") +
-      cxKpi("Open findings", items.length, items.filter(function (x) { return x.sev === "h"; }).length + " high severity") + cxKpi(cxe(K[0]), K[1], "Last 30 days") + '</div>' +
-      cxCard("Document flow", flow, "", '<span class="cx-note">EDI documents on Trading Grid. Select a step for its transactions.</span>') + wsTx(i, ccWsStep, F.steps[ccWsStep], ccStepDoc(ccProc(i).steps[ccWsStep]).split(" / ")[0]) +
-      '<div class="cx-g21">' + cxCard("Open findings", lensNav + '<table class="cx-tbl cx-pf"><thead><tr><th>Finding</th><th>Module</th><th>Severity</th><th>Detected</th></tr></thead><tbody>' + items.map(function (x) {
-        return '<tr><td>' + cxItemLink(x, "b") + '<small>' + cxe(x.partner) + '</small></td><td>' + cxTag(x.mod) + '</td><td>' + cxSevChip(x.sev) + '</td><td>' + cxe(x.at) + '</td></tr>'; }).join("") +
-        (items.length ? "" : '<tr><td colspan="4" class="cx-empty">No open findings.</td></tr>') + '</tbody></table>') +
-      cxCard("Rules and documents", '<ul class="cx-agr">' + rules.map(function (r) { var a = CXA.filter(function (x) { return x.id === r[0]; })[0]; return '<li>' + ci("check") + cxe(r[1]) + ' <small class="ws-mu">' + a.n + '</small></li>'; }).join("") + '</ul><h4 class="cx-sh">Documents</h4><p class="ws-docs">' + docs.map(function (r) { return '<code>' + r[1].split(",")[0] + '</code> ' + r[0]; }).join(" · ") + '</p>', "", cxGoBtn("Rules", "cfg")) + '</div>';
+    var k = function (c) { var L = by(all, c); return [L.length, bdSum(L)]; }, u = k("us"), p = k("pt"), rj = k("rj"), cl = k("cl");
+    return h + '<div class="cx-fsum bd-k">' + cxKpi("Documents today", F.n.toLocaleString("en-US"), Math.round(100 * F.ok / F.n) + "% on track") +
+      cxKpi("Waiting on us", u[1].toLocaleString("en-US"), u[0] + " items") + cxKpi("Waiting on partner", p[1].toLocaleString("en-US"), p[0] + " items") +
+      cxKpi(cols[2][1], rj[1].toLocaleString("en-US"), rj[0] + " items · 824") + cxKpi(cxe(K[0]), K[1], "Last 30 days") + '</div>' +
+      cxCard("Document flow", '<ol class="bd-flow">' + steps + '</ol>', "bd-fc", '<span class="cx-note">EDI documents on Trading Grid. Select a document to filter the board.</span>') +
+      filt + board +
+      cxCard("Rules on this process", '<ul class="cx-agr bd-rules">' + rules.map(function (r) { var a = CXA.filter(function (x) { return x.id === r[0]; })[0]; return '<li>' + ci("check") + cxe(r[1]) + ' <small class="ws-mu">' + a.n + '</small></li>'; }).join("") + '</ul>', "", cxGoBtn("Rules", "cfg"));
   };
+  /* Item drawer: control numbers, acknowledgment and application advice detail, segments, and the next action */
+  function bdDrawer() {
+    var i = +ccWsProc, v = bdItems(i).filter(function (x) { return x.c.k === ccDr[1]; })[0];
+    if (!v) { ccDr = null; return ""; }
+    var c = v.c, col = bdCols().filter(function (x) { return x[0] === c.c; })[0], code = c.d.split(",")[0], rows = bdTx(v), out = c.dir === "Out";
+    var is997 = code === "997", is824 = code === "824", missing = /^(No |Not )/.test(c.ack || ""), fid = BDFID[c.s] || "IN";
+    var ackCol = is824 ? "OTI01" : is997 || c.c === "pt" ? "AK9" : "997";
+    var tx = '<table class="cx-tbl bd-tx"><thead><tr><th>ISA13</th><th>GS06</th><th>ST02</th><th>Reference</th><th>Time</th><th>' + ackCol + '</th></tr></thead><tbody>' + rows.map(function (r) {
+      var st = is824 ? "TR" : c.c === "cl" ? "A" : missing ? "None" : "A";
+      return '<tr><td>' + (r.isa ? '<code>' + r.isa + '</code>' : "Not sent") + '</td><td>' + (r.gs ? '<code>' + r.gs + '</code>' : "") + '</td><td>' + (r.st ? '<code>' + r.st + '</code>' : "") + '</td><td>' + r.ref + '</td><td>' + r.tm + '</td><td>' + st + '</td></tr>'; }).join("") +
+      '</tbody></table><p class="cx-note">' + (c.n > 5 ? "First 5 of " + c.n.toLocaleString("en-US") + " · " : "") + cxe(c.d) + ' ' + (out ? "outbound" : "inbound") + ' · <button type="button" class="cx-lk" data-wstgi>Open in TG Insights</button></p>';
+    var r0 = rows[0], seg = "";
+    if (is824) seg = "ST*824*0001~\nBGN*00*" + r0.ref.replace(/\D/g, "") + "*20261024~\nOTI*TR*" + (c.s === "856" ? "SI" : "IV") + "*" + r0.ref + "~\nTED*" + c.rej[0] + "*" + c.rej[2].toUpperCase() + "~\nSE*5*0001~";
+    else if (is997 && missing) seg = "Expected, not " + (out ? "sent" : "received") + ":\nST*997*0001~\nAK1*" + fid + "*" + (r0.gs || "4521") + "~\nAK9*A*" + Math.min(5, c.n) + "*" + Math.min(5, c.n) + "*" + Math.min(5, c.n) + "~\nSE*4*0001~";
+    var dl = [["Partner", cxe(v.partner || "")], ["Document", '<code>' + cxe(c.d) + '</code> ' + (is997 || is824 ? (is997 ? "Functional acknowledgment" : "Application advice") + ' for the ' + c.s + ' ' + cxe((wsDocName(c.s) || "").toLowerCase()) : cxe(wsDocName(code))) + ', ' + (out ? "outbound" : "inbound")],
+      c.sla ? ["Service level", cxe(c.sla[0]) + ' · ' + cxe(c.sla[1])] : null, c.ack ? ["Acknowledgment", cxe(c.ack)] : null, c.rej ? ["Application advice", 'OTI01 TR · TED01 ' + c.rej[0] + ' ' + cxe(c.rej[1]) + ' · ' + cxe(c.rej[2])] : null,
+      v.agent ? ["Agent", cxe(v.agent)] : null, v.val ? ["Value at risk", "$" + v.val.toLocaleString("en-US")] : null, c.age ? ["Oldest open", cxe(c.age)] : c.at ? ["Cleared", "Today, " + c.at] : null].filter(Boolean);
+    var foot = v.f ? (v.done ? '<span class="cx-done">' + ci("ok") + (v.done === 2 ? "Marked as known issue" : v.run ? "Approved. Runs on Trading Grid; closes when the documents are exchanged." : "Task created for " + cxe(v.appr || "the owner") + ".") + '</span>' :
+        '<button type="button" class="cx-btn p" data-cxapp="' + v.f.id + '">' + (v.run ? "Approve and run" : "Create task for " + cxe(v.appr || "owner")) + '</button>') + '<button type="button" class="cx-btn" data-cxf="' + v.f.id + '">Open finding</button>' :
+      v.rc ? '<button type="button" class="cx-btn p" data-rt-case="' + cxe(v.rc.id) + '">Open case</button>' : c.c !== "cl" && v.appr ? '<button type="button" class="cx-btn p" data-wsbdtask="' + c.k + '">Create task for ' + cxe(v.appr) + '</button>' : "";
+    var h = '<header><span><p>' + cxe(ccShort(i)) + ' · ' + col[1] + '</p><h3>' + cxe(c.t) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
+      '<p class="cx-chipsr">' + (v.sev === "h" ? cxSevChip("h") : v.sev === "m" ? cxSevChip("m") : "") + cxTag(v.mod) + (c.pred ? '<span class="cx-tg">Prediction</span>' : "") + '</p>' +
+      '<dl class="cx-dl">' + dl.map(function (d) { return '<div><dt>' + d[0] + '</dt><dd>' + d[1] + '</dd></div>'; }).join("") + '</dl>' +
+      '<h4>Transactions</h4>' + tx + (seg ? '<h4>' + (is824 ? "824 segments" : "997 segments") + '</h4><pre class="bd-x12">' + cxe(seg) + '</pre>' : "") +
+      (v.act ? '<h4>Recommended action</h4><div class="cx-rec">' + ci("bot") + '<span>' + cxe(v.act) + (v.appr ? '<small>Approver: ' + cxe(v.appr) + '</small>' : "") + '</span></div>' : "") +
+      '</div>' + (foot ? '<div class="cx-ft">' + foot + '</div>' : "");
+    return '<div class="cx-scrim" data-cxclose></div><aside class="cx-dr bd-dr" role="dialog" aria-modal="true">' + h + '</aside>';
+  }
 
   /* Dashboards: Overview tabs. Prebuilt by package, plus custom dashboards from the component library */
   var WSPRE = [{ k: "pm", n: function () { return ccRole() === "retailer" ? "Supplier scorecard" : ccOn("rt") ? "Scorecard with retail accounts" : "Scorecard with customers"; }, t: "pm", h: function () { return cxScorecard(); } }];
@@ -222,7 +289,7 @@
 
   /* Shell hooks */
   var wsBaseDrawer = cxDrawer;
-  cxDrawer = function () { return ccDr && ccDr[0] === "rule" && ccRw ? rwDrawer() : wsBaseDrawer(); };
+  cxDrawer = function () { return ccDr && ccDr[0] === "rule" && ccRw ? rwDrawer() : ccDr && ccDr[0] === "bd" ? bdDrawer() : wsBaseDrawer(); };
   var wsBaseRender = cxRender;
   cxRender = function () {
     wsLoad(); wsBaseRender();
@@ -230,10 +297,14 @@
     var dr = cx.querySelector(".cx-dr.rw"); if (dr) { var f = dr.querySelector(".cx-db input, .cx-db select, .cx-db textarea, .cx-db button"); if (f && document.activeElement === document.body) f.focus({ preventScroll: true }); }
   };
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-wsproc],[data-wsstep],[data-wstgi],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
+    var b = e.target.closest("[data-wsproc],[data-wsbd],[data-wsbddoc],[data-wsbddir],[data-wsbdclr],[data-wsbdtask],[data-wstgi],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
     var W = wsLoad(), v;
-    if (b.hasAttribute("data-wsproc")) { ccWsProc = b.getAttribute("data-wsproc"); ccWsStep = -1; }
-    else if (b.hasAttribute("data-wsstep") && !e.target.closest("[data-cxf]")) { ccWsStep = +b.getAttribute("data-wsstep"); }
+    if (b.hasAttribute("data-wsproc")) { ccWsProc = b.getAttribute("data-wsproc"); ccBd = { dir: "All", doc: "", pt: "", q: "" }; }
+    else if (b.hasAttribute("data-wsbd")) { ccDr = ["bd", b.getAttribute("data-wsbd")]; }
+    else if (b.hasAttribute("data-wsbddoc")) { v = b.getAttribute("data-wsbddoc"); ccBd.doc = ccBd.doc === v ? "" : v; }
+    else if (b.hasAttribute("data-wsbddir")) { ccBd.dir = b.getAttribute("data-wsbddir"); }
+    else if (b.hasAttribute("data-wsbdclr")) { ccBd = { dir: "All", doc: "", pt: "", q: "" }; ccWsLens = "all"; }
+    else if (b.hasAttribute("data-wsbdtask")) { v = bdItems(+ccWsProc).filter(function (x) { return x.c.k === b.getAttribute("data-wsbdtask"); })[0]; ccBdTask[v.c.k] = 1; cxToast("Task created for " + v.appr + "."); }
     else if (b.hasAttribute("data-wstgi")) { cxToast("TG Insights opens with these transactions in the product. It is not connected in this prototype."); }
     else if (b.hasAttribute("data-cxwsproc")) { ccWsProc = b.getAttribute("data-cxwsproc"); cxGo("ws-proc"); return; }
     else if (b.hasAttribute("data-wsform")) { ccWsForm = b.getAttribute("data-wsform"); }
@@ -271,6 +342,10 @@
   });
   cx.addEventListener("change", function (e) {
     var el = e.target;
+    if (el.hasAttribute && (el.hasAttribute("data-wsbdpt") || el.hasAttribute("data-wsbdq") || el.hasAttribute("data-wsbdlens"))) {
+      if (el.hasAttribute("data-wsbdpt")) ccBd.pt = el.value; else if (el.hasAttribute("data-wsbdq")) ccBd.q = String(el.value || "").trim(); else ccWsLens = el.value;
+      cxRender(); var nx = cx.querySelector(el.hasAttribute("data-wsbdq") ? "[data-wsbdq]" : el.hasAttribute("data-wsbdpt") ? "[data-wsbdpt]" : "[data-wsbdlens]"); if (nx) nx.focus({ preventScroll: true }); return;
+    }
     if (el.hasAttribute && el.hasAttribute("data-rwfile") && ccRw) { rwRead(); ccRw.file = el.files && el.files[0] ? el.files[0].name : ""; ccRw.ref = ccRw.file ? "Uploaded file" : "None"; cxRender(); }
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && ccDr && ccDr[0] === "rule") { e.preventDefault(); ccRw = null; ccDr = null; cxRender(); } });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && ccDr && ccDr[0] === "rule") { e.preventDefault(); ccRw = null; ccDr = null; cxRender(); } else if (e.key === "Escape" && ccDr && ccDr[0] === "bd") { e.preventDefault(); ccDr = null; cxRender(); } });
