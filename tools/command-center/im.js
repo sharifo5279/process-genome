@@ -9,7 +9,9 @@
   var IMBANDS = [["10K and above", 3, 10000], ["2K to 10K", 14, 2000], ["500 to 2K", 46, 500], ["Under 500", 100, 1], ["No traffic in 30 days", 45, 0]];
   function imPt(name) { var ps = cxPartners(); for (var k = 0; k < ps.length; k++) if (ps[k][0] === name) return k; return 0; }
   function imBandOf(v) { for (var b = 0; b < IMBANDS.length; b++) if (v >= IMBANDS[b][2]) return b; return IMBANDS.length - 1; }
-  function imKind(k) { return k === 8 ? "carrier" : k === 9 ? "3pl" : "trade"; }
+  function imKind(k) { return k === 8 || k === 9 && ccRole() === "retailer" ? "carrier" : k === 9 ? "3pl" : "trade"; }
+  /* Per-perspective error: the retailer's Meadowline Care connection fails on the moved endpoint, not on signatures */
+  function imE(k) { var e = IMPT[k].slice(); if (k === 1 && ccRole() === "retailer") e[3] = "AS2 connection refused"; return e; }
   /* Document types seen from the client: In is received, Out is sent */
   var IMDOCS = ["850", "855", "856", "810", "820", "846", "214", "940", "945"];
   function imDir(d, k) {
@@ -33,9 +35,9 @@
   CXDASH.push({ o: 5, mod: "IM", w: 6, t: "Daily digest · yesterday", h: function () {
     var ps = cxPartners();
     return '<div class="im-dg"><div class="cx-k4">' + cxKpi("Documents", "4,612", '<em class="up">↑ 4% vs prior day</em>') + cxKpi("Failed transactions", "37", "Across 9 partners") +
-      cxKpi("Partners onboarded", "2", ps[6][0] + " and 1 more") + cxKpi("Anomalies detected", "3", "2 volume, 1 failed transactions") + '</div>' +
+      cxKpi("Partners in onboarding", "1", ps[6][0] + ", testing since Oct 20") + cxKpi("Anomalies detected", "3", "2 volume, 1 failed transactions") + '</div>' +
       '<table class="cx-tbl"><thead><tr><th>Top partners by volume</th><th class="n">Documents</th><th class="n">Errors</th><th>Most common error</th></tr></thead><tbody>' +
-      [[0, 6], [1, 3], [2, 4], [3, 2], [5, 5]].map(function (x) { var k = x[0]; return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(ps[k][0]) + '">' + cxe(ps[k][0]) + '</button></td><td class="n">' + Math.round(IMPT[k][1] / 30).toLocaleString("en-US") + '</td><td class="n">' + x[1] + '</td><td>' + cxe(IMPT[k][3]) + '</td></tr>'; }).join("") + '</tbody></table>' +
+      [[0, 4], [1, 3], [2, 4], [3, 2], [5, 5]].map(function (x) { var k = x[0]; return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(ps[k][0]) + '">' + cxe(ps[k][0]) + '</button></td><td class="n">' + Math.round(IMPT[k][1] / 30).toLocaleString("en-US") + '</td><td class="n">' + x[1] + '</td><td>' + cxe(imE(k)[3]) + '</td></tr>'; }).join("") + '</tbody></table>' +
       '<div class="cx-kpi cx-ka2 im-ka"><span>' + ci("spark") + 'Key analysis</span><small>Volume rose 4% on order traffic. Failed transactions stayed within the normal range; ' + cxe(ps[5][0]) + ' had the most, all for a missing required segment.</small></div></div>'; },
     f: function () { return '<span class="cx-note">Daily Summarizer and Explainer Agent · Generated 06:00</span>'; } });
 
@@ -43,11 +45,11 @@
   CXS["im-vol"] = function () {
     var ps = cxPartners(), v = imVol, seed = [v.dt, v.pt, v.ad, v.st, v.sol].filter(function (x) { return x !== "All"; }).length;
     var f = 1 / (1 + seed * 1.6), n = v.per === "1" ? 30 : v.per === "24" ? 24 : 12;
-    var base = v.per === "1" ? [4410, 4520, 4610, 4580, 3120, 2410, 4460, 4550, 4640, 4600, 4590, 3180, 2470, 4490, 4620, 4700, 4660, 4610, 3240, 2520, 4520, 4650, 4720, 4690, 4630, 3260, 2550, 4580, 4612, 4700]
+    var base = v.per === "1" ? [2450, 3187, 4526, 4579, 4632, 4685, 4438, 2543, 3206, 4597, 4650, 4703, 4456, 4509, 2526, 3225, 4668, 4421, 4474, 4527, 4580, 2509, 3244, 4439, 4492, 4545, 4598, 4651, 4612, 1350]
       : v.per === "24" ? [3410, 3480, 3520, 3600, 3550, 3490, 3620, 3700, 3760, 3740, 3800, 3790, 3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590]
       : [3820, 3960, 4100, 4120, 4010, 3890, 4240, 4380, 4510, 4460, 4620, 4590];
     var wk = v.gr === "Week" ? 7 : 1, vals = base.map(function (x) { return Math.round(x * f * wk); }), mx = Math.max.apply(null, vals);
-    var xl = v.per === "1" ? vals.map(function (_, i) { return i % 5 === 0 ? "Day " + (i + 1) : ""; })
+    var xl = v.per === "1" ? vals.map(function (_, i) { return i % 5 === 4 ? ["Sep 29", "Oct 4", "Oct 9", "Oct 14", "Oct 19", "Oct 24"][Math.floor(i / 5)] : ""; })
       : v.per === "24" ? ["Nov", "", "Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", "", "Nov", "", "Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", ""] : ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"];
     function sel(key, label, opts) { return '<label class="ws-f"><span>' + label + '</span><select data-imvol="' + key + '">' + ["All"].concat(opts).map(function (o) { return '<option' + (o === v[key] ? " selected" : "") + '>' + cxe(o) + '</option>'; }).join("") + '</select></label>'; }
     function seg(key, opts) { return opts.map(function (o) { return '<button type="button" data-imseg="' + key + ':' + o[0] + '" aria-pressed="' + (v[key] === o[0]) + '">' + o[1] + '</button>'; }).join(""); }
@@ -60,7 +62,7 @@
       (seed ? '<button type="button" class="cx-btn" data-imclear>Clear refinements</button>' : "") + '</aside><div>' +
       cxCard("Transaction volume", '<nav class="ws-lens" aria-label="Period"><span>Period</span>' + seg("per", [["1", "1 month"], ["12", "12 months"], ["24", "24 months"]]) + '<span class="im-gap">By</span>' + seg("gr", [["Day", "Day"], ["Week", "Week"]]) + '</nav>' +
         cxLine([{ v: vals, area: true }], { w: 860, h: 240, min: 0, max: Math.ceil(mx * 1.2 / 100) * 100, xl: xl, label: "Transaction volume" }) +
-        '<p class="cx-note">' + (seed ? seed + " refinement" + (seed > 1 ? "s" : "") + " applied · " : "All traffic · ") + "Documents per " + v.gr.toLowerCase() + ", " + (v.per === "1" ? "last 30 days" : "last " + v.per + " months") + '</p>') +
+        '<p class="cx-note">' + (seed ? seed + " refinement" + (seed > 1 ? "s" : "") + " applied · " : "All traffic · ") + "Documents per " + v.gr.toLowerCase() + ", " + (v.per === "1" ? "last 30 days; today is partial to 09:30" : "last " + v.per + " months") + '</p>') +
       cxCard("By document type", cxBars(mix.map(function (m) { return [m[0], m[1], "", "b"]; }), { max: 40, fmt: function (x) { return x + "%"; } })) + '</div></div>';
   };
 
@@ -86,7 +88,7 @@
     if (imIa === "err") {
       var rows = ps.map(function (p, k) { return [p, k]; }).filter(function (x) { return IMPT[x[1]][2] > 0; }).sort(function (a, b) { return IMPT[b[1]][2] - IMPT[a[1]][2]; });
       return nav + cxCard("Transaction processing errors, last 30 days", '<table class="cx-tbl"><thead><tr><th>Partner</th><th class="n">Errors</th><th class="n">Error rate</th><th>Most common error</th><th>Protocol</th></tr></thead><tbody>' + rows.map(function (x) {
-        var e = IMPT[x[1]]; return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(x[0][0]) + '">' + cxe(x[0][0]) + '</button></td><td class="n">' + e[2] + '</td><td class="n">' + (100 * e[2] / Math.max(1, e[1])).toFixed(2) + '%</td><td>' + cxe(e[3]) + '</td><td>' + e[0] + '</td></tr>'; }).join("") + '</tbody></table>');
+        var e = imE(x[1]); return '<tr><td><button type="button" class="cx-lk" data-impt="' + cxe(x[0][0]) + '">' + cxe(x[0][0]) + '</button></td><td class="n">' + e[2] + '</td><td class="n">' + (100 * e[2] / Math.max(1, e[1])).toFixed(2) + '%</td><td>' + cxe(e[3]) + '</td><td>' + e[0] + '</td></tr>'; }).join("") + '</tbody></table>');
     }
     if (imIa === "pro") {
       var pro = [["AS2", 96], ["VAN", 52], ["SFTP", 38], ["API", 14], ["Web forms", 8]];
@@ -102,7 +104,7 @@
   var imBaseDrawer = cxDrawer;
   cxDrawer = function () {
     if (!ccDr || ccDr[0] !== "pt") return imBaseDrawer();
-    var ps = cxPartners(), k = imPt(ccDr[1]), p = ps[k], e = IMPT[k], docs = IMDOCS.filter(function (d) { return imCell(k, d); });
+    var ps = cxPartners(), k = imPt(ccDr[1]), p = ps[k], e = imE(k), docs = IMDOCS.filter(function (d) { return imCell(k, d); });
     var a1 = "ZZ:" + p[1], a2 = "01:" + (100000000 + k * 7316451), split = e[1] ? [Math.round(e[1] * 0.78), e[1] - Math.round(e[1] * 0.78)] : [0, 0];
     var h = '<header><span><p>Partner details</p><h3>' + cxe(p[0]) + '</h3></span><button type="button" class="cx-ic" data-cxclose aria-label="Close">' + ci("x") + '</button></header><div class="cx-db">' +
       '<dl class="cx-dl"><div><dt>Status</dt><dd>' + p[2] + '</dd></div><div><dt>Alias</dt><dd><code>' + p[1] + '</code></dd></div><div><dt>Protocol</dt><dd>' + e[0] + '</dd></div><div><dt>Onboarded</dt><dd>' + p[4] + '</dd></div><div><dt>Last activity</dt><dd>' + p[5] + '</dd></div></dl>' +

@@ -1,9 +1,9 @@
   /* Command Center data for Retail and CPG. Illustrative values for the concept preview. */
   var CCF = [
     { id: "f1", p: 0, st: 2, sev: "c", mod: "Performance Monitor", how: "Rule and prediction", pil: "Extend", dp: 2, partner: "Northfield Stores", n: 14, val: 8400, at: "07:10",
-      ot: "Ship notices not sent for 14 shipments", os: "Carrier pickup confirmed at 06:10. No 856 sent, and the loads arrive at the DC in about 5 hours.",
+      ot: "Ship notices not sent for 14 shipments", os: "Crestline Logistics confirmed 14 loads shipped (945) at 06:10. No 856 sent to Northfield Stores, and the loads arrive at its DC in about 5 hours.",
       bt: "14 shipments arriving before their ship notice", bs: "Northfield Stores cannot receive the loads by scan until the ship notices arrive.",
-      ev: [["05:45", "Last 856 sent to Northfield Stores"], ["06:10", "Carrier pickup events (214) for 14 loads"], ["07:10", "Rule breached: no 856 within 1 hour of pickup"], ["08:05", "Predicted arrival before ship notice for all 14 loads"]],
+      ev: [["05:45", "Last 856 sent to Northfield Stores"], ["06:10", "Shipping advice (945) from Crestline Logistics for 14 loads"], ["07:10", "Rule breached: no 856 within 1 hour of shipment"], ["08:05", "Predicted arrival before ship notice for all 14 loads"]],
       cause: "No 856 has been sent since 05:45, while 855 and 810 traffic continues. The ship notice feed into Trading Grid stopped.",
       act: "Notify shipping and the ERP team that the 856 feed stopped at 05:45, then confirm the 14 notices are sent and accepted.", appr: "EDI operations lead",
       area: "Missing documents", who: ["Supply chain", "IT and ERP", "Customer service"] },
@@ -12,9 +12,9 @@
       bt: "Harbor Grocers orders down 64% this morning", bs: "About $182,000 in expected orders has not arrived in this window.",
       ev: [["05:52", "Last 850 interchange received"], ["06:30", "Volume fell below the projected band"], ["06:41", "AS2 receipts from the partner failing signature checks"], ["07:15", "Anomaly confirmed across two order windows"]],
       cause: "The partner rotated its AS2 signing certificate. Messages fail signature checks at the connection.",
-      act: "Request the new certificate from Harbor Grocers, load it, and ask the partner to resend orders since 05:52.", appr: "EDI operations lead",
+      act: "Verify the new certificate fingerprint with Harbor Grocers by phone, load it, and ask the partner to resend orders since 05:52.", appr: "EDI operations lead",
       area: "Certificate management", who: ["Customer service", "Information security", "Sales and key accounts"] },
-    { id: "f3", p: 0, st: 1, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Westline Home", n: 37, val: 3700, at: "05:00",
+    { id: "f3", p: 0, st: 1, sev: "w", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Westline Home", n: 37, val: 91000, at: "05:00",
       ot: "37 acknowledgments past the 24-hour window", os: "Purchase orders received yesterday have no 855. Westline Home requires acknowledgment within 24 hours.",
       bt: "37 orders not confirmed with Westline Home", bs: "Unconfirmed orders risk cancellation by the customer.",
       ev: [["Yesterday 04:58", "37 purchase orders received and loaded"], ["05:00", "24-hour acknowledgment window closed"], ["05:05", "Acknowledgments sent for other orders; none for these 37"]],
@@ -42,12 +42,12 @@
       cause: "Purchase orders received after Monday's 832 still carry the old cost.",
       act: "Invoice the 61 open orders at the PO cost, or ask Northfield Stores to send 860 changes with the new cost.", appr: "Pricing analyst",
       area: "Cross-references and master data", who: ["Master data", "Finance and treasury"] },
-    { id: "f10", p: 0, st: 4, sev: "w", mod: "Integration Monitor", how: "Anomaly", pil: "Optimize", partner: "Westline Home", n: 52, val: 0, at: "08:10",
-      ot: "Functional acknowledgments missing for 52 invoices", os: "Westline Home has returned no 997 for invoices sent since 05:00. Its 997s for ship notices and its purchase orders arrive normally.",
-      bt: "52 invoices without confirmed receipt", bs: "Invoices without a 997 may not have reached accounts payable at Westline Home.",
+    { id: "f10", p: 0, st: 4, sev: "w", mod: "Integration Monitor", how: "Anomaly", pil: "Optimize", partner: "Brightway Marketplace", n: 52, val: 0, at: "08:10",
+      ot: "Functional acknowledgments missing for 52 invoices", os: "Brightway Marketplace has returned no 997 for invoices sent since 05:00. Its 997s for ship notices and its purchase orders arrive normally.",
+      bt: "52 invoices without confirmed receipt", bs: "Invoices without a 997 may not have reached Brightway Marketplace.",
       ev: [["05:00", "Last 997 received for an invoice"], ["06:00", "Acknowledgment volume fell below the projected band"], ["08:10", "52 invoices unacknowledged"]],
       cause: "Not yet known. The partner's acknowledgments for other document types are flowing.",
-      act: "Ask Westline Home to confirm receipt of the 52 invoices, and resend those it did not receive.", appr: "EDI operations lead",
+      act: "Ask Brightway Marketplace to confirm receipt of the 52 invoices, and resend those it did not receive.", appr: "EDI operations lead",
       area: "Monitoring", who: ["Accounts receivable", "IT and ERP"] },
   ];
   /* The demo client solution covers three processes */
@@ -115,22 +115,23 @@
   /* Client view of each process: steps the retailer adds in front (its own orders), steps hidden because another process in the solution already counts them,
      and 824 and 997 shown on the step they answer rather than as steps of their own */
   var CCVIEW = {
-    supplier: { 0: { hide: [3] }, 8: { hide: [1, 4] } },
+    supplier: { 0: { hide: [3], add: [["Order change", "860, 865 / ORDCHG, ORDRSP", 1]], order: [0, 1, 6, 2, 3, 4, 5] },
+      8: { hide: [1, 4], add: [["Routing request", "753", 0], ["Routing instructions", "754", 1]], order: [0, 2, 6, 7, 3, 1, 4, 5] } },
     retailer: { 1: { n: "Purchase to pay", short: "Purchase to pay", owner: "Buying, receiving and accounts payable", pre: [["Purchase order", "850 / ORDERS", 0], ["Order acknowledgment", "855 / ORDRSP", 1], ["Order change", "860, 865 / ORDCHG, ORDRSP", 0]] },
       2: { hide: [3] }, 3: { n: "Chargebacks and deductions", short: "Chargebacks", owner: "Vendor compliance and accounts payable" } }
   };
   /* Per step, in client-view step order (null where Command Center cannot see the step): [direction, documents today, past SLA, 997 overdue, 824 rejects, oldest open].
-     risk and br count process instances at risk and breached; in flight is the sum of documents today. Illustrative. */
+     Breached = past SLA + 824 rejects; at risk = 997 overdue + predicted (pred). Illustrative. */
   var CCFLOW = {
     supplier: {
-      0: { risk: 113, br: 163, steps: [["In", 310, 37, 0, 0, "26 h"], ["Out", 262, 0, 3, 0, "4 d"], ["Out", 248, 14, 4, 9, "3 h 40 m"], null, ["Out", 226, 0, 52, 112, "2 d"], ["In", 146, 1, 0, 0, "7 d"]] },
-      8: { risk: 4, br: 2, steps: [["In", 18, 0, 0, 0, "1 d"], null, ["Out", 64, 2, 0, 0, "1 h 10 m"], ["In", 57, 1, 0, 0, "50 m"], null, ["In", 12, 0, 1, 0, "1 d"]] },
-      3: { risk: 13, br: 4, steps: [null, ["In", 46, 0, 0, 0, "12 d"], ["In", 38, 2, 0, 0, "2 d"], null, null, ["In", 16, 0, 0, 0, "9 d"]] }
+      0: { pred: 61, steps: [["In", 310, 0, 0, 0, "4 h 30 m"], ["Out", 262, 37, 3, 0, "28 h"], ["Out", 248, 14, 4, 9, "3 h 40 m"], null, ["Out", 226, 0, 52, 112, "2 d"], ["In", 146, 1, 0, 0, "7 d"], ["In", 38, 0, 0, 0, "1 d"]] },
+      8: { pred: 0, steps: [["In", 18, 0, 0, 0, "1 d"], null, ["Out", 64, 0, 0, 0, "1 h 10 m"], ["In", 57, 1, 0, 0, "50 m"], null, ["In", 12, 0, 1, 0, "1 d"], ["Out", 24, 0, 0, 0, "2 h"], ["In", 22, 1, 0, 0, "1 h 50 m"]] },
+      3: { pred: 0, steps: [null, ["In", 46, 0, 0, 0, "12 d"], ["In", 38, 2, 0, 0, "2 d"], null, null, ["Out / In", 16, 0, 0, 0, "9 d"]] }
     },
     retailer: {
-      1: { risk: 61, br: 164, steps: [["Out", 340, 0, 74, 0, "3 h 38 m"], ["In", 262, 37, 0, 0, "28 h"], ["Out", 41, 0, 0, 0, "1 d"], ["In", 58, 14, 0, 9, "3 h 20 m"], null, ["Out", 66, 0, 0, 0, "1 d"], ["In", 226, 0, 52, 112, "2 d"], null, ["Out", 28, 1, 0, 0, "7 d"]] },
-      2: { risk: 9, br: 3, steps: [["In", 22, 0, 0, 0, "4 h"], ["Out", 20, 1, 0, 0, "1 h 10 m"], ["Out", 31, 2, 1, 0, "5 h"], null, ["In", 140, 6, 0, 0, "1 d"], ["In", 35, 0, 0, 0, "6 d"]] },
-      3: { risk: 13, br: 4, steps: [null, ["Out", 46, 0, 0, 0, "12 d"], ["Out", 38, 1, 0, 0, "2 d"], null, null, ["In", 16, 0, 0, 0, "9 d"]] }
+      1: { pred: 61, steps: [["Out", 340, 74, 0, 0, "3 h 38 m"], ["In", 262, 37, 0, 0, "28 h"], ["Out / In", 41, 0, 0, 0, "1 d"], ["In", 58, 14, 0, 9, "3 h 20 m"], null, ["Out", 66, 0, 0, 0, "1 d"], ["In", 226, 0, 52, 112, "2 d"], null, ["Out", 28, 1, 0, 0, "7 d"]] },
+      2: { pred: 0, steps: [["In", 22, 0, 0, 0, "4 h"], ["Out", 20, 1, 0, 0, "1 h 10 m"], ["Out / In", 31, 2, 1, 0, "5 h"], null, ["In", 140, 6, 0, 0, "1 d"], ["In", 35, 0, 0, 0, "6 d"]] },
+      3: { pred: 0, steps: [null, ["Out", 46, 0, 0, 0, "12 d"], ["Out", 38, 1, 0, 0, "2 d"], null, null, ["Out", 16, 0, 0, 0, "9 d"]] }
     }
   };
   /* Key EDI measure per process: [label, value] */

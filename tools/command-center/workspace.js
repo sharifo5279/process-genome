@@ -19,14 +19,14 @@
         { t: "Dispute window closing", ch: "Email", r: "Deductions review", on: true, k: "rt" }],
       tasks: [{ t: "Restore the AS2 connection for the order feed", o: "Alex Morgan", d: "Today", k: "f:f2", done: false, tr: "im" },
         { t: "Resolve the cost mismatch on open orders", o: "Dana Ortiz", d: "Oct 27", k: "f:f9", done: false, tr: "pm" },
-        { t: "Request the 214 and 861 for the two deductions", o: "Jamie Brooks", d: "Tomorrow", k: "rt:rt-invoice-deduction", done: false, tr: "rt" }],
+        { t: "Follow up the 861 for ASN-10391", o: "Jamie Brooks", d: "Tomorrow", k: "rt:rt-invoice-deduction", done: false, tr: "rt" }],
       reminders: [{ t: "Check the remittance advice after the connection fix", w: "Today, 11:30", tr: "im" }, { t: "Check acknowledgments before the 12:00 cutoff", w: "Today, 11:30", tr: "pm" }, { t: "Deduction review window closes", w: "Nov 21, 09:00", tr: "rt" }],
       rules: []
     };
   }
   var WSOPT = {
     rep: [["Findings digest", "im"], ["Network activity", "im"], ["Partner activity", "im"], ["Process performance", "pm"], ["Partner scorecard", "pm"], ["Retail compliance", "rt"], ["Deduction and dispute evidence", "rt"]],
-    not: [["High-severity finding", "im"], ["Volume anomaly", "im"], ["Partner feed late", "im"], ["Action waiting over 1 hour", "pm"], ["Process health turns critical", "pm"], ["Rule over budget", "pm"], ["Dispute window closing", "rt"], ["Ship notice late for a retail account", "rt"]]
+    not: [["High-severity finding", "im"], ["Volume anomaly", "im"], ["Partner feed late", "im"], ["Action waiting over 1 hour", "pm"], ["Process health turns critical", "pm"], ["Rule over budget", "pm"], ["Dispute window closing", "rt"], ["Ship notice late for a trading partner", "rt"]]
   };
   function wsOpts(k) { return WSOPT[k].filter(function (o) { return ccOn(o[1]); }).map(function (o) { return o[0]; }); }
   function wsTier(x) { return ccOn(x.t && x.t.length === 2 ? x.t : x.k && x.k.length === 2 ? x.k : x.tr || "im"); }
@@ -64,14 +64,16 @@
   var WSREJ = { "856": "Duplicate SSCC in carton loop", "856, 824": "Duplicate SSCC in carton loop", "810": "Unit price differs from the PO", "850": "Unknown ship-to location" };
   /* Transactions at the selected step: control numbers, partner, business reference, acknowledgment and application advice status. Illustrative. */
   function wsTx(i, k, s, code) {
-    var all = cxPartners(), first = code.split(",")[0], pre = WSREF[first] || "DOC-";
-    /* Warehouse documents go to the 3PL, freight documents to the carrier, everything else to trading partners */
+    var all = cxPartners(), first = code.split(",")[0], pre = WSREF[first] || "DOC-", fs = cxOpen().filter(function (f) { return f.p === i && f.st === k; });
+    /* Warehouse documents go to the 3PL, freight documents to the carrier, everything else to trading partners in production */
     var ps = /^94/.test(first) ? [all[9]] : /^(204|214|210)/.test(first) ? [all[8]] : all.slice(0, 8).filter(function (p) { return p[2] === "Active"; });
     var rows = [0, 1, 2, 3, 4, 5].map(function (j) {
-      var seed = i * 7919 + k * 613 + j * 97 + 4521, late = j < Math.min(2, s[2]), ack = j === 2 && s[3] > 0, rej = j === 3 && s[4] > 0;
-      var st = late ? '<span class="cx-st s-new"><i></i>Past SLA</span>' : rej ? '<span class="cx-st s-new"><i></i>Rejected</span>' : ack ? '<span class="cx-st s-known"><i></i>Awaiting 997</span>' : '<span class="cx-st s-resolved"><i></i>Accepted</span>';
-      return '<tr><td><code>' + String(100000000 + seed * 13).slice(-9) + '</code></td><td><code>' + (1000 + seed % 9000) + '</code></td><td><code>' + ("000" + (j + 1)).slice(-4) + '</code></td><td>' + cxe(ps[(seed + j) % ps.length][0]) + '</td>' +
-        '<td>' + pre + (10000 + seed % 89999) + '</td><td>' + ("0" + (9 - j)).slice(-2) + ':' + ("0" + (seed % 60)).slice(-2) + '</td><td>' + (ack ? "Overdue" : s[0] === "Out" ? "Received" : "Sent") + '</td><td>' + (rej ? cxe(WSREJ[code] || "Rejected") : "None") + '</td><td>' + st + '</td></tr>';
+      var seed = i * 7919 + k * 613 + j * 97 + 4521, late = j < Math.min(2, s[2]), ack = j === 2 && s[3] > 0, rej = j === 3 && s[4] > 0, ex = late || ack || rej;
+      var f = ex && fs.length ? fs[Math.min(j, fs.length - 1)] : null, partner = f ? f.partner : ps[(j + k) % ps.length][0], mins = 9 * 60 + 29 - j * 47 - seed % 20;
+      var none = late && s[0] === "Out", tm = ("0" + Math.floor(mins / 60)).slice(-2) + ":" + ("0" + mins % 60).slice(-2);
+      var st = none ? '<span class="cx-st s-new"><i></i>Not sent</span>' : late ? '<span class="cx-st s-new"><i></i>Past SLA</span>' : rej ? '<span class="cx-st s-new"><i></i>Rejected</span>' : ack ? '<span class="cx-st s-known"><i></i>Awaiting 997</span>' : '<span class="cx-st s-resolved"><i></i>Accepted</span>';
+      return '<tr><td>' + (none ? "" : '<code>' + String(100000000 + seed * 13).slice(-9) + '</code>') + '</td><td>' + (none ? "" : '<code>' + (1000 + seed % 9000) + '</code>') + '</td><td>' + (none ? "" : '<code>' + ("000" + (j + 1)).slice(-4) + '</code>') + '</td><td>' + cxe(partner) + '</td>' +
+        '<td>' + pre + (10000 + seed % 89999) + '</td><td>' + tm + '</td><td>' + (none ? "" : ack ? "Overdue" : s[0] === "Out" ? "Received" : "Sent") + '</td><td>' + (rej ? cxe(WSREJ[code] || "Rejected") : "None") + '</td><td>' + st + '</td></tr>';
     }).join("");
     return cxCard("Transactions · " + code + " " + wsDocName(code), '<table class="cx-tbl ws-tx"><thead><tr><th>ISA13</th><th>GS06</th><th>ST02</th><th>Partner</th><th>Reference</th><th>Time</th><th>997</th><th>824</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table>',
       "", '<span class="cx-note">' + s[1].toLocaleString("en-US") + ' today · showing 6</span><button type="button" class="cx-btn" data-wstgi>' + ci("ext") + 'Open in TG Insights</button>');
@@ -252,14 +254,17 @@
       if (f === "rem") W.reminders.unshift({ t: n, w: (wsVal("[data-wsd]") || "").replace("T", ", ") || "No time", tr: "im" });
       ccWsForm = ""; wsSave(); cxToast("Saved.");
     }
-    else if (b.hasAttribute("data-rwnew")) { ccRw = { step: 0, proc: ccProc(0).n, partner: "All partners", doc: cxSol()[0][0] + " (850)", ref: "None", file: "", budget: 50000, onb: "Pause the rule and notify", test: null }; rwPick("nora"); ccDr = ["rule"]; }
+    else if (b.hasAttribute("data-rwnew")) { ccRw = { step: 0, proc: ccProc(ccSol()[0]).n, partner: "All partners", doc: cxSol()[0][0] + " (850)", ref: "None", file: "", budget: 50000, onb: "Pause the rule and notify", test: null }; rwPick("nora"); ccDr = ["rule"]; }
     else if (b.hasAttribute("data-rwclose")) { ccRw = null; ccDr = null; }
     else if (b.hasAttribute("data-rwagent")) { rwPick(b.getAttribute("data-rwagent")); }
     else if (b.hasAttribute("data-rwref")) { ccRw.ref = b.getAttribute("data-rwref"); ccRw.file = ""; }
     else if (b.hasAttribute("data-rwgo")) { rwRead(); ccRw.step = Math.max(0, Math.min(7, ccRw.step + +b.getAttribute("data-rwgo"))); }
     else if (b.hasAttribute("data-rwtest")) { rwRead(); var k = RWJOBS.map(function (x) { return x[0]; }).indexOf(ccRw.agent) + 1, nn = 3800 + 431 * k, d = 9 + 7 * k; ccRw.test = { n: nn, d: d, h: Math.ceil(d / 5), c: 100 - 100 * d / nn }; }
     else if (b.hasAttribute("data-rwdeploy")) {
-      var j = rwJob(), r = [ccRw.agent, ccRw.name || j[3], ccRw.doc, [ccSol().filter(function (i) { return ccProc(i).n === ccRw.proc; })[0] || 0], +(ccRw.test ? ccRw.test.c : 99).toFixed(1), 0, "Just now", "Active"];
+      /* Rule scopes are stored on the supplier solution; a retailer rule is mapped back through the inverse of CCPMAP */
+      var pi = ccSol().filter(function (i) { return ccProc(i).n === ccRw.proc; })[0], inv = { 1: 0, 2: 8, 3: 3 };
+      if (pi == null) pi = ccSol()[0];
+      var j = rwJob(), r = [ccRw.agent, ccRw.name || j[3], ccRw.doc, [ccRole() === "retailer" ? inv[pi] : pi], +(ccRw.test ? ccRw.test.c : 99).toFixed(1), 0, "Just now", "Active"];
       CXR.push(r); W.rules.push(r); wsSave(); ccRw = null; ccDr = null; cxToast("Rule deployed. " + r[1] + " is active.");
     }
     cxRender();

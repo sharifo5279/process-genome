@@ -253,7 +253,7 @@ test('demo findings stay inside the three processes of the client solution', () 
   }
   const cfg = screen('cfg');
   assert.ok(cfg.includes('Rules &amp; Policies') && cfg.includes('Retail policy templates'));
-  for (const r of app.RTDATA.rules) assert.ok(cfg.includes(`data-rt-rule="${r.id}"`), `${r.id} sits in Configuration`);
+  for (const r of app.RTDATA.rules) assert.equal(cfg.includes(`data-rt-rule="${r.id}"`), !r.roles || r.roles.includes(app.rtRole), `${r.id} shows for its perspective only`);
   app.ccWsProc = 'sol';
   assert.match(screen('ws-proc'), /Business document/);
 });
@@ -265,7 +265,7 @@ test('approving a core finding closes it and moves its action to Completed', () 
   assert.equal(item.done, true);
   assert.equal(item.actDone, true);
   app.ccActTab = 'done';
-  assert.ok(screen('act').includes('Action approved'));
+  assert.ok(screen('act').includes('Task created for'));
 });
 
 test('rule wizard walks eight steps and deploys a Performance Monitor rule', () => {

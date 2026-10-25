@@ -37,7 +37,7 @@
       
       {
         id: "rt-order-change", workflow: "orders", title: "Warehouse release uses the superseded quantity",
-        source: "PM", agent: "Reese", severity: "critical", process: 8,
+        source: "PM", agent: "Reese", severity: "critical", process: 8, detected: "08:41",
         ruleId: "rt-rule-order-change", partnerId: "pt-tidewell", owner: "Sam Lee · Fulfillment coordination",
         reference: "PO-78288 / WH-45018", amount: null, unit: "units above accepted change", value: 200,
         policy: "Fulfillment rule REV-01: the latest accepted order revision governs the quantity released to the warehouse; no quantity tolerance is configured for this account.",
@@ -104,8 +104,20 @@
         reference: "ASN-10482", amount: null, unit: "duplicate carton IDs", value: 2,
         policy: "ASN guide PACK-08: all eight cartons in this shipment require distinct SSCC identifiers. This is the configured receiving requirement for this relationship.",
         roles: {
-          retailer: { partner: "Solara Personal Care", direction: "Inbound supplier ship notice", summary: "ASN-10482 describes eight cartons but has only six distinct carton identifiers. Application advice reports the duplicate references.", impact: "The notice does not meet this relationship's receiving requirements.", nextAction: "Prepare the failed carton references for supplier correction and receiving-team review.", over: { process: 1 } },
-          supplier: { partner: "Cedar & Coast", direction: "Outbound retailer ship notice", summary: "The ASN sent to Cedar & Coast repeats two carton identifiers. Its application advice rejects the carton-reference content.", impact: "The transmitted notice requires correction. A successful functional acknowledgment did not establish business acceptance.", nextAction: "Prepare a corrected-notice review with the retailer's duplicate-reference errors." }
+          retailer: { partner: "Solara Personal Care", direction: "Inbound supplier ship notice", summary: "ASN-10482 describes eight cartons but has only six distinct carton identifiers. Application advice reports the duplicate references.", impact: "The notice does not meet this relationship's receiving requirements.", nextAction: "Prepare the failed carton references for supplier correction and receiving-team review.", over: { process: 1,
+            timeline: [
+              { time: "08:12", title: "Ship notice received", detail: "ASN-10482 advises 576 units across eight cartons.", status: "pass" },
+              { time: "08:13", title: "Functional acknowledgment sent", detail: "Syntax processing is acknowledged.", status: "pass" },
+              { time: "08:22", title: "Application rejection sent to Solara Personal Care", detail: "The 824 identifies duplicate carton references.", status: "fail" },
+              { time: "08:24", title: "Conformance evidence assembled", detail: "Nora identifies two duplicate occurrences and the configured uniqueness rule.", status: "fail" }
+            ] } },
+          supplier: { partner: "Cedar & Coast", direction: "Outbound retailer ship notice", summary: "The ASN sent to Cedar & Coast repeats two carton identifiers. Its application advice rejects the carton-reference content.", impact: "The transmitted notice requires correction. A successful functional acknowledgment did not establish business acceptance.", nextAction: "Prepare a corrected-notice review with the retailer's duplicate-reference errors.", over: {
+            checks: [
+              { name: "Required carton references present", expected: "8 carton records with an SSCC value", observed: "8 of 8 carton records populated", status: "pass" },
+              { name: "Carton identifier uniqueness", expected: "8 distinct values; 0 duplicate occurrences", observed: "6 distinct values; 2 duplicate occurrences", status: "fail" },
+              { name: "Advised item quantity", expected: "576 units across the three order lines", observed: "576 units advised", status: "pass" },
+              { name: "Corrected notice", expected: "Replacement 856 for ASN-10482", observed: "Not sent", status: "unknown" }
+            ], evidenceGap: "No corrected 856 sent yet." } }
         },
         documents: [
           { type: "856", id: "ASN-10482", status: "fail", time: "08:12", detail: "Eight carton records; six distinct SSCC values" },
@@ -135,14 +147,15 @@
         action: { label: "Prepare ASN correction review", completedLabel: "Correction review prepared", completionNote: "The duplicate references and application advice are prepared for Shipment compliance. No replacement ASN was generated or transmitted." }
       },
       {
-        id: "rt-shipment-sequence", workflow: "shipments", title: "Warehouse release preceded routing approval",
+        id: "rt-shipment-sequence", workflow: "shipments", title: "Shipped before routing instructions arrived",
         source: "PM", agent: "Liz", severity: "attention", process: 8,
         ruleId: "rt-rule-routing", partnerId: "pt-fieldstone", owner: "Taylor Chen · Transportation planning",
-        reference: "ROUTE-38106 / WH-45022", amount: null, unit: "minutes before approval", value: 50,
-        policy: "Collect-freight program COLLECT-03: retailer routing instructions must be recorded before a warehouse shipping order is released for this program.",
+        reference: "ROUTE-38106 / WH-45022", amount: null, unit: "minutes before instructions", value: 50,
+        policy: "Collect-freight program COLLECT-03: the supplier must not ship or send an 856 before the retailer's routing instructions (754) arrive.",
         roles: {
           retailer: { partner: "Fieldstone Essentials", direction: "Inbound routing request · outbound routing instructions", summary: "Fieldstone Essentials sent ASN-10520 at 08:20; routing instructions for this collect-freight shipment were issued at 09:10.", impact: "The shipment may move on a carrier other than the routed one, outside the collect-freight program.", nextAction: "Prepare a routing review with Fieldstone Essentials and Transportation planning before the load is tendered.",
             over: { process: 2, title: "Ship notice received before routing instructions", ruleId: "rt-rule-routing-asn", reference: "ROUTE-38106 / ASN-10520", unit: "minutes before instructions",
+              policy: "Collect-freight program COLLECT-03: suppliers must not ship or send an 856 before Northfield Stores issues the 754.",
               documents: [
                 { type: "753", id: "ROUTE-38106", status: "pass", time: "08:00", detail: "Routing request received" },
                 { type: "856", id: "ASN-10520", status: "fail", time: "08:20", detail: "Shipment advised before routing instructions" },
@@ -163,29 +176,29 @@
               ],
               explanation: "Liz compares the routing request, the instructions Northfield Stores issued and the supplier's ship notice. The supplier advised shipment 50 minutes before instructions were issued, so the carrier may not be the routed one.",
               evidenceGap: "No 214 pickup event received yet." } },
-          supplier: { partner: "Eastbank Market", direction: "Outbound routing request · inbound retailer instructions", summary: "The warehouse shipping order was released 50 minutes before Eastbank Market's routing instructions arrived.", impact: "The warehouse may be working from instructions issued before approval. No carrier pickup event (214) is recorded yet.", nextAction: "Prepare a review of the warehouse instruction against the latest routing approval and confirm the pickup plan with Transportation planning." }
+          supplier: { partner: "Eastbank Market", direction: "Outbound routing request · inbound retailer instructions", summary: "Crestline Logistics confirmed WH-45022 shipped at 08:20 (945), 50 minutes before Eastbank Market's routing instructions arrived.", impact: "The load may have moved on a carrier other than the routed one, outside the collect-freight program.", nextAction: "Prepare a routing review with Transportation planning and confirm the carrier used before the 856 is sent." }
         },
         documents: [
-          { type: "753", id: "ROUTE-38106", status: "pass", time: "08:00", detail: "Routing request submitted" },
-          { type: "940", id: "WH-45022", status: "fail", time: "08:20", detail: "Warehouse release before approval evidence" },
-          { type: "754", id: "APP-38106", status: "pass", time: "09:10", detail: "Routing instructions recorded" },
-          { type: "214", id: "Pickup not observed", status: "unknown", time: "09:30", detail: "No connected carrier pickup event" }
+          { type: "753", id: "ROUTE-38106", status: "pass", time: "07:40", detail: "Routing request sent with cartons, weight and cube" },
+          { type: "945", id: "WH-45022", status: "fail", time: "08:20", detail: "3PL confirms the load shipped" },
+          { type: "754", id: "APP-38106", status: "pass", time: "09:10", detail: "Routing instructions received" },
+          { type: "856", id: "Not sent", status: "unknown", time: "09:30", detail: "Ship notice not yet sent" }
         ],
         checks: [
           { name: "Program applicability", expected: "Collect-freight program assigned", observed: "COLLECT-03 applies to this order", status: "pass" },
           { name: "Routing request correlation", expected: "Request and approval use the same routing reference", observed: "ROUTE-38106 matched", status: "pass" },
-          { name: "Approval before warehouse release", expected: "754 timestamp at or before 940 release", observed: "09:10 approval after 08:20 release; 50-minute gap", status: "fail" },
-          { name: "Carrier pickup", expected: "214 pickup event", observed: "Not received", status: "unknown" }
+          { name: "Instructions before shipment", expected: "754 at or before the 945 ship time", observed: "945 at 08:20; 754 at 09:10; 50-minute gap", status: "fail" },
+          { name: "Ship notice", expected: "856 with the routed carrier", observed: "Not sent", status: "unknown" }
         ],
         timeline: [
-          { time: "08:00", title: "Routing requested", detail: "The supplier asks for instructions under the collect-freight program.", status: "pass" },
-          { time: "08:20", title: "Warehouse order released", detail: "WH-45022 is issued before routing approval is present.", status: "fail" },
-          { time: "09:10", title: "Routing instructions arrive", detail: "The 754 identifies the approved route and carrier instructions.", status: "pass" },
-          { time: "09:12", title: "Sequence exception confirmed", detail: "Liz compares the recorded step order using the configured program rule.", status: "fail" }
+          { time: "07:40", title: "Routing requested", detail: "The 753 asks for instructions under the collect-freight program.", status: "pass" },
+          { time: "08:20", title: "Load shipped", detail: "Crestline Logistics confirms WH-45022 shipped (945) before instructions exist.", status: "fail" },
+          { time: "09:10", title: "Routing instructions arrive", detail: "The 754 names the routed carrier.", status: "pass" },
+          { time: "09:12", title: "Sequence exception confirmed", detail: "Liz compares the 945 and 754 timestamps under the program rule.", status: "fail" }
         ],
-        explanation: "Liz evaluates the sequence of correlated business events. The routing request, approval and warehouse order are all present, but their order violates the policy configured for this collect-freight program. This is an evidenced sequence exception; transport failure is not established.",
-        evidenceGap: "No 945 shipping advice or 214 pickup event received yet.",
-        action: { label: "Prepare routing review", completedLabel: "Routing review prepared", completionNote: "The conflicting sequence and current approval are prepared for Transportation planning. No load was held, retendered or rebooked." }
+        explanation: "Liz compares the routing request, the 3PL's shipping advice and the retailer's instructions. The load shipped 50 minutes before instructions arrived, so the carrier may not be the routed one.",
+        evidenceGap: "No 856 sent yet, so the carrier used is not confirmed on Trading Grid.",
+        action: { label: "Prepare routing review", completedLabel: "Routing review prepared", completionNote: "The sequence and the routing instructions are prepared for Transportation planning. No document was sent." }
       },
       
       {
@@ -210,7 +223,8 @@
                 { name: "Receiving advice sent", expected: "861 for ASN-10391 before the deduction", observed: "Not sent", status: "fail" },
                 { name: "Deduction support", expected: "Received quantities and arrival time on file for both reason codes", observed: "Not on Trading Grid", status: "unknown" }
               ],
-              evidenceGap: "No 861 sent for ASN-10391." } },
+              evidenceGap: "No 861 sent for ASN-10391.",
+              action: { label: "Prepare receiving advice follow-up", completedLabel: "Follow-up prepared", completionNote: "A follow-up to send the 861 for ASN-10391 is prepared for Vendor compliance. No document was sent." } } },
           supplier: { partner: "Northfield Stores", direction: "Inbound retailer remittance", summary: "Northfield Stores' remittance deducts $450 for notice timing and $300 for shortage from a $25,000 invoice. No 214 delivery event or 861 receiving advice is on file.", impact: "The $750 is an observed deduction, not a recoverable amount. Validity and dispute eligibility remain unconfirmed.", nextAction: "Prepare the remittance, invoice and ASN evidence for a deductions analyst and request the 861 receiving advice before 21 Nov." }
         },
         documents: [
@@ -245,13 +259,13 @@
     rules: [
       
       
-      { id: "rt-rule-ack", name: "Partner acknowledgment deadline", agent: "Lex", workflow: "orders", scope: "Partner policy ACK-120 and its agreed service window", condition: "Start from confirmed order receipt and seek a correlated business acknowledgment within the configured window.", threshold: 120, unit: "minutes after receipt", evidence: "Order receipt timestamp, order/partner correlation, 855 or equivalent business response and service calendar", guardrail: "Apply this relationship's policy only. A 997 is not a business commitment.", test: {
+      { id: "rt-rule-ack", name: "Drop ship acknowledgment deadline", agent: "Lex", workflow: "orders", scope: "Drop ship policy ACK-120 for marketplace orders", condition: "Start from confirmed order receipt and seek a correlated business acknowledgment within the configured window.", threshold: 120, unit: "minutes after receipt", evidence: "Order receipt timestamp, order/partner correlation, 855 or equivalent business response and service calendar", guardrail: "Apply this relationship's policy only. A 997 is not a business commitment.", test: {
         operator: "max", measure: "Minutes from receipt to acknowledgment or current observation", passValue: 95, failValue: 140,
         passLabel: "Acknowledgment at 08:45", failLabel: "Still unobserved at 09:30",
         pass: "Order receipt at 07:10; matching 855 at 08:45: 95 minutes elapsed.", fail: "Order receipt at 07:10; no matching 855 by 09:30: 140 minutes elapsed.",
         passDecision: "No acknowledgment deadline breach", failDecision: "Raise an acknowledgment timing finding"
       } },
-      { id: "rt-rule-order-change", name: "Release matches accepted order revision", agent: "Reese", workflow: "orders", scope: "Fulfillment rule REV-01", condition: "Compare released warehouse quantities with the latest accepted revision using order, line, item and normalized unit references.", threshold: 0, unit: "quantity tolerance", evidence: "850, accepted 860/865 revision, 940 release and unit/item reference data", guardrail: "A release mismatch is an instruction exception. The shipped quantity comes from the 945.", test: {
+      { id: "rt-rule-order-change", roles: ["supplier"], name: "Release matches accepted order revision", agent: "Reese", workflow: "orders", scope: "Fulfillment rule REV-01", condition: "Compare released warehouse quantities with the latest accepted revision using order, line, item and normalized unit references.", threshold: 0, unit: "quantity tolerance", evidence: "850, accepted 860/865 revision, 940 release and unit/item reference data", guardrail: "A release mismatch is an instruction exception. The shipped quantity comes from the 945.", test: {
         operator: "max", measure: "Absolute quantity difference from accepted revision", passValue: 0, failValue: 200,
         passLabel: "Release at accepted quantity", failLabel: "Release at original quantity",
         pass: "Revision 2 accepts 800 units; warehouse release requests 800: difference 0.", fail: "Revision 2 accepts 800 units; warehouse release requests 1,000: difference 200.",
@@ -263,19 +277,19 @@
         pass: "8 populated carton records contain 8 distinct identifiers: 0 repeated occurrences.", fail: "8 populated carton records contain 6 distinct identifiers: 2 repeated occurrences.",
         passDecision: "Carton-identifier check passes", failDecision: "Raise a carton conformance finding"
       } },
-      { id: "rt-rule-routing", name: "Routing approval before warehouse release", agent: "Liz", workflow: "shipments", scope: "Collect-freight program COLLECT-03", condition: "For this program, compare the correlated routing approval timestamp with warehouse release time.", threshold: 0, unit: "minutes released before approval", evidence: "753 request, 754 instructions, 940 release and program assignment", guardrail: "Apply only to configured collect-freight relationships.", test: {
-        operator: "max", measure: "Early-release minutes; zero when approval precedes release", passValue: 0, failValue: 50,
-        passLabel: "Approval before warehouse release", failLabel: "Approval after warehouse release",
-        pass: "Approval at 08:10; release at 08:20: 0 minutes released early.", fail: "Release at 08:20; approval at 09:10: 50 minutes released early.",
-        passDecision: "Release sequence is within policy", failDecision: "Raise a routing-sequence finding"
+      { id: "rt-rule-routing", roles: ["supplier"], name: "Shipment before routing instructions", agent: "Liz", workflow: "shipments", scope: "Collect-freight program COLLECT-03", condition: "For this program, compare the 3PL's 945 ship time and the 856 with the retailer's 754.", threshold: 0, unit: "minutes shipped before instructions", evidence: "753 request, 754 instructions, 945 shipping advice and program assignment", guardrail: "Apply only to configured collect-freight relationships.", test: {
+        operator: "max", measure: "Minutes shipped before instructions; zero when the 754 came first", passValue: 0, failValue: 50,
+        passLabel: "Instructions before shipment", failLabel: "Shipment before instructions",
+        pass: "754 at 08:10; 945 at 08:20: 0 minutes early.", fail: "945 at 08:20; 754 at 09:10: 50 minutes early.",
+        passDecision: "Sequence is within policy", failDecision: "Raise a routing-sequence finding"
       } },
-      { id: "rt-rule-asn-revision", name: "Ship notice within accepted order revision", agent: "Reese", workflow: "orders", scope: "Order rule REV-02", condition: "Compare ship notice quantities with the latest accepted 860/865 revision by order, line, item and normalized unit.", threshold: 0, unit: "quantity tolerance", evidence: "850, accepted 860/865 revision, 856 and unit/item reference data", guardrail: "A ship notice overage is an advised quantity; the received quantity comes from the 861.", test: {
+      { id: "rt-rule-asn-revision", roles: ["retailer"], name: "Ship notice within accepted order revision", agent: "Reese", workflow: "orders", scope: "Order rule REV-02", condition: "Compare ship notice quantities with the latest accepted 860/865 revision by order, line, item and normalized unit.", threshold: 0, unit: "quantity tolerance", evidence: "850, accepted 860/865 revision, 856 and unit/item reference data", guardrail: "A ship notice overage is an advised quantity; the received quantity comes from the 861.", test: {
         operator: "max", measure: "Absolute quantity difference from accepted revision", passValue: 0, failValue: 200,
         passLabel: "Ship notice at accepted quantity", failLabel: "Ship notice at original quantity",
         pass: "Revision 2 accepts 800 units; the 856 advises 800: difference 0.", fail: "Revision 2 accepts 800 units; the 856 advises 1,000: difference 200.",
         passDecision: "Ship notice quantity is within tolerance", failDecision: "Raise a ship notice overage finding"
       } },
-      { id: "rt-rule-routing-asn", name: "Routing instructions before ship notice", agent: "Liz", workflow: "shipments", scope: "Collect-freight program COLLECT-03", condition: "For collect-freight orders, compare the 754 timestamp with the supplier's 856.", threshold: 0, unit: "minutes shipped before instructions", evidence: "753 request, 754 instructions, 856 ship notice and program assignment", guardrail: "Apply only to configured collect-freight relationships.", test: {
+      { id: "rt-rule-routing-asn", roles: ["retailer"], name: "Routing instructions before ship notice", agent: "Liz", workflow: "shipments", scope: "Collect-freight program COLLECT-03", condition: "For collect-freight orders, compare the 754 timestamp with the supplier's 856.", threshold: 0, unit: "minutes shipped before instructions", evidence: "753 request, 754 instructions, 856 ship notice and program assignment", guardrail: "Apply only to configured collect-freight relationships.", test: {
         operator: "max", measure: "Minutes the 856 preceded the 754; zero when instructions came first", passValue: 0, failValue: 50,
         passLabel: "Instructions before ship notice", failLabel: "Ship notice before instructions",
         pass: "754 at 08:10; 856 at 08:20: 0 minutes early.", fail: "856 at 08:20; 754 at 09:10: 50 minutes early.",
@@ -303,19 +317,22 @@
           { type: "855", label: "Order acknowledgment", status: "healthy", required: true, lastSeen: "08:05", detail: "Configured and active; business deadlines are evaluated per order in PM." },
           { type: "856", label: "Ship notice", status: "late", required: true, lastSeen: "05:45", detail: "No 856 since 05:45 while 855 and 810 traffic continues." },
           { type: "810", label: "Invoice", status: "healthy", required: true, lastSeen: "08:45", detail: "Invoice feed is active." },
-          { type: "820", label: "Remittance", status: "healthy", required: true, lastSeen: "22 Oct 07:40", detail: "Weekly remittance received on schedule." },
+          { type: "820", label: "Remittance", status: "healthy", required: true, lastSeen: "22 Oct 07:40", detail: "Weekly remittance exchanged on schedule." },
+          { type: "824", label: "Application advice", status: "healthy", required: true, lastSeen: "08:40", detail: "Application advice route is active." },
+          { type: "861", label: "Receiving advice", status: "healthy", required: true, lastSeen: "08:10", detail: "Exchanged after each receipt; none yet for ASN-10391." },
           { type: "997", label: "Functional acknowledgment", status: "healthy", required: true, lastSeen: "08:46", detail: "Functional acknowledgment route is active." },
           { type: "846", label: "Inventory advice", status: "not-required", required: false, lastSeen: "Not required", detail: "Excluded from this relationship's required-feed coverage." }
         ]
       },
       {
-        id: "pt-meadowline", names: { retailer: "Meadowline Care", supplier: "Harbor Grocers" }, status: "watch", lastActivity: "09:18", owner: "Dana Ortiz",
+        id: "pt-meadowline", names: { retailer: "Meadowline Care", supplier: "Harbor Grocers" }, status: "watch", lastActivity: { retailer: "09:18", supplier: "05:52" }, owner: "Dana Ortiz",
         documents: [
           { type: "850", label: "Purchase order", status: "late", required: true, lastSeen: "05:52", detail: "No 850 exchanged since 05:52; AS2 failures on this connection." },
           { type: "855", label: "Order acknowledgment", status: "healthy", required: true, lastSeen: "09:02", detail: "The feed is active." },
           { type: "856", label: "Ship notice", status: "healthy", required: true, lastSeen: "08:51", detail: "Ship-notice feed is active." },
           { type: "810", label: "Invoice", status: "healthy", required: true, lastSeen: "08:42", detail: "Invoice feed is active." },
-          { type: "820", label: "Remittance", status: "missing", required: true, lastSeen: "17 Oct 05:40", detail: "Weekly 820 due today at 06:00 was not exchanged." }
+          { type: "820", label: "Remittance", status: "missing", required: true, lastSeen: "17 Oct 05:40", detail: "Weekly 820 due today at 06:00 was not exchanged." },
+          { type: "997", label: "Functional acknowledgment", status: "late", required: true, lastSeen: "05:52", detail: "Acknowledgments stopped with the AS2 failures at 05:52." }
         ]
       },
       {
@@ -336,7 +353,7 @@
           { type: "860", label: "Order change", status: "healthy", required: true, lastSeen: "08:00", detail: "Revision 2 for PO-78288 processed successfully." },
           { type: "865", label: "Change acknowledgment", status: "healthy", required: true, lastSeen: "08:15", detail: "Accepted change processed successfully." },
           { type: "856", label: "Ship notice", status: "healthy", required: true, lastSeen: "09:05", detail: "Feed is active." },
-          { type: "810", label: "Invoice", status: "healthy", required: true, lastSeen: "04:58", detail: "Invoice feed is active." },
+          { type: "810", label: "Invoice", status: "healthy", required: true, lastSeen: "09:18", detail: "52 invoices since 05:00 have no 997." },
           { type: "997", label: "Functional acknowledgment", status: "late", required: true, lastSeen: "05:00", detail: "Acknowledgments for invoices behind since 05:00." },
           { type: "846", label: "Inventory advice", status: "healthy", required: true, lastSeen: "09:00", detail: "Hourly inventory feed is within the configured schedule." }
         ]
@@ -347,7 +364,9 @@
           { type: "850", label: "Purchase order", status: "healthy", required: true, lastSeen: "09:15", detail: "Order feed is active." },
           { type: "855", label: "Order acknowledgment", status: "healthy", required: true, lastSeen: "08:48", detail: "Acknowledgment feed is active." },
           { type: "856", label: "Ship notice", status: "healthy", required: true, lastSeen: "08:12", detail: "Transmission completed; ASN-10482 has a separate PM carton-conformance finding." },
-          { type: "824", label: "Application advice", status: "healthy", required: true, lastSeen: "08:22", detail: "Application rejection delivered successfully; message transport is healthy." },
+          { type: "810", label: "Invoice", status: "late", required: true, lastSeen: "07:30", detail: "112 invoices rejected by 824 on unit price since 04:20." },
+          { type: "832", label: "Price catalog", status: "healthy", required: true, lastSeen: "Mon 10:05", detail: "Cost change for 9 items exchanged Monday." },
+          { type: "824", label: "Application advice", status: "healthy", required: true, lastSeen: "08:22", detail: "Application advice route is active." },
           { type: "997", label: "Functional acknowledgment", status: "healthy", required: true, lastSeen: "08:13", detail: "Functional acknowledgment recorded for ASN-10482." }
         ]
       },
@@ -356,19 +375,21 @@
         documents: [
           { type: "850", label: "Purchase order", status: "healthy", required: true, lastSeen: "08:55", detail: "Order feed is active." },
           { type: "753", label: "Routing request", status: "healthy", required: true, lastSeen: "08:00", detail: "Routing request processed successfully." },
-          { type: "754", label: "Routing instructions", status: "healthy", required: true, lastSeen: "09:10", detail: "Approval received; PM identifies its sequence relative to warehouse release." },
+          { type: "754", label: "Routing instructions", status: "healthy", required: true, lastSeen: "09:10", detail: "Routing instructions exchanged; PM checks their sequence against shipment." },
           { type: "856", label: "Ship notice", status: "healthy", required: true, lastSeen: "08:32", detail: "Feed is active." },
           { type: "214", label: "Shipment status", status: "unconfigured", required: false, lastSeen: "No route", detail: "No carrier events configured. Excluded from required integration coverage but shown as a PM evidence gap." }
         ]
       },
       {
-        id: "pt-copperleaf", names: { retailer: "Copperleaf Living", supplier: "Stonebridge Stores" }, status: "active", lastActivity: "09:22", owner: "Casey Park",
+        id: "pt-copperleaf", names: { retailer: "Copperleaf Living", supplier: "Westline Home" }, status: "active", lastActivity: "09:22", owner: "Casey Park",
         documents: [
           { type: "850", label: "Purchase order", status: "healthy", required: true, lastSeen: "09:22", detail: "Configured and active." },
           { type: "855", label: "Order acknowledgment", status: "healthy", required: true, lastSeen: "09:10", detail: "Configured and active." },
           { type: "856", label: "Ship notice", status: "healthy", required: true, lastSeen: "08:50", detail: "Configured and active." },
           { type: "810", label: "Invoice", status: "healthy", required: true, lastSeen: "09:05", detail: "Configured and active." },
-          { type: "852", label: "Product activity", status: "healthy", required: true, lastSeen: "06:00", detail: "Daily activity feed received within its configured window." }
+          { type: "852", label: "Product activity", status: "healthy", required: true, lastSeen: "06:00", detail: "Daily activity feed exchanged within its configured window." },
+          { type: "861", label: "Receiving advice", status: "healthy", required: true, lastSeen: "08:30", detail: "Receiving advice exchanged after each receipt." },
+          { type: "997", label: "Functional acknowledgment", status: "healthy", required: true, lastSeen: "09:22", detail: "Functional acknowledgment route is active." }
         ]
       },
       {
