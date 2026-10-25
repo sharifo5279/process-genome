@@ -481,3 +481,8 @@
   @container (max-width: 1080px) { .bd-b { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bd-k { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @container (max-width: 640px) { .bd-b, .bd-k { grid-template-columns: 1fr; } .bd-q input { width: 160px; } .bd-rules { columns: 1; } }
   .rt-flist { list-style: none; margin: 0 0 12px; padding: 0; } .rt-flist li { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--pl); }
+  /* Overview ring in WebGL: canvas behind the SVG labels; the SVG arcs hide once WebGL draws the ring */
+  .cx-hv.gl { position: relative; }
+  .cx-hv .cx-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+  .cx-hv.gl .cx-ring { position: relative; }
+  .cx-hv.gl .g-arc, .cx-hv.gl .g-arc-t { display: none; }
