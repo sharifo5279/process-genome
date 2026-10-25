@@ -4,6 +4,7 @@
      One Overview, one findings list and one action queue; every record names the module that produced it.
      Illustrative values for the concept preview. */
   var ccEl = document.getElementById("cc"), cx = document.getElementById("cx");
+  var ccHeroV = "ring"; try { if (localStorage.getItem("process-genome-cc-hero") === "globe") ccHeroV = "globe"; } catch (e) {}
   var ccScr = "dash", ccNavMin = false, ccAv = false, ccDr = null, ccTab = "sc", ccPj = 0, ccAvLog = [];
   var ccCfgTab = "", ccModF = "all", ccSevF = "all", ccStF = "open", ccActTab = "open", ccPtTab = "all";
   var CC_GENOME = "../#retail/map";
@@ -344,7 +345,11 @@
       [["14", "Cleared after partner resend", [1, 3, 4, 6, 8, 11, 13, 14]], [String(7 + done), "Actions approved", [0, 1, 1, 2, 4, 5, 6, 7 + done]], ["3", "Awaiting partner confirmation", [0, 0, 1, 1, 2, 3, 3, 3]]].map(function (d) {
         return '<div class="cx-gc cx-gr"><div><b class="cx-gv">' + d[0] + '</b><small>' + d[1] + '</small></div>' + spark(d[2]) + '</div>'; }).join("") + '</div>';
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';
-    return '<section class="cx-hero2" aria-label="Process health"><div class="cx-hv">' + svg + '</div>' + side + '</section>';
+    /* Two views of the same health: the process ring, or the trading network as a globe (WebGL) */
+    var tog = '<span class="cx-seg cx-hvt" role="group" aria-label="Overview view">' + [["ring", "Process ring"], ["globe", "Network globe"]].map(function (o) { return '<button type="button" data-cxhv="' + o[0] + '" aria-pressed="' + (ccHeroV === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</span>';
+    var globe = '<div class="cx-globe" role="img" aria-label="' + cxe(ccCompany()) + ' trading network: each arc is a document route colored by its health"><div class="cx-gll"></div>' +
+      '<p class="cx-glh"><b>' + cxe(ccCompany()) + ' trading network</b><span>Arc color shows route health. Beads are documents in flight.</span></p><p class="cx-glf">The network globe needs WebGL in this browser.</p></div>';
+    return '<section class="cx-hero2" aria-label="Process health"><div class="cx-hv' + (ccHeroV === "globe" ? " gv" : "") + '">' + tog + (ccHeroV === "globe" ? globe : '<div class="cx-hvb">' + svg + '</div>') + '</div>' + side + '</section>';
   }
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
   function cxOvHead() {
@@ -529,9 +534,10 @@
   }
   function cxGo(s) { if (s === "ws") s = cxWsSecs()[0][0]; if (s === "im-map") ccWsProc = "sol"; if (s === "an") ccWsDash = "p:pm"; if (s === "rt-partners") ccPtTab = "req"; s = CXALIAS[s] || s; if (!CXS[s] || !cxNavOk(s)) s = "dash"; ccScr = s; ccDr = null; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-cxgo],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt],[data-cxhelp]"); if (!b) return;
+    var b = e.target.closest("[data-cxgo],[data-cxhv],[data-cxmin],[data-cxav],[data-cxf],[data-cxproc],[data-cxclose],[data-cxapp],[data-cxknown],[data-cxtab],[data-cxpj],[data-cxq],[data-cxfs],[data-cxmod],[data-cxat],[data-cxtheme],[data-cxcfg],[data-cxpt],[data-cxhelp]"); if (!b) return;
     if (b.hasAttribute("data-cxgo")) cxGo(b.getAttribute("data-cxgo"));
     else if (b.hasAttribute("data-cxmin")) { ccNavMin = !ccNavMin; cxRender(); }
+    else if (b.hasAttribute("data-cxhv")) { ccHeroV = b.getAttribute("data-cxhv"); try { localStorage.setItem("process-genome-cc-hero", ccHeroV); } catch (err) {} cxRender(); }
     else if (b.hasAttribute("data-cxav")) { ccAv = !ccAv; cxRender(); }
     else if (b.hasAttribute("data-cxf")) { ccDr = ["f", b.getAttribute("data-cxf")]; cxRender(); }
     else if (b.hasAttribute("data-cxproc")) { if (ccOn("pm")) { ccWsProc = b.getAttribute("data-cxproc"); cxGo("ws-proc"); } }
