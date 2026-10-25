@@ -1105,6 +1105,10 @@
   .pv-lad { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pv-lad button { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; text-align: left; } .pv-lad button[aria-pressed="true"] { padding: 7px 9px; }
   .pp a.pm-more { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+
+  [data-ccwip] { cursor: pointer; }
+  .ccwip { position: fixed; left: 50%; bottom: 24px; z-index: 1000; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 2px solid var(--blue, #0066FF); border-radius: 12px; background: var(--card, #FFFFFF); color: var(--fg, #0B1220); font: 600 14px/20px var(--font, Inter, sans-serif); box-shadow: 0 8px 24px rgba(0, 24, 137, 0.10); }
+  .ccwip[hidden] { display: none; }
 </style>
 
 <a class="skip" href="#content">Skip to content</a>
@@ -1237,7 +1241,7 @@
       <a href="#retail/map" data-v="map" data-map hidden><svg class="av-i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6h7M6 8.5v7M18 8.5v7M8.5 18h7M8 8l8 8"/></svg><b>Process Genome</b><span>Processes and documents on one interactive map.</span></a>
       <a href="#retail/solution" data-v="sol" data-sol hidden><svg class="av-i" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5" opacity=".55"/></svg><b>Solution overview</b><span>Trading Grid for Retail and CPG</span></a>
       </div>
-      <a class="proto" data-cc href="https://process-genome.onrender.com/command-center/" target="_blank" rel="noopener" hidden aria-label="Try the Command Center clickable prototype for Retail and CPG (opens in a new tab)"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 2.5l8.5 5.2-3.9.9 2.2 4-1.6.9-2.2-4L4 12.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Try the Command Center prototype</span><svg class="pe" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="proto" data-cc data-ccwip role="button" tabindex="0" hidden aria-label="Command Center prototype for Retail and CPG, work in progress"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 2.5l8.5 5.2-3.9.9 2.2 4-1.6.9-2.2-4L4 12.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Try the Command Center prototype</span></a>
     </nav>
     <div id="v-ops">
     <section id="work" hidden>
@@ -2681,7 +2685,7 @@ var TRANSLATE = [
       (ex ? '<span>' + pmBars("h", true) + '</span><span>' + pmBars("m", true) + '</span><span>' + pmBars("l", true) + '</span>'
         : '<span>' + pmBars("h") + '<span class="obw">Critical</span></span><span>' + pmBars("m") + '<span class="obw">Warning</span></span><span>' + pmBars("l") + '<span class="obw">Monitored</span></span>') + '</div>' +
       '<p class="pp-key pv-key">' + (ex ? "Numbers on tiles mark agent decision points." : "<b>IM</b> Integration Monitor · <b>PM</b> Performance Monitor rule · <b>ASN</b> ASN Intelligence") + '</p>' +
-      '<a class="pm-btn pm-more" href="command-center/" target="_blank" rel="noopener" aria-label="Try the Command Center clickable prototype (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>Try the Command Center prototype</a></div>';
+      '<button type="button" class="pm-btn pm-more" data-ccwip aria-label="Command Center prototype, work in progress">Try the Command Center prototype</button></div>';
     if (ex) {
       h += '<h4>Performance Monitor agents</h4><ul class="pp-list pv-list">' + PMOV.extend.dp.map(function (d, i) {
         var a = P.ag[i] || ["", ""];
@@ -3937,4 +3941,12 @@ var TRANSLATE = [
   if (window.TGR_K) window.TGR_RENDER(window.TGR_K);
 })();
 </script>
-</body></html>
+<div class="ccwip" id="ccwip" role="status" aria-live="polite" hidden></div>
+<script>
+(function () {
+  var t;
+  function wip() { var el = document.getElementById("ccwip"); if (!el) return; el.textContent = "Command Center prototype: work in progress."; el.hidden = false; clearTimeout(t); t = setTimeout(function () { el.hidden = true; }, 3200); }
+  document.addEventListener("click", function (e) { var b = e.target.closest && e.target.closest("[data-ccwip]"); if (!b) return; e.preventDefault(); wip(); });
+  document.addEventListener("keydown", function (e) { var b = e.target.closest && e.target.closest("a[data-ccwip]"); if (!b || (e.key !== "Enter" && e.key !== " ")) return; e.preventDefault(); wip(); });
+})();
+</script></body></html>
