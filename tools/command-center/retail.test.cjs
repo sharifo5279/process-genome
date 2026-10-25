@@ -351,3 +351,18 @@ test('process board: every finding sits on its own process board, and items open
   click({ 'data-wsbddoc': '856' });
   assert.ok(app.bdItems(0).filter(app.bdMatch).every(v => v.c.s === '856'));
 });
+
+test('cross-references: unmatched identifiers map to an item and move to the table', () => {
+  const { app, click, screen } = loadApp();
+  for (const role of ['retailer', 'supplier']) {
+    click({ 'data-rt-role': role });
+    click({ 'data-cxcfg': 'xr' });
+    const html = screen('cfg');
+    assert.match(html, /Item cross-reference/);
+    assert.equal(html.includes('Location cross-reference'), role === 'supplier');
+    for (const x of app.XRI[role]) assert.equal(app.xrGtin(x[0]).length, 14);
+  }
+  app.ccXr.u1 = 'NB-30022';
+  const after = screen('cfg');
+  assert.ok(!after.includes('data-xrmap="u1"') && after.includes('HG-77131'));
+});

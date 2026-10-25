@@ -269,8 +269,9 @@
     }).join("") + '</tbody></table>';
   }
   CXS["cfg"] = function () {
-    var pm = ccOn("pm"), tab = pm && ccCfgTab !== "mon" ? "rp" : "mon";
-    var h = cxHead("Configuration") + (pm ? '<nav class="cx-tabs"><button type="button" data-cxcfg="rp" aria-pressed="' + (tab === "rp") + '">Rules &amp; Policies</button><button type="button" data-cxcfg="mon" aria-pressed="' + (tab === "mon") + '">Monitoring</button></nav>' : "");
+    var pm = ccOn("pm"), tab = ccCfgTab === "xr" || ccCfgTab === "mon" ? ccCfgTab : pm ? "rp" : "mon";
+    var h = cxHead("Configuration") + '<nav class="cx-tabs">' + (pm ? '<button type="button" data-cxcfg="rp" aria-pressed="' + (tab === "rp") + '">Rules &amp; Policies</button>' : "") + '<button type="button" data-cxcfg="mon" aria-pressed="' + (tab === "mon") + '">Monitoring</button><button type="button" data-cxcfg="xr" aria-pressed="' + (tab === "xr") + '">Cross-references</button></nav>';
+    if (tab === "xr") return h + cxXref();
     if (tab === "mon") {
       var ivy = CXA.filter(function (a) { return a.t === "im"; });
       return h + cxCard("Monitoring checks", '<p class="cx-sub">Volume, missing-document and acknowledgment checks run by Ivy for every partner.</p>' + cxRuleTable(CXR, ivy), "", cxTag("IM")) +

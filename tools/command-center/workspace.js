@@ -287,6 +287,51 @@
     ccRw.agent = agent; ccRw.name = j[3]; ccRw.expect = j[3] + " for every document in scope."; ccRw.med = j[5]; ccRw.high = j[6]; ccRw.test = null;
   }
 
+  /* Cross-references: item and location identifiers that EDI documents carry, mapped to the client's own codes.
+     Sources are 832 catalogs and 816 location lists seen on Trading Grid, file upload, and manual mapping. The item master stays in the client's ERP. Illustrative. */
+  var ccXr = {}, ccXrQ = "";
+  function xrGtin(b) { var s = 0; for (var i = 0; i < 13; i++) s += +b.charAt(12 - i) * (i % 2 ? 1 : 3); return b + (10 - s % 10) % 10; }
+  /* [GTIN base (13 digits), partner item number, our item number, description, partner, source, updated] */
+  var XRI = {
+    supplier: [["0008451230001", "418820", "NB-30001", "Hydrating serum 30 ml", "Northfield Stores", "832", "12 Oct"], ["0008451230014", "418836", "NB-30014", "Daily SPF 50 lotion", "Northfield Stores", "832", "12 Oct"],
+      ["0008451230022", "418851", "NB-30022", "Gentle foaming cleanser", "Northfield Stores", "832", "12 Oct"], ["0008451230035", "418867", "NB-30035", "Retinol night cream", "Northfield Stores", "832", "12 Oct"],
+      ["0008451230001", "HG-77102", "NB-30001", "Hydrating serum 30 ml", "Harbor Grocers", "Upload", "3 Oct"], ["0008451230014", "HG-77118", "NB-30014", "Daily SPF 50 lotion", "Harbor Grocers", "Upload", "3 Oct"],
+      ["0008451230041", "WL-2260417", "NB-30041", "Vitamin C brightening gel", "Westline Home", "832", "8 Oct"], ["0008451230057", "B0D7K2XQ4M", "NB-30057", "Barrier repair moisturizer", "Brightway Marketplace", "Manual", "21 Oct"]],
+    retailer: [["0008451230001", "NB-30001", "418820", "Hydrating serum 30 ml", "Nuvori Beauty", "832", "12 Oct"], ["0008451230014", "NB-30014", "418836", "Daily SPF 50 lotion", "Nuvori Beauty", "832", "12 Oct"],
+      ["0007312640088", "SL-1088", "522104", "Shea body butter 200 ml", "Solara Personal Care", "832", "19 Oct"], ["0007312640091", "SL-1091", "522117", "Unscented body wash 500 ml", "Solara Personal Care", "832", "19 Oct"],
+      ["0006620410215", "TW-215", "610482", "Linen spray 250 ml", "Tidewell Home", "Upload", "6 Oct"], ["0005194470033", "FE-0033", "733019", "Bamboo toothbrush, 4 pack", "Fieldstone Essentials", "Manual", "22 Oct"]]
+  };
+  /* Identifiers seen in documents with no mapping: [key, document, partner, partner item number, GTIN base or "", first seen, documents, suggested item number or ""] */
+  var XRU = {
+    supplier: [["u1", "852", "Harbor Grocers", "HG-77131", "0008451230022", "Mon 19 Oct", 386, "NB-30022"], ["u2", "850", "Westline Home", "WL-2260433", "", "Thu 22 Oct", 4, ""],
+      ["u3", "852", "Cedar & Coast", "CC-55190", "0008451230035", "Mon 19 Oct", 388, "NB-30035"]],
+    retailer: [["u4", "856", "Fieldstone Essentials", "FE-0041", "0005194470041", "Today 08:20", 2, ""], ["u5", "810", "Solara Personal Care", "SL-1102", "0007312640102", "Fri 23 Oct", 6, ""]]
+  };
+  /* Locations: [partner, N1 code, type, name, city, source, updated] */
+  var XRL = [["Northfield Stores", "0041", "Store", "Store 41", "Columbus OH", "816", "1 Oct"], ["Northfield Stores", "0012", "Store", "Store 12", "Dayton OH", "816", "1 Oct"],
+    ["Northfield Stores", "DC-04", "Distribution center", "Groveport DC", "Groveport OH", "816", "1 Oct"], ["Harbor Grocers", "HG-118", "Store", "Store 118", "Erie PA", "Upload", "3 Oct"],
+    ["Brightway Marketplace", "BW-DC07", "Distribution center", "Fulfillment center 07", "Joliet IL", "Manual", "Today 07:38"]];
+  function xrOurs() { var seen = {}; return XRI[ccRole()].filter(function (r) { if (seen[r[2]]) return false; seen[r[2]] = 1; return true; }); }
+  function cxXref() {
+    var r = ccRole() === "retailer", P = r ? "Supplier" : ccOn("rt") ? "Retailer" : "Partner", items = XRI[ccRole()], un = XRU[ccRole()].filter(function (u) { return !ccXr[u[0]]; }), done = XRU[ccRole()].filter(function (u) { return ccXr[u[0]]; });
+    var q = ccXrQ.toLowerCase(), rows = items.concat(done.map(function (u) { return [u[4] || "", u[3], ccXr[u[0]], (xrOurs().filter(function (o) { return o[2] === ccXr[u[0]]; })[0] || [])[3] || "", u[2], "Manual", "Just now"]; }))
+      .filter(function (x) { return !q || x.join(" ").toLowerCase().indexOf(q) >= 0; });
+    var sel = function (u) { return '<select data-xrsel="' + u[0] + '" aria-label="Item for ' + cxe(u[3]) + '"><option value="">Select item</option>' + xrOurs().map(function (o) { return '<option value="' + o[2] + '"' + (o[2] === u[7] ? " selected" : "") + '>' + o[2] + ' · ' + cxe(o[3]) + '</option>'; }).join("") + '</select>'; };
+    var h = '<div class="cx-fsum ws-pk">' + cxKpi("Items mapped", r ? "2,318" : "1,184", "Across " + (r ? "64 suppliers" : "6 partners")) + cxKpi("Unmatched identifiers", un.length, un.length ? "Documents waiting on a mapping" : "All identifiers mapped") +
+      (r ? "" : cxKpi("Locations mapped", "4,183", "Stores and distribution centers")) + cxKpi("Learned from 832", r ? "2,040" : "1,032", "Last catalog " + (r ? "19 Oct" : "12 Oct")) + '</div>';
+    h += cxCard("Unmatched identifiers", un.length ? '<table class="cx-tbl xr-u"><thead><tr><th>Seen in</th><th>' + P + ' item number</th><th>GTIN</th><th>First seen</th><th class="n">Documents</th><th>Map to</th><th></th></tr></thead><tbody>' + un.map(function (u) {
+        return '<tr><td><code>' + u[1] + '</code> ' + cxe(u[2]) + '</td><td><code>' + cxe(u[3]) + '</code></td><td>' + (u[4] ? '<code>' + xrGtin(u[4]) + '</code>' : '<span class="ws-mu">Not sent</span>') + '</td><td>' + cxe(u[5]) + '</td><td class="n">' + u[6].toLocaleString("en-US") + '</td><td>' + sel(u) + (u[7] ? '<small class="ws-mu xr-s">Suggested: GTIN match</small>' : "") + '</td><td><button type="button" class="cx-btn" data-xrmap="' + u[0] + '">Save mapping</button></td></tr>'; }).join("") + '</tbody></table>'
+      : '<p class="cx-empty">All identifiers in recent documents are mapped.</p>', "", '<span class="cx-note">From inbound documents in the last 7 days</span>');
+    h += cxCard("Item cross-reference", '<div class="xr-bar"><label class="bd-q">' + ci("search") + '<input type="search" data-xrq value="' + cxe(ccXrQ) + '" placeholder="GTIN, item number or description" aria-label="Search items"></label><span class="cx-note">' + rows.length + ' of ' + (r ? "2,318" : "1,184") + ' shown</span></div>' +
+      '<table class="cx-tbl"><thead><tr><th>GTIN</th><th>' + P + ' item number</th><th>Our item number</th><th>Description</th><th>' + P + '</th><th>Source</th><th>Updated</th></tr></thead><tbody>' + rows.map(function (x) {
+        return '<tr><td>' + (x[0] ? '<code>' + xrGtin(x[0]) + '</code>' : "") + '</td><td><code>' + cxe(x[1]) + '</code></td><td><code>' + cxe(x[2]) + '</code></td><td>' + cxe(x[3]) + '</td><td>' + cxe(x[4]) + '</td><td>' + (x[5] === "832" ? "832 catalog" : x[5]) + '</td><td>' + cxe(x[6]) + '</td></tr>'; }).join("") + (rows.length ? "" : '<tr><td colspan="7" class="cx-empty">No items match the search.</td></tr>') + '</tbody></table>',
+      "", '<span class="ws-hb"><button type="button" class="cx-btn" data-xrfile>Download template</button><button type="button" class="cx-btn p" data-xrfile>' + ci("plus") + 'Upload file</button></span>');
+    if (!r) h += cxCard("Location cross-reference", '<table class="cx-tbl"><thead><tr><th>' + P + '</th><th>Location code (N104)</th><th>Type</th><th>Name</th><th>City</th><th>Source</th><th>Updated</th></tr></thead><tbody>' + XRL.map(function (l) {
+        return '<tr><td>' + cxe(l[0]) + '</td><td><code>' + cxe(l[1]) + '</code></td><td>' + l[2] + '</td><td>' + cxe(l[3]) + '</td><td>' + cxe(l[4]) + '</td><td>' + (l[5] === "816" ? "816 location list" : l[5]) + '</td><td>' + cxe(l[6]) + '</td></tr>'; }).join("") + '</tbody></table>',
+      "", '<span class="cx-note">Store and ship-to codes in 850, 856 and 852</span><button type="button" class="cx-btn p" data-xrfile>' + ci("plus") + 'Upload file</button>');
+    return h + '<p class="cx-note">Item and location masters stay in your ERP. Command Center keeps the mappings that EDI documents need.</p>';
+  }
+
   /* Shell hooks */
   var wsBaseDrawer = cxDrawer;
   cxDrawer = function () { return ccDr && ccDr[0] === "rule" && ccRw ? rwDrawer() : ccDr && ccDr[0] === "bd" ? bdDrawer() : wsBaseDrawer(); };
@@ -297,9 +342,11 @@
     var dr = cx.querySelector(".cx-dr.rw"); if (dr) { var f = dr.querySelector(".cx-db input, .cx-db select, .cx-db textarea, .cx-db button"); if (f && document.activeElement === document.body) f.focus({ preventScroll: true }); }
   };
   cx.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-wsproc],[data-wsbd],[data-wsbddoc],[data-wsbddir],[data-wsbdclr],[data-wsbdtask],[data-wstgi],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
+    var b = e.target.closest("[data-xrmap],[data-xrfile],[data-wsproc],[data-wsbd],[data-wsbddoc],[data-wsbddir],[data-wsbdclr],[data-wsbdtask],[data-wstgi],[data-wslens],[data-wsform],[data-wssave],[data-wsdash],[data-wsdel],[data-wsrun],[data-wstog],[data-wsdone],[data-wsstudio],[data-cxwsproc],[data-rwnew],[data-rwclose],[data-rwgo],[data-rwagent],[data-rwref],[data-rwtest],[data-rwdeploy]"); if (!b) return;
     var W = wsLoad(), v;
-    if (b.hasAttribute("data-wsproc")) { ccWsProc = b.getAttribute("data-wsproc"); ccBd = { dir: "All", doc: "", pt: "", q: "" }; }
+    if (b.hasAttribute("data-xrmap")) { var xs = cx.querySelector('[data-xrsel="' + b.getAttribute("data-xrmap") + '"]'); if (!xs || !xs.value) { cxToast("Select an item, then save the mapping."); cxRender(); return; } ccXr[b.getAttribute("data-xrmap")] = xs.value; cxToast("Mapping saved. Documents with this identifier are reprocessed."); }
+    else if (b.hasAttribute("data-xrfile")) { cxToast("File upload is not connected in this prototype."); }
+    else if (b.hasAttribute("data-wsproc")) { ccWsProc = b.getAttribute("data-wsproc"); ccBd = { dir: "All", doc: "", pt: "", q: "" }; }
     else if (b.hasAttribute("data-wsbd")) { ccDr = ["bd", b.getAttribute("data-wsbd")]; }
     else if (b.hasAttribute("data-wsbddoc")) { v = b.getAttribute("data-wsbddoc"); ccBd.doc = ccBd.doc === v ? "" : v; }
     else if (b.hasAttribute("data-wsbddir")) { ccBd.dir = b.getAttribute("data-wsbddir"); }
@@ -342,6 +389,7 @@
   });
   cx.addEventListener("change", function (e) {
     var el = e.target;
+    if (el.hasAttribute && el.hasAttribute("data-xrq")) { ccXrQ = String(el.value || "").trim(); cxRender(); var xq = cx.querySelector("[data-xrq]"); if (xq) xq.focus({ preventScroll: true }); return; }
     if (el.hasAttribute && (el.hasAttribute("data-wsbdpt") || el.hasAttribute("data-wsbdq") || el.hasAttribute("data-wsbdlens"))) {
       if (el.hasAttribute("data-wsbdpt")) ccBd.pt = el.value; else if (el.hasAttribute("data-wsbdq")) ccBd.q = String(el.value || "").trim(); else ccWsLens = el.value;
       cxRender(); var nx = cx.querySelector(el.hasAttribute("data-wsbdq") ? "[data-wsbdq]" : el.hasAttribute("data-wsbdpt") ? "[data-wsbdpt]" : "[data-wsbdlens]"); if (nx) nx.focus({ preventScroll: true }); return;

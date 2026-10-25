@@ -475,6 +475,7 @@
   .bd-f .cx-agi { width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-style: normal; }
   .bd-f em { margin-left: auto; font-style: normal; font-weight: 500; color: var(--pai); text-align: right; }
   .bd-rules { columns: 2; column-gap: 24px; } .bd-rules li { break-inside: avoid; }
+  .xr-bar { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; } .xr-u select { height: 32px; max-width: 240px; border: 1px solid var(--pl2); border-radius: 8px; background: var(--pc); color: var(--pf); font: 400 13px/16px var(--font); } .xr-s { display: block; margin-top: 2px; font-size: 11px; }
   .bd-tx td { font-size: 13px; white-space: nowrap; }
   .bd-x12 { margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--pl); border-radius: 8px; background: var(--pcl); font: 500 12px/18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; color: var(--pf); }
   @container (max-width: 1080px) { .bd-b { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bd-k { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
