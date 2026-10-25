@@ -707,6 +707,16 @@
   .cx-ftb td:nth-child(n+2) { white-space: normal; } .cx-ftb td.cx-fa .cx-btn { white-space: nowrap; }
   .cx-hero2:not(.cx-hero-im) .fu-list { max-height: 470px; overflow: auto; overscroll-behavior: contain; padding-right: 2px; }
   @container (max-width: 1080px) { .cx-hero2:not(.cx-hero-im) .fu-list { max-height: none; } }
+
+  /* Overview hero: the ring stays compact so the follow-ups sit beside it at 100% zoom */
+  .cx-globe { aspect-ratio: 820 / 460; }
+  .cx-hvb { max-width: min(760px, 92vh); margin: 0 auto; }
+  .cx-ring .g-fn, .cx-ring .g-fs, .cx-ring .g-cs { font-size: 14px; } .cx-ring .g-pn { font-size: 16px; } .cx-ring .g-cn { font-size: 14px; } .cx-ring .g-pc { font-size: 15px; }
+  .cx-rfn { margin: 4px 0 0; font-size: 12px; color: var(--g-fnt, var(--pmu)); }
+  .cx-hero2 { padding: 18px 20px; align-items: flex-start; }
+  .cx-hero2:not(.cx-hero-im) .fu-list { max-height: min(400px, 46vh); }
+  @container (max-width: 1080px) { .cx-hero2 { flex-direction: row; } .cx-hero2 .cx-hv { max-width: none; } .cx-hero2 .fu-list { grid-template-columns: 1fr; } .cx-hero2:not(.cx-hero-im) .fu-list { max-height: min(400px, 46vh); } .cx-hs { flex: 0 0 280px; } }
+  @container (max-width: 760px) { .cx-hero2 { flex-direction: column; } .cx-hs { flex-basis: auto; } }
   /* Retail and CPG workspaces: additive, scoped to the Command Center. */
   .cx.rt-app {
     --rt-navy: #102b56;
@@ -1585,12 +1595,12 @@
     }).sort(function (a, b) { return "rac".indexOf(a.sev) - "rac".indexOf(b.sev) || b.cnt - a.cnt; }).slice(0, 10);
   }
   function cxHero() {
-    var X = 548, Y = 270, R = 128, items = ccItems(), open = items.filter(function (i) { return fuBucket(i) === "need"; }), waiting = items.filter(function (i) { return fuBucket(i) === "wait"; });
+    var X = 548, Y = 250, R = 128, items = ccItems(), open = items.filter(function (i) { return fuBucket(i) === "need"; }), waiting = items.filter(function (i) { return fuBucket(i) === "wait"; });
     var ver = items.filter(function (i) { return fuBucket(i) === "ver"; }).length;
     var tot = 0, ok = 0, rk = 0, br = 0; ccSol().forEach(function (i) { var F = ccFlow(i); tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
     /* Documents verified from the network move from breached or at risk back to on track */
     cxAll().forEach(function (f) { if (ccDone[f.id] !== 1 || !f.n) return; var sg = FUSEG[f.id] || "rk", m = Math.min(f.n, sg === "br" ? br : rk); if (sg === "br") br -= m; else rk -= m; ok += m; });
-    var svg = '<svg class="cx-ring" viewBox="0 0 820 560" role="img" aria-label="' + tot.toLocaleString("en-US") + ' documents today, ' + open.length + ' findings need action"><defs>' +
+    var svg = '<svg class="cx-ring" viewBox="0 0 820 460" role="img" aria-label="' + tot.toLocaleString("en-US") + ' documents today, ' + open.length + ' findings need action"><defs>' +
       '<filter id="cxbl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
       '<filter id="cxsf" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="28"/></filter>' +
       '<radialGradient id="cxdisc" cx="50%" cy="40%" r="62%"><stop offset="0" style="stop-color:var(--g-disc2)"/><stop offset="1" style="stop-color:var(--g-disc)"/></radialGradient>' +
@@ -1599,7 +1609,7 @@
       '<circle cx="' + X + '" cy="' + Y + '" r="190" class="g-halo" filter="url(#cxsf)"/>' +
       '<text x="0" y="20" class="g-eb">Business processes</text><text x="276" y="20" class="g-fn" text-anchor="end">Documents today</text>';
     ccSol().forEach(function (i, k) {
-      var F = ccFlow(i), P = ccProc(i), y = 92 + k * 150, n = open.filter(function (x) { return x.proc === i; }), wn = waiting.filter(function (x) { return x.proc === i; }), sev = n.length ? "red" : wn.length ? "amb" : "blue";
+      var F = ccFlow(i), P = ccProc(i), y = 88 + k * 134, n = open.filter(function (x) { return x.proc === i; }), wn = waiting.filter(function (x) { return x.proc === i; }), sev = n.length ? "red" : wn.length ? "amb" : "blue";
       var ang = (200 - k * 22) * Math.PI / 180, tx = X + (R + 22) * Math.cos(ang), ty = Y + (R + 22) * Math.sin(ang), d = "M304 " + y + " C400 " + y + " " + (tx - 90).toFixed(1) + " " + ty.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1);
       var w = 80, okw = w * F.ok / F.n, rw = w * F.risk / F.n, bw = w * F.br / F.n, docs = [].concat.apply([], ccSteps(i).map(function (p) { return p[1][1].split(" / ")[0].split(/,\s*/); })).filter(function (v, j, a) { return /^\d/.test(v) && a.indexOf(v) === j; }).join(", ");
       svg += '<path d="' + d + '" class="g-st ' + sev + '"/>' + [0, 1, 2].map(function (q) { return '<circle r="2.4" class="g-pt ' + sev + '"><animateMotion dur="3.6s" begin="-' + (q * 1.2) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
@@ -1635,8 +1645,8 @@
       return '<path d="' + d + '" class="g-rg ' + cls + '" filter="url(#cxsf)"/><path d="' + d + '" stroke="' + grad + '" class="g-rb"/><path d="' + d + '" class="g-hit-r" data-cxov="tab:' + tab + '"/>' + [0, 1, 2, 3].map(function (q) { return '<circle r="2.2" class="g-rp"><animateMotion dur="2.8s" begin="-' + (q * 0.7) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
         '<text x="816" y="' + (y1 + (y1 < Y ? -32 : 44)) + '" class="g-cn g-lk" text-anchor="end" data-cxov="tab:' + tab + '" tabindex="0" role="button" aria-label="Show ' + lbl + '">' + lbl + '</text>';
     }
-    svg += rib(Y - 30, 210, "red", "url(#cxrr)", open.length + " need action · " + waiting.length + " waiting", "need") + rib(Y + 36, 452, "blue", "url(#cxrb)", ver + " verified today", "ver");
-    svg += '<text x="0" y="552" class="g-fn">Ring: documents today by state. Strands: follow-ups per process. Select a process, segment or label to filter.</text></svg>';
+    svg += rib(Y - 30, 196, "red", "url(#cxrr)", open.length + " need action · " + waiting.length + " waiting", "need") + rib(Y + 36, 402, "blue", "url(#cxrb)", ver + " verified today", "ver");
+    svg += '</svg><p class="cx-rfn">Ring: documents today by state. Strands: follow-ups per process. Select a process, segment or label to filter.</p>';
     var side = fuSide();
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';
     /* Two views of the same health: the process ring, or the trading network as a globe (WebGL) */
@@ -3379,7 +3389,7 @@
   /* Overview ring in WebGL (three.js, served next to this page). The SVG keeps the labels, process strands and ribbons;
      three.js draws the state ring and the document particles behind them. Without WebGL the SVG ring stays. */
   var GL = { on: false, cv: null, T: null, r: null, s: null, cam: null, ring: null, pts: null, sp: null, seg: [], t0: 0, raf: 0, key: "", mode: "ring", X: null, gs: null, gcam: null, gg: null, gkey: "", gp: [], beads: [], comp: null, host: null };
-  var GLX = 548, GLY = 270, GLR = 128, GLW = 820, GLH = 560;
+  var GLX = 548, GLY = 250, GLR = 128, GLW = 820, GLH = 460;
   function glDark() { var t = document.documentElement.getAttribute("data-theme"); return t === "dark" || (!t && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches); }
   function glState() {
     var tot = 0, ok = 0, rk = 0, br = 0; ccSol().forEach(function (i) { var F = ccFlow(i); tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
@@ -3480,7 +3490,7 @@
     if (GL.gkey === key && GL.gs) return;
     GL.gkey = key;
     var S = new T.Scene(), g = new T.Group(), col = { r: 0xFF4D5A, a: 0xF4B740, b: dark ? 0x6E9BFF : 0x2F6BFF, c: dark ? 0x39D98A : 0x15803D };
-    GL.gcam = new T.PerspectiveCamera(38, 820 / 560, 1, 5000); GL.gcam.position.set(-120, 140, 1120); GL.gcam.lookAt(-120, 0, 0);
+    GL.gcam = new T.PerspectiveCamera(38, 820 / 460, 1, 5000); GL.gcam.position.set(-120, 140, 1120); GL.gcam.lookAt(-120, 0, 0);
     S.add(new T.AmbientLight(0xffffff, dark ? 0.35 : 1.1)); var dl = new T.DirectionalLight(0xffffff, dark ? 0.8 : 1.6); dl.position.set(-400, 500, 600); S.add(dl);
     g.add(new T.Mesh(new T.SphereGeometry(GLRG - 2, 96, 96), new T.MeshStandardMaterial(dark ? { color: 0x10267A, roughness: 0.7, metalness: 0.1, emissive: 0x0A1A5C, emissiveIntensity: 1 } : { color: 0xF2F6FF, roughness: 0.9, metalness: 0, emissive: 0x2F6BFF, emissiveIntensity: 0.06 })));
     var n = 9000, pos = new Float32Array(n * 3);

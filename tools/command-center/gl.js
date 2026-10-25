@@ -1,7 +1,7 @@
   /* Overview ring in WebGL (three.js, served next to this page). The SVG keeps the labels, process strands and ribbons;
      three.js draws the state ring and the document particles behind them. Without WebGL the SVG ring stays. */
   var GL = { on: false, cv: null, T: null, r: null, s: null, cam: null, ring: null, pts: null, sp: null, seg: [], t0: 0, raf: 0, key: "", mode: "ring", X: null, gs: null, gcam: null, gg: null, gkey: "", gp: [], beads: [], comp: null, host: null };
-  var GLX = 548, GLY = 270, GLR = 128, GLW = 820, GLH = 560;
+  var GLX = 548, GLY = 250, GLR = 128, GLW = 820, GLH = 460;
   function glDark() { var t = document.documentElement.getAttribute("data-theme"); return t === "dark" || (!t && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches); }
   function glState() {
     var tot = 0, ok = 0, rk = 0, br = 0; ccSol().forEach(function (i) { var F = ccFlow(i); tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
@@ -102,7 +102,7 @@
     if (GL.gkey === key && GL.gs) return;
     GL.gkey = key;
     var S = new T.Scene(), g = new T.Group(), col = { r: 0xFF4D5A, a: 0xF4B740, b: dark ? 0x6E9BFF : 0x2F6BFF, c: dark ? 0x39D98A : 0x15803D };
-    GL.gcam = new T.PerspectiveCamera(38, 820 / 560, 1, 5000); GL.gcam.position.set(-120, 140, 1120); GL.gcam.lookAt(-120, 0, 0);
+    GL.gcam = new T.PerspectiveCamera(38, 820 / 460, 1, 5000); GL.gcam.position.set(-120, 140, 1120); GL.gcam.lookAt(-120, 0, 0);
     S.add(new T.AmbientLight(0xffffff, dark ? 0.35 : 1.1)); var dl = new T.DirectionalLight(0xffffff, dark ? 0.8 : 1.6); dl.position.set(-400, 500, 600); S.add(dl);
     g.add(new T.Mesh(new T.SphereGeometry(GLRG - 2, 96, 96), new T.MeshStandardMaterial(dark ? { color: 0x10267A, roughness: 0.7, metalness: 0.1, emissive: 0x0A1A5C, emissiveIntensity: 1 } : { color: 0xF2F6FF, roughness: 0.9, metalness: 0, emissive: 0x2F6BFF, emissiveIntensity: 0.06 })));
     var n = 9000, pos = new Float32Array(n * 3);

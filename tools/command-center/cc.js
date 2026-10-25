@@ -299,12 +299,12 @@
     }).sort(function (a, b) { return "rac".indexOf(a.sev) - "rac".indexOf(b.sev) || b.cnt - a.cnt; }).slice(0, 10);
   }
   function cxHero() {
-    var X = 548, Y = 270, R = 128, items = ccItems(), open = items.filter(function (i) { return fuBucket(i) === "need"; }), waiting = items.filter(function (i) { return fuBucket(i) === "wait"; });
+    var X = 548, Y = 250, R = 128, items = ccItems(), open = items.filter(function (i) { return fuBucket(i) === "need"; }), waiting = items.filter(function (i) { return fuBucket(i) === "wait"; });
     var ver = items.filter(function (i) { return fuBucket(i) === "ver"; }).length;
     var tot = 0, ok = 0, rk = 0, br = 0; ccSol().forEach(function (i) { var F = ccFlow(i); tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
     /* Documents verified from the network move from breached or at risk back to on track */
     cxAll().forEach(function (f) { if (ccDone[f.id] !== 1 || !f.n) return; var sg = FUSEG[f.id] || "rk", m = Math.min(f.n, sg === "br" ? br : rk); if (sg === "br") br -= m; else rk -= m; ok += m; });
-    var svg = '<svg class="cx-ring" viewBox="0 0 820 560" role="img" aria-label="' + tot.toLocaleString("en-US") + ' documents today, ' + open.length + ' findings need action"><defs>' +
+    var svg = '<svg class="cx-ring" viewBox="0 0 820 460" role="img" aria-label="' + tot.toLocaleString("en-US") + ' documents today, ' + open.length + ' findings need action"><defs>' +
       '<filter id="cxbl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
       '<filter id="cxsf" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="28"/></filter>' +
       '<radialGradient id="cxdisc" cx="50%" cy="40%" r="62%"><stop offset="0" style="stop-color:var(--g-disc2)"/><stop offset="1" style="stop-color:var(--g-disc)"/></radialGradient>' +
@@ -313,7 +313,7 @@
       '<circle cx="' + X + '" cy="' + Y + '" r="190" class="g-halo" filter="url(#cxsf)"/>' +
       '<text x="0" y="20" class="g-eb">Business processes</text><text x="276" y="20" class="g-fn" text-anchor="end">Documents today</text>';
     ccSol().forEach(function (i, k) {
-      var F = ccFlow(i), P = ccProc(i), y = 92 + k * 150, n = open.filter(function (x) { return x.proc === i; }), wn = waiting.filter(function (x) { return x.proc === i; }), sev = n.length ? "red" : wn.length ? "amb" : "blue";
+      var F = ccFlow(i), P = ccProc(i), y = 88 + k * 134, n = open.filter(function (x) { return x.proc === i; }), wn = waiting.filter(function (x) { return x.proc === i; }), sev = n.length ? "red" : wn.length ? "amb" : "blue";
       var ang = (200 - k * 22) * Math.PI / 180, tx = X + (R + 22) * Math.cos(ang), ty = Y + (R + 22) * Math.sin(ang), d = "M304 " + y + " C400 " + y + " " + (tx - 90).toFixed(1) + " " + ty.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1);
       var w = 80, okw = w * F.ok / F.n, rw = w * F.risk / F.n, bw = w * F.br / F.n, docs = [].concat.apply([], ccSteps(i).map(function (p) { return p[1][1].split(" / ")[0].split(/,\s*/); })).filter(function (v, j, a) { return /^\d/.test(v) && a.indexOf(v) === j; }).join(", ");
       svg += '<path d="' + d + '" class="g-st ' + sev + '"/>' + [0, 1, 2].map(function (q) { return '<circle r="2.4" class="g-pt ' + sev + '"><animateMotion dur="3.6s" begin="-' + (q * 1.2) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
@@ -349,8 +349,8 @@
       return '<path d="' + d + '" class="g-rg ' + cls + '" filter="url(#cxsf)"/><path d="' + d + '" stroke="' + grad + '" class="g-rb"/><path d="' + d + '" class="g-hit-r" data-cxov="tab:' + tab + '"/>' + [0, 1, 2, 3].map(function (q) { return '<circle r="2.2" class="g-rp"><animateMotion dur="2.8s" begin="-' + (q * 0.7) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
         '<text x="816" y="' + (y1 + (y1 < Y ? -32 : 44)) + '" class="g-cn g-lk" text-anchor="end" data-cxov="tab:' + tab + '" tabindex="0" role="button" aria-label="Show ' + lbl + '">' + lbl + '</text>';
     }
-    svg += rib(Y - 30, 210, "red", "url(#cxrr)", open.length + " need action · " + waiting.length + " waiting", "need") + rib(Y + 36, 452, "blue", "url(#cxrb)", ver + " verified today", "ver");
-    svg += '<text x="0" y="552" class="g-fn">Ring: documents today by state. Strands: follow-ups per process. Select a process, segment or label to filter.</text></svg>';
+    svg += rib(Y - 30, 196, "red", "url(#cxrr)", open.length + " need action · " + waiting.length + " waiting", "need") + rib(Y + 36, 402, "blue", "url(#cxrb)", ver + " verified today", "ver");
+    svg += '</svg><p class="cx-rfn">Ring: documents today by state. Strands: follow-ups per process. Select a process, segment or label to filter.</p>';
     var side = fuSide();
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';
     /* Two views of the same health: the process ring, or the trading network as a globe (WebGL) */

@@ -679,3 +679,13 @@
   .cx-ftb td:nth-child(n+2) { white-space: normal; } .cx-ftb td.cx-fa .cx-btn { white-space: nowrap; }
   .cx-hero2:not(.cx-hero-im) .fu-list { max-height: 470px; overflow: auto; overscroll-behavior: contain; padding-right: 2px; }
   @container (max-width: 1080px) { .cx-hero2:not(.cx-hero-im) .fu-list { max-height: none; } }
+
+  /* Overview hero: the ring stays compact so the follow-ups sit beside it at 100% zoom */
+  .cx-globe { aspect-ratio: 820 / 460; }
+  .cx-hvb { max-width: min(760px, 92vh); margin: 0 auto; }
+  .cx-ring .g-fn, .cx-ring .g-fs, .cx-ring .g-cs { font-size: 14px; } .cx-ring .g-pn { font-size: 16px; } .cx-ring .g-cn { font-size: 14px; } .cx-ring .g-pc { font-size: 15px; }
+  .cx-rfn { margin: 4px 0 0; font-size: 12px; color: var(--g-fnt, var(--pmu)); }
+  .cx-hero2 { padding: 18px 20px; align-items: flex-start; }
+  .cx-hero2:not(.cx-hero-im) .fu-list { max-height: min(400px, 46vh); }
+  @container (max-width: 1080px) { .cx-hero2 { flex-direction: row; } .cx-hero2 .cx-hv { max-width: none; } .cx-hero2 .fu-list { grid-template-columns: 1fr; } .cx-hero2:not(.cx-hero-im) .fu-list { max-height: min(400px, 46vh); } .cx-hs { flex: 0 0 280px; } }
+  @container (max-width: 760px) { .cx-hero2 { flex-direction: column; } .cx-hs { flex-basis: auto; } }
