@@ -189,7 +189,7 @@
       '<dl class="cx-dl fu-dl"><div><dt>Partner</dt><dd><button type="button" class="cx-lk" data-impt="' + cxe(f.partner) + '">' + cxe(f.partner) + '</button></dd></div><div><dt>Owner</dt><dd>' + (u.owner || "Unassigned") + '</dd></div>' +
       '<div><dt>Waiting on</dt><dd>' + cxe(fuWaitTxt(u, f)) + '</dd></div><div><dt>Expect by</dt><dd>' + (u.exp ? (fuOverdue(u) ? '<span class="fu-od">Overdue ' + Math.round(ccNow - u.exp) + ' m</span>' : fuT(u.exp)) : "Not set") + '</dd></div>' +
       (u.ticket ? '<div><dt>Ticket</dt><dd>' + cxe(u.ticket) + '</dd></div>' : "") + '</dl>' +
-      '<h4>What the network shows</h4><p>' + cxe(f.os) + '</p><div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
+      '<h4>What the network shows</h4><p>' + cxe(f.os) + '</p><p class="cx-note fu-win">Expected window: ' + cxe(CXRULE[f.id]) + '. Missed, so this is a finding.</p><div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
       '<h4>Evidence</h4>' + cxAffected(f) +
       '<h4>Recovery check</h4><ul class="fu-ck-l">' + C.map(function (c, j) { return '<li class="' + (u.chk[j] ? "on" : "") + '">' + ci(u.chk[j] ? "ok" : "clock") + '<span>' + cxe(c) + (u.chk[j] ? '<small>Seen ' + u.chk[j] + '</small>' : "") + '</span></li>'; }).join("") + '</ul>' +
       '<p class="cx-note">Checked against documents on the network. A reply by email does not close a follow-up.' + (/810|820|824/.test(CXDOC[f.id] || "") ? " Payment status is not visible to Command Center." : "") + '</p>' +

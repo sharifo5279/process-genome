@@ -691,3 +691,34 @@
   @container (max-width: 760px) { .cx-hero2 { flex-direction: column; } .cx-hs { flex-basis: auto; } }
   /* Strands for processes with no open follow-up recede: thin, dashed, no moving documents */
   .cx-ring .g-st.idle { stroke-width: 1; stroke-dasharray: 2 4; opacity: .45; }
+
+  /* Aviator: live answers from the Trading Grid Agent */
+  aside.cx-av { width: 400px; }
+  .av-new { margin-left: auto; font-size: 12.5px; } .av-new + .cx-ic { margin-left: 0 !important; }
+  .cx-avl li.a { display: grid; gap: 8px; font-size: 13px; line-height: 19px; } .cx-avl li.a p { margin: 0; }
+  .cx-avl li.err { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: start; background: var(--pc); border: 1px solid #F3B4B4; } .cx-avl li.err .ci { color: #C4320A; width: 16px; height: 16px; } .cx-avl li.err span b { display: block; } .cx-avl li.err .cx-btn { grid-column: 2; justify-self: start; }
+  .av-pend { display: flex !important; align-items: center; gap: 10px; color: var(--pmu); }
+  .av-sp { width: 14px; height: 14px; border: 2px solid var(--pl2); border-top-color: var(--pa); border-radius: 50%; animation: av-spin .8s linear infinite; flex: none; }
+  @keyframes av-spin { to { transform: rotate(360deg); } }
+  .av-ul { margin: 0; padding-left: 18px; }
+  .av-bt { display: block; font-size: 12px; color: var(--pmu); margin-bottom: 4px; }
+  .av-kpi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } .av-kpi > div { padding: 8px 10px; border-radius: 8px; background: var(--pc); } .av-kpi span { display: block; font-size: 11.5px; color: var(--pmu); } .av-kpi b { display: block; font-size: 17px; line-height: 22px; } .av-kpi small { font-size: 11.5px; color: var(--pmu); }
+  .av-st, .av-tr ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; } .av-st li, .av-tr li { display: grid; grid-template-columns: 12px 1fr; gap: 8px; align-items: start; } .av-st li .ci { width: 14px; height: 14px; color: var(--pmu); }
+  .av-st small, .av-tr small { display: block; font-size: 11.5px; color: var(--pmu); } .av-st em, .av-tr em { font-style: normal; color: var(--pmu); }
+  .av-d { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: #E89400; display: inline-block; } .av-d.g { background: #15803D; } .av-d.r { background: #E5484D; }
+  .av-rec { padding: 8px 10px; border-radius: 8px; background: var(--pc); } .av-rec dl { margin: 0; display: grid; gap: 4px; } .av-rec dl div { display: grid; grid-template-columns: 110px 1fr; gap: 8px; } .av-rec dt { font-size: 12px; color: var(--pmu); } .av-rec dd { margin: 0; } .av-rs { font-weight: 400; color: var(--pf); }
+  .av-al { display: grid; grid-template-columns: 16px 1fr; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--pc); border: 1px solid #F3B4B4; } .av-al .ci { width: 16px; height: 16px; color: #C4320A; } .av-al b { display: block; }
+  .av-act { display: flex; flex-wrap: wrap; gap: 6px; } .av-chip { padding: 5px 10px; border: 1px solid var(--pl2); border-radius: 999px; background: var(--pc); color: var(--pai); font: 600 12px/16px var(--font); cursor: pointer; } .av-chip:hover { border-color: var(--pa); }
+  .av-cards { display: grid; gap: 6px; } .av-cards div { padding: 8px 10px; border-radius: 8px; background: var(--pc); } .av-cards b { display: block; } .av-cards span { font-size: 12px; color: var(--pmu); }
+  .av-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; } .av-bars li { display: grid; grid-template-columns: 110px 1fr auto; gap: 8px; align-items: center; font-size: 12px; } .av-bars i { height: 6px; border-radius: 3px; background: var(--pl); overflow: hidden; } .av-bars u { display: block; height: 100%; background: var(--pa); }
+  .av-g span { display: flex; gap: 8px; align-items: baseline; font-size: 12px; } .av-g span small { color: var(--pmu); } .av-g i { position: relative; display: block; height: 6px; margin-top: 4px; border-radius: 3px; background: var(--pl); } .av-g u { display: block; height: 100%; border-radius: 3px; background: var(--pa); } .av-g em { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--pf); }
+  .av-tb { width: 100%; border-collapse: collapse; font-size: 12px; } .av-tb th, .av-tb td { padding: 4px 6px; border-bottom: 1px solid var(--pl); text-align: left; vertical-align: top; } .av-tb th { color: var(--pmu); font-weight: 600; }
+  .av-copy { position: relative; } .av-copy pre { margin: 0; padding: 10px; border-radius: 8px; background: var(--pc); white-space: pre-wrap; font: 12px/17px var(--font); } .av-cp { margin-top: 6px; } .av-cp .ci { width: 14px; height: 14px; }
+  .av-nx { font-weight: 600; } .av-src { font-size: 11.5px; color: var(--pmu); }
+  .av-tr { border-top: 1px solid var(--pl); padding-top: 6px; font-size: 12px; } .av-tr summary { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--pmu); } .av-tr summary .ci { width: 13px; height: 13px; color: var(--pa); } .av-tr p { margin: 6px 0; color: var(--pmu); } .av-tr li .av-d { margin-top: 5px; }
+  aside.cx-av .av-ft { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .av-in { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: end; } .av-in textarea { width: 100%; resize: none; padding: 8px 10px; border: 1px solid var(--pl2); border-radius: 10px; background: var(--pc); color: var(--pf); font: 13px/18px var(--font); }
+  .av-send { color: var(--pa) !important; } .av-send:disabled { opacity: .4; }
+  .fu-win { margin-top: -4px; }
+  .cx-avl li li { padding: 0; border-radius: 0; background: none; max-width: none; justify-self: stretch; color: inherit; }
+  .cx-avl .av-ul li { display: list-item; }

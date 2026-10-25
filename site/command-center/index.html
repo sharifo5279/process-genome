@@ -719,6 +719,37 @@
   @container (max-width: 760px) { .cx-hero2 { flex-direction: column; } .cx-hs { flex-basis: auto; } }
   /* Strands for processes with no open follow-up recede: thin, dashed, no moving documents */
   .cx-ring .g-st.idle { stroke-width: 1; stroke-dasharray: 2 4; opacity: .45; }
+
+  /* Aviator: live answers from the Trading Grid Agent */
+  aside.cx-av { width: 400px; }
+  .av-new { margin-left: auto; font-size: 12.5px; } .av-new + .cx-ic { margin-left: 0 !important; }
+  .cx-avl li.a { display: grid; gap: 8px; font-size: 13px; line-height: 19px; } .cx-avl li.a p { margin: 0; }
+  .cx-avl li.err { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: start; background: var(--pc); border: 1px solid #F3B4B4; } .cx-avl li.err .ci { color: #C4320A; width: 16px; height: 16px; } .cx-avl li.err span b { display: block; } .cx-avl li.err .cx-btn { grid-column: 2; justify-self: start; }
+  .av-pend { display: flex !important; align-items: center; gap: 10px; color: var(--pmu); }
+  .av-sp { width: 14px; height: 14px; border: 2px solid var(--pl2); border-top-color: var(--pa); border-radius: 50%; animation: av-spin .8s linear infinite; flex: none; }
+  @keyframes av-spin { to { transform: rotate(360deg); } }
+  .av-ul { margin: 0; padding-left: 18px; }
+  .av-bt { display: block; font-size: 12px; color: var(--pmu); margin-bottom: 4px; }
+  .av-kpi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } .av-kpi > div { padding: 8px 10px; border-radius: 8px; background: var(--pc); } .av-kpi span { display: block; font-size: 11.5px; color: var(--pmu); } .av-kpi b { display: block; font-size: 17px; line-height: 22px; } .av-kpi small { font-size: 11.5px; color: var(--pmu); }
+  .av-st, .av-tr ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; } .av-st li, .av-tr li { display: grid; grid-template-columns: 12px 1fr; gap: 8px; align-items: start; } .av-st li .ci { width: 14px; height: 14px; color: var(--pmu); }
+  .av-st small, .av-tr small { display: block; font-size: 11.5px; color: var(--pmu); } .av-st em, .av-tr em { font-style: normal; color: var(--pmu); }
+  .av-d { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: #E89400; display: inline-block; } .av-d.g { background: #15803D; } .av-d.r { background: #E5484D; }
+  .av-rec { padding: 8px 10px; border-radius: 8px; background: var(--pc); } .av-rec dl { margin: 0; display: grid; gap: 4px; } .av-rec dl div { display: grid; grid-template-columns: 110px 1fr; gap: 8px; } .av-rec dt { font-size: 12px; color: var(--pmu); } .av-rec dd { margin: 0; } .av-rs { font-weight: 400; color: var(--pf); }
+  .av-al { display: grid; grid-template-columns: 16px 1fr; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--pc); border: 1px solid #F3B4B4; } .av-al .ci { width: 16px; height: 16px; color: #C4320A; } .av-al b { display: block; }
+  .av-act { display: flex; flex-wrap: wrap; gap: 6px; } .av-chip { padding: 5px 10px; border: 1px solid var(--pl2); border-radius: 999px; background: var(--pc); color: var(--pai); font: 600 12px/16px var(--font); cursor: pointer; } .av-chip:hover { border-color: var(--pa); }
+  .av-cards { display: grid; gap: 6px; } .av-cards div { padding: 8px 10px; border-radius: 8px; background: var(--pc); } .av-cards b { display: block; } .av-cards span { font-size: 12px; color: var(--pmu); }
+  .av-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; } .av-bars li { display: grid; grid-template-columns: 110px 1fr auto; gap: 8px; align-items: center; font-size: 12px; } .av-bars i { height: 6px; border-radius: 3px; background: var(--pl); overflow: hidden; } .av-bars u { display: block; height: 100%; background: var(--pa); }
+  .av-g span { display: flex; gap: 8px; align-items: baseline; font-size: 12px; } .av-g span small { color: var(--pmu); } .av-g i { position: relative; display: block; height: 6px; margin-top: 4px; border-radius: 3px; background: var(--pl); } .av-g u { display: block; height: 100%; border-radius: 3px; background: var(--pa); } .av-g em { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--pf); }
+  .av-tb { width: 100%; border-collapse: collapse; font-size: 12px; } .av-tb th, .av-tb td { padding: 4px 6px; border-bottom: 1px solid var(--pl); text-align: left; vertical-align: top; } .av-tb th { color: var(--pmu); font-weight: 600; }
+  .av-copy { position: relative; } .av-copy pre { margin: 0; padding: 10px; border-radius: 8px; background: var(--pc); white-space: pre-wrap; font: 12px/17px var(--font); } .av-cp { margin-top: 6px; } .av-cp .ci { width: 14px; height: 14px; }
+  .av-nx { font-weight: 600; } .av-src { font-size: 11.5px; color: var(--pmu); }
+  .av-tr { border-top: 1px solid var(--pl); padding-top: 6px; font-size: 12px; } .av-tr summary { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--pmu); } .av-tr summary .ci { width: 13px; height: 13px; color: var(--pa); } .av-tr p { margin: 6px 0; color: var(--pmu); } .av-tr li .av-d { margin-top: 5px; }
+  aside.cx-av .av-ft { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .av-in { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: end; } .av-in textarea { width: 100%; resize: none; padding: 8px 10px; border: 1px solid var(--pl2); border-radius: 10px; background: var(--pc); color: var(--pf); font: 13px/18px var(--font); }
+  .av-send { color: var(--pa) !important; } .av-send:disabled { opacity: .4; }
+  .fu-win { margin-top: -4px; }
+  .cx-avl li li { padding: 0; border-radius: 0; background: none; max-width: none; justify-self: stretch; color: inherit; }
+  .cx-avl .av-ul li { display: list-item; }
   /* Retail and CPG workspaces: additive, scoped to the Command Center. */
   .cx.rt-app {
     --rt-navy: #102b56;
@@ -1653,7 +1684,7 @@
     if (rr) svg += rib(Y - 30, rv ? 196 : 300, "red", "url(#cxrr)", [open.length ? open.length + " need action" : "", waiting.length ? waiting.length + " waiting" : ""].filter(Boolean).join(" · "), "need");
     if (rv) svg += rib(Y + 36, rr ? 402 : 300, "blue", "url(#cxrb)", ver + " verified today", "ver");
     if (!rr && !rv) svg += '<text x="816" y="' + (Y + 4) + '" class="g-fn" text-anchor="end">No open follow-ups</text>';
-    svg += '</svg><p class="cx-rfn">Ring: documents today by state. Strands: follow-ups per process. Select a process, segment or label to filter.</p>';
+    svg += '</svg><p class="cx-rfn">Ring: documents today by state. On track includes open documents still inside their expected window. Strands: follow-ups per process. Select a process, segment or label to filter.</p>';
     var side = fuSide();
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';
     /* Two views of the same health: the process ring, or the trading network as a globe (WebGL) */
@@ -1757,10 +1788,10 @@
   /* The first transactions behind a finding, with control numbers and acknowledgment status. Illustrative. */
   function cxAffected(f) {
     var code = (/\((\d{3})\)/.exec(CXDOC[f.id] || "") || [0, "997"])[1], s = CCFLOW[ccRole()][f.p].steps[f.st] || ["In"], pre = { "850": "PO-", "855": "PO-", "856": "ASN-", "810": "INV-", "820": "REM-", "832": "CAT-", "997": "INV-" }[code] || "DOC-";
-    var notSent = /not sent|No 856|no 855|not delivered|not received/i.test(f.ot), rows = [];
+    var notSent = /not sent|No 856|no 855|No ship notices|not delivered|not received/i.test(f.ot), rows = [], none = s[0] === "In" ? "Not received" : "Not sent";
     for (var j = 0; j < Math.min(5, f.n || 1); j++) {
       var seed = f.id.charCodeAt(1) * 977 + j * 131 + 3301, t = 9 * 60 + 20 - j * 23 - seed % 9;
-      rows.push('<tr><td>' + (notSent ? "Not sent" : '<code>' + String(100000000 + seed * 17).slice(-9) + '</code>') + '</td><td>' + (notSent ? "" : '<code>' + ("000" + (j + 1)).slice(-4) + '</code>') + '</td><td>' + pre + (40000 + seed % 59999) + '</td><td>' + ("0" + Math.floor(t / 60)).slice(-2) + ':' + ("0" + t % 60).slice(-2) + '</td><td>' + cxe(f.how) + '</td></tr>');
+      rows.push('<tr><td>' + (notSent ? none : '<code>' + String(100000000 + seed * 17).slice(-9) + '</code>') + '</td><td>' + (notSent ? "" : '<code>' + ("000" + (j + 1)).slice(-4) + '</code>') + '</td><td>' + pre + (40000 + seed % 59999) + '</td><td>' + ("0" + Math.floor(t / 60)).slice(-2) + ':' + ("0" + t % 60).slice(-2) + '</td><td>' + cxe(f.how) + '</td></tr>');
     }
     return '<table class="cx-tbl cx-aff"><thead><tr><th>ISA13</th><th>ST02</th><th>Reference</th><th>Time</th><th>Check</th></tr></thead><tbody>' + rows.join("") + '</tbody></table><p class="cx-note">' + (f.n > 5 ? "First 5 of " + f.n + " · " : "") + code + " " + s[0] + '</p>';
   }
@@ -2075,7 +2106,7 @@
       '<dl class="cx-dl fu-dl"><div><dt>Partner</dt><dd><button type="button" class="cx-lk" data-impt="' + cxe(f.partner) + '">' + cxe(f.partner) + '</button></dd></div><div><dt>Owner</dt><dd>' + (u.owner || "Unassigned") + '</dd></div>' +
       '<div><dt>Waiting on</dt><dd>' + cxe(fuWaitTxt(u, f)) + '</dd></div><div><dt>Expect by</dt><dd>' + (u.exp ? (fuOverdue(u) ? '<span class="fu-od">Overdue ' + Math.round(ccNow - u.exp) + ' m</span>' : fuT(u.exp)) : "Not set") + '</dd></div>' +
       (u.ticket ? '<div><dt>Ticket</dt><dd>' + cxe(u.ticket) + '</dd></div>' : "") + '</dl>' +
-      '<h4>What the network shows</h4><p>' + cxe(f.os) + '</p><div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
+      '<h4>What the network shows</h4><p>' + cxe(f.os) + '</p><p class="cx-note fu-win">Expected window: ' + cxe(CXRULE[f.id]) + '. Missed, so this is a finding.</p><div class="cx-imp"><b>' + cxe(f.bt) + '</b><span>' + cxe(f.bs) + '</span></div>' +
       '<h4>Evidence</h4>' + cxAffected(f) +
       '<h4>Recovery check</h4><ul class="fu-ck-l">' + C.map(function (c, j) { return '<li class="' + (u.chk[j] ? "on" : "") + '">' + ci(u.chk[j] ? "ok" : "clock") + '<span>' + cxe(c) + (u.chk[j] ? '<small>Seen ' + u.chk[j] + '</small>' : "") + '</span></li>'; }).join("") + '</ul>' +
       '<p class="cx-note">Checked against documents on the network. A reply by email does not close a follow-up.' + (/810|820|824/.test(CXDOC[f.id] || "") ? " Payment status is not visible to Command Center." : "") + '</p>' +
@@ -3554,6 +3585,138 @@
     Promise.all(["./three.module.min.js", "./jsm/postprocessing/EffectComposer.js", "./jsm/postprocessing/RenderPass.js", "./jsm/postprocessing/UnrealBloomPass.js", "./jsm/postprocessing/OutputPass.js"].map(function (u) { return import(u); }))
       .then(glInit).catch(function () { import("./three.module.min.js").then(function (m) { glInit([m]); }).catch(function () {}); });
   }
+  /* Aviator in Command Center: questions go to the Trading Grid Agent on Trading Grid Context Services
+     (Trading Grid Agent Connectors, MCP over HTTP). The request carries the screen and the follow-up state of this
+     session; the answer comes back with the sub-agents used and the evidence trail. Read only. */
+  var AVCS = "https://tg-context-services-prototype.onrender.com/cc/mcp";
+  var AVTOK = { retailer: "tgcs_commandcenter_retailer_193977d9ac9c1238", supplier: "tgcs_commandcenter_supplier_3b68094cb7129b6b" };
+  var ccAvConv = {}, ccAvBusy = false, ccAvDraft = "", ccAvSeq = 0, ccAvT0 = 0, ccAvTick = 0;
+  CXI.copy = '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>';
+
+  /* What the user sees, so answers refer to the same screen */
+  function avScreen() {
+    var nav = CXNAV.filter(function (g) { return g[0] === cxNavKey(ccScr); })[0], lines = [];
+    lines.push("Company: " + ccCompany() + " (" + (ccRole() === "retailer" ? "retailer" : "CPG supplier") + ")");
+    lines.push("Licensed modules: " + cxMods().map(function (m) { return CCMOD[m][0]; }).join(", ") + ". Use only data from these modules.");
+    lines.push("Screen: " + (nav ? nav[1] : "Overview") + (ccScr !== cxNavKey(ccScr) ? " > " + ccScr : ""));
+    if (ccOvF) lines.push("Overview filter: " + ccOvF.l);
+    if (ccDr && ccDr[0] === "f") { var f = cxById(ccDr[1]); if (f) lines.push("Open follow-up: " + f.id + ", " + f.ot + " (" + f.partner + ")"); }
+    if (ccDr && ccDr[0] === "rt-case") lines.push("Open retail case: " + ccDr[1]);
+    if (ccDr && ccDr[0] === "pt") lines.push("Open partner: " + ccDr[1]);
+    if (ccDr && ccDr[0] === "rl") lines.push("Open rule: " + ccDr[1]);
+    lines.push("Network time: " + fuT(ccNow) + " ET");
+    return lines.join("\n");
+  }
+  function avFollowUps() {
+    return ccItems().map(function (i) {
+      if (i.key.indexOf("f:") === 0) { var id = i.key.slice(2), u = cxFu(id), f = cxById(id);
+        return { id: id, state: u.st, owner: u.owner || "Unassigned", waitingOn: fuWaitTxt(u, f), expectBy: u.exp ? fuT(u.exp) : null, since: u.since || null, activity: u.log.slice(0, 6).map(function (e) { return e[0] + " " + e[2]; }) }; }
+      return { id: i.key.slice(3), state: i.status, owner: i.owner, waitingOn: i.wait || null };
+    });
+  }
+
+  /* Answer text: paragraphs, bullets, tables and the agent's visual blocks */
+  function avInline(s) { return cxe(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>"); }
+  var AVOK = /complete|active|live|delivered|received|confirmed|verified|on target|ok|pass/i, AVBAD = /fail|blocked|expired|missing|rejected|overdue|breach|high|off target|not received|not sent/i;
+  function avDot(st) { return '<i class="av-d ' + (AVBAD.test(st) ? "r" : AVOK.test(st) ? "g" : "a") + '"></i>'; }
+  function avBlock(type, body) {
+    var rows = body.split("\n").filter(function (l) { return l.trim(); }), title = "", status = "", extra = "";
+    rows = rows.filter(function (l) { var m = /^(title|status|series|cols):\s*(.*)$/i.exec(l.trim()); if (!m) return true; if (/title/i.test(m[1])) title = m[2]; else if (/status/i.test(m[1])) status = m[2]; else extra = m[2]; return false; });
+    var C = rows.map(function (l) { return l.split(" | ").map(function (x) { return x.trim(); }); }), t = type.toLowerCase(), h = title ? '<b class="av-bt">' + avInline(title) + '</b>' : "";
+    if (/^(email|message|note|text)$/.test(t)) return '<div class="av-copy">' + h + '<pre>' + cxe(body.replace(/^title:.*\n/i, "")) + '</pre><button type="button" class="cx-btn av-cp" data-avcopy>' + ci("copy") + 'Copy</button></div>';
+    if (t === "kpi") return h + '<div class="av-kpi">' + C.map(function (c) { return '<div><span>' + avInline(c[0]) + '</span><b>' + avInline(c[1] || "") + '</b>' + (c[2] ? '<small>' + avInline(c[2]) + '</small>' : "") + '</div>'; }).join("") + '</div>';
+    if (t === "gauge") return h + C.map(function (c) { var v = parseFloat(c[1]) || 0, g = parseFloat(c[2]) || 0; return '<div class="av-g"><span>' + avInline(c[0]) + '<b>' + cxe(c[1]) + '</b>' + (c[2] ? '<small>Target ' + cxe(c[2]) + '</small>' : "") + '</span><i><u style="width:' + Math.min(100, v) + '%"></u>' + (g ? '<em style="left:' + Math.min(100, g) + '%"></em>' : "") + '</i></div>'; }).join("");
+    if (/^(status|steps|timeline|flow)$/.test(t)) return h + '<ul class="av-st">' + C.map(function (c) { var st = t === "timeline" ? c[2] || "" : c[1] || ""; return '<li>' + avDot(st) + '<span><b>' + avInline(c[0]) + '</b>' + (t === "timeline" ? " " + avInline(c[1] || "") : ' <em>' + avInline(c[1] || "") + '</em>') + (c[2] && t !== "timeline" ? '<small>' + avInline(c[2]) + '</small>' : "") + '</span></li>'; }).join("") + '</ul>';
+    if (t === "record") return '<div class="av-rec">' + (title ? '<b class="av-bt">' + avInline(title) + (status ? ' <span class="av-rs">' + avDot(status) + cxe(status) + '</span>' : "") + '</b>' : "") + '<dl>' + C.map(function (c) { return '<div><dt>' + avInline(c[0]) + '</dt><dd>' + avInline(c.slice(1).join(" | ")) + '</dd></div>'; }).join("") + '</dl></div>';
+    if (t === "alert") return C.map(function (c) { return '<div class="av-al">' + ci("warn") + '<span><b>' + avInline(c[1] || c[0]) + '</b>' + avInline(c[2] || "") + '</span></div>'; }).join("");
+    if (t === "actions") return '<div class="av-act">' + C.map(function (c) { return '<button type="button" class="av-chip" data-avq="' + cxe(c[1] || c[0]) + '">' + avInline(c[0]) + '</button>'; }).join("") + '</div>';
+    if (t === "contact") return h + '<ul class="av-st">' + C.map(function (c) { return '<li>' + ci("users") + '<span><b>' + avInline(c[0]) + '</b> ' + avInline(c[1] || "") + '<small>' + avInline([c[2], c[3]].filter(Boolean).join(" · ")) + '</small></span></li>'; }).join("") + '</ul>';
+    if (t === "cards") return h + '<div class="av-cards">' + C.map(function (c) { return '<div><b>' + avInline(c[0]) + '</b><span>' + avInline(c[1] || "") + '</span></div>'; }).join("") + '</div>';
+    if (t === "chart bar" || t === "donut") { var mx = Math.max.apply(null, C.map(function (c) { return parseFloat(String(c[1]).replace(/[^\d.]/g, "")) || 0; })) || 1;
+      return h + '<ul class="av-bars">' + C.map(function (c) { var v = parseFloat(String(c[1]).replace(/[^\d.]/g, "")) || 0; return '<li><span>' + avInline(c[0]) + '</span><i><u style="width:' + Math.round(100 * v / mx) + '%"></u></i><b>' + cxe(c[1]) + '</b></li>'; }).join("") + '</ul>'; }
+    if (t === "chart line") { var vs = C.map(function (c) { return parseFloat(String(c[1]).replace(/[^\d.-]/g, "")) || 0; }); return h + cxLine([{ v: vs, area: true }], { w: 360, h: 150, xl: C.map(function (c) { return c[0]; }), label: title || "Trend" }); }
+    var head = t === "compare" && extra ? '<tr><th></th>' + extra.split(",").map(function (x) { return '<th>' + cxe(x.trim()) + '</th>'; }).join("") + '</tr>' : "";
+    return h + '<table class="av-tb">' + (head ? '<thead>' + head + '</thead>' : "") + '<tbody>' + C.map(function (c) { return '<tr>' + c.map(function (x) { return '<td>' + avInline(x) + '</td>'; }).join("") + '</tr>'; }).join("") + '</tbody></table>';
+  }
+  function avRender(text) {
+    var out = [], lines = String(text || "").replace(/\r/g, "").split("\n"), i = 0, para = [], list = [];
+    function flush() { if (para.length) out.push('<p>' + avInline(para.join(" ")) + '</p>'); if (list.length) out.push('<ul class="av-ul">' + list.map(function (l) { return '<li>' + avInline(l) + '</li>'; }).join("") + '</ul>'); para = []; list = []; }
+    while (i < lines.length) {
+      var l = lines[i], m = /^```\s*([\w ]*)\s*$/.exec(l.trim());
+      if (m) { flush(); var body = []; i++; while (i < lines.length && !/^```\s*$/.test(lines[i].trim())) body.push(lines[i++]); i++; out.push(avBlock(m[1] || "text", body.join("\n"))); continue; }
+      if (/^\s*\|.*\|\s*$/.test(l)) { flush(); var tb = []; while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) tb.push(lines[i++]);
+        var rows = tb.filter(function (r) { return !/^\s*\|[\s:|-]+\|\s*$/.test(r); }).map(function (r) { return r.trim().replace(/^\||\|$/g, "").split("|").map(function (x) { return x.trim(); }); });
+        out.push('<table class="av-tb"><thead><tr>' + rows[0].map(function (x) { return '<th>' + avInline(x) + '</th>'; }).join("") + '</tr></thead><tbody>' + rows.slice(1).map(function (r) { return '<tr>' + r.map(function (x) { return '<td>' + avInline(x) + '</td>'; }).join("") + '</tr>'; }).join("") + '</tbody></table>'); continue; }
+      if (/^\s*[-*]\s+/.test(l)) { if (para.length) { out.push('<p>' + avInline(para.join(" ")) + '</p>'); para = []; } list.push(l.replace(/^\s*[-*]\s+/, "")); i++; continue; }
+      if (/^#{1,4}\s/.test(l)) { flush(); out.push('<p><b>' + avInline(l.replace(/^#+\s*/, "")) + '</b></p>'); i++; continue; }
+      if (/^Next step:/i.test(l.trim())) { flush(); out.push('<p class="av-nx">' + avInline(l.trim()) + '</p>'); i++; continue; }
+      if (/^Sources:/i.test(l.trim())) { flush(); out.push('<p class="av-src">' + avInline(l.trim()) + '</p>'); i++; continue; }
+      if (!l.trim()) { flush(); i++; continue; }
+      if (list.length) flush();
+      para.push(l.trim()); i++;
+    }
+    flush();
+    return out.join("");
+  }
+  function avTrail(r) {
+    var calls = (r.steps || []).filter(function (s) { return s.tool !== "engage_subagent"; });
+    return '<details class="av-tr"><summary>' + ci("spark") + 'Trading Grid Agent' + (r.subagents && r.subagents.length ? ' · ' + cxe(r.subagents.join(", ")) : "") + ' · ' + calls.length + (calls.length === 1 ? " call" : " calls") + ' · ' + Math.max(1, Math.round((r.ms || 0) / 1000)) + ' s</summary>' +
+      '<p>' + cxe((r.route || []).join(" › ")) + '</p><ol>' + calls.map(function (s) { return '<li>' + avDot(s.status === "OK" ? "Complete" : "Failed") + '<span><b>' + cxe(s.title || s.tool) + '</b>' + (s.subagent ? ' <em>' + cxe(s.subagent) + '</em>' : "") + '<small>' + cxe([s.product, s.summary, s.completeness && s.completeness !== "COMPLETE" ? "Partial evidence" : ""].filter(Boolean).join(" · ")) + '</small></span></li>'; }).join("") + '</ol>' +
+      '<p>' + cxe((r.company || ccCompany()) + " grant " + (r.grantId || "") + ". Read only.") + '</p></details>';
+  }
+
+  /* The call */
+  function avAsk(q) {
+    q = String(q || "").trim(); if (!q || ccAvBusy) return;
+    ccAvBusy = true; ccAvDraft = ""; ccAvT0 = Date.now(); var role = ccRole(), seq = ++ccAvSeq;
+    ccAvLog.push(["q", cxe(q)]); cxRender(); avScroll();
+    clearInterval(ccAvTick); ccAvTick = setInterval(function () { var p = cx.querySelector(".av-pend span"); if (p) p.textContent = avPendText(); }, 1000);
+    var ctl = typeof AbortController !== "undefined" ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 150000);
+    fetch(AVCS, { method: "POST", signal: ctl ? ctl.signal : undefined, headers: { "Authorization": "Bearer " + AVTOK[role], "Content-Type": "application/json", "Accept": "application/json, text/event-stream" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: seq, method: "tools/call", params: { name: "trading_grid_agent", arguments: { request: q, conversation_id: ccAvConv[role] || undefined, screen_context: avScreen(), network_time: fuT(ccNow), follow_ups: avFollowUps() } } }) })
+      .then(function (res) { return res.json().catch(function () { return { error: { message: "Trading Grid Context Services returned " + res.status + "." } }; }); })
+      .then(function (j) {
+        if (seq !== ccAvSeq) return;
+        var r = j && j.result, sc = r && r.structuredContent;
+        if (j.error || !r) throw new Error((j.error && j.error.message) || "No response.");
+        if (r.isError || !sc) throw new Error(((r.content || [])[0] || {}).text || "The agent returned no answer.");
+        ccAvConv[role] = sc.conversationId;
+        ccAvLog.push(["a", avRender(sc.answer) + avTrail(sc)]);
+      })
+      .catch(function (e) { if (seq !== ccAvSeq) return; ccAvLog.push(["err", ci("warn") + '<span><b>Trading Grid Context Services did not answer.</b>' + cxe(e && e.name === "AbortError" ? "The request timed out after 150 seconds." : String(e && e.message || e).replace(/^Aviator AKS gateway: /, "Gateway: ")) + '</span><button type="button" class="cx-btn" data-avq="' + cxe(q) + '" data-avretry>Retry</button>']); })
+      .then(function () { clearTimeout(to); clearInterval(ccAvTick); if (seq !== ccAvSeq) return; ccAvBusy = false; cxRender(); avScroll(); var t = cx.querySelector("[data-avin]"); if (t) t.focus({ preventScroll: true }); });
+  }
+  function avPendText() { var s = Math.round((Date.now() - ccAvT0) / 1000); return s < 8 ? "Trading Grid Agent is working" : s < 25 ? "Checking Trading Grid services · " + s + " s" : "Starting Trading Grid Context Services. The first request can take up to a minute · " + s + " s"; }
+  function avScroll() { var l = cx.querySelector(".cx-avb"); if (l) l.scrollTop = l.scrollHeight; }
+
+  cxAviator = function () {
+    if (!ccAv) return "";
+    var qs = CXQ.filter(function (q) { return !q.t || ccOn(q.t); });
+    var log = ccAvLog.map(function (m) { return '<li class="' + m[0] + '">' + m[1] + '</li>'; }).join("") + (ccAvBusy ? '<li class="a av-pend"><i class="av-sp"></i><span>' + avPendText() + '</span></li>' : "");
+    return '<aside class="cx-av" aria-label="Aviator"><header>' + ci("spark") + '<b>Aviator</b>' + (ccAvLog.length ? '<button type="button" class="cx-lk av-new" data-avnew>New conversation</button>' : "") + '<button type="button" class="cx-ic" data-cxav aria-label="Close Aviator">' + ci("x") + '</button></header>' +
+      '<div class="cx-avb" aria-live="polite">' + (ccAvLog.length ? "" : '<p class="cx-av-intro">Ask about partners, findings, follow-ups and anomalies for ' + cxe(ccCompany()) + '.</p><ul class="cx-avq">' + qs.map(function (q) { return '<li><button type="button" data-avq="' + cxe(q.q()) + '">' + cxe(q.q()) + '</button></li>'; }).join("") + '</ul>') +
+      '<ul class="cx-avl">' + log + '</ul></div>' +
+      '<div class="cx-ft av-ft"><div class="av-in"><textarea data-avin rows="2" placeholder="Ask Aviator" aria-label="Ask Aviator"' + (ccAvBusy ? " disabled" : "") + '>' + cxe(ccAvDraft) + '</textarea><button type="button" class="cx-ic av-send" data-avsend aria-label="Send"' + (ccAvBusy ? " disabled" : "") + '>' + ci("send") + '</button></div>' +
+      '<small>Trading Grid Agent via Trading Grid Context Services, read only. AI can make mistakes. Check important information.</small></div></aside>';
+  };
+  cxAsk = function (k) { var q = CXQ[k]; if (q) avAsk(q.q()); };
+  cx.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-avq],[data-avsend],[data-avnew],[data-avcopy]"); if (!b) return;
+    if (b.hasAttribute("data-avq")) avAsk(b.getAttribute("data-avq"));
+    else if (b.hasAttribute("data-avsend")) { var t = cx.querySelector("[data-avin]"); avAsk(t ? t.value : ccAvDraft); }
+    else if (b.hasAttribute("data-avnew")) { ccAvLog = []; delete ccAvConv[ccRole()]; ccAvSeq++; ccAvBusy = false; clearInterval(ccAvTick); cxRender(); }
+    else if (b.hasAttribute("data-avcopy")) { var pre = b.parentNode.querySelector("pre"); try { navigator.clipboard.writeText(pre.textContent); cxToast("Copied."); } catch (err) { cxToast("Copy is not available in this browser."); } cxRender(); }
+  });
+  cx.addEventListener("input", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-avin")) ccAvDraft = e.target.value; });
+  cx.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey && e.target.hasAttribute && e.target.hasAttribute("data-avin")) { e.preventDefault(); avAsk(e.target.value); } });
+  /* Keep the draft and focus across re-renders */
+  var avBaseRender = cxRender;
+  cxRender = function () {
+    var a = document.activeElement, had = a && a.hasAttribute && a.hasAttribute("data-avin"), pos = had ? a.selectionStart : 0, sc = cx.querySelector(".cx-avb"), st = sc ? sc.scrollTop : 0;
+    avBaseRender();
+    var n = cx.querySelector(".cx-avb"); if (n) n.scrollTop = st;
+    if (had) { var t = cx.querySelector("[data-avin]"); if (t) { t.focus({ preventScroll: true }); try { t.setSelectionRange(pos, pos); } catch (err) {} } }
+  };
   /* Overlays. One right sheet for object detail, below the top bar. Opening a related object from a sheet stacks it:
      Back and Escape return one level, X closes the stack, and focus returns to the control that opened the first sheet.
      Confirmations use a small centered dialog. */

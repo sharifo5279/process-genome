@@ -355,7 +355,7 @@
     if (rr) svg += rib(Y - 30, rv ? 196 : 300, "red", "url(#cxrr)", [open.length ? open.length + " need action" : "", waiting.length ? waiting.length + " waiting" : ""].filter(Boolean).join(" · "), "need");
     if (rv) svg += rib(Y + 36, rr ? 402 : 300, "blue", "url(#cxrb)", ver + " verified today", "ver");
     if (!rr && !rv) svg += '<text x="816" y="' + (Y + 4) + '" class="g-fn" text-anchor="end">No open follow-ups</text>';
-    svg += '</svg><p class="cx-rfn">Ring: documents today by state. Strands: follow-ups per process. Select a process, segment or label to filter.</p>';
+    svg += '</svg><p class="cx-rfn">Ring: documents today by state. On track includes open documents still inside their expected window. Strands: follow-ups per process. Select a process, segment or label to filter.</p>';
     var side = fuSide();
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';
     /* Two views of the same health: the process ring, or the trading network as a globe (WebGL) */
@@ -459,10 +459,10 @@
   /* The first transactions behind a finding, with control numbers and acknowledgment status. Illustrative. */
   function cxAffected(f) {
     var code = (/\((\d{3})\)/.exec(CXDOC[f.id] || "") || [0, "997"])[1], s = CCFLOW[ccRole()][f.p].steps[f.st] || ["In"], pre = { "850": "PO-", "855": "PO-", "856": "ASN-", "810": "INV-", "820": "REM-", "832": "CAT-", "997": "INV-" }[code] || "DOC-";
-    var notSent = /not sent|No 856|no 855|not delivered|not received/i.test(f.ot), rows = [];
+    var notSent = /not sent|No 856|no 855|No ship notices|not delivered|not received/i.test(f.ot), rows = [], none = s[0] === "In" ? "Not received" : "Not sent";
     for (var j = 0; j < Math.min(5, f.n || 1); j++) {
       var seed = f.id.charCodeAt(1) * 977 + j * 131 + 3301, t = 9 * 60 + 20 - j * 23 - seed % 9;
-      rows.push('<tr><td>' + (notSent ? "Not sent" : '<code>' + String(100000000 + seed * 17).slice(-9) + '</code>') + '</td><td>' + (notSent ? "" : '<code>' + ("000" + (j + 1)).slice(-4) + '</code>') + '</td><td>' + pre + (40000 + seed % 59999) + '</td><td>' + ("0" + Math.floor(t / 60)).slice(-2) + ':' + ("0" + t % 60).slice(-2) + '</td><td>' + cxe(f.how) + '</td></tr>');
+      rows.push('<tr><td>' + (notSent ? none : '<code>' + String(100000000 + seed * 17).slice(-9) + '</code>') + '</td><td>' + (notSent ? "" : '<code>' + ("000" + (j + 1)).slice(-4) + '</code>') + '</td><td>' + pre + (40000 + seed % 59999) + '</td><td>' + ("0" + Math.floor(t / 60)).slice(-2) + ':' + ("0" + t % 60).slice(-2) + '</td><td>' + cxe(f.how) + '</td></tr>');
     }
     return '<table class="cx-tbl cx-aff"><thead><tr><th>ISA13</th><th>ST02</th><th>Reference</th><th>Time</th><th>Check</th></tr></thead><tbody>' + rows.join("") + '</tbody></table><p class="cx-note">' + (f.n > 5 ? "First 5 of " + f.n + " · " : "") + code + " " + s[0] + '</p>';
   }

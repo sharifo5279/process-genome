@@ -46,7 +46,7 @@ function loadApp(storage = new Map()) {
   };
   app.window.document = app.document;
   vm.createContext(app);
-  vm.runInContext(['data.js', 'cc.js', 'fu.js', 'im.js', 'workspace.js', 'retail-data.js', 'retail.js', 'ov.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
+  vm.runInContext(['data.js', 'cc.js', 'fu.js', 'im.js', 'workspace.js', 'retail-data.js', 'retail.js', 'av.js', 'ov.js'].map(source).join('\n'), app, { filename: 'command-center.js' });
 
   function click(attributes) {
     const target = {
@@ -374,4 +374,14 @@ test('cross-references: unmatched identifiers map to an item and move to the tab
   app.ccXr.u1 = 'NB-30022';
   const after = screen('cfg');
   assert.ok(!after.includes('data-xrmap="u1"') && after.includes('HG-77131'));
+});
+
+test('Aviator renders the Trading Grid Agent answer blocks without gaps', () => {
+  const { app } = loadApp();
+  const text = 'Start with **Meadowline Care**.\n\n```kpi\nNeed action | 11 | 5 high\nWaiting | 0 | none\n```\n\n| Finding | At risk |\n|---|---|\n| Orders failed | $182,000 |\n\n```status\n850 | Failed | 74 held\n856 | Active | flowing\n```\n\n```record\ntitle: Meadowline Care\nstatus: Open\nProtocol | AS2\n```\n\n```actions\nWho owes the next document? | Who owes the next document for Meadowline Care?\n```\n\n- one\n- two\n\nNext step: Assign it to yourself.\nSources: Integration Monitor';
+  const html = app.avRender(text);
+  for (const s of ['av-kpi', 'av-tb', 'av-st', 'av-rec', 'av-chip', 'av-ul', 'av-nx', 'av-src', '<b>Meadowline Care</b>']) assert.ok(html.includes(s), s);
+  assert.doesNotMatch(html, /undefined|```/);
+  assert.match(app.avScreen(), /Licensed modules: Integration Monitor, Performance Monitor, Retail pack/);
+  assert.equal(app.avFollowUps().length, app.ccItems().length);
 });
