@@ -717,6 +717,8 @@
   .cx-hero2:not(.cx-hero-im) .fu-list { max-height: min(400px, 46vh); }
   @container (max-width: 1080px) { .cx-hero2 { flex-direction: row; } .cx-hero2 .cx-hv { max-width: none; } .cx-hero2 .fu-list { grid-template-columns: 1fr; } .cx-hero2:not(.cx-hero-im) .fu-list { max-height: min(400px, 46vh); } .cx-hs { flex: 0 0 280px; } }
   @container (max-width: 760px) { .cx-hero2 { flex-direction: column; } .cx-hs { flex-basis: auto; } }
+  /* Strands for processes with no open follow-up recede: thin, dashed, no moving documents */
+  .cx-ring .g-st.idle { stroke-width: 1; stroke-dasharray: 2 4; opacity: .45; }
   /* Retail and CPG workspaces: additive, scoped to the Command Center. */
   .cx.rt-app {
     --rt-navy: #102b56;
@@ -1612,7 +1614,8 @@
       var F = ccFlow(i), P = ccProc(i), y = 88 + k * 134, n = open.filter(function (x) { return x.proc === i; }), wn = waiting.filter(function (x) { return x.proc === i; }), sev = n.length ? "red" : wn.length ? "amb" : "blue";
       var ang = (200 - k * 22) * Math.PI / 180, tx = X + (R + 22) * Math.cos(ang), ty = Y + (R + 22) * Math.sin(ang), d = "M304 " + y + " C400 " + y + " " + (tx - 90).toFixed(1) + " " + ty.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1);
       var w = 80, okw = w * F.ok / F.n, rw = w * F.risk / F.n, bw = w * F.br / F.n, docs = [].concat.apply([], ccSteps(i).map(function (p) { return p[1][1].split(" / ")[0].split(/,\s*/); })).filter(function (v, j, a) { return /^\d/.test(v) && a.indexOf(v) === j; }).join(", ");
-      svg += '<path d="' + d + '" class="g-st ' + sev + '"/>' + [0, 1, 2].map(function (q) { return '<circle r="2.4" class="g-pt ' + sev + '"><animateMotion dur="3.6s" begin="-' + (q * 1.2) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
+      var idle = !n.length && !wn.length;
+      svg += '<path d="' + d + '" class="g-st ' + sev + (idle ? ' idle' : '') + '"/>' + (idle ? [] : [0, 1, 2]).map(function (q) { return '<circle r="2.4" class="g-pt ' + sev + '"><animateMotion dur="3.6s" begin="-' + (q * 1.2) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
         '<text x="0" y="' + (y - 6) + '" class="g-pn">' + cxe(ccShort(i)) + '</text><text x="0" y="' + (y + 12) + '" class="g-fn">' + cxe(docs) + '</text>' +
         '<text x="276" y="' + (y - 6) + '" class="g-pc" text-anchor="end">' + F.n.toLocaleString("en-US") + '</text>' +
         '<rect x="196" y="' + (y + 22) + '" width="' + w + '" height="4" rx="2" class="g-tr"/><rect x="196" y="' + (y + 22) + '" width="' + okw.toFixed(1) + '" height="4" rx="2" class="g-f blue"/>' +
@@ -1645,7 +1648,11 @@
       return '<path d="' + d + '" class="g-rg ' + cls + '" filter="url(#cxsf)"/><path d="' + d + '" stroke="' + grad + '" class="g-rb"/><path d="' + d + '" class="g-hit-r" data-cxov="tab:' + tab + '"/>' + [0, 1, 2, 3].map(function (q) { return '<circle r="2.2" class="g-rp"><animateMotion dur="2.8s" begin="-' + (q * 0.7) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
         '<text x="816" y="' + (y1 + (y1 < Y ? -32 : 44)) + '" class="g-cn g-lk" text-anchor="end" data-cxov="tab:' + tab + '" tabindex="0" role="button" aria-label="Show ' + lbl + '">' + lbl + '</text>';
     }
-    svg += rib(Y - 30, 196, "red", "url(#cxrr)", open.length + " need action · " + waiting.length + " waiting", "need") + rib(Y + 36, 402, "blue", "url(#cxrb)", ver + " verified today", "ver");
+    /* A ribbon shows only when it carries something; with one ribbon left it takes the middle lane */
+    var rr = open.length + waiting.length > 0, rv = ver > 0;
+    if (rr) svg += rib(Y - 30, rv ? 196 : 300, "red", "url(#cxrr)", [open.length ? open.length + " need action" : "", waiting.length ? waiting.length + " waiting" : ""].filter(Boolean).join(" · "), "need");
+    if (rv) svg += rib(Y + 36, rr ? 402 : 300, "blue", "url(#cxrb)", ver + " verified today", "ver");
+    if (!rr && !rv) svg += '<text x="816" y="' + (Y + 4) + '" class="g-fn" text-anchor="end">No open follow-ups</text>';
     svg += '</svg><p class="cx-rfn">Ring: documents today by state. Strands: follow-ups per process. Select a process, segment or label to filter.</p>';
     var side = fuSide();
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';

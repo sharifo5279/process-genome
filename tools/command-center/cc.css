@@ -689,3 +689,5 @@
   .cx-hero2:not(.cx-hero-im) .fu-list { max-height: min(400px, 46vh); }
   @container (max-width: 1080px) { .cx-hero2 { flex-direction: row; } .cx-hero2 .cx-hv { max-width: none; } .cx-hero2 .fu-list { grid-template-columns: 1fr; } .cx-hero2:not(.cx-hero-im) .fu-list { max-height: min(400px, 46vh); } .cx-hs { flex: 0 0 280px; } }
   @container (max-width: 760px) { .cx-hero2 { flex-direction: column; } .cx-hs { flex-basis: auto; } }
+  /* Strands for processes with no open follow-up recede: thin, dashed, no moving documents */
+  .cx-ring .g-st.idle { stroke-width: 1; stroke-dasharray: 2 4; opacity: .45; }
