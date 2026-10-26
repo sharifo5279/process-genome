@@ -1,39 +1,40 @@
   /* Overview ring in WebGL (three.js, served next to this page). The SVG keeps the labels, process strands and ribbons;
      three.js draws the state ring and the document particles behind them. Without WebGL the SVG ring stays. */
   var GL = { on: false, cv: null, T: null, r: null, s: null, cam: null, ring: null, pts: null, sp: null, seg: [], t0: 0, raf: 0, key: "", mode: "ring", X: null, gs: null, gcam: null, gg: null, gkey: "", gp: [], beads: [], comp: null, host: null };
-  var GLX = 548, GLY = 250, GLR = 128, GLW = 820, GLH = 460;
+  var GLX = 200, GLY = 200, GLR = 150, GLW = 400, GLH = 400;
   function glDark() { var t = document.documentElement.getAttribute("data-theme"); return t === "dark" || (!t && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches); }
   function glState() {
-    var tot = 0, ok = 0, rk = 0, br = 0; ccSol().forEach(function (i) { var F = ccFlow(i); tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
-    return [[ok, 0x2F6BFF], [rk, 0xF4B740], [br, 0xE5484D]].map(function (x) { return [Math.max(360 * x[0] / tot, 7), x[1]]; });
+    var tot = 0, ok = 0, rk = 0, br = 0, fp = ccOvF && ccOvF.k === "proc" ? +ccOvF.v : null;
+    ccSol().forEach(function (i) { if (fp != null && i !== fp) return; var F = cxProcState(i); tot += F.n; ok += F.ok; rk += F.rk; br += F.br; });
+    return [[ok, 0x2F6BFF], [rk, 0xF4B740], [br, 0xE5484D]].map(function (x) { return [Math.max(360 * x[0] / tot, 6), x[1]]; });
   }
   function glBuild() {
     var THREE = GL.T, S = glState(), key = S.map(function (x) { return x[0].toFixed(1); }).join("|") + (glDark() ? "d" : "l");
     if (GL.key === key && GL.ring) return;
     GL.key = key;
     if (GL.ring) { GL.s.remove(GL.ring); GL.s.remove(GL.pts); }
-    var ring = new THREE.Group(), at = -96, gap = 2.6;
+    var ring = new THREE.Group(), at = -90, gap = 2.4;
     GL.seg = [];
     S.forEach(function (sg, k) {
       var span = sg[0], a0 = at + gap / 2, len = span - gap, col = new THREE.Color(sg[1]);
-      var m = new THREE.Mesh(new THREE.TorusGeometry(GLR, [5, 8, 9][k] * 0.62, 20, Math.max(24, Math.round(len * 1.4)), len * Math.PI / 180),
+      var m = new THREE.Mesh(new THREE.TorusGeometry(GLR, [6, 9, 10][k] * 0.55, 20, Math.max(24, Math.round(len * 1.4)), len * Math.PI / 180),
         new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: glDark() ? 0.75 : 0.35, metalness: 0.35, roughness: 0.28 }));
       m.rotation.z = -(a0 + len) * Math.PI / 180;     /* SVG angles run clockwise with y down */
       ring.add(m); GL.seg.push([a0, a0 + len, col]); at += span;
     });
-    var glass = new THREE.Mesh(new THREE.TorusGeometry(GLR + 18, 1.1, 8, 160), new THREE.MeshBasicMaterial({ color: glDark() ? 0x8FB2FF : 0x7FA3E8, transparent: true, opacity: glDark() ? 0.35 : 0.45 }));
+    var glass = new THREE.Mesh(new THREE.TorusGeometry(GLR + 14, 0.9, 8, 160), new THREE.MeshBasicMaterial({ color: glDark() ? 0x8FB2FF : 0x7FA3E8, transparent: true, opacity: glDark() ? 0.35 : 0.45 }));
     ring.add(glass);
     ring.position.set(GLX, -GLY, 0);
-    /* documents in flight: points on a band around the ring, coloured by the state segment they pass */
-    var n = 1400, pos = new Float32Array(n * 3), colr = new Float32Array(n * 3), meta = new Float32Array(n * 3);
+    /* Documents in flight: beads in three lanes along the track, evenly spaced, colored by the state they pass through */
+    var n = 216, pos = new Float32Array(n * 3), colr = new Float32Array(n * 3), meta = new Float32Array(n * 3);
     for (var i = 0; i < n; i++) {
-      var a = Math.random() * 360, r = GLR - 6 + Math.pow(Math.random(), 1.6) * 44, z = (Math.random() - 0.5) * 30;
-      meta[i * 3] = a; meta[i * 3 + 1] = r; meta[i * 3 + 2] = 0.12 + Math.random() * 0.35;
-      pos[i * 3 + 2] = z;
+      var lane = i % 3;
+      meta[i * 3] = (i / n) * 360 + lane * 1.7; meta[i * 3 + 1] = GLR + (lane - 1) * 9; meta[i * 3 + 2] = [7, 10, 13][lane];
+      pos[i * 3 + 2] = 4;
     }
     var g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(colr, 3));
-    var pts = new THREE.Points(g, new THREE.PointsMaterial({ size: 2.4, vertexColors: true, transparent: true, opacity: glDark() ? 0.9 : 0.75, depthWrite: false,
+    var pts = new THREE.Points(g, new THREE.PointsMaterial({ size: 3.2, vertexColors: true, transparent: true, opacity: glDark() ? 0.95 : 0.8, depthWrite: false,
       blending: glDark() ? THREE.AdditiveBlending : THREE.NormalBlending }));
     pts.position.set(GLX, -GLY, 0); pts.userData.meta = meta;
     GL.s.add(ring); GL.s.add(pts); GL.ring = ring; GL.pts = pts;
@@ -48,12 +49,12 @@
     var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches, k = still ? 0 : (t - GL.t0) / 1000;
     glSize();
     if (GL.mode === "globe") { glGlobeFrame(k); GL.raf = still ? 0 : requestAnimationFrame(glFrame); return; }
-    GL.ring.rotation.x = 0.16 + Math.sin(k * 0.5) * 0.05; GL.ring.rotation.y = Math.sin(k * 0.37) * 0.09;
+    GL.ring.rotation.x = Math.sin(k * 0.4) * 0.03; GL.ring.rotation.y = Math.sin(k * 0.3) * 0.04;
     GL.pts.rotation.x = GL.ring.rotation.x; GL.pts.rotation.y = GL.ring.rotation.y;
-    GL.sp.position.set(GLX + Math.cos(k * 0.8) * 220, -GLY + Math.sin(k * 0.8) * 220, 160);
+    GL.sp.position.set(GLX + Math.cos(k * 0.6) * 180, -GLY + Math.sin(k * 0.6) * 180, 160);
     var m = GL.pts.userData.meta, p = GL.pts.geometry.attributes.position.array, c = GL.pts.geometry.attributes.color.array;
     for (var i = 0; i < m.length / 3; i++) {
-      var a = m[i * 3] + k * 60 * m[i * 3 + 2], r = m[i * 3 + 1], rd = -a * Math.PI / 180, col = glColor(a);
+      var a = m[i * 3] + k * m[i * 3 + 2], r = m[i * 3 + 1], rd = -a * Math.PI / 180, col = glColor(a);
       p[i * 3] = r * Math.cos(rd); p[i * 3 + 1] = r * Math.sin(rd); c[i * 3] = col.r; c[i * 3 + 1] = col.g; c[i * 3 + 2] = col.b;
     }
     GL.pts.geometry.attributes.position.needsUpdate = true; GL.pts.geometry.attributes.color.needsUpdate = true;

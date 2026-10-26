@@ -298,75 +298,81 @@
       return { n: n, sev: sev, cnt: need.length + wait.length, sub: t.length > 44 ? t.slice(0, 43).replace(/\s+\S*$/, "") + "…" : t };
     }).sort(function (a, b) { return "rac".indexOf(a.sev) - "rac".indexOf(b.sev) || b.cnt - a.cnt; }).slice(0, 10);
   }
+  /* Process state after network-verified recoveries: documents move from breached or at risk back to on track */
+  function cxProcState(i) {
+    var F = ccFlow(i), ok = F.ok, rk = F.risk, br = F.br;
+    cxAll().forEach(function (f) { if (f.p !== i || ccDone[f.id] !== 1 || !f.n) return; var sg = FUSEG[f.id] || "rk", m = Math.min(f.n, sg === "br" ? br : rk); if (sg === "br") br -= m; else rk -= m; ok += m; });
+    return { n: F.n, ok: ok, rk: rk, br: br, ack: F.ack, rej: F.rej };
+  }
+  var CXRING = { R: 150, C: 200 };
+  function cxArc(r, a0, a1) { var C = CXRING.C, p = function (a) { return (C + r * Math.cos(a * Math.PI / 180)).toFixed(1) + " " + (C + r * Math.sin(a * Math.PI / 180)).toFixed(1); }; return "M" + p(a0) + "A" + r + " " + r + " 0 " + (a1 - a0 > 180 ? 1 : 0) + " 1 " + p(a1); }
+  /* Overview hero: processes feed the ring; the ring feeds the follow-up lanes. Wires are drawn from live positions. */
   function cxHero() {
-    var X = 548, Y = 250, R = 128, items = ccItems(), open = items.filter(function (i) { return fuBucket(i) === "need"; }), waiting = items.filter(function (i) { return fuBucket(i) === "wait"; });
-    var ver = items.filter(function (i) { return fuBucket(i) === "ver"; }).length;
-    var tot = 0, ok = 0, rk = 0, br = 0; ccSol().forEach(function (i) { var F = ccFlow(i); tot += F.n; ok += F.ok; rk += F.risk; br += F.br; });
-    /* Documents verified from the network move from breached or at risk back to on track */
-    cxAll().forEach(function (f) { if (ccDone[f.id] !== 1 || !f.n) return; var sg = FUSEG[f.id] || "rk", m = Math.min(f.n, sg === "br" ? br : rk); if (sg === "br") br -= m; else rk -= m; ok += m; });
-    var svg = '<svg class="cx-ring" viewBox="0 0 820 460" role="img" aria-label="' + tot.toLocaleString("en-US") + ' documents today, ' + open.length + ' findings need action"><defs>' +
-      '<filter id="cxbl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
-      '<filter id="cxsf" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="28"/></filter>' +
-      '<radialGradient id="cxdisc" cx="50%" cy="40%" r="62%"><stop offset="0" style="stop-color:var(--g-disc2)"/><stop offset="1" style="stop-color:var(--g-disc)"/></radialGradient>' +
-      '<linearGradient id="cxrr" x1="0" x2="1"><stop offset="0" style="stop-color:var(--g-red);stop-opacity:0"/><stop offset=".45" style="stop-color:var(--g-red);stop-opacity:.85"/><stop offset="1" style="stop-color:var(--g-red)"/></linearGradient>' +
-      '<linearGradient id="cxrb" x1="0" x2="1"><stop offset="0" style="stop-color:var(--g-blue);stop-opacity:0"/><stop offset=".45" style="stop-color:var(--g-blue);stop-opacity:.85"/><stop offset="1" style="stop-color:var(--g-blue)"/></linearGradient></defs>' +
-      '<circle cx="' + X + '" cy="' + Y + '" r="190" class="g-halo" filter="url(#cxsf)"/>' +
-      '<text x="0" y="20" class="g-eb">Business processes</text><text x="276" y="20" class="g-fn" text-anchor="end">Documents today</text>';
-    ccSol().forEach(function (i, k) {
-      var F = ccFlow(i), P = ccProc(i), y = 88 + k * 134, n = open.filter(function (x) { return x.proc === i; }), wn = waiting.filter(function (x) { return x.proc === i; }), sev = n.length ? "red" : wn.length ? "amb" : "blue";
-      var ang = (200 - k * 22) * Math.PI / 180, tx = X + (R + 22) * Math.cos(ang), ty = Y + (R + 22) * Math.sin(ang), d = "M304 " + y + " C400 " + y + " " + (tx - 90).toFixed(1) + " " + ty.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1);
-      var w = 80, okw = w * F.ok / F.n, rw = w * F.risk / F.n, bw = w * F.br / F.n, docs = [].concat.apply([], ccSteps(i).map(function (p) { return p[1][1].split(" / ")[0].split(/,\s*/); })).filter(function (v, j, a) { return /^\d/.test(v) && a.indexOf(v) === j; }).join(", ");
-      var idle = !n.length && !wn.length;
-      svg += '<path d="' + d + '" class="g-st ' + sev + (idle ? ' idle' : '') + '"/>' + (idle ? [] : [0, 1, 2]).map(function (q) { return '<circle r="2.4" class="g-pt ' + sev + '"><animateMotion dur="3.6s" begin="-' + (q * 1.2) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
-        '<text x="0" y="' + (y - 6) + '" class="g-pn">' + cxe(ccShort(i)) + '</text><text x="0" y="' + (y + 12) + '" class="g-fn">' + cxe(docs) + '</text>' +
-        '<text x="276" y="' + (y - 6) + '" class="g-pc" text-anchor="end">' + F.n.toLocaleString("en-US") + '</text>' +
-        '<rect x="196" y="' + (y + 22) + '" width="' + w + '" height="4" rx="2" class="g-tr"/><rect x="196" y="' + (y + 22) + '" width="' + okw.toFixed(1) + '" height="4" rx="2" class="g-f blue"/>' +
-        '<rect x="' + (196 + okw).toFixed(1) + '" y="' + (y + 22) + '" width="' + rw.toFixed(1) + '" height="4" class="g-f amb"/><rect x="' + (196 + okw + rw).toFixed(1) + '" y="' + (y + 22) + '" width="' + bw.toFixed(1) + '" height="4" class="g-f red"/>' +
-        '<circle cx="300" cy="' + y + '" r="9" class="g-f ' + sev + '" opacity=".18"/><circle cx="300" cy="' + y + '" r="4.5" class="g-nd ' + sev + '"/>' +
-        (n.length || wn.length ? '<text x="0" y="' + (y + 44) + '" class="g-fs ' + sev + '">' + [n.length ? n.length + " need action" : "", wn.length ? wn.length + " waiting" : ""].filter(Boolean).join(" · ") + '</text>' : '<text x="0" y="' + (y + 44) + '" class="g-fs blue">No open follow-ups</text>') +
-        '<text x="0" y="' + (y + 60) + '" class="g-fn">' + F.ack + ' 997 overdue · ' + F.rej + ' 824 rejects</text>' +
-        '<rect x="-6" y="' + (y - 26) + '' + '" width="320" height="94" rx="8" class="g-hit' + (ccOvF && ccOvF.k === "proc" && +ccOvF.v === i ? " on" : "") + '" data-cxov="proc:' + i + '" tabindex="0" role="button" aria-label="Filter follow-ups to ' + cxe(ccShort(i)) + '"><title>Filter follow-ups to ' + cxe(ccShort(i)) + '</title></rect>';
-    });
-    for (var a = 0; a < 360; a += 3) { var rd = a * Math.PI / 180, big = a % 30 === 0, r1 = R + 38, r2 = r1 + (big ? 11 : 5);
-      svg += '<line x1="' + (X + r1 * Math.cos(rd)).toFixed(1) + '" y1="' + (Y + r1 * Math.sin(rd)).toFixed(1) + '" x2="' + (X + r2 * Math.cos(rd)).toFixed(1) + '" y2="' + (Y + r2 * Math.sin(rd)).toFixed(1) + '" class="g-tk" opacity="' + (0.18 + 0.5 * Math.pow(Math.cos((a - 300) * Math.PI / 360), 2)).toFixed(2) + '"/>'; }
-    svg += '<circle cx="' + X + '" cy="' + Y + '" r="' + (R + 18) + '" class="g-l2"/><circle cx="' + X + '" cy="' + Y + '" r="' + (R - 18) + '" fill="url(#cxdisc)" class="g-l2s"/><circle cx="' + X + '" cy="' + Y + '" r="' + (R - 42) + '" class="g-l1"/>';
-    var S = [["On track", ok, "blue", 5], ["At risk", rk, "amb", 8], ["Breached", br, "red", 9]], at = -96, gap = 2.6, mids = [];
-    S.forEach(function (sg) {
-      var span = Math.max(360 * sg[1] / tot, 7), a0 = (at + gap / 2) * Math.PI / 180, a1 = (at + span - gap / 2) * Math.PI / 180, dd; mids.push((at + span / 2) * Math.PI / 180); at += span;
-      dd = "M" + (X + R * Math.cos(a0)).toFixed(1) + " " + (Y + R * Math.sin(a0)).toFixed(1) + "A" + R + " " + R + " 0 " + (span > 180 ? 1 : 0) + " 1 " + (X + R * Math.cos(a1)).toFixed(1) + " " + (Y + R * Math.sin(a1)).toFixed(1);
-      svg += '<path d="' + dd + '" class="g-arc-t"/><path d="' + dd + '" class="g-arc ' + sg[2] + '" style="stroke-width:' + sg[3] + 'px"/><path d="' + dd + '" class="g-hit-a" data-cxov="seg:' + ["ok", "rk", "br"][S.indexOf(sg)] + '" tabindex="0" role="button" aria-label="Filter follow-ups: ' + sg[0] + '"><title>Filter follow-ups: ' + sg[0] + '</title></path>';
-    });
-    [1, 2].forEach(function (k, j) {
-      var m = mids[k], x0 = X + (R + 10) * Math.cos(m), y0 = Y + (R + 10) * Math.sin(m), ly = 34 + j * 40, lx = 640;
-      svg += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'V' + ly + 'H' + (lx - 8) + '" class="g-cl ' + S[k][2] + '"/><circle cx="' + (lx - 8) + '" cy="' + ly + '" r="3" class="g-f ' + S[k][2] + '"/>' +
-        '<text x="' + lx + '" y="' + (ly - 3) + '" class="g-cn g-lk" data-cxov="seg:' + ["ok", "rk", "br"][k] + '" tabindex="0" role="button">' + S[k][0] + ' · ' + S[k][1].toLocaleString("en-US") + '</text><text x="' + lx + '" y="' + (ly + 12) + '" class="g-cs ' + S[k][2] + '">' + ["Expected document due soon", "Window passed"][j] + '</text>';
-    });
-    svg += '<text x="' + X + '" y="' + (Y - 46) + '" class="g-eb" text-anchor="middle">Documents today</text><text x="' + X + '" y="' + (Y + 10) + '" class="g-big" text-anchor="middle">' + tot.toLocaleString("en-US") + '</text>' +
-      '<text x="' + X + '" y="' + (Y + 33) + '" class="g-ok" text-anchor="middle">' + (100 * ok / tot).toFixed(1) + '% on track</text><line x1="' + (X - 66) + '" y1="' + (Y + 48) + '" x2="' + (X + 66) + '" y2="' + (Y + 48) + '" class="g-l2"/>' +
-      '<text x="' + (X - 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">' + ver + '</text><text x="' + (X - 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Verified today</text>' +
-      '<text x="' + (X + 44) + '" y="' + (Y + 70) + '" class="g-sm" text-anchor="middle">' + open.length + '</text><text x="' + (X + 44) + '" y="' + (Y + 85) + '" class="g-fn" text-anchor="middle">Need action</text>';
-    function rib(y0, y1, cls, grad, lbl, tab) {
-      var d = "M" + (X + R - 4) + " " + y0 + " C" + (X + R + 70) + " " + y0 + " 720 " + y1 + " 816 " + y1;
-      return '<path d="' + d + '" class="g-rg ' + cls + '" filter="url(#cxsf)"/><path d="' + d + '" stroke="' + grad + '" class="g-rb"/><path d="' + d + '" class="g-hit-r" data-cxov="tab:' + tab + '"/>' + [0, 1, 2, 3].map(function (q) { return '<circle r="2.2" class="g-rp"><animateMotion dur="2.8s" begin="-' + (q * 0.7) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; }).join("") +
-        '<text x="816" y="' + (y1 + (y1 < Y ? -32 : 44)) + '" class="g-cn g-lk" text-anchor="end" data-cxov="tab:' + tab + '" tabindex="0" role="button" aria-label="Show ' + lbl + '">' + lbl + '</text>';
-    }
-    /* A ribbon shows only when it carries something; with one ribbon left it takes the middle lane */
-    var rr = open.length + waiting.length > 0, rv = ver > 0;
-    if (rr) svg += rib(Y - 30, rv ? 196 : 300, "red", "url(#cxrr)", [open.length ? open.length + " need action" : "", waiting.length ? waiting.length + " waiting" : ""].filter(Boolean).join(" · "), "need");
-    if (rv) svg += rib(Y + 36, rr ? 402 : 300, "blue", "url(#cxrb)", ver + " verified today", "ver");
-    if (!rr && !rv) svg += '<text x="816" y="' + (Y + 4) + '" class="g-fn" text-anchor="end">No open follow-ups</text>';
-    svg += '</svg><p class="cx-rfn">Ring: documents today by state. On track includes open documents still inside their expected window. Strands: follow-ups per process. Select a process, segment or label to filter.</p>';
+    var items = ccItems(), need = items.filter(function (i) { return fuBucket(i) === "need"; }), wait = items.filter(function (i) { return fuBucket(i) === "wait"; }), ver = items.filter(function (i) { return fuBucket(i) === "ver"; });
     var side = fuSide();
     if (!ccOn("pm")) return '<section class="cx-hero2 cx-hero-im" aria-label="Network health">' + side + '</section>';
-    /* Two views of the same health: the process ring, or the trading network as a globe (WebGL) */
+    var T = { n: 0, ok: 0, rk: 0, br: 0 }, PS = {};
+    ccSol().forEach(function (i) { var P = cxProcState(i); PS[i] = P; T.n += P.n; T.ok += P.ok; T.rk += P.rk; T.br += P.br; });
+    var fp = ccOvF && ccOvF.k === "proc" ? +ccOvF.v : null, fs = ccOvF && ccOvF.k === "seg" ? ccOvF.v : null, V = fp != null && PS[fp] ? PS[fp] : T;
+    var R = CXRING.R, C = CXRING.C, svg = '<svg class="cx-ring" viewBox="0 0 400 400" aria-hidden="true"><defs><radialGradient id="cxdisc" cx="50%" cy="40%" r="62%"><stop offset="0" style="stop-color:var(--g-disc2)"/><stop offset="1" style="stop-color:var(--g-disc)"/></radialGradient></defs>';
+    for (var a = 0; a < 360; a += 3) { var rd = a * Math.PI / 180, big = a % 30 === 0, r1 = R + 26, r2 = r1 + (big ? 9 : 4);
+      svg += '<line x1="' + (C + r1 * Math.cos(rd)).toFixed(1) + '" y1="' + (C + r1 * Math.sin(rd)).toFixed(1) + '" x2="' + (C + r2 * Math.cos(rd)).toFixed(1) + '" y2="' + (C + r2 * Math.sin(rd)).toFixed(1) + '" class="g-tk"/>'; }
+    svg += '<circle cx="' + C + '" cy="' + C + '" r="' + (R + 14) + '" class="g-l2"/><circle cx="' + C + '" cy="' + C + '" r="' + (R - 16) + '" fill="url(#cxdisc)" class="g-l2s"/><circle cx="' + C + '" cy="' + C + '" r="' + (R - 30) + '" class="g-l1"/>';
+    var S = [["ok", "On track", V.ok, "blue", 6], ["rk", "At risk", V.rk, "amb", 9], ["br", "Breached", V.br, "red", 10]], at = -90, gap = 2.4;
+    S.forEach(function (sg) { var span = Math.max(360 * sg[2] / Math.max(1, V.n), 6), d = cxArc(R, at + gap / 2, at + span - gap / 2); at += span;
+      svg += '<path d="' + d + '" class="g-arc-t"/><path d="' + d + '" class="g-arc ' + sg[3] + (fs && fs !== sg[0] ? " dim" : "") + '" style="stroke-width:' + sg[4] + 'px"/><path d="' + d + '" class="g-hit-a" data-cxov="seg:' + sg[0] + '"><title>' + sg[1] + '</title></path>'; });
+    svg += '</svg>';
+    var procs = '<ol class="cx-hp" aria-label="Business processes">' + ccSol().map(function (i) {
+      var P = PS[i], n = need.filter(function (x) { return x.proc === i; }).length, w = wait.filter(function (x) { return x.proc === i; }).length, sev = n ? "red" : w ? "amb" : "blue", on = fp === i;
+      var docs = [].concat.apply([], ccSteps(i).map(function (p) { return p[1][1].split(" / ")[0].split(/,\s*/); })).filter(function (v, j, a2) { return /^\d/.test(v) && a2.indexOf(v) === j; }).join(", ");
+      return '<li><button type="button" class="cx-hpi ' + sev + (on ? " on" : "") + '" data-cxov="' + (on ? "clear" : "proc:" + i) + '" data-hp="' + i + '" aria-pressed="' + on + '"><span class="hp1"><b>' + cxe(ccShort(i)) + '</b><em>' + P.n.toLocaleString("en-US") + '</em></span><small>' + cxe(docs) + '</small>' +
+        '<span class="hp-bar"><i class="blue" style="width:' + (100 * P.ok / P.n).toFixed(1) + '%"></i><i class="amb" style="width:' + (100 * P.rk / P.n).toFixed(1) + '%"></i><i class="red" style="width:' + (100 * P.br / P.n).toFixed(1) + '%"></i></span>' +
+        '<span class="hp-f ' + sev + '">' + (n || w ? [n ? n + " need action" : "", w ? w + " waiting" : ""].filter(Boolean).join(" · ") : "No open follow-ups") + '</span><small>' + P.ack + ' 997 overdue · ' + P.rej + ' 824 rejects</small></button></li>'; }).join("") + '</ol>';
+    var center = '<div class="cx-rc">' + (fp != null ? '<button type="button" class="cx-rcx" data-cxov="clear" aria-label="Show all processes">' + cxe(ccShort(fp)) + ci("x") + '</button>' : '<span class="cx-rck">Documents today</span>') +
+      '<b class="cx-rcn">' + V.n.toLocaleString("en-US") + '</b><span class="cx-rcp">' + (100 * V.ok / Math.max(1, V.n)).toFixed(1) + '% on track</span>' +
+      '<span class="cx-rcs">' + S.slice(1).concat([S[0]]).map(function (sg) { var on = fs === sg[0]; return '<button type="button" class="' + sg[3] + (on ? " on" : "") + '" data-cxov="' + (on ? "clear" : "seg:" + sg[0]) + '" aria-pressed="' + on + '"><i></i>' + sg[1] + '<em>' + sg[2].toLocaleString("en-US") + '</em></button>'; }).join("") + '</span></div>';
     var tog = '<span class="cx-seg cx-hvt" role="group" aria-label="Overview view">' + [["ring", "Process ring"], ["globe", "Network globe"]].map(function (o) { return '<button type="button" data-cxhv="' + o[0] + '" aria-pressed="' + (ccHeroV === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</span>';
     var GP = cxGlobePts(), stl = { r: "Need action", a: "Waiting", c: "Recovering" };
     var globe = '<div class="cx-globe"><div class="cx-gll" aria-hidden="true"></div>' +
       '<p class="cx-glh"><b>' + cxe(ccCompany()) + ' trading network</b><span>Partners with open follow-ups. Arc color shows the follow-up state.</span></p>' +
       '<ul class="cx-glg" aria-label="Partners with open follow-ups">' + GP.map(function (p) { var on = ccOvF && ccOvF.k === "pt" && ccOvF.v === p.n; return '<li><button type="button" class="' + p.sev + (on ? " sel" : "") + '" data-cxov="pt:' + cxe(p.n) + '" aria-pressed="' + !!on + '"><i></i><b>' + cxe(p.n) + '</b><small>' + stl[p.sev] + ' · ' + p.cnt + '</small></button></li>'; }).join("") +
       (GP.length ? "" : '<li class="cx-empty">No open follow-ups.</li>') + '</ul><p class="cx-glf">The network globe needs WebGL in this browser.</p></div>';
-    return '<section class="cx-hero2" aria-label="Process health"><div class="cx-hv' + (ccHeroV === "globe" ? " gv" : "") + '">' + tog + (ccHeroV === "globe" ? globe : '<div class="cx-hvb">' + svg + '</div>') + '</div>' + side + '</section>';
+    var gl = ccHeroV === "globe";
+    return '<section class="cx-hero3' + (gl ? " gv" : "") + '" aria-label="Process health" data-hero>' +
+      '<header class="cx-h3l"><b>Business processes</b><span>Documents today</span></header><div class="cx-h3t">' + tog + '</div>' +
+      (gl ? '<div class="cx-h3g">' + globe + '</div>' : procs + '<div class="cx-rg cx-hvb" role="img" aria-label="' + T.n.toLocaleString("en-US") + ' documents today, ' + need.length + ' follow-ups need action">' + svg + center + '</div>') +
+      side + '<p class="cx-rfn">' + (gl ? "Partners with open follow-ups. Select a partner to filter the follow-ups." : "On track includes open documents still inside their expected window. Select a process or state to filter the follow-ups.") + '</p>' +
+      (gl ? "" : '<svg class="cx-hov" aria-hidden="true"></svg>') + '</section>';
   }
+  /* Wires: process to ring, ring to follow-up lane. Measured after layout so they connect at any width or zoom. */
+  function cxWire() {
+    var h = cx.querySelector("[data-hero]"), o = h && h.querySelector(".cx-hov"), rg = h && h.querySelector(".cx-rg");
+    if (!o || !rg || !h.getBoundingClientRect) return;
+    var hb = h.getBoundingClientRect(), rb = rg.getBoundingClientRect(), r = rb.width * (CXRING.R + 14) / 400, cxp = rb.left + rb.width / 2 - hb.left, cyp = rb.top + rb.height / 2 - hb.top;
+    if (!rb.width || window.getComputedStyle(o).display === "none") { o.innerHTML = ""; return; }
+    var P = [].slice.call(h.querySelectorAll("[data-hp]")), out = "", sel = ccOvF && ccOvF.k === "proc" ? ccOvF.v : null;
+    var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function beads(d, cls, n, dur) { if (still) return ""; var s = ""; for (var q = 0; q < n; q++) s += '<circle r="2.4" class="w-bd ' + cls + '"><animateMotion dur="' + dur + 's" begin="-' + (q * dur / n).toFixed(2) + 's" repeatCount="indefinite" path="' + d + '"/></circle>'; return s; }
+    P.forEach(function (b, k) {
+      var bb = b.getBoundingClientRect(), x0 = bb.right - hb.left + 4, y0 = bb.top + bb.height * 0.32 - hb.top, ang = (P.length < 2 ? 180 : 206 - k * 52 / (P.length - 1)) * Math.PI / 180;
+      var x1 = cxp + r * Math.cos(ang), y1 = cyp + r * Math.sin(ang), mx = (x0 + x1) / 2, d = "M" + x0.toFixed(1) + " " + y0.toFixed(1) + " C" + mx.toFixed(1) + " " + y0.toFixed(1) + " " + mx.toFixed(1) + " " + y1.toFixed(1) + " " + x1.toFixed(1) + " " + y1.toFixed(1);
+      var cls = /\bred\b/.test(b.className) ? "red" : /\bamb\b/.test(b.className) ? "amb" : "blue", idle = cls === "blue", dim = sel != null && sel !== b.getAttribute("data-hp");
+      out += '<path d="' + d + '" class="w-st ' + cls + (idle ? " idle" : "") + (dim ? " dim" : "") + '"/><circle cx="' + x0.toFixed(1) + '" cy="' + y0.toFixed(1) + '" r="3.5" class="w-nd ' + cls + '"/>' + (idle || dim ? "" : beads(d, cls, 3, 3.2));
+    });
+    /* Ring to the follow-up lanes: one ribbon per lane that holds follow-ups, width by count */
+    [["need", -18, "red"], ["wait", 0, "amb"], ["ver", 18, "grn"]].forEach(function (L) {
+      var t = h.querySelector('[data-cxovt="' + L[0] + '"]'), n = t ? +(t.getAttribute("data-n") || 0) : 0; if (!t || !n) return;
+      var tb = t.getBoundingClientRect(), a2 = L[1] * Math.PI / 180, x0 = cxp + r * Math.cos(a2), y0 = cyp + r * Math.sin(a2), x1 = tb.left - hb.left - 2, y1 = tb.top + tb.height / 2 - hb.top;
+      var d;
+      if (x1 < x0 + 20) { /* lanes sit below the ring: leave from the bottom of the ring and drop into the top of the lane */
+        var a3 = (90 - L[1]) * Math.PI / 180; x0 = cxp + r * Math.cos(a3); y0 = cyp + r * Math.sin(a3); x1 = tb.left + tb.width / 2 - hb.left; y1 = tb.top - hb.top - 2;
+        var my = y0 + (y1 - y0) * 0.5; d = "M" + x0.toFixed(1) + " " + y0.toFixed(1) + " C" + x0.toFixed(1) + " " + my.toFixed(1) + " " + x1.toFixed(1) + " " + my.toFixed(1) + " " + x1.toFixed(1) + " " + y1.toFixed(1);
+      } else { var mx = x0 + (x1 - x0) * 0.55; d = "M" + x0.toFixed(1) + " " + y0.toFixed(1) + " C" + mx.toFixed(1) + " " + y0.toFixed(1) + " " + mx.toFixed(1) + " " + y1.toFixed(1) + " " + x1.toFixed(1) + " " + y1.toFixed(1); }
+      out += '<path d="' + d + '" class="w-rb ' + L[2] + '" style="stroke-width:' + Math.min(14, 3 + n * 1.3).toFixed(1) + 'px"/>' + beads(d, "w " + L[2], Math.min(5, 1 + n), 2.6);
+    });
+    o.setAttribute("viewBox", "0 0 " + hb.width.toFixed(0) + " " + hb.height.toFixed(0)); o.innerHTML = out;
+  }
+  if (window.addEventListener) window.addEventListener("resize", function () { cxWire(); });
   /* Overview: the process ring with Performance Monitor; failure points and network activity for every client */
   function cxOvHead() {
     var procs = ccOn("pm") ? " · " + ccSol().map(ccShort).join("; ") : "", cd = wsCurDash(), dt = wsDashTabs(), onD = ccScr === "ws-dash" && cd;
@@ -548,6 +554,7 @@
       '<button type="button" class="cx-ic" data-cxtheme aria-label="' + (th === "dark" ? "Switch to light theme" : "Switch to dark theme") + '">' + ci(th === "dark" ? "sun" : "moon") + '</button><button type="button" class="cx-ic" data-cxfs aria-label="Full screen">' + ci("full") + '</button><span class="cx-me" title="' + cxe(ccCompany()) + '">' + (ccRole() === "retailer" ? "NS" : "NB") + '</span></span></header>' +
       '<div class="cx-body' + (ccNavMin ? " min" : "") + (ccAv ? " av" : "") + '"><nav class="cx-nav" aria-label="Command Center"><ul>' + nav + '</ul><a class="cx-n1 cx-col" href="' + CC_GENOME + '" title="Open Process Genome">' + ci("gen") + '<span>Open Process Genome</span></a><button type="button" class="cx-n1 cx-col" data-cxmin title="' + (ccNavMin ? "Expand panel" : "Collapse panel") + '">' + ci("side") + '<span>Collapse panel</span></button></nav>' +
       '<main class="cx-main" id="cx-main" tabindex="-1">' + CXS[ccScr]() + '</main>' + cxAviator() + '</div>' + cxDrawer();
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(cxWire);
   }
   function cxGo(s) { if (s === "ws") s = cxWsSecs()[0][0]; if (s === "im-map") ccWsProc = "sol"; if (s === "an") ccWsDash = "p:pm"; if (s === "rt-partners") ccPtTab = "req"; s = CXALIAS[s] || s; if (!CXS[s] || !cxNavOk(s)) s = "dash"; ccScr = s; ccDr = null; cxRender(); var el = document.getElementById("cx-main"); if (el) el.scrollTop = 0; }
   cx.addEventListener("click", function (e) {

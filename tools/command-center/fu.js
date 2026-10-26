@@ -117,7 +117,7 @@
     var list = cxSort(B[ccOvTab]), more = list.length > 5;
     var strip = f && f.k === "pt" ? '<p class="fu-strip"><b>' + cxe(f.v) + '</b> · ' + cxe(fuPartnerLine(f.v)) + ' <button type="button" class="cx-lk" data-impt="' + cxe(f.v) + '">Partner details</button></p>' : "";
     return '<div class="cx-hs fu-side"><h3 class="cx-hh"><span class="cx-hi ' + (B.need.length ? 'r">' + ci("warn") : 'b">' + ci("ok")) + '</span>Follow-ups</h3>' +
-      '<span class="cx-seg fu-tabs" role="group" aria-label="Follow-ups">' + tabs.map(function (t) { return '<button type="button" data-cxovt="' + t[0] + '" aria-pressed="' + (ccOvTab === t[0]) + '">' + t[1] + ' <em>' + B[t[0]].length + '</em></button>'; }).join("") + '</span>' +
+      '<div class="fu-lanes" role="group" aria-label="Follow-ups">' + tabs.map(function (t) { return '<button type="button" class="' + { need: "red", wait: "amb", ver: "grn" }[t[0]] + '" data-cxovt="' + t[0] + '" data-n="' + B[t[0]].length + '" aria-pressed="' + (ccOvTab === t[0]) + '"><i></i>' + t[1] + '<em>' + B[t[0]].length + '</em></button>'; }).join("") + '</div>' +
       (f ? '<p class="fu-fl"><button type="button" class="fu-fc" data-cxov="clear" aria-label="Clear filter ' + cxe(f.l) + '">' + cxe(f.l) + ' ' + ci("x") + '</button>' + (f.k === "proc" ? '<button type="button" class="cx-lk" data-cxproc="' + f.v + '">Open board</button>' : "") + '</p>' : "") + strip +
       '<ul class="fu-list">' + list.slice(0, 5).map(function (i) {
         var st = i.key.indexOf("f:") === 0 ? cxFu(i.key.slice(2)) : null;
