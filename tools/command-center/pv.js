@@ -46,7 +46,7 @@
       '<li><button type="button" data-pvp="comply" aria-pressed="' + cp + '"><b>Comply</b><span>Validation, alerts and scorecards</span></button></li>' +
       '<li><button type="button" data-pvp="optimize" aria-pressed="' + (!ex && !cn && !cp) + '"><b>Optimize</b><span>Monitors, rules and ASN checks</span></button></li>' +
       '<li><button type="button" data-pvp="extend" aria-pressed="' + ex + '"><b>Extend</b><span>Agents that act</span></button></li></ol>' +
-      '<p class="oc-def pv-def">' + (cn ? "Web EDI lets suppliers answer retailer orders online. The supplier portal lets a retailer trade with vendors that have no EDI."
+      '<p class="oc-def pv-def">' + (cn ? "Web EDI lets suppliers answer retailer orders online. The supplier portal lets retailer and CPG hubs trade with vendors that have no EDI."
         : cp ? "Validation holds ship notices and invoices that break a retailer rule. Alerts reach the order owner while the window is open. Scorecards track fill rate and document accuracy." : ex ? "Agents predict a problem at a decision point, recommend an action and wait for a person to approve it."
         : "Integration Monitor watches volume, timing and acknowledgments. Performance Monitor checks business rules across documents. ASN Intelligence monitors ship notice health by supplier.") + '</p>' +
       '<div class="oc-k"><b>' + (cn || cp ? "Shading: coverage" : ex ? "Shading: value at stake" : "Shading: findings now") + '</b>' +
@@ -60,7 +60,7 @@
         var a = P.ag[i] || ["", ""];
         return '<li><button type="button" data-pe="' + esc(d[1][0]) + '"><span class="pv-t pv-n">' + (i + 1) + '</span><span>' + esc(d[0]) + '<small>' + esc(a[0]) + '. Approved by ' + esc(lc(a[1])) + '.</small></span></button></li>';
       }).join("") + '</ul>';
-    } else if (cn) h += '<h4>Web EDI for suppliers</h4>' + list(P.web, "WEB") + '<h4>Supplier portal</h4>' + list(P.sp, "SP");
+    } else if (cn) h += '<h4>Web EDI for suppliers</h4>' + list(P.web, "WEB") + '<h4>Supplier portal for retailer and CPG hubs</h4>' + list(P.sp, "SP");
     else if (cp) h += '<h4>Pre-delivery document validation</h4>' + list(P.val, "VAL") + '<h4>Order lifecycle and chargeback alerts</h4>' + list(P.alr, "ALR") + '<h4>Fill rate and scorecard</h4>' + list(P.sc, "SC");
     else h += '<h4>Integration Monitor</h4>' + list(P.im, "IM") + '<h4>Performance Monitor rules</h4>' + list(P.pm, "PM") + (P.asn ? '<h4>ASN Intelligence (in development)</h4>' + list(P.asn, "ASN") : "");
     return h;
