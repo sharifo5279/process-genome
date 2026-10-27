@@ -3,14 +3,14 @@
 (function () {
   var NS = "http://www.w3.org/2000/svg";
   // each stage: letter, name, and the lever that lifts client value at that stage (two lines)
-  // letter, name, lever (two lines), today's client value, retail opportunity added on top (illustrative units).
-  // Today's value is highest at Connect and falls through Extend; the opportunity starts at Activate, is largest there,
-  // and every later stage ends higher than Connect does today.
+  // letter, name, lever (two lines), today's client value, retail opportunity on top, growth over time above that
+  // (illustrative units). Today's value is highest at Connect and falls through Extend. The opportunity is small at
+  // Connect, largest at Activate, smaller at Optimize and smaller again at Extend; Optimize and Extend grow over time.
   var LEVERS = [
-    ["C", "Connect", "Where most client value", "comes from today", 100, 0],
-    ["A", "Activate", "More business processes", "running per partner", 45, 125],
-    ["O", "Optimize", "Exceptions caught", "before chargebacks", 20, 112],
-    ["E", "Extend", "Agents that predict", "and recommend actions", 6, 100]
+    ["C", "Connect", "Faster onboarding,", "better partner processes", 100, 10, 0],
+    ["A", "Activate", "More business processes", "running per partner", 45, 120, 0],
+    ["O", "Optimize", "Exceptions caught", "before chargebacks", 20, 55, 45],
+    ["E", "Extend", "Agents that predict", "and recommend actions", 6, 30, 60]
   ];
   var X0 = 70, X1 = 980, YB = 350, ZW = (X1 - X0) / 4, K = 1.65, CW = 112;
   function cx(i) { return X0 + ZW * i + ZW / 2; }
@@ -36,40 +36,37 @@
     var sec = document.createElement("section");
     sec.className = "opx"; sec.id = "mk-opp"; sec.setAttribute("aria-labelledby", "mk-h-opp");
     sec.innerHTML = '<div class="wrap"><p class="mk-eb">Retail opportunity</p><h2 id="mk-h-opp">Retail adoption opportunity</h2>' +
-      '<p class="opx-sub">Today most client value comes from Connect. A retail focus adds value on top at Activate, Optimize and Extend, the most at Activate.</p>' +
-      '<div class="opx-box"><div class="opx-bar"><ul class="opx-lg"><li><i class="b"></i>Today&#39;s client value</li><li><i class="g b"></i>Retail opportunity</li></ul>' +
+      '<p class="opx-sub">Today most client value comes from Connect. A retail focus adds value at every stage, the most at Activate. Optimize and Extend grow over time.</p>' +
+      '<div class="opx-box"><div class="opx-bar"><ul class="opx-lg"><li><i class="b"></i>Today&#39;s client value</li><li><i class="g b"></i>Retail opportunity</li><li><i class="f b"></i>Growth over time</li></ul>' +
       '<div class="opx-acts"><span class="opx-ill">Illustrative</span><button type="button" class="opx-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Replay animation</span></button></div></div>' +
       '<div class="opx-cw"></div></div><p class="opx-nt">Shape is illustrative, not measured data. Some capabilities shown are in development or planned.</p></div>';
     var svg = el("svg", { "class": "opx-c", viewBox: "0 0 1000 470", role: "img",
-      "aria-label": "Client value by stage. Today's value is highest at Connect and lower at Activate, Optimize and Extend. A retail focus adds value on top at Activate, Optimize and Extend, the most at Activate, so each of those stages ends higher than Connect today." });
+      "aria-label": "Client value by stage. Today's value is highest at Connect and lower at Activate, Optimize and Extend. A retail focus adds value at every stage: a little at Connect, the most at Activate, less at Optimize and less again at Extend, where value grows over time." });
     // zones and axis
     for (var i = 1; i < 4; i++) svg.appendChild(el("line", { "class": "zl", x1: X0 + i * ZW, y1: 30, x2: X0 + i * ZW, y2: YB + 112 }));
     svg.appendChild(el("path", { "class": "ax", d: "M" + X0 + " 24V" + YB + "H" + X1 }));
     svg.appendChild(el("path", { "class": "ax", d: "M" + (X0 - 6) + " 32L" + X0 + " 22L" + (X0 + 6) + " 32" }));
     svg.appendChild(el("text", { "class": "yl", x: "0", y: "0", transform: "translate(40 " + (YB - 4) + ") rotate(-90)" }, "Client value"));
-    // reference: today's Connect value across the chart
-    var ry = YB - LEVERS[0][4] * K, ref = el("g", { "class": "fd" });
-    ref.appendChild(el("line", { "class": "rf", x1: X0, y1: ry, x2: X1, y2: ry }));
-    ref.appendChild(el("text", { "class": "rft", x: cx(0), y: ry - 10, "text-anchor": "middle" }, "Connect today"));
     // columns: today below, opportunity stacked on top
     var cols = LEVERS.map(function (L, i) {
       var x = cx(i) - CW / 2, t = el("rect", { "class": "ct", x: x, y: YB, width: CW, height: "0" }),
         g = el("rect", { "class": "cg", x: x, y: YB - L[4] * K, width: CW, height: "0" }),
-        lab = el("text", { "class": "cgl fd", x: cx(i), y: YB - (L[4] + L[5]) * K - 10, "text-anchor": "middle" }, i === 1 ? "Largest opportunity" : L[5] ? "Opportunity" : "");
-      svg.appendChild(t); svg.appendChild(g); svg.appendChild(lab);
-      return { t: t, g: g, lab: lab, L: L };
+        top = YB - (L[4] + L[5] + L[6]) * K,
+        f = L[6] ? el("rect", { "class": "cf fd", x: x + 1, y: top, width: CW - 2, height: (L[6] * K).toFixed(1) }) : null,
+        lab = el("text", { "class": (L[6] ? "cfl" : "cgl") + " fd", x: cx(i), y: top - 10, "text-anchor": "middle" }, L[6] ? "Grows over time" : i === 1 ? "Largest opportunity" : "Opportunity");
+      svg.appendChild(t); svg.appendChild(g); if (f) svg.appendChild(f); svg.appendChild(lab);
+      return { t: t, g: g, f: f, lab: lab, L: L };
     });
-    svg.appendChild(ref);
     // stage labels under the axis: big letter, name, and the lever (revealed with its column)
     var levs = LEVERS.map(function (L, i) {
       var zl = X0 + ZW * i;
       svg.appendChild(el("text", { "class": "zL", x: zl + 14, y: YB + 74, "text-anchor": "start" }, L[0]));
       svg.appendChild(el("text", { "class": "zn", x: zl + 74, y: YB + 34, "text-anchor": "start" }, L[1]));
       var g = el("g", { "class": "lv" });
-      g.appendChild(el("text", { "class": i ? "k" : "k t", x: zl + 74, y: YB + 56 }, i ? "Opportunity" : "Today's core"));
-      if (L[5]) g.appendChild(el("rect", { "class": "ob", x: zl + 156, y: YB + 47, width: (64 * L[5] / 125).toFixed(1), height: "10", rx: "5" }));
-      g.appendChild(el("text", { "class": i ? "d" : "d t", x: zl + 74, y: YB + 78 }, L[2]));
-      g.appendChild(el("text", { "class": i ? "d" : "d t", x: zl + 74, y: YB + 96 }, L[3]));
+      g.appendChild(el("text", { "class": "k", x: zl + 74, y: YB + 56 }, "Opportunity"));
+      g.appendChild(el("rect", { "class": "ob", x: zl + 156, y: YB + 47, width: Math.max(10, 64 * L[5] / 120).toFixed(1), height: "10", rx: "5" }));
+      g.appendChild(el("text", { "class": "d", x: zl + 74, y: YB + 78 }, L[2]));
+      g.appendChild(el("text", { "class": "d", x: zl + 74, y: YB + 96 }, L[3]));
       svg.appendChild(g);
       return g;
     });
@@ -77,10 +74,10 @@
     var cl = el("g", { "class": "cl fd" });
     cl.appendChild(el("rect", { x: "84", y: "26", width: "330", height: "58", rx: "12" }));
     cl.appendChild(el("text", { "class": "h", x: "102", y: "50", "data-dx": 18 }, "Retail opportunity"));
-    cl.appendChild(el("text", { "class": "s", x: "102", y: "71", "data-dx": 18 }, "Largest at Activate. Every later stage ends above Connect today."));
+    cl.appendChild(el("text", { "class": "s", x: "102", y: "71", "data-dx": 18 }, "Largest at Activate. Optimize and Extend grow over time."));
     svg.appendChild(cl);
     sec.querySelector(".opx-cw").appendChild(svg);
-    return { sec: sec, svg: svg, cols: cols, levs: levs, cl: cl, ref: ref };
+    return { sec: sec, svg: svg, cols: cols, levs: levs, cl: cl };
   }
 
   var V = null, timers = [], raf = 0, played = false;
@@ -98,7 +95,7 @@
     (function step(ts) { if (t0 == null) t0 = ts; var p = Math.max(0, Math.min(1, (ts - t0) / ms)), e = 1 - Math.pow(1 - p, 3);
       f(e); if (p < 1) raf = requestAnimationFrame(step); else if (done) done(); })(performance.now());
   }
-  function all() { return V.levs.concat(V.cols.map(function (c) { return c.lab; }), [V.cl, V.ref]); }
+  function all() { return V.levs.concat(V.cols.map(function (c) { return c.lab; }), V.cols.filter(function (c) { return c.f; }).map(function (c) { return c.f; }), [V.cl]); }
   function finalState() {
     stop(); fitCallout();
     V.cols.forEach(function (c) { setT(c, 1); setG(c, 1); });
@@ -111,15 +108,20 @@
     if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) { finalState(); return; }
     // 1. today's columns rise together; Connect's label and lever show
     tween(1100, function (e) { V.cols.forEach(function (c) { setT(c, e); }); }, function () {
-      V.cols[0].lab.classList.add("on"); V.levs[0].classList.add("on"); V.ref.classList.add("on");
-      // 2. the opportunity stacks on Activate, Optimize and Extend in turn
-      var i = 1;
+      // 2. the opportunity stacks on each stage in turn; 3. growth over time on Optimize and Extend; 4. the callout
+      var i = 0;
       (function next() {
-        if (i > 3) { timers.push(setTimeout(function () { V.cl.classList.add("on"); }, 250)); return; }
+        if (i > 3) {
+          timers.push(setTimeout(function () {
+            V.cols.forEach(function (c) { if (c.f) { c.f.classList.add("on"); c.lab.classList.add("on"); } });
+            timers.push(setTimeout(function () { V.cl.classList.add("on"); }, 500));
+          }, 300));
+          return;
+        }
         var c = V.cols[i], lv = V.levs[i];
         timers.push(setTimeout(function () {
-          tween(800, function (e) { setG(c, e); }, function () { c.lab.classList.add("on"); lv.classList.add("on"); i++; next(); });
-        }, 250));
+          tween(i ? 800 : 500, function (e) { setG(c, e); }, function () { if (!c.f) c.lab.classList.add("on"); lv.classList.add("on"); i++; next(); });
+        }, 220));
       })();
     });
   }
