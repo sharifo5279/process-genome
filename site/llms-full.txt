@@ -58,10 +58,6 @@ Catch late, rejected and mismatched documents before they turn into chargebacks,
 ### 4. Extend (Intelligence)
 Use network data and agents to predict problems and recommend actions, with a person approving each one.
 
-### Across every step
-- Order lifecycle correlation: 850, 855, 856, 824, 810 and 820 linked by order, so each solution works from the whole transaction.
-- Retailer-specific rules: Rules and timing windows set per retailer, document and order type.
-
 ## Solutions by stage
 
 - Plan and synchronize: EDI compliance; Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment
