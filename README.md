@@ -33,8 +33,8 @@ agent instructions that point to `llms-full.txt` and `llms.txt`, and `<head>` li
 
 `tools/adoption-path/` adds a managed block (between `adoption-path:start` and `adoption-path:end` markers) that shows the
 adoption path steps as large C, A, O and E letters, and adds the Retail adoption opportunity animation after them: today's
-go-to-market motion levels off after Connect while a retail-focused motion keeps client value rising, with the widening gap as the
-opportunity. `build-site.mjs` installs it on every
+go-to-market motion against a retail-focused motion, both raising client value, with the green gap as the opportunity: moderate in
+Connect, largest in Activate, smaller in Optimize and Extend. `build-site.mjs` installs it on every
 master build; `node tools/adoption-path/inject.mjs site/index.html` applies a change to the current page. Retail only.
 
 ## Crawling: robots.txt and sitemap.xml
