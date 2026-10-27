@@ -46,6 +46,9 @@ npm test                                   # stats service tests and the crawl c
 git fetch origin main && git rebase origin/main
 ```
 
+Render does not deploy on push: after pushing a change under `site/`, trigger a deploy of the `process-genome` static
+site (service `srv-dbdlutbncjis73aldb70`) and confirm the change is live.
+
 Commit `site/robots.txt`, `site/sitemap.xml` and `tools/crawl-state.json` with the pages they describe. On a rebase
 conflict in any of them, take either side, then run `node tools/crawl-files.mjs` and commit the result.
 
