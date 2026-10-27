@@ -29,8 +29,8 @@
 .tgr .opx svg.opx-c { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; font-family: var(--font); }
 .tgr .opx-c .ax { stroke: var(--line-2); stroke-width: 1.5; fill: none; }
 .tgr .opx-c .zl { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 5; }
-.tgr .opx-c .zL { font-size: 76px; font-weight: 800; letter-spacing: -3px; fill: var(--accent); opacity: .12; text-anchor: middle; }
-.tgr .opx-c .zn { font-size: 14px; font-weight: 700; fill: var(--fg); text-anchor: middle; }
+.tgr .opx-c .zL { font-size: 64px; font-weight: 800; letter-spacing: -3px; fill: var(--accent); }
+.tgr .opx-c .zn { font-size: 14.5px; font-weight: 700; fill: var(--fg); }
 .tgr .opx-c .yl { font-size: 12px; font-weight: 600; fill: var(--muted); }
 .tgr .opx-c .ln { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
 .tgr .opx-c .ln.t { stroke: var(--fg); }
@@ -39,11 +39,11 @@
 .tgr .opx-c .tag { font-size: 13px; font-weight: 700; }
 .tgr .opx-c .tag.t { fill: var(--fg); }
 .tgr .opx-c .tag.g { fill: var(--opp-ink); }
-.tgr .opx-c .lv { opacity: 0; transition: opacity .5s ease, transform .5s ease; transform: translateY(6px); }
+.tgr .opx-c .lv { opacity: 0; transition: opacity .5s ease; }
 .tgr .opx-c .lv.on { opacity: 1; transform: none; }
 .tgr .opx-c .lv rect { fill: var(--card); stroke: var(--opp); stroke-width: 1.5; }
 .tgr .opx-c .lv .k { font-size: 12.5px; font-weight: 800; fill: var(--opp-ink); }
-.tgr .opx-c .lv .d { font-size: 12.5px; font-weight: 500; fill: var(--fg); }
+.tgr .opx-c .lv .d { font-size: 12.5px; font-weight: 500; fill: var(--opp-ink); }
 .tgr .opx-c .lv circle { fill: var(--opp); }
 .tgr .opx-c .fd { opacity: 0; transition: opacity .6s ease; }
 .tgr .opx-c .fd.on { opacity: 1; }
