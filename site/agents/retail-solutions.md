@@ -1,0 +1,257 @@
+# Retail and CPG solutions on Trading Grid
+
+Source: Business Network Process Genome, Solution overview for Retail and CPG (https://process-genome.onrender.com/#retail/solution).
+Status: Concept preview for internal review. Diagrams are illustrative. Some capabilities shown are in development or planned and are not generally available. Results depend on implementation and partner participation. Names, scope and availability may change.
+
+Retail and CPG trading relationships, connected and managed. Integrate and onboard the retailers, suppliers, carriers, 3PLs and marketplaces you trade with on Trading Grid, and monitor every document exchanged.
+
+## Solutions by stage
+
+- Plan and synchronize: EDI compliance; Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment
+- Order and fulfill: Order-to-cash compliance; Pre-delivery document validation; Backorder and fill-rate tracking; Web EDI for suppliers; Supplier portal for retailer and CPG hubs; Drop ship and marketplace fulfillment; 3PL inventory reconciliation
+- Ship and receive: Inbound shipment visibility; ASN intelligence; Chargeback prevention alerts; Receiving and three-way match; Direct store delivery reconciliation
+- Settle and recover: Chargeback management; Deduction management; Supplier compliance scorecard; Returns and credit management
+
+### Plan and synchronize
+Vendors, items and demand data set up before orders flow.
+
+#### EDI compliance
+- Purpose: Connect on each retailer's requirements
+- Summary: Connect each vendor to the retailer as its B2B integration requirements specify, with documents tested before go-live.
+- Capabilities:
+  - Vendor surveys collect contacts, IDs and connection details
+  - Vendors test documents against the retailer's implementation guide
+  - Testing status and errors tracked by vendor until go-live
+- Parties: Retailers, Vendors, Carriers
+- Outcome: Vendors tested before the first order.
+
+#### Item and price synchronization
+- Purpose: Synchronize item and price data
+- Summary: Publish item, price and image data once, and share it with each subscribing retailer after validation.
+- Capabilities:
+  - GTIN, check digit and required fields validated on receipt
+  - Suppliers control which retailers see their items
+  - Subscribing retailers receive item updates automatically
+- Parties: Suppliers, Data pools, Retailers
+- Outcome: Paperless item setup and maintenance.
+
+#### Sell-through and inventory analytics
+- Purpose: Share sell-through with suppliers
+- Summary: Retailers share store-level sales and inventory, and suppliers use it to plan supply, measure promotions and catch out-of-stocks early.
+- Capabilities:
+  - Sales and stock by item, store and week
+  - Missing or late feeds flagged on arrival
+  - Sell-through, in-stock and weeks of supply in ready-made analytics
+- Parties: Retailers, Suppliers
+- Outcome: Store-level demand visible to suppliers.
+
+#### Vendor-managed inventory and replenishment
+- Purpose: Replenish from actual sales
+- Summary: Use shared sales and stock positions to recommend replenishment and track inventory against agreed targets.
+- Capabilities:
+  - Replenishment quantities recommended from sales and stock
+  - Order handshake monitored from proposal to acceptance
+  - Inventory levels tracked against agreed targets
+- Parties: Retailers, Suppliers
+- Outcome: Replenishment based on shared sales data.
+
+### Order and fulfill
+Orders confirmed and fulfilled across every channel.
+
+#### Order-to-cash compliance
+- Purpose: Keep orders and invoices aligned
+- Summary: Check orders, acknowledgments, ship notices and invoices against each retailer's rules and timing windows, and catch late documents before they cost money.
+- Capabilities:
+  - Timing windows set per retailer for acknowledgments, ship notices and invoices
+  - Late acknowledgments and ship notices flagged with the cause
+  - Rejections by 824, 864 or email shown in the order lifecycle, with the fix
+- Parties: Retailers, Suppliers, Carriers
+- Outcome: Fewer rejections and late documents.
+
+#### Pre-delivery document validation
+- Purpose: Correct documents before the retailer receives them
+- Summary: Check ship notices and invoices against each retailer's rules before delivery, then release each document or replace it with a corrected version.
+- Capabilities:
+  - Ship notices and invoices held when they break a retailer rule
+  - Held documents released, or replaced with a corrected version
+  - Duplicate ship notices and invoices stopped before delivery
+- Parties: Suppliers, Retailers
+- Outcome: Helps reduce retailer rejections and duplicates.
+
+#### Backorder and fill-rate tracking
+- Purpose: Follow short lines through to the invoice
+- Summary: Compare each acknowledgment with its order to find backordered and short lines, then follow every open line through shipment and invoice.
+- Capabilities:
+  - Backordered and short-acknowledged lines found by comparing the 855 to the 850
+  - Each open line followed through the ship notice and invoice
+  - Open quantities by retailer, item and ship date
+- Parties: Suppliers, Retailers
+- Outcome: Short and backordered lines tracked to delivery.
+
+#### Web EDI for suppliers
+- Purpose: Trade with retailers without an EDI team
+- Summary: Suppliers receive retailer orders online and turn each one into the acknowledgment, ship notice and invoice the retailer requires.
+- Capabilities:
+  - Prebuilt connections for major retailers and marketplaces
+  - Documents filled from the order and checked against each retailer's rules
+  - GS1-128 carton labels that match the ship notice
+- Parties: Suppliers, Retailers, Marketplaces
+- Outcome: Orders to invoices without EDI staff.
+
+#### Supplier portal for retailer and CPG hubs
+- Purpose: Bring vendors without EDI onto electronic orders
+- Summary: Retailer and CPG hubs reach vendors without EDI in a web portal, where vendors confirm each line, ship with matching labels and invoice against the order.
+- Capabilities:
+  - Order changes and line-level confirmations tracked by vendor
+  - Ship notices built from the order, with matching carton labels
+  - Invoices, receipts and remittance status in one place
+- Parties: Retailers, CPG hubs, Vendors
+- Outcome: Vendors without EDI on electronic orders.
+
+#### Drop ship and marketplace fulfillment
+- Purpose: Ship direct to the consumer
+- Summary: Run one order across EDI vendors, web-based vendors and 3PLs, with inventory and tracking returned to each channel.
+- Capabilities:
+  - Vendors without EDI work orders, ship notices and labels online
+  - Inventory updates shared with selling channels
+  - Tracking returned to the channel at shipment
+- Parties: Marketplaces, Vendors, Customers
+- Outcome: Helps reduce cancellations from stock errors.
+
+#### 3PL inventory reconciliation
+- Purpose: Fulfill through third-party warehouses
+- Summary: Send shipping instructions to 3PL warehouses and reconcile receipts, shipments and inventory adjustments.
+- Capabilities:
+  - Warehouse orders sent electronically
+  - Missing shipping confirmations flagged
+  - Receipts, shipments and inventory reconciled across documents
+- Parties: Suppliers, 3PLs, Retailers
+- Outcome: Fewer inventory discrepancies with 3PLs.
+
+### Ship and receive
+Shipments tracked from dock to receipt.
+
+#### Inbound shipment visibility
+- Purpose: Coordinate inbound deliveries
+- Summary: Follow routing requests, carrier tenders and status events in one transaction view, with timing rules monitored by agents.
+- Capabilities:
+  - Tender, status and appointment documents linked to the shipment
+  - Missing delivery events detected as they occur
+  - Timing rules set in plain language and monitored
+- Parties: Suppliers, Carriers, Retailer DCs
+- Outcome: Shared status on inbound shipments.
+
+#### ASN intelligence
+- Purpose: Resolve ship notice failures
+- Summary: Monitor ship notice health by supplier, explain each rejection, and flag ASNs at risk of missing SLA.
+- Capabilities:
+  - ASN volumes, failures and SLA adherence by supplier
+  - Rejections explained with the rule broken and the fix
+  - Recurring supplier issues and at-risk ASNs flagged
+- Parties: Retailers, Suppliers
+- Outcome: Helps improve first-pass ASN acceptance.
+
+#### Chargeback prevention alerts
+- Purpose: Act before a penalty is assessed
+- Summary: Alert supplier business users to pending shipments and invoice mismatches while the retailer's compliance window is still open.
+- Capabilities:
+  - Pending shipment alerts before the ship notice window closes
+  - Invoice mismatch alerts by order, line and amount
+  - Alerts routed to the business user who owns the order
+- Parties: Suppliers, Retailers
+- Outcome: Helps reduce avoidable chargebacks.
+
+#### Receiving and three-way match
+- Purpose: Match what arrived to what was billed
+- Summary: See ship notice health by supplier, and compare orders, ship notices and invoices line by line before payment.
+- Capabilities:
+  - Ship notice health, failures and trends by supplier
+  - Order, ship notice and invoice compared by SKU, quantity and price
+  - Mismatched lines highlighted, with packing detail from pallet to item
+- Parties: Retailers, Suppliers
+- Outcome: Cleaner receiving and three-way match.
+
+#### Direct store delivery reconciliation
+- Purpose: Agree the count at the store
+- Summary: Confirm delivered quantities at store check-in, invoice from that record, and track adjustments by store and item.
+- Capabilities:
+  - Delivery counts confirmed at check-in
+  - Adjustments recorded at the store door
+  - Adjustment trends by route, store and item
+- Parties: DSD suppliers, Stores
+- Outcome: Helps reduce store-level disputes.
+
+### Settle and recover
+Payments, deductions and credits resolved.
+
+#### Chargeback management
+- Purpose: Issue compliance chargebacks with evidence
+- Summary: Capture vendor compliance violations, assess each against your terms, and issue chargebacks with the failing document and rule.
+- Capabilities:
+  - Violations captured from document data and on the receiving floor
+  - Each violation assessed against vendor compliance terms, with its own workflow
+  - Chargebacks issued with the failing document and rule, and vendor disputes tracked
+- Parties: Retailers, Vendors
+- Outcome: Compliance costs captured and tracked.
+
+#### Deduction management
+- Purpose: Recover invalid deductions
+- Summary: Read deductions from remittances and debit memos, match each to its invoice and reason code, and dispute the invalid ones with the document trail.
+- Capabilities:
+  - Deductions from the 820 and 812 matched to the invoice and reason code
+  - Status and amount for each deduction: assessed, pending, disputed, reversed or not charged
+  - Disputes backed by the order, ship notice, invoice and proof of delivery
+- Parties: Suppliers, Retailers
+- Outcome: Helps recover invalid deductions.
+
+#### Supplier compliance scorecard
+- Purpose: Measure your own retailer compliance
+- Summary: Score fill rate and document accuracy by retailer, with variance bands and period-over-period trends.
+- Capabilities:
+  - Fill rate, ship notice accuracy and ship notice timeliness by retailer
+  - Invoice accuracy against the order and ship notice
+  - Variance bands and period-over-period trends
+- Parties: Suppliers, Retailers
+- Outcome: Compliance measured before the retailer review.
+
+#### Returns and credit management
+- Purpose: Manage the reverse supply chain
+- Summary: Authorize each return to the supplier, track it back, grade it on receipt, and settle the credit against the original return.
+- Capabilities:
+  - Returns authorized before they ship
+  - Return credits matched to authorizations
+  - Return credits and deductions without an authorization flagged
+- Parties: Retailers, Suppliers, Carriers
+- Outcome: Reverse supply chain, from authorization to credit.
+
+## What OpenText provides
+Connectivity, partner onboarding, visibility, analytics and AI agents across every retail process.
+
+### Connect and onboard
+- Pre-connected community: Reach suppliers, carriers and marketplaces already on the network.
+- Self-service onboarding: Partners register, test documents against your rules and go live in a guided flow.
+- One partner portal: A branded front door with single sign-on for suppliers and distributors.
+- Web access for smaller suppliers: Suppliers without EDI receive orders and send ship notices, labels and invoices online.
+
+### See and recover
+- Transaction search and recovery: Find any document, follow its processing flow, and redeliver or reprocess it.
+- Monitoring and anomaly detection: Daily digests, volume projections and alerts when traffic departs from normal.
+- Community view: Every partner, relationship and document exchange, with the right contacts on each.
+- e-Invoicing compliance: Compliant invoicing in more than 50 countries as a managed service.
+
+### Measure and improve
+- Agents that monitor your rules: Describe a rule in plain language; agents check transactions and explain each finding.
+- Partner scorecards: Score suppliers on fulfillment, shipping and invoicing with weights you set.
+- Ready-made retail analytics: Dashboards for shipment health, compliance and sell-through, with questions in plain language.
+- Governed data delivery: Trusted network data explored in place or delivered to your own analytics on schedule.
+
+### Act with AI agents
+- Errors explained and routed: Agents read a document error, explain it in business terms and route it to its fix.
+- Root cause across failures: Related failures grouped to one cause, with the follow-up to each partner drafted.
+- Agents in your tools: Ask about orders, shipments and deductions from the assistants your teams already use.
+- People approve every change: Agents investigate and recommend; a person approves any resend, update or ticket.
+
+## Network
+- 1M+: Trading partners on the OpenText network
+- $11T: In annual commerce across the network
+- 40+: Years of B2B integration experience

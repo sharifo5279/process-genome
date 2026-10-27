@@ -1,0 +1,912 @@
+# Retail and CPG business processes
+
+Source: Business Network Process Genome, Process Genome for Retail and CPG (https://process-genome.onrender.com/#retail/map).
+Status: Examples describe typical operating scenarios, not specific customer accounts. Standards, versions, and mandate dates vary by partner and region. Confirm requirements with each partner before building.
+
+## 1. Order to cash
+Outcome: Fill retailer orders on time, with accepted ship notices and invoices, and collect payment without deductions.
+
+The supplier's end-to-end flow from a retailer purchase order to the payment that settles it. Every retailer runs the same documents under its own compliance guide, so the work is less about the documents and more about meeting each retailer's timing, label and matching rules. Most compliance chargebacks in retail trace back to this flow, many of them to the ship notice.
+
+- Parties: Supplier, Retailer
+- Business owner: Customer operations and accounts receivable
+- Measures: Fill rate, On-time and in-full (OTIF), ASN timeliness and accuracy, First-time invoice match rate, Days sales outstanding (DSO)
+- Documents, North America: 850, 855, 860/865, 856, 997, 824, 810, 820
+- Documents, Europe and international: ORDERS, ORDRSP, ORDCHG, DESADV, CONTRL, APERAK, RECADV, INVOIC, REMADV
+
+### Steps
+1. **Purchase order** (850 / ORDERS, from retailer)
+   - What happens: The retailer's replenishment system sends the order: items, quantities, cost, ship window, ship-to location and order type.
+   - Rules that bite: Items and costs must already exist in both systems. Order type (stock, cross-dock, store-direct) carries different packing and label rules, and the ship window sets the clock for everything after.
+   - EDI team work: Monitors inbound orders into order management, resolves item cross-reference failures, holds orders with unknown items or cost mismatches for review, and confirms the functional acknowledgment went back.
+   - If it fails: An order that never loads is never shipped, and the retailer records a missed order against fill rate.
+   - Work areas: Monitoring, Cross-references and master data, Missing documents
+2. **Acknowledge order** (855 / ORDRSP, from supplier)
+   - What happens: The supplier confirms each line, or reports changes, substitutions and back orders, within the retailer's window.
+   - Rules that bite: Acknowledgment is due within a fixed window after the order, commonly a day or two. Unconfirmed or rejected lines count against the supplier, and some retailers cancel unacknowledged orders.
+   - EDI team work: Generates the acknowledgment from order entry, maps line status codes to the retailer's list, and chases missing acknowledgments on either side before the window closes.
+   - If it fails: The retailer plans and promotes against quantities that will not arrive, or cancels the order.
+   - Work areas: Map build and maintenance, Rejections, Partner follow-up
+3. **Ship and label** (856 / DESADV, from supplier)
+   - What happens: The supplier picks, packs and labels each carton and pallet with a GS1-128 label carrying an SSCC, then sends the ship notice with the shipment, order, pack and item hierarchy.
+   - Rules that bite: The notice must be processed before the truck arrives, often at ship time. Every labeled SSCC must appear in it, pack hierarchy must follow the retailer's guide, and carrier and bill of lading numbers must match.
+   - EDI team work: Builds the notice from warehouse shipping data, validates hierarchy and SSCC counts before sending, watches the retailer's acknowledgment and application advice, and corrects and resends rejected notices before arrival.
+   - If it fails: The dock receives by hand, the shipment is scored as no or late ASN, and chargebacks follow.
+   - Work areas: Rejections, Fix routing, Monitoring
+4. **Application advice** (824 / APERAK, from retailer)
+   - What happens: The retailer's application reports ship notices or invoices it could not process, with the reason: unknown order, quantity mismatch, duplicate, missing reference.
+   - Rules that bite: A functional acknowledgment only confirms the file was readable. Where sent, the application advice accepts or rejects the content; many retailers send one only on error, so silence is not acceptance. A resend must replace the original.
+   - EDI team work: Routes each reason code to the owner (warehouse, order entry, master data), tracks time to correct, and keeps the original and corrected documents as evidence for later disputes.
+   - If it fails: Rejections go unseen, freight lands in the retailer's problem area, and the invoice is never paid.
+   - Work areas: Rejections, Fix routing, Support desk and on-call
+5. **Invoice** (810 / INVOIC, from supplier)
+   - What happens: The supplier invoices per order and shipment with the order number, item identifiers, shipped quantities, cost and agreed allowances.
+   - Rules that bite: Invoice only after shipment and after the ship notice. One invoice per order and shipment, cost equal to the order cost, allowances exactly as agreed, and no resends of an invoice already received.
+   - EDI team work: Generates the invoice after the ship notice is accepted, validates order number, cost and terms against the order, and monitors acknowledgments so a rejected invoice is corrected rather than resent.
+   - If it fails: Rejected or short-paid invoices delay cash and turn into pricing and billing deductions.
+   - Work areas: Rejections, Cross-references and master data, Chargebacks and deductions management
+6. **Payment and remittance** (820 / REMADV, from retailer)
+   - What happens: The retailer pays one net amount across many invoices and lists each invoice, deduction and allowance with a reason code.
+   - Rules that bite: Remittance detail may travel with the payment or separately. Dispute windows start when the deduction appears, not when the supplier finds it.
+   - EDI team work: Loads the remittance into cash application, maps the retailer's reason codes, and routes each deduction to the deductions team with the matching order, notice and invoice records.
+   - If it fails: Cash sits unapplied, and deductions age past the window in which they could be disputed.
+   - Work areas: Chargebacks and deductions management, Missing documents, Reporting and documentation
+
+### Variants
+- **DC and store-direct orders**: Distribution center orders ship on pallets, with a pack hierarchy the retailer's guide sets: pallet only, or pallet and carton. Store-direct orders carry store addresses, carton-level notices and different on-time rules.
+- **Cross-dock and pack by store** (850 with cross-dock order type, 856 pack by store): The retailer orders for many stores on one order to a DC. Each carton holds one store's goods, the label carries the store, the ship notice is case-level by store, and the invoice is consolidated at order level.
+- **Grocery** (875, 876, 880): Grocery retailers and wholesalers use the UCS subset: grocery purchase order, order change and invoice in place of the general retail sets. The flow and rules are the same.
+- **Collect freight** (753, 754): The retailer controls the carrier. The supplier requests routing when goods are ready and ships to the instructions returned. See Routing and delivery.
+- **Order changes** (860, 865 / ORDCHG): The retailer changes quantities, dates or ship-to after the order, and the supplier accepts or rejects each change. Changes that arrive after picking are the usual cause of shipped quantities that do not match.
+
+### Penalties and disputes
+- Ship notice: none sent, sent after the truck arrived, or not matching cartons received. Settled as a per-shipment fee or a share of shipment value, deducted from remittance.
+- Labels: missing GS1-128 label, unscannable SSCC, or SSCC not in the ship notice. Settled per carton.
+- Fill rate below the retailer's threshold, measured against the original order quantity. Settled as a share of the shorted value.
+- Invoice before shipment, duplicate invoice, invoice without a matching order, or cost above the order cost. Rejected, or short-paid with a pricing deduction.
+- Disputes run through each retailer's portal within a fixed window, with the ship notice, bill of lading and proof of delivery as evidence. Late ship notice fees are often not disputable.
+
+### Watch for
+- The functional acknowledgment is not acceptance. The application advice is, and it may arrive hours later.
+- Early can be late: programs that score arrival against a window count early deliveries as misses.
+- Pack hierarchy is retailer-specific. A standard-pack notice sent to a retailer that requires pick-and-pack detail is rejected even when the goods are right.
+- The order sets the unit (each or case) and the item identifier (consumer unit GTIN, case GTIN-14 or the retailer's item number). A notice or invoice that uses a different unit or identifier from the order fails quantity matching even when the goods are right.
+- Order changes after picking are the main source of ship notices and invoices that do not match the order.
+- One order can ship in several shipments, and a store-allocated order can cover many locations. Each shipment needs its own ship notice; check the retailer's guide for whether each also needs its own invoice.
+
+### Europe and international
+- ORDERS, ORDRSP, DESADV and INVOIC under EANCOM, with CONTRL for syntax and APERAK for application-level rejections.
+- The DESADV with an SSCC on every logistic unit is the standard receiving key, and retailers that mandate it never load a notice that fails validation into their systems.
+- Some retailers return a receiving advice after physical receipt, and the supplier invoices the accepted quantities, so shortage differences are settled before the invoice rather than deducted after it.
+- National e-invoicing mandates set the invoice format and channel country by country: some accept an existing EDI procedure that meets EN 16931, others require an approved platform or Peppol. INVOIC production, routing and archiving change by country.
+- Some UK retailers still exchange Tradacoms messages alongside EANCOM.
+
+## 2. Receive, match and pay
+Outcome: Receive goods against the ship notice, pay matched invoices on terms, and deduct only for real shortages and violations.
+
+The retailer's side of Order to cash: validate the supplier's ship notice, receive against it at the dock, match the invoice to order and receipt, and pay one net amount with a remittance that explains each deduction. The retailer's cost to receive and pay rises with every supplier document that fails, and every mismatch it finds becomes a deduction the supplier will dispute. The hard part is scale: thousands of suppliers, each failing in its own way.
+
+- Parties: Retailer, Supplier
+- Business owner: Distribution center operations, transportation and accounts payable
+- Measures: Supplier OTIF and fill rate, Ship notice coverage and accuracy, Dock-to-stock time, First-time invoice match rate, Days payable outstanding (DPO)
+- Documents, North America: 856, 997, 824, 861, 810, 820, 812
+- Documents, Europe and international: DESADV, CONTRL, APERAK, RECADV, INVOIC, REMADV
+
+### Steps
+1. **Validate ship notice** (856, 824 / DESADV, APERAK, from retailer)
+   - What happens: The retailer's system checks each inbound ship notice against the open order: order number, items, quantities, pack hierarchy and SSCCs, then loads it as an expected receipt.
+   - Rules that bite: The notice must arrive before the truck, list every labeled SSCC once and reference an open order. Retailers reject a notice with errors whole or accept it with warnings; a rejected notice must be resent before arrival.
+   - EDI team work: Monitors notice coverage by supplier ahead of appointments, returns the functional acknowledgment and an application advice with a reason for each rejection, chases suppliers with no notice on file, and feeds repeat failures to vendor compliance.
+   - If it fails: The dock receives by hand, item by item, and the shipment is scored as received without a notice.
+   - Work areas: Monitoring, Rejections, Partner follow-up
+2. **Appointment and arrival** (Portal, from retailer)
+   - What happens: The carrier books a delivery appointment in the retailer's transportation system. The gate stamps arrival and matches bill of lading and PRO numbers to the appointment and the notice.
+   - Rules that bite: Arrival is measured against a must-arrive-by window at order level; early and late both count as misses. Loads without an appointment are dated by the carrier's PRO date, which can be days after the truck arrived.
+   - EDI team work: Little document traffic here. The B2B team keeps bill of lading and PRO references on the notice consistent with the appointment, and supplies notice and gate timestamps when transportation and vendor compliance score on-time performance.
+   - If it fails: The trailer waits in the yard, the order is scored late, and the supplier's on-time score drops with a chargeback behind it.
+   - Work areas: Reporting and documentation, Monitoring
+3. **Scan and receive** (861, WMS / RECADV, from retailer)
+   - What happens: Receivers scan the SSCC on each pallet or carton. A scan that matches the notice receives the unit as complete; overs, shorts, damage and unknown labels are counted by hand.
+   - Rules that bite: Received quantity is compared with the order and the notice; shorts and overs count against fill rate, measured on the original order quantity. Cartons whose label will not scan or is missing from the notice go to the problem area. Where the retailer sends a receiving advice, it reports accepted and rejected quantities with reasons.
+   - EDI team work: Supplies the warehouse system with the notice detail that drives the scan, investigates receipts that could not be matched to a notice line, and keeps notice, scan and receipt history as the record later shortage and label chargebacks rest on.
+   - If it fails: Receiving labor rises, stock sits in the problem area instead of reaching stores, and phantom shortages turn into deductions.
+   - Work areas: Cross-references and master data, Reporting and documentation, Support desk and on-call
+4. **Invoice in** (810 / INVOIC, from supplier)
+   - What happens: The supplier invoices per order and shipment. The retailer's system checks vendor number, invoice number, order reference and totals, and returns an application advice for any invoice it cannot load.
+   - Rules that bite: An invoice must reference an open order, carry a unique invoice number and arrive after shipment. A resend of an invoice already received is not a correction; it is rejected or deducted as duplicate billing.
+   - EDI team work: Maps each supplier's invoice into accounts payable, returns application advice for held or rejected invoices with the reason (invalid vendor number, blank invoice number, totals mismatch), and tracks suppliers whose invoices fail repeatedly for onboarding fixes.
+   - If it fails: The invoice never reaches matching, payment terms never start, and the supplier chases a payment the retailer has no record of owing.
+   - Work areas: Rejections, Cross-references and master data, Monitoring
+5. **Match and approve** (ERP, from retailer)
+   - What happens: Accounts payable matches each invoice line to the order and the receipt: item, quantity received, order cost and agreed allowances. Lines that match within tolerance are approved for payment.
+   - Rules that bite: Three-way match. Invoice quantity above received quantity becomes a shortage deduction, invoice cost above order cost a pricing deduction, and an invoice with no receipt behind it is held or deducted in full.
+   - EDI team work: Supplies the order, notice and receipt data the match runs on, resolves item and unit-of-measure cross-reference breaks (case versus each) that create false mismatches, and reports first-time match rate by supplier.
+   - If it fails: Manual matching backs up, suppliers are paid late or short without explanation, and deductions are raised on data errors rather than real shortages.
+   - Work areas: Cross-references and master data, Reporting and documentation
+6. **Pay and remit** (820 / REMADV, from retailer)
+   - What happens: The retailer pays one net amount per supplier across approved invoices, deductions and allowances, and sends a remittance listing each invoice and adjustment with a reason code.
+   - Rules that bite: Reason codes should come from the standard adjustment code list so the supplier can apply cash automatically. Remittance detail travels inside the payment (CTX) or separately; a payment with no detail is unapplied cash on the supplier's side.
+   - EDI team work: Generates the remittance from the payment run, maps internal deduction codes to standard adjustment reason codes, and confirms every payment has a remittance the supplier can match to it.
+   - If it fails: Suppliers cannot apply cash, dispute volume rises, and the retailer's payables team fields calls about payments it has already made.
+   - Work areas: Chargebacks and deductions management, Map build and maintenance, Partner follow-up
+
+### Variants
+- **Pallet and case receiving**: With a usable ship notice the dock scans one SSCC per pallet and receives its contents as listed. Without one, or for mixed pallets, receivers scan each case and link it to the order by hand.
+- **Cross-dock receiving** (856 pack by store): Store-specific cartons arrive on a DC order. The DC scans each carton's SSCC and store number and sorts it to the store trailer without putaway, so the notice must be case-level by store, and a carton with a bad label goes to the problem area instead of the trailer.
+- **Store-direct receiving**: Stores receive against the order at the back door. Programs typically score store-direct orders on on-time and fill rate only, with the DC appointment and pallet rules not applied.
+- **Grocery invoices** (880, 812): Grocery retailers receive the grocery invoice in place of the general invoice and use it for detail billing only; credits and debits travel as adjustments, not as corrected invoices.
+- **Receipt-based invoicing** (RECADV, INVOIC; 861): The retailer sends a receiving advice after physical receipt with accepted and rejected quantities and reasons, and the supplier invoices those quantities. Common with some European retailers; a few US retailers send the 861.
+
+### Penalties and disputes
+- Receipt without a usable ship notice, or a notice processed after the goods arrived: a per-shipment or per-order fee, or a share of the value received, deducted from remittance.
+- Carton shortage and goods billed but not received: the unreceived value is deducted from the invoice payment under a shortage code; the supplier usually sees it first on the remittance.
+- Invoice cost above order cost: the difference is deducted as a pricing deduction. The order is the reference, so these are rarely overturned.
+- Duplicate invoice or a resend of an invoice already received: rejected, or paid and then deducted as duplicate billing.
+- Arrival before or after the must-arrive-by window, or with no appointment: scored against on-time, rolled up monthly, and charged as a share of the cost of goods on the order.
+- Deductions are netted against unrelated invoices on the remittance, and the dispute window starts when the retailer posts the deduction, not when the supplier finds it.
+
+### Watch for
+- Know each retailer's ship notice clock: at ship time, before gate-in, or by a fixed cut-off. Where it is gate-in, a notice that lands between gate-in and unloading is late.
+- With a usable notice, receiving is one scan per pallet. Without one, it is a scan per item and lot plus manual order linkage, which is where phantom shortages are born.
+- Send the application advice promptly. A supplier that only sees the functional acknowledgment assumes the notice was accepted and learns otherwise from the deduction.
+- Shortages are a large share of AP deductions. Before upholding one, check whether the notice, the label or a case versus each conversion caused the mismatch.
+- Loads with no appointment are dated by the PRO date, so a truck that arrived on time can be scored days late.
+- Receiving discrepancies usually reach the supplier first as a portal receipt report, before the deduction. Pull it daily; it is the earliest chance to fix the notice or file proof of delivery.
+
+### Europe and international
+- DESADV validation happens before loading: retailers that mandate a DESADV with an SSCC on every logistic unit require it before the goods and by a cut-off on delivery day, and a notice that fails validation is never loaded into the retailer's system.
+- RECADV goes back after physical receipt, mirrors the DESADV with accepted and rejected quantities and reasons, and lets the supplier invoice exactly what was accepted, so after-the-fact shortage deductions are rare.
+- REMADV plays the 820's role, with payment date, amount and reduction reasons. Adoption is lower than for orders, despatch advices and invoices and varies by retailer and country; many publish remittance only in a portal.
+- E-invoicing mandates make the retailer a mandatory receiver of structured invoices (EN 16931 formats or an agreed EDI procedure) on national timelines, and in some countries the receiving obligation starts before the issuing one, so payables intake changes first.
+- CONTRL confirms syntax; APERAK is the application response, with status codes for confirmed, on hold and not accepted.
+
+## 3. Routing and delivery
+Outcome: Move each order from the supplier's dock to the retailer's DC on the assigned carrier, inside the arrival window.
+
+How freight moves from the supplier's dock to the retailer's DC when the retailer controls the carrier. The supplier requests routing when goods are ready, the retailer's transportation system builds loads, assigns carriers and sets appointments, and the carrier reports status and bills the freight. The B2B team sits between three parties and two document families, retail routing and motor carrier, and a mismatch between them (carrier, bill of lading, PRO, quantity) is scored as a supplier failure.
+
+- Parties: Supplier, Retailer transportation, Carrier
+- Business owner: Supplier shipping and retailer transportation
+- Measures: Collect freight ready at appointment, Routing guide compliance, Carrier on-time pickup and delivery, Arrivals inside the must-arrive-by window
+- Documents, North America: 753, 754, 204, 990, 856, 214, 211, 210
+- Documents, Europe and international: IFTMBF, IFTMBC, IFTMIN, DESADV, IFTSTA, IFTMAN, INVOIC
+
+### Steps
+1. **Request routing** (753, from supplier)
+   - What happens: When the order is picked and staged, the supplier sends a routing request per order and ship-from: ready date, cartons, pallets, weight, cube and destination DC.
+   - Rules that bite: The request is due inside a window before the ship date, sometimes a day. Collect on-time is measured on readiness: against the declared ready date in some programs, the carrier's pickup appointment in others.
+   - EDI team work: Generates the request from the warehouse's ready status, validates that quantities and order references agree with the order, and confirms the retailer acknowledged it before the window closes.
+   - If it fails: No routing comes back, the goods sit on the dock, and the order misses its arrival window as a supplier miss.
+   - Work areas: Missing documents, Monitoring, Partner follow-up
+2. **Routing instructions** (754, from retailer transportation)
+   - What happens: The retailer's transportation system consolidates requests into loads and returns the carrier, pickup date, load number and order references the supplier must ship under.
+   - Rules that bite: Ship with the named carrier on the named date. A different carrier, a changed quantity or an early or late pickup is a routing guide violation. Pickup dates can be assigned shortly before the pickup window ends.
+   - EDI team work: Maps the instructions into the warehouse shipping system, carries load, carrier and appointment references forward so the ship notice and bill of lading match them, and alerts shipping when instructions change after the load was planned.
+   - If it fails: Goods ship on the wrong carrier or date, the retailer re-bills the freight, and the supplier pays the transportation cost plus a fee.
+   - Work areas: Map build and maintenance, Monitoring, Partner follow-up
+3. **Tender load** (204, 990 / IFTMIN, from retailer transportation)
+   - What happens: The retailer tenders the load to the carrier: stops, pickup and delivery appointments, equipment and the orders on it. The carrier accepts or declines, and a declined load is re-tendered.
+   - Rules that bite: The accepted tender is what freight audit pays against: rate, equipment and appointments. The load reference on it must match the routing instructions and the delivery appointment.
+   - EDI team work: Runs the carrier connections (tender out, response in), chases carriers that have not responded before the pickup, and keeps load, order and appointment references aligned across the tender, the routing instructions and the ship notice.
+   - If it fails: No carrier shows at the supplier's dock, the pickup is missed, and the supplier has to prove the lateness was not its own.
+   - Work areas: Connections and protocols, Partner follow-up, Monitoring
+4. **Load and notify** (856 / DESADV, from supplier)
+   - What happens: At the pickup appointment the supplier loads the carrier's trailer, signs the bill of lading with the carrier's PRO, and sends the ship notice as the truck leaves.
+   - Rules that bite: Carrier, bill of lading and PRO numbers on the notice must match the routing instructions and the delivery appointment, and quantities must match the routing request. Collect freight not ready at the appointment is a supplier miss.
+   - EDI team work: Checks that the notice carries the load, carrier, bill of lading and PRO from the routing instructions before it is sent, and holds a notice whose references do not match rather than letting it reject at the retailer.
+   - If it fails: The notice is rejected or scored inaccurate and the DC cannot tie the load it receives to the notice it holds.
+   - Work areas: Rejections, Monitoring, Cross-references and master data
+5. **Track and deliver** (214 / IFTSTA, from carrier)
+   - What happens: The carrier reports pickup, transit and delivery status with timestamps and proof of delivery. The retailer's gate time becomes the arrival record for every order on the load.
+   - Rules that bite: On-time is judged per order against the must-arrive-by window while the carrier drives to a load-level due date; early and late both miss. Prepaid freight is scored on arrival, collect freight on readiness at pickup.
+   - EDI team work: Correlates carrier status with the ship notice and the orders on the load, keeps status, timestamps and proof of delivery retrievable per shipment, and supplies them when an on-time score is challenged.
+   - If it fails: The supplier takes the on-time penalty on prepaid freight, the retailer absorbs the delay on collect, and mismatched records leave both arguing over timestamps.
+   - Work areas: Monitoring, Reporting and documentation
+6. **Freight invoice** (210 / INVOIC, from carrier)
+   - What happens: The carrier invoices the party that controls the freight: the retailer on collect, the supplier on prepaid. Freight audit matches the invoice to the tender, the shipment and accessorial charges.
+   - Rules that bite: Freight is paid against the tendered rate and the accepted load; accessorial charges need a reason the shipment record supports. Freight caused by a supplier routing violation is billed back to the supplier with a fee.
+   - EDI team work: Loads carrier invoices into freight audit, matches them to the tender and the status history, and resolves the load, PRO and bill of lading reference mismatches that stop the automatic match.
+   - If it fails: Freight is paid late or in error, and routing violation re-bills go out to suppliers without the evidence to hold them.
+   - Work areas: Cross-references and master data, Chargebacks and deductions management, Reporting and documentation
+
+### Variants
+- **Prepaid freight** (204, 990, 214): The supplier chooses and pays the carrier and tenders the load itself, but still books the retailer's delivery appointment and is scored on arrival inside the must-arrive-by window rather than on readiness.
+- **Truckload and LTL**: Truckload orders move as a dedicated load tendered to one carrier. Less-than-truckload orders share a trailer with other suppliers' freight and are often routed through a consolidation facility.
+- **Consolidation**: Less-than-truckload orders are routed to a consolidation facility, cross-docked into full trailers and delivered to the DC on a load-level due date, while each order keeps its own must-arrive-by date.
+- **Parcel and store-direct**: Store-direct and small orders ship parcel; tracking numbers stand in for the bill of lading and PRO on the ship notice.
+- **Electronic bill of lading** (211): Where the shipper and carrier exchange the bill of lading electronically, the motor carrier bill of lading set carries the legal document; it is not used for tender or appointment data.
+
+### Penalties and disputes
+- Late or missing routing request: the order cannot be built into a load and is scored not ready or late; routing violations usually carry a flat fee per occurrence.
+- Wrong carrier or wrong ship date against the routing instructions: the supplier is charged the full transportation cost plus a fee.
+- Collect freight not ready at the carrier's appointment: counted against the supplier's ready rate and charged as a share of the cost of goods on the order.
+- Prepaid freight outside the must-arrive-by window, or arriving with no appointment: scored late (unscheduled arrivals are dated by the PRO date) and charged as a share of the cost of goods.
+- Ship notice carrier, bill of lading or PRO not matching the routing instructions and appointment: an ASN accuracy defect, charged per shipment or as a tiered share of product cost.
+- Transportation penalties settle like the rest: a monthly scorecard, a deduction from remittance, and a dispute window in the retailer's portal with routing documents and the signed bill of lading as evidence.
+
+### Watch for
+- Declare ready only when the goods are staged. Where on-time is measured from the declared ready date, an optimistic date converts a safe order into a miss.
+- Some retailers run routing in a transportation portal instead of the 754, and the pickup date can be assigned shortly before the pickup window ends. Shipping has to check routing daily; planning from the order's ship window alone misses it.
+- Must-arrive-by date is per order, carrier due date is per load. Orders consolidated on one load can have different windows; check each one.
+- Build the ship notice after routing comes back, never before. A notice built from the order alone carries the wrong carrier, bill of lading and PRO.
+- The order's freight terms (shipment method of payment and FOB point) decide whether it is collect or prepaid. Map them from the order to shipping, or the order follows the wrong routing path.
+- Collect and prepaid are scored differently: readiness at pickup for collect, arrival in the window for prepaid. In-full is measured against the original order quantity on both.
+
+### Europe and international
+- EANCOM has no equivalent of the routing request and instruction pair. Its transport messages are the carrier set: IFTMBF and IFTMBC for booking, IFTMIN for the instruction to transport one consignment under agreed conditions, IFTSTA for status and IFTMAN for arrival notice.
+- IFTMIN instructs transport only; despatch instructions use INSDES, and the DESADV with an SSCC on every logistic unit remains the receiving key regardless of who booked the truck.
+- European retailers also publish logistics manuals and apply delivery penalties, but regulation constrains them: France caps logistics penalties and requires the retailer to prove the breach. North American practice differs in published chargeback schedules deducted automatically from remittance, which European suppliers entering the US meet for the first time.
+- The legal road transport document is the CMR consignment note, and electronic CMR is replacing paper; the 211 has no role.
+
+## 4. Deductions, chargebacks and disputes
+Outcome: Resolve every deduction inside its dispute window: recover the invalid ones, clear the valid ones, and remove the causes.
+
+Retailers short-pay rather than ask. Shortages, pricing differences, allowances and compliance chargebacks are netted off the remittance with a reason code, and a debit memo or a portal entry explains them, sometimes. The supplier's deductions team must match each one to the order, ship notice, receipt and invoice, decide whether it is valid, and dispute it inside a window that started when the retailer posted it. Volume, thin reason codes and short windows are what make it hard.
+
+- Parties: Retailer AP, Supplier AR
+- Business owner: Accounts receivable and deductions management
+- Measures: Deduction rate, Days deductions outstanding (DDO), Dispute win and recovery rate, Days to deduction identification, Unapplied cash rate
+- Documents, North America: 812, 820, 810
+- Documents, Europe and international: COMDIS, INVOIC, REMADV
+
+### Steps
+1. **Violation posted** (Portal, from retailer AP)
+   - What happens: The retailer's systems record a defect against an order, shipment or invoice: short receipt, late or missing ship notice, label failure, pricing variance. It appears in the supplier portal.
+   - Rules that bite: Violations are posted per order, shipment or carton with a reason code. Some programs allow a short review period to request an exemption before the charge issues; after that it stands unless disputed, and some types are not disputable.
+   - EDI team work: Pulls violation feeds or portal exports daily, matches each violation to the document trail (order, notice, acknowledgments, application advice), and routes it to the owner before the review period lapses.
+   - If it fails: Violations become chargebacks unseen, and the review period that could have stopped them has already closed.
+   - Work areas: Monitoring, Chargebacks and deductions management, Partner follow-up
+2. **Debit memo** (812, from retailer AP)
+   - What happens: The retailer issues a debit or credit adjustment naming the invoice or order, the amount and the reason: shortage, pricing, allowance, compliance. Some retailers send one each business day.
+   - Rules that bite: Memos often use the retailer's own codes, not the standard adjustment list. One event can produce a memo, a portal entry and a remittance line. Resending the invoice to recover a short payment triggers a duplicate billing deduction.
+   - EDI team work: Maps each retailer's adjustment codes to the supplier's deduction categories, loads memos into the deductions system, and links them to the matching remittance lines so one event is not worked twice.
+   - If it fails: Deductions are worked twice or not at all, and research starts from the bank statement instead of the memo.
+   - Work areas: Map build and maintenance, Cross-references and master data, Chargebacks and deductions management
+3. **Net remittance** (820 / REMADV, from retailer AP)
+   - What happens: The payment arrives as one net amount. The remittance lists the invoices paid and each deduction with an adjustment reason code and a reference to the invoice, order or memo.
+   - Rules that bite: Reason codes are standard or the retailer's own. The remittance may travel with the payment (CTX), separately, or as a short reference only (CCD). The dispute clock runs from the posting date, not from the remittance.
+   - EDI team work: Loads the remittance into cash application, auto-matches paid invoices, and opens a deduction case per adjustment line with retailer, reason, amount and references attached.
+   - If it fails: Cash sits unapplied, nobody knows how many deductions are open, and the window runs down while someone reconciles the bank statement.
+   - Work areas: Chargebacks and deductions management, Missing documents, Monitoring
+4. **Research and classify** (ERP, from supplier AR)
+   - What happens: The deductions team matches each case to order, ship notice, bill of lading, proof of delivery and invoice, and decides: valid, invalid, or a promotion to check against its authorization.
+   - Rules that bite: The burden of proof sits with the supplier. Shortage claims need the signed bill of lading, proof of delivery and the notice listing the cartons; pricing claims need the order cost; promotional claims need the authorization and proof of performance.
+   - EDI team work: Keeps every document and acknowledgment per order retrievable for the dispute window and the post-audit period, and gives the deductions team one view linking order, notice, invoice, memo and remittance line.
+   - If it fails: Evidence cannot be found in time, recoverable deductions are written off, and the same cause recurs because nobody traced it.
+   - Work areas: Reporting and documentation, Chargebacks and deductions management, Cross-references and master data
+5. **Dispute** (Portal, from supplier AR)
+   - What happens: The supplier files one dispute per deduction in the retailer's portal with the evidence attached, and answers the retailer's requests for more information within days.
+   - Rules that bite: Windows run from about a month to six months from the posting date, differ for domestic and import orders, and may allow no second dispute. Late ship notice fees and some drop ship refunds cannot be disputed at all.
+   - EDI team work: Tracks window expiry per retailer and deduction, assembles the evidence pack from the document archive, and records outcome and reason so repeat causes are visible by retailer, DC and document type.
+   - If it fails: The window closes and a recoverable deduction becomes a permanent loss.
+   - Work areas: Chargebacks and deductions management, Reporting and documentation, Partner follow-up
+6. **Settle** (812, 820 / REMADV, from retailer AP)
+   - What happens: The retailer approves or denies. Repayment comes as a credit adjustment or later remittance line; valid deductions are written off internally, with no credit sent.
+   - Rules that bite: Repayment is netted into a later remittance under its own reason code, so cash application has to link it back to the original deduction. Post-audit claims can arrive long after the event under the same rules.
+   - EDI team work: Matches the repayment to the open case and closes it, and reports recovered, written off and open balances by retailer and reason, with root causes fed back to the order to cash owners.
+   - If it fails: Recovered money lands as unexplained cash, cases stay open, and the deduction rate never moves.
+   - Work areas: Chargebacks and deductions management, Reporting and documentation
+
+### Variants
+- **AP deductions and compliance chargebacks**: Accounts payable deductions (shortages, pricing, allowances) come out of the invoice match. Compliance chargebacks are fees the retailer bills for program violations and nets against payments, published on a scorecard and disputed in a separate portal. Different owners, different windows.
+- **Trade promotion settlement** (820, 812): The retailer short-pays a promotional allowance with a reference. The supplier validates it against the promotion authorization (items, dates, rate) and proof of performance, checks for duplicates, then clears the accrual or disputes.
+- **Post audit** (812): Long after the event the retailer raises post-audit claims under the same dispute rules. The supplier needs the same evidence it needed at the time, which is why the document archive outlives the payment.
+- **Grocery adjustments** (880, 812): Grocery retailers settle deductions and credits against grocery invoices with the credit/debit adjustment rather than corrected invoices, and promotional billbacks travel the same way.
+- **Markdown and allowance deductions** (812, 820): Markdown money, price protection, co-op advertising and return handling charges arrive as deductions under their own code families and are validated against the agreement rather than against a shipment.
+
+### Penalties and disputes
+- Shortage: cartons or units billed but not received, or no merchandise received for an invoice. Deducted from the invoice payment on the remittance under a shortage code.
+- Pricing: invoice cost above order cost. The difference is deducted; the order is the reference and these are hard to win.
+- Duplicate billing: resending an invoice already received. Deducted in full as a duplicate rather than ignored.
+- Compliance chargebacks: no, late or inaccurate ship notice, label failures, fill rate below threshold, early or late arrival, wrong carrier. Flat fees per shipment or carton or a share of the cost of goods, escalating after repeat occurrences in a period, with scorecard grades that can raise or lower the schedule.
+- Allowances and promotions: off-invoice allowances, billbacks, markdown money, co-op. Deducted with a reference the supplier must match to its agreement.
+- Settlement: everything above nets against unrelated invoices on the remittance. Disputes run in the retailer's portal within a fixed window from the posting date, with order, notice, bill of lading and proof of delivery as evidence; some fees are not disputable.
+
+### Watch for
+- The clock starts when the deduction posts in the retailer's system, not when the remittance arrives and not when the supplier finds it.
+- Never resend an invoice to fix a short payment. It becomes a duplicate billing deduction on top of the original.
+- One event can show up as a portal violation, a debit memo and a remittance line. Match on order, invoice and amount before counting, or the deduction rate doubles on paper.
+- Most shortage disputes are decided on proof of delivery: a delivery receipt signed without exceptions, the carton count on the bill of lading, and a ship notice listing the cartons. On collect freight, a shortage after a clean signed pickup is a carrier claim, not the supplier's.
+- Standard adjustment codes give the category; the retailer's own code and the portal give the cause. Map both, or root cause analysis stops at 'shortage'.
+- Disputing everything is as wrong as disputing nothing. Set a value threshold, automate matching below it, and spend people on the categories with a win record.
+
+### Europe and international
+- Where the retailer sends RECADV after receipt, the supplier invoices accepted quantities, so discrepancies are settled before the invoice rather than off it.
+- COMDIS is the buyer's notice of commercial dispute against one or more invoices (wrong price, wrong product identification, missing proof of delivery). The buyer states the errors and corrections; the supplier cancels and reissues, or issues a credit note, which is an INVOIC with a credit note function.
+- REMADV carries payment date, amount and reduction reasons but is little used, so the structured remittance with deductions that North American suppliers rely on is often missing.
+- European retailers also apply logistics penalties, but law restricts them: France caps them and requires proof, the EU Unfair Trading Practices Directive bans certain unilateral deductions in agri-food supply, and large UK grocers operate under a statutory supply code. Automatic deduction of a published chargeback schedule is mainly North American.
+
+## 5. Item and price synchronization
+Outcome: Have correct item, hierarchy and cost data in the retailer's systems before the first order, and keep it correct.
+
+The flow that puts a supplier's items, packaging hierarchy, dimensions and costs into the retailer's systems before the first order, and keeps them aligned. Item data travels through the GDSN where the retailer mandates it, or on X12 catalogs and portals where it does not, while cost often travels separately. Bad item data surfaces later as rejected orders, receiving problems and pricing deductions.
+
+- Parties: Supplier, Data pool, Retailer
+- Business owner: Product data management, pricing and sales
+- Measures: Time to shelf (item setup cycle time), Issues per item, Synchronized item rate, Pricing deductions on invoices
+- Documents, North America: CIP, RCI, CIS, CIN, CIC, 832, 888, 879, 889, 850
+- Documents, Europe and international: CIP, RCI, CIS, CIN, CIC, PRICAT, PRODAT, ORDERS
+
+### Steps
+1. **Load and publish** (GDSN CIP, from supplier)
+   - What happens: The supplier loads each item hierarchy (consumer unit, case, pallet) into its source data pool with GTINs, dimensions, weights and classification, then publishes it to a target market or retailer.
+   - Rules that bite: Every level of the hierarchy needs its own GTIN, provider GLN, target market and product classification. Measurements must describe production packaging, not pre-production samples; wrong case dimensions and unit counts are the common finding in retailer audits.
+   - EDI team work: Maps the item master export to the pool's load format, keeps GTIN to internal SKU cross-references current, checks that hierarchy links and mandatory attributes are complete before publishing, and tracks which retailers each hierarchy is published to.
+   - If it fails: The item never reaches the retailer, the launch date slips, and the first order is written against an item the retailer cannot find.
+   - Work areas: Cross-references and master data, Map build and maintenance, Business programs
+2. **Register and validate** (GDSN RCI, CIS, from data pool)
+   - What happens: The source data pool validates the item against GDSN rules, registers its keys (GTIN, provider GLN, target market) in the GS1 Global Registry, and matches them to the retailer's subscription.
+   - Rules that bite: Schema errors are rejected with a GS1 Response. Global validation rule failures are rejected or passed with a review flag, and pools add national and retailer rules on top (pallet height, weight limits, local attributes) that the item must pass.
+   - EDI team work: Reads the GS1 Response for every publication, translates validation error codes into fixes for the product data team, and resubmits; confirms the retailer's subscription exists before chasing a notification that was never going to be sent.
+   - If it fails: The item sits in the pool as rejected and nothing reaches the retailer, while the supplier believes it has been published.
+   - Work areas: Rejections, Fix routing, Cross-references and master data
+3. **Notify retailer** (GDSN CIN, from data pool)
+   - What happens: Once the registry matches keys and subscription, the source pool sends the Catalogue Item Notification, carrying the full hierarchy, to the retailer's recipient pool for loading into the retailer's systems.
+   - Rules that bite: The notification carries the whole hierarchy, so a change at one level republishes every level. Retailers often require attributes beyond the GDSN set and collect them through their own portals, so a synchronised item is not yet a set-up item.
+   - EDI team work: Monitors that each publication produced a notification at the recipient pool, reconciles the retailer's loaded item list against what was published, and investigates items the retailer says it never received before the retailer's setup deadline.
+   - If it fails: The retailer's buyer waits for an item that is live in the supplier's pool, and the setup window for the launch closes.
+   - Work areas: Monitoring, Missing documents, Partner follow-up
+4. **Confirm item** (GDSN CIC, from retailer)
+   - What happens: The retailer returns its decision: received (no decision yet), synchronised (loaded and kept in sync), review (data looks wrong, please fix) or rejected (stop sending updates).
+   - Rules that bite: Confirmation is optional for the retailer, so silence is not acceptance. A review flag needs a corrected republication, and a rejected confirmation stops all further notifications for that hierarchy until the retailer requests the data again.
+   - EDI team work: Routes each confirmation state to an owner, treats review as a defect ticket with the retailer's comment attached, tracks time from publication to synchronised per retailer, and keeps the confirmation as proof the item was set up.
+   - If it fails: Review requests go unanswered, the retailer rejects the hierarchy, and every later correction is silently dropped.
+   - Work areas: Rejections, Fix routing, Reporting and documentation
+5. **Cost and price** (832, 879 / PRICAT, from supplier)
+   - What happens: The supplier sends cost, suggested retail, bracket or zone pricing and effective dates: a price and sales catalog for general retail, price information and promotion announcements in grocery.
+   - Rules that bite: Every price needs a change type and effective date, and the retailer's cost file must match the order cost before orders are cut. Promotion announcements need dates, items, allowances and performance terms that match the agreed deal.
+   - EDI team work: Generates the price documents from the pricing system, validates bracket, zone and effective date segments against the retailer's guide, confirms acknowledgments, and checks that the next inbound orders carry the new cost.
+   - If it fails: The retailer keeps ordering at the old cost, and the difference is deducted from every invoice until the cost file is fixed.
+   - Work areas: Document and version changes, Cross-references and master data, Chargebacks and deductions management
+6. **First order** (850 / ORDERS, from retailer)
+   - What happens: The retailer orders the item by GTIN or its own item number at the cost in its file. The sync is proven when this order loads and the invoice matches.
+   - Rules that bite: Orders for items not on file are blocked at the retailer, and in some drop ship programs no order is issued until the catalog is loaded. An invoice cost above the order cost is deducted, not negotiated.
+   - EDI team work: Watches the first orders for a new item for cross-reference failures and cost mismatches, holds them for review rather than letting them reject, and feeds the mismatch back to product data and pricing before the invoice is sent.
+   - If it fails: The order rejects or ships at a cost the retailer will not pay, and the launch starts with a pricing deduction.
+   - Work areas: Monitoring, Rejections, Cross-references and master data
+
+### Variants
+- **X12 catalog without GDSN** (832 or 888, 879, 889, 997, 824): Smaller retailers and many distributors load items straight from the supplier's price and sales catalog or, in grocery, from item maintenance and price information sets. No pool and no confirmation: the retailer's functional acknowledgment or application advice is the only feedback.
+- **Portal keying** (Portal): Suppliers outside the GDSN key items into the retailer's setup portal, and GDSN suppliers still key the retailer-specific attributes the pool does not carry. Portal entries are not EDI, but they must agree with what was published.
+- **Item change and withdrawal** (CIN, CIC, CIHW): Attribute corrections republish the hierarchy as a new notification, and the retailer confirms again. Changes the GTIN Management Standard treats as a new product need a new GTIN. A hierarchy published in error is withdrawn with a hierarchical withdrawal; a discontinued item is flagged with a discontinued date and later deleted.
+- **Promotions** (889): Promotion announcements carry promotion dates, items, allowances and performance terms. Later billback deductions are validated against these terms plus proof of performance, so the announcement must match the deal sheet exactly.
+
+### Penalties and disputes
+- Pricing deduction: the invoice cost exceeds the order cost, usually because a cost change never reached the retailer's cost file. The difference is deducted from remittance with a pricing reason code, and disputes rarely succeed because the order cost is the reference.
+- Not on file: orders and store deliveries for items missing from the retailer's item file are blocked or held, and some drop ship programs issue no orders until the catalog is loaded.
+- Validation rejection: schema and global rule failures bounce at the pool with a GS1 Response and never reach the retailer; national and retailer rules return a review flag that the supplier must clear.
+- Rejected confirmation: once a retailer rejects a hierarchy, every later notification for it is dropped until the retailer requests the data again.
+- Data quality scorecards: retailers count issues per item, audit supplier data on a schedule and hold items with bad data at entry. Wrong dimensions and weights from pre-production samples are the usual finding.
+
+### Watch for
+- Received is not acceptance. Only a synchronised confirmation means the retailer loaded the item, and a review flag means the retailer thinks the data is wrong.
+- Measure production packaging. Case dimensions, weights and unit counts taken from pre-production samples are the most common audit finding.
+- Item and cost are two flows. The GDSN item can be synchronised while the cost in the retailer's file is stale, and the gap only shows when invoices start deducting.
+- The GDSN does not finish setup. Most retailers require attributes outside the standard set, keyed in their own portal, and the portal values must agree with the published ones.
+- Pools and target markets differ. The same hierarchy can pass global validation and fail a national rule such as pallet height or weight, so check the recipient market's rules before publishing.
+
+### Europe and international
+- The GDSN messages are the same (CIN and CIC through a certified pool), but each pool layers national rules on top of the global ones, and failures of those rules come back as a review flag rather than a rejection.
+- EANCOM PRICAT carries item and price together, with line action codes for add, change, delete and confirm and either general or customer-specific prices; the buyer may reply with an acceptance or rejection. PRODAT carries master data without commercial terms.
+- Volumes are high: a large grocer can receive several hundred thousand new product records a year through the GDSN, so retailers automate confirmation and pools connect to ERPs over AS2 or SFTP.
+- Pool ownership has changed hands in major markets, so the supplier chooses a certified pool rather than assuming a national GS1 pool exists.
+- EU food information rules require the same mandatory product information online as on pack, including allergens and nutrition, which made the GDSN the default channel for food items in many markets.
+
+## 6. Direct store delivery
+Outcome: Deliver to the store, agree quantity and cost at the back door, and get paid on that record.
+
+The supplier's own route trucks deliver straight to the store, bypassing the retailer's DC, for categories where freshness, shelf service and velocity matter: beverages, snacks, bakery, dairy, flowers, cards and magazines. The driver and the store agree what was delivered at the back door, and that agreed record is the invoice. Most disputes trace to item, cost and promotion data that differ between the supplier's handheld and the store system.
+
+- Parties: DSD supplier, Store, Retailer AP
+- Business owner: Route sales, store receiving and accounts payable
+- Measures: Invoice discrepancy rate, Adjustment rate at check-in, Store in-stock rate, Days to payment
+- Documents, North America: 888, 879, 894, 895, 882, 824, 820, 852
+- Documents, Europe and international: PRICAT, ORDERS, DESADV, RECADV, INVOIC
+
+### Steps
+1. **Authorize items** (888, 879 / PRICAT, from dSD supplier)
+   - What happens: Before the first drop, the supplier's items and costs are loaded and authorized in the retailer's DSD item file, through item maintenance and price information sets or the retailer's portal.
+   - Rules that bite: Store systems block items that are not on file, discontinued or inactive, and pay the lower of the invoiced and the authorized cost. Cost changes and promotions must be in the file before the delivery that uses them.
+   - EDI team work: Keeps the supplier's item and cost master, the handheld's price book and the retailer's authorized list aligned, sends cost and item changes ahead of effective dates, and confirms acknowledgments before drivers deliver at the new cost.
+   - If it fails: The store refuses lines at the door or pays the old cost, and the driver loses selling time arguing over items.
+   - Work areas: Cross-references and master data, Document and version changes, Partner onboarding
+2. **Delivery record** (894, from dSD supplier)
+   - What happens: At the back door the driver's handheld sends the delivery record over DEX to the store system: items, quantities, unit cost, allowances and any returns picked up.
+   - Rules that bite: Supplier identifiers, store number and item codes must match the retailer's file exactly. One record per delivery; a resend with the same record number is rejected as a duplicate.
+   - EDI team work: Maintains the 894 map and the UCS version each retailer runs, keeps store and supplier identifiers current in the handheld and route system, and supports drivers whose DEX session fails so the delivery is not keyed by hand.
+   - If it fails: The store keys the delivery from paper, errors enter both systems, and the payment is short or late.
+   - Work areas: Connections and protocols, Support desk and on-call, Map build and maintenance
+3. **Store check-in** (895, from store)
+   - What happens: The receiver counts the delivery against the record. The store system returns an acknowledgment or line adjustments for shortages, overages, refused items and cost differences, which the driver accepts.
+   - Rules that bite: Adjustments must point at the right line and carry a reason, and an adjustment must not apply twice when a record is resent. What the driver accepts at the door becomes the invoice of record.
+   - EDI team work: Maps adjustment and reason codes into the route accounting system so the supplier's receivable equals the store's accepted total, and reports adjustment patterns by store and item to sales and master data.
+   - If it fails: The supplier bills the delivered quantity, the store pays the counted quantity, and the gap becomes a deduction nobody can trace.
+   - Work areas: Rejections, Fix routing, Reporting and documentation
+4. **Invoice of record** (894 or 810 / INVOIC, from dSD supplier)
+   - What happens: The handheld syncs to route accounting, which books the accepted record as the invoice. Retailers wanting an office record take a network 894 or an 810 per store delivery.
+   - Rules that bite: The office record must equal what the store accepted, line for line, or it fails the match. Credits for returns and stales travel as separate credit records within a fixed window after pickup, and duplicates are rejected.
+   - EDI team work: Reconciles handheld records against what the retailer acknowledged, resends records the store never received, generates credit records for pickups inside the window, and monitors functional acknowledgments and application advices for rejected records.
+   - If it fails: Deliveries that were made and accepted are never billed, or are billed twice and rejected, and the route's revenue does not reconcile.
+   - Work areas: Missing documents, Monitoring, Rejections
+5. **Match and pay** (820 / REMADV, from retailer AP)
+   - What happens: Retailer accounts payable matches the supplier's records to the store-accepted deliveries, pays the lower of invoiced and authorized cost, audits a sample, and remits one net payment with adjustments listed.
+   - Rules that bite: Payment runs off the accepted record, not the delivered quantity. Cost differences, unauthorized items and promotion allowances not on file are deducted with reason codes, and the summary of deliveries, returns and adjustments must tie to the payment.
+   - EDI team work: Loads the remittance into cash application, matches each paid record to the handheld delivery and its adjustments, and sends the DSD summary where the retailer requires one so both sides agree the period's totals.
+   - If it fails: Thousands of small store invoices sit unapplied, and cost and quantity deductions age past the point where the route can explain them.
+   - Work areas: Chargebacks and deductions management, Reporting and documentation, Cross-references and master data
+
+### Variants
+- **NEX pre-delivery invoice** (894, 997, 824): The supplier's office sends the delivery record through the EDI network before the truck arrives. The retailer validates it (functional acknowledgment, application advice on failure), routes it to the store for approval at check-in, then releases it to payment.
+- **Scan-based trading** (852, 820): The supplier owns the stock until it scans at the register. The retailer sends daily or weekly product activity with quantity sold and cost per item, and payment follows the scan data, not the delivery. Shrink is the supplier's problem.
+- **Returns and credits** (894): Stales, damaged and unsold goods are picked up on the route. The credit travels as a separate credit record, within a fixed window after the pickup, and is applied against the supplier's payments.
+- **Summary and payment request** (882): Some retailers want a periodic summary of deliveries, returns and adjustments with a payment request and the remittance party, without item detail, to reconcile the period before paying.
+
+### Penalties and disputes
+- Not on file: items missing from the retailer's DSD item file, discontinued or inactive, are refused at the door or dropped from the record. There is no deduction; the sale simply does not happen.
+- Cost difference: the store pays the lower of the invoiced and the authorized cost and deducts the difference with a reason code, so a cost increase that did not reach the file is lost on every delivery until it does.
+- Quantity adjustments: shortages, overages and refused items are adjusted on the acknowledgment at check-in and paid as counted. A supplier that bills the delivered quantity instead sees the difference as a deduction.
+- Duplicates and late records: a resent record with the same number is rejected, and records or credits that arrive outside the retailer's window are held or refused.
+- Post audit: retailers audit a random share of deliveries after check-in, and differences found become deductions, disputed through the retailer's AP process within its window.
+
+### Watch for
+- The agreed record at the door is the invoice. Whatever the driver accepts on the handheld is what gets paid, so drivers need to know when to dispute, not just how to tap accept.
+- Most DSD disputes are data, not counting. Item, cost and promotion data out of sync between the supplier's handheld and the store system causes the bulk of discrepancies, so fix master data before retraining receivers.
+- Volume is the problem. A route supplier generates thousands of small store invoices a week, so a small error rate is still a large deductions backlog, and cash application cannot be manual.
+- DEX and NEX are different programs. The same retailer may run DEX at the door and NEX between offices, each with its own setup, and the two records must agree.
+- Scan-based trading changes the settlement basis. Payment follows register scans, not deliveries, and the supplier carries shrink until the scan.
+
+### Europe and international
+- EANCOM has no equivalent of DEX or of the 894 and 895. European store deliveries run on the standard messages: GS1 in Europe's harmonised order profile includes a direct store delivery order type, followed by DESADV and INVOIC.
+- Where the retailer sends a receiving advice (RECADV) after the goods are checked, the supplier invoices the accepted quantities, which replaces the back-door adjustment record.
+- Item and price authorization runs on PRICAT, or through the GDSN, before the first order.
+
+## 7. Vendor-managed inventory and CPFR
+Outcome: Keep retailer stock at agreed levels, with the supplier building replenishment orders from shared sales and inventory data.
+
+The retailer hands replenishment to the supplier. It shares sales, on-hand and on-order data by item and location every day or week, and the supplier decides what to ship and writes the order. The retailer usually still owns the stock and, in many programs, the purchase order number, while the supplier owns the quantity. CPFR adds a joint business plan and shared forecasts with exception review. The hard part is keeping the feed, the order handshake and the targets current.
+
+- Parties: Retailer or distributor, Supplier
+- Business owner: Demand planning, replenishment and category management
+- Measures: Replenishment in-stock rate, Weeks of supply (inventory health), Forecast accuracy, On-time and in-full (OTIF)
+- Documents, North America: 852, 855, 824, 830, 856, 810
+- Documents, Europe and international: INVRPT, SLSRPT, SLSFCT, ORDRSP, APERAK, DESADV, INVOIC
+
+### Steps
+1. **Share activity** (852 / INVRPT, SLSRPT, from retailer or distributor)
+   - What happens: Daily or weekly, the retailer sends product activity by item and location (sold, on hand, on order, committed, out of stock), sometimes with reserved purchase order numbers and expiry dates.
+   - Rules that bite: Each quantity carries a qualifier that says what it is, and a mis-mapped qualifier turns on-order stock into on-hand stock. The feed must arrive on schedule; the supplier plans against whatever the last file said.
+   - EDI team work: Monitors the feed's arrival against its schedule and alerts on a missed or partial file, maps the retailer's quantity qualifiers and location codes to the planning system, and keeps the reserved order number pool loaded and unexpired.
+   - If it fails: The supplier plans blind or on stale numbers, and the stores run out or overstock before anyone notices the feed stopped.
+   - Work areas: Monitoring, Missing documents, Map build and maintenance
+2. **Plan replenishment** (ERP, from supplier)
+   - What happens: The supplier's planning system nets on hand and on order against agreed targets and forecast, and proposes order quantities in case and pallet multiples inside the agreed lead time.
+   - Rules that bite: The agreement sets the targets: in-stock goal, weeks of supply, minimum and maximum levels, order multiples and who may override. Promotions and new items need forecast input the activity feed does not carry.
+   - EDI team work: Keeps retailer item numbers, GTINs and supplier SKUs cross-referenced and store and DC location tables current, so the planner's proposal maps back to the retailer's keys without manual repair.
+   - If it fails: Stores get too much of slow items and too little of fast ones, and the retailer's in-stock score drops on the supplier's record.
+   - Work areas: Cross-references and master data, Business programs
+3. **Place order** (855 / ORDRSP, from supplier)
+   - What happens: The supplier sends the order it built as a purchase order acknowledgment quoting a reserved purchase order number, and the retailer's system loads it as its own purchase order.
+   - Rules that bite: The retailer owns the number, the supplier owns the quantity. The number must be unused and unexpired, and items must be authorized for that location in the retailer's unit of measure.
+   - EDI team work: Maps the planner's output to the acknowledgment with the reserved number, validates it before sending, watches for the functional acknowledgment and any application advice, and confirms the order shows as on order in the next activity feed.
+   - If it fails: The retailer has no purchase order to receive or pay against, and the shipment arrives as an unexpected delivery.
+   - Work areas: Map build and maintenance, Business programs, Rejections
+4. **Validate order** (824 / APERAK, from retailer or distributor)
+   - What happens: The retailer's system checks the supplier's order: valid, unexpired number, authorized items, quantity rules. Rejections return as an application advice; accepted orders appear as on order in the next feed.
+   - Rules that bite: A rejected order is not an order. The supplier must fix and resend under a valid number before the expiry, and nothing ships until the order is accepted; silence from the retailer means check the next feed, not ship.
+   - EDI team work: Routes each rejection reason to planning or master data, tracks rejected order rate by retailer, and reconciles yesterday's orders against today's on-order quantities to catch orders that were neither rejected nor loaded.
+   - If it fails: Rejected orders go unseen, the replenishment cycle skips a beat, and the out-of-stock shows up on the supplier's scorecard.
+   - Work areas: Rejections, Fix routing, Partner follow-up
+5. **Ship and invoice** (856, 810 / DESADV, INVOIC, from supplier)
+   - What happens: The supplier ships against the accepted order with a ship notice and invoices it, exactly as in order to cash, with the reserved purchase order number on every document.
+   - Rules that bite: The retailer's normal compliance rules apply: ship notice before arrival, labels, delivery window, quantities equal to the accepted order. The supplier wrote the order, so a short or late shipment counts against it twice: fill rate and in-stock.
+   - EDI team work: Carries the reserved number from the acknowledgment through the ship notice and invoice without re-keying, and ties each shipment back to the activity feed so planning sees the stock as received, not still on order.
+   - If it fails: The invoice fails to match the retailer's purchase order, and the next planning run still sees the goods as on order.
+   - Work areas: Monitoring, Cross-references and master data, Chargebacks and deductions management
+6. **Review scorecard** (Portal, from retailer or distributor)
+   - What happens: The retailer publishes weekly supplier metrics: replenishment in-stock, inventory health, forecast accuracy and on-time in-full. In CPFR the two sides also review forecast exceptions against the joint plan.
+   - Rules that bite: Often in-stock is measured against the daily forecast, not against whether any unit is on hand, so a store with one unit left can count as out. The agreement sets the goals, and the scorecard is what the buyer sees.
+   - EDI team work: Pulls the scorecard from the retailer's portal, reconciles the retailer's numbers to the supplier's own order, shipment and activity records, and supplies the evidence when a miss traces to a late feed or a rejected order rather than planning.
+   - If it fails: The supplier cannot explain misses, and the buyer loses confidence in the program.
+   - Work areas: Reporting and documentation, Business programs
+
+### Variants
+- **Retailer-issued order** (852, 850, 855): In some programs the supplier sends a suggested order and the retailer issues its own purchase order from it, which arrives as a standard order the supplier acknowledges like any other. Slower by a cycle, but no reserved number pool is needed.
+- **Distributor VMI** (852, 855): A wholesaler or distributor sends the activity report and pre-creates purchase order headers; the supplier's acknowledgment fills the lines by purchase order number. The documents are the same as the retail flow.
+- **Consignment** (852, 810): The supplier keeps title until the goods sell. Replenishment runs the same way, but settlement follows the sales in the activity feed rather than the shipment, as in scan-based trading.
+- **CPFR** (830, 852, 855 / SLSFCT): Collaborative planning, forecasting and replenishment adds a front-end agreement, a joint business plan, shared sales and order forecasts with exception review, and order generation from the agreed forecast, following the nine-step guideline from the VICS committee, which later merged into GS1 US. Forecasts travel on the retail planning schedule.
+
+### Penalties and disputes
+- In-stock misses: the supplier is scored on replenishment in-stock by store and item. There is usually no fee; the penalty is the scorecard and the buyer's trust.
+- Rejected supplier orders: invalid or expired reserved numbers, unauthorized items or quantity rule breaks come back as an application advice, and nothing ships until a valid order is accepted.
+- Downstream compliance still applies: once the order exists, late or missing ship notices, label defects and deliveries outside the window are charged back exactly as in order to cash, deducted from remittance.
+- Excess stock: inventory health above the agreed weeks of supply counts against the supplier, and in consignment the excess is the supplier's working capital.
+- Fill rate: because the supplier wrote the order, a short shipment is scored against its own quantity, and the shorted value can be deducted under the retailer's fill rate rule.
+
+### Watch for
+- The retailer owns the number, the supplier owns the quantity. Expired or reused reserved numbers reject the order, so manage the pool like inventory.
+- A missing activity file is an incident, not a quiet day. The planning run uses the last file it has, and a stale file writes orders for yesterday's stock.
+- Qualifier mapping is silent. If committed or on-order quantities are mapped to on hand, the planner under-orders for weeks before anyone looks.
+- In-stock has several definitions. Replenishment in-stock against forecast is tougher than customer in-stock against any unit on hand; know which one the scorecard uses before you promise a number.
+- Once accepted, a VMI order is an ordinary order. Ship notice, labels, delivery windows and invoice matching rules apply in full, and the deductions land in the same place.
+- CPFR is a process, not a document set. The forecasts can travel on a planning schedule or a spreadsheet; the value is in the exception review and the front-end agreement that says who changes what.
+
+### Europe and international
+- The activity feed splits into two messages: INVRPT for stock (held, planned and target, including damaged and quality-held) and SLSRPT for sales by location, period and item. SLSFCT carries the sales forecast for collaborative planning.
+- GS1 in Europe's harmonised order profile includes a VMI and co-managed inventory flow built on INVRPT and SLSRPT. In common ERP VMI setups, on both continents, the supplier's order travels as an ORDRSP that the retailer's system converts into its purchase order, with the purchase order number returned on an order change.
+- Downstream the ship notice is DESADV with an SSCC on every logistic unit, and where the retailer sends RECADV after receipt, the supplier invoices the accepted quantities.
+- DELFOR, the EDIFACT counterpart of the 830, can carry order forecasts but is rare in retail; sales forecasts travel on SLSFCT, and much CPFR forecast exchange runs outside EDI.
+
+## 8. Drop ship and marketplaces
+Outcome: Ship each consumer order from the vendor within the retailer's window, with tracking, and collect payment without refund chargebacks.
+
+The retailer sells online and the vendor ships each consumer order from its own stock under the retailer's name, so the vendor's warehouse becomes part of the retailer's customer promise. Volume is high, order value is low, and every clock runs in hours: acknowledgment, shipment, tracking and invoice. Marketplaces run the same flow through APIs instead of EDI and enforce it with seller performance standards.
+
+- Parties: Retailer, Vendor
+- Business owner: E-commerce operations and vendor management
+- Measures: On-time ship rate, Cancellation and backorder rate, Valid tracking rate, Inventory feed timeliness, Order defect rate
+- Documents, North America: 832, 846, 850, 855, 856, 997, 824, 810, 820
+- Documents, Europe and international: PRICAT, INVRPT, ORDERS, ORDRSP, DESADV, APERAK, INVOIC, REMADV
+
+### Steps
+1. **Inventory feed** (846 / INVRPT, from vendor)
+   - What happens: The vendor sends available-to-sell quantity by item, at least daily and often several times a day, so the retailer only sells what the vendor can ship.
+   - Rules that bite: Items must already be set up through the catalog before any order arrives. The feed is due at least daily and must load without errors; an item goes to zero in the feed before it is delisted.
+   - EDI team work: Schedules the feed from the warehouse system, validates item cross-references against the retailer's catalog, confirms each feed loaded, and alerts when a scheduled feed does not go out.
+   - If it fails: The retailer sells stock the vendor does not have, cancels the consumer order, and scores the cancellation against the vendor.
+   - Work areas: Monitoring, Cross-references and master data, Missing documents
+2. **Consumer order** (850 / ORDERS, from retailer)
+   - What happens: The retailer passes each consumer order as it is placed: one order per consumer, ship-to address, service level, expected ship date and the carrier to use.
+   - Rules that bite: Orders flow all day and the expected ship date, usually the next day, starts the clock at order time. The functional acknowledgment is due within a day, and the retailer's carrier account or assigned carrier must be used.
+   - EDI team work: Collects orders many times a day into order management, resolves unknown items and address failures before they stall picking, and watches that every order received was acknowledged back.
+   - If it fails: An order the vendor never loads is never shipped; the retailer refunds the consumer and charges the vendor.
+   - Work areas: Monitoring, Missing documents, Cross-references and master data
+3. **Acknowledge or cancel** (855 / ORDRSP, from vendor)
+   - What happens: The vendor confirms each order line it will ship, or cancels lines it cannot fill, within hours of the order. Most programs allow few or no backorders.
+   - Rules that bite: The acknowledgment window is measured in hours, a day at most, and some programs reject partial acknowledgments: accept or cancel the whole order. Vendor cancellations count toward a cancellation rate threshold that triggers chargebacks.
+   - EDI team work: Generates the acknowledgment from order management as soon as the order is allocated, maps line status codes to the program's list, and chases orders still unacknowledged before the window closes.
+   - If it fails: The retailer cannot tell the consumer, the order is cancelled on the vendor's record, and the cancellation rate climbs.
+   - Work areas: Map build and maintenance, Rejections, Partner follow-up
+4. **Ship and track** (856 / DESADV, from vendor)
+   - What happens: The vendor picks, packs to the retailer's packaging rules, ships on the retailer's carrier account, and sends the ship notice with a tracking number for every parcel.
+   - Rules that bite: Ship within the retailer's window, usually a day, and send the notice with tracking once the parcel ships. Every parcel needs valid tracking, packaging follows the program's plain-box or branded-slip rule, and label SSCCs must match the notice where required.
+   - EDI team work: Builds the notice from warehouse ship confirmation and carrier tracking, validates tracking number format and carrier code before sending, and corrects rejected notices the same day.
+   - If it fails: The consumer gets no tracking, the order is scored late or unshipped, and the retailer may refund it and charge the vendor.
+   - Work areas: Rejections, Fix routing, Monitoring
+5. **Invoice** (810 / INVOIC, from vendor)
+   - What happens: The vendor invoices the retailer per consumer order, at the order cost, once the ship notice is accepted.
+   - Rules that bite: Invoice within the program's window, usually a day after shipment, and only after the ship notice. One invoice per order, cost equal to the order cost, and no resend of an invoice already received.
+   - EDI team work: Triggers the invoice from the accepted ship notice rather than from order entry, validates order number and cost against the order, and routes application advice rejections to billing for correction.
+   - If it fails: Invoices arrive before the notice or outside the window and are rejected, so a shipped order goes unpaid.
+   - Work areas: Rejections, Cross-references and master data, Monitoring
+6. **Payment and chargebacks** (820 / REMADV, from retailer)
+   - What happens: The retailer pays on agreed terms net of any return allowance, late shipment fees and the value of consumer orders it refunded, each with a reason code.
+   - Rules that bite: Where the program uses a return allowance, it is a fixed share of every invoice taken in place of item-level return credits. Consumer refund chargebacks are often not disputable; other disputes run through the portal within a fixed window.
+   - EDI team work: Loads the remittance into cash application, maps the program's reason codes, and matches each refund chargeback to the order, acknowledgment, ship notice and tracking record that show whether the vendor met the window.
+   - If it fails: Chargebacks age unexamined, the allowance is booked as a shortage, and cash sits unapplied.
+   - Work areas: Chargebacks and deductions management, Reporting and documentation, Missing documents
+
+### Variants
+- **Marketplace seller** (Orders, shipment confirmation, inventory, price and returns APIs; usually no EDI): The seller lists and prices its own items and the marketplace takes the consumer order. Orders come down, shipment confirmations with tracking and inventory updates go up through the marketplace's APIs or bulk feeds, often through an integrator, and performance is scored on cancellation, late shipment, valid tracking and order defect rates.
+- **Marketplace vendor drop ship** (Order, acknowledgment, label, shipment confirmation and invoice operations, or 850, 855, 856, 846, 810): The marketplace sells as the retailer and sends the vendor drop ship orders through its vendor API. The vendor acknowledges the whole order within a day, requests the shipping label, confirms shipment and invoices after shipment; the same flow can run on EDI, with deductions for late acknowledgments and ship notices.
+- **Status report cancellations** (870): Some programs take vendor cancellations and status updates on the order status report rather than on the acknowledgment, within a day of the order.
+- **Order changes** (860, 865 / ORDCHG): Address changes and consumer cancellations after acceptance arrive as order changes, which the vendor confirms or rejects before shipping.
+- **Consumer returns** (180, 812): The retailer takes the return from the consumer. It either keeps the flat return allowance or notifies the vendor of each return with the original order, item, reason and disposition, then debits the value. See Returns, credits and allowances.
+
+### Penalties and disputes
+- Late shipment: shipped after the expected ship date, or the notice sent without valid tracking. Settled as a flat fee per order or a chargeback of the order value, and counted against the on-time threshold.
+- Cancellation: the vendor cancels after the inventory feed showed stock, or misses the acknowledgment window. Counted against the cancellation threshold the program scorecard enforces.
+- Consumer refund: the retailer refunds a consumer for a late, lost or wrong shipment and charges the order value back. These chargebacks are often excluded from dispute.
+- Inventory feed: a missed or erroneous daily feed. It breaks the program's daily feed requirement, and any oversell it causes counts as a cancellation.
+- Invoice: before the ship notice, duplicate, or outside the invoice window. Rejected, or held unpaid until corrected.
+- Settlement: fees and refund chargebacks net against remittance, and the return allowance is taken on every invoice by contract. Disputes run through the retailer's portal within a fixed window, with the order, acknowledgment and tracking record as evidence.
+
+### Watch for
+- The inventory feed is the only control against overselling. The retailer sells whatever the last feed said, so send zero quantities explicitly and send fast movers more often than the minimum.
+- Orders arrive all day and the ship clock starts at order time, not when the vendor collected the file. Polling once a day is already late.
+- One consumer order is one order, one notice and one invoice. Nothing consolidates, and a multi-parcel order needs tracking per parcel.
+- Packaging rules are per program: plain boxes for one retailer, branded packing slips for another, no vendor inserts for most. A warehouse shipping for several programs needs the rule by program, not by item. The order also carries packing slip content (retailer name, retail price, gift message) that must print exactly as sent.
+- Whole-order acknowledgment programs reject a partial acknowledgment outright. Decide at allocation whether to ship or cancel the whole order.
+- Marketplace APIs have no 997. A direct call returns success or an error at once; a bulk feed is processed later, and its errors appear only in the feed status report, which something must poll.
+
+### Europe and international
+- ORDERS, ORDRSP, DESADV and INVOIC carry the same flow under EANCOM, and INVRPT stands in for the inventory feed. A consumer has no GLN, so the delivery address travels as plain-text name and address, and that personal data falls under GDPR retention rules.
+- Marketplaces in Europe run the same API model: offers and stock up, orders down, shipment confirmation with tracking back, usually through an integrator, with no VAN or CONTRL in the path.
+- Consumers have 14 days from delivery to withdraw from a distance purchase under the EU Consumer Rights Directive, so consumer returns are structural. The contract decides whether the vendor takes them back or the retailer keeps a return allowance.
+- The vendor's invoice to the retailer falls under national e-invoicing mandates like any other B2B invoice, which changes how INVOIC is produced and archived.
+
+## 9. 3PL fulfillment
+Outcome: Ship retailer orders from a 3PL with ship notices, invoices and stock records that match what the warehouse did.
+
+The supplier outsources storage, picking and shipping to a third-party logistics provider but keeps the retailer relationship, the compliance agreement and the chargebacks. Warehouse documents sit between the retailer order and the ship notice, so the retailer's ASN is built from what the 3PL reports. A missing order reference, a late shipping advice or an SSCC that differs from the label lands on the supplier as a chargeback.
+
+- Parties: Supplier, 3PL, Retailer
+- Business owner: Distribution and logistics operations
+- Measures: Order to shipping advice cycle time, ASN timeliness and accuracy, Inventory accuracy (ERP versus 3PL), Dock-to-stock time
+- Documents, North America: 943, 944, 850, 940, 945, 856, 810, 846, 947
+- Documents, Europe and international: DESADV, RECADV, ORDERS, INSDES, HANMOV, DESADV, INVOIC, INVRPT
+
+### Steps
+1. **Stock the warehouse** (944 / RECADV, from 3PL)
+   - What happens: The 3PL receives stock the supplier announced on a transfer shipment advice and confirms quantities, with overs, shorts and damage.
+   - Rules that bite: The 3PL contract sets receiving: an appointment, an advice before arrival, and the receipt advice within an agreed window after unloading. Items must exist in the 3PL's item master first, or receipts stall.
+   - EDI team work: Maps transfer orders to the advice, keeps the item cross-reference between ERP and 3PL item numbers current, posts the receipt advice to the ERP, and routes over, short and damage lines to inventory control.
+   - If it fails: The ERP shows stock the warehouse cannot find, or goods sit on the receiving dock unavailable to allocate.
+   - Work areas: Cross-references and master data, Monitoring, Rejections
+2. **Retailer order** (850 / ORDERS, from retailer)
+   - What happens: The retailer orders from the supplier as usual: items, quantities, ship window, ship-to and order type. Its compliance rules apply whichever warehouse ships.
+   - Rules that bite: The ship window, routing rules and label guide bind the supplier, not the 3PL. Order type decides packing and label content, and the supplier must allocate the order to a warehouse that holds the stock before the pick cutoff.
+   - EDI team work: Monitors inbound orders into order management, resolves item cross-reference failures, confirms the functional acknowledgment, and checks that allocation picked the right warehouse for the ship-to and stock position.
+   - If it fails: The order allocates to a warehouse without stock, or misses the pick cutoff, and the ship window is lost before anyone notices.
+   - Work areas: Monitoring, Cross-references and master data, Missing documents
+3. **Shipping order** (940 / INSDES, from supplier)
+   - What happens: The supplier instructs the 3PL to pick, pack and ship: retailer order number, ship-to, ship window, carrier and routing, and the data the retailer's carton label needs.
+   - Rules that bite: The 3PL contract sets an order cutoff for same-day shipment. The shipping order must carry every value the GS1-128 label and pack rules need, such as store, department and pack hierarchy, because the 3PL has no other source.
+   - EDI team work: Maps the retailer order and routing instructions into the shipping order, adds retailer-specific label data by program, watches for the 3PL's functional acknowledgment, and escalates orders not acknowledged before cutoff.
+   - If it fails: The warehouse ships late, or ships with labels the retailer's dock cannot scan.
+   - Work areas: Map build and maintenance, Business programs, Monitoring
+4. **Shipping advice** (945 / DESADV, from 3PL)
+   - What happens: The 3PL confirms what shipped: ordered versus shipped quantity per line, carrier and SCAC, bill of lading or tracking numbers, lot numbers, and the SSCC on every carton or pallet.
+   - Rules that bite: Many retailers want the ship notice at ship time, so the advice must arrive within minutes of the truck leaving; a nightly batch is too late. It must carry the order reference and every SSCC labeled.
+   - EDI team work: Validates each advice for the order reference, SSCC count and shipped quantities, posts shipments to the ERP, chases advices still missing after the carrier pickup, and reconciles short ships against the order.
+   - If it fails: The supplier cannot build the retailer's ship notice in time and the ASN is late, or built from the shipping order and wrong.
+   - Work areas: Missing documents, Partner follow-up, Monitoring
+5. **Ship notice** (856 / DESADV, from supplier)
+   - What happens: The supplier turns the shipping advice into the retailer's ship notice: shipment, order, pack and item hierarchy, the 3PL's SSCCs, carrier and bill of lading.
+   - Rules that bite: The same timing and accuracy rules as a direct shipment apply, and the chargebacks land on the supplier. SSCCs must equal the labels the 3PL applied, item numbers must be the retailer's, and quantities must be the shipped ones.
+   - EDI team work: Runs the turnaround map from advice to notice, cross-references 3PL item numbers to the retailer's, checks pack hierarchy and SSCC counts before sending, and corrects application advice rejections before the goods arrive.
+   - If it fails: A late or mismatched notice means hand receiving at the dock and a chargeback to the supplier, whoever caused it.
+   - Work areas: Map build and maintenance, Rejections, Chargebacks and deductions management
+6. **Inventory reconciliation** (846, 947 / INVRPT, from 3PL)
+   - What happens: The 3PL reports on-hand, allocated and damaged stock by item, usually daily, and sends adjustments with reason codes after cycle counts or a physical inventory.
+   - Rules that bite: The contract sets the inventory accuracy threshold, the count cycle and who absorbs variances. Adjustments need a reason code and must post to the ERP, or the two stock positions drift apart.
+   - EDI team work: Loads the daily stock report, compares it with ERP on-hand by item and status, posts adjustments, and gives inventory control a variance list with the receipts, shipments and adjustments behind each difference.
+   - If it fails: The ERP allocates stock the warehouse does not have, orders cancel or ship short, and fill rate falls.
+   - Work areas: Reporting and documentation, Cross-references and master data, Monitoring
+
+### Variants
+- **3PL sends the ASN** (945 to the supplier, 856 from the 3PL): The 3PL sends the ship notice to the retailer directly under the supplier's trading partner identity, and the supplier receives only the shipping advice for its ERP. The supplier still owns the retailer's rejections and chargebacks, so it needs the status of every notice sent.
+- **Consumer orders from the 3PL** (940, 945 with tracking): Drop ship and e-commerce orders go to the 3PL as shipping orders with the consumer address and the program's packaging and packing slip rules, and the advice returns a tracking number per parcel. See Drop ship and marketplaces.
+- **Returns into the 3PL** (943, 944): The supplier authorizes the 3PL to accept a return from a retailer with a transfer shipment advice; the 3PL reports what arrived and in what condition on the receipt advice.
+- **Lot and serial control** (940, 945 lot detail, 947): Regulated or dated goods carry lot or serial numbers on the shipping order and the advice, and status changes such as quality hold or damage come through inventory adjustments.
+
+### Penalties and disputes
+- Retailer chargebacks for a late, missing or inaccurate ship notice, or unscannable labels, are charged to the supplier even when the 3PL caused them. Recovery from the 3PL is a contract claim, usually settled as a service credit on its monthly invoice.
+- 3PL service levels: receipt advice later than the agreed window, orders before cutoff not shipped the same day, shipping advice later than agreed, inventory accuracy below the threshold. Settled as service credits, and only where the contract names them.
+- Shortage deductions when the notice or invoice claims more than the 3PL shipped, because a shipped-versus-ordered variance on the advice was ignored.
+- Routing violations when the 3PL books its own carrier or misses the retailer's pickup appointment. Charged to the supplier as the transportation cost plus a fee.
+- Inventory write-offs at count: typically, variances above the contract's allowance fall on the 3PL, everything below on the supplier.
+
+### Watch for
+- The shipping advice is the record of what shipped. The notice and the invoice must come from it, never from the shipping order; the shipping order is what was asked for, not what happened.
+- The advice carries no pricing. The invoice is produced in the ERP from the posted shipment, and it bills shipped quantities, not ordered ones.
+- Assign SSCCs once. Either the supplier pre-assigns them on the shipping order or the 3PL assigns them and reports them on the advice; two sources produce labels that never match the notice.
+- A missing or altered order reference on the advice is the usual break. The retailer order number and the shipping order number must round-trip unchanged.
+- Three item numbers live in this flow: the supplier's SKU, the 3PL's item and the retailer's item or GTIN. Any cross-reference gap produces a notice the retailer rejects.
+- Compliance clocks do not pause for the 3PL. A nightly batch of shipping advices guarantees late ship notices for retailers that want the notice at ship time.
+
+### Europe and international
+- The instruction to despatch (INSDES) carries the shipping order to the logistics provider, and the handling and movement message (HANMOV) can carry pick, pack and label instructions, though it is rarely used. The provider can produce the DESADV on the supplier's behalf.
+- Inbound stock is a DESADV from the supplier answered by a RECADV from the provider, and INVRPT reports stock levels and movements.
+- Retailer DESADV rules bind the supplier whoever ships: an SSCC on every logistic unit, received before the goods and validated before they are unloaded, with failed notices never loaded.
+- Retailers that return a receiving advice expect the invoice to match the accepted quantities, so a short ship the 3PL did not report surfaces there and holds the invoice rather than becoming a later deduction.
+
+## 10. Returns, credits and allowances
+Outcome: Take back or write off goods under an agreed authorization, and settle credits and allowances without unmatched deductions.
+
+The money flows that run against the invoice: returns of defective, damaged or unsold goods, the credits that settle them, and the promotional allowances, markdown money and billbacks the retailer takes under the trade agreement. The retailer deducts first and the supplier reconciles afterwards, so the work is matching each debit to an authorization, a receipt or a promotion and disputing the rest inside the window. Unmatched items age into write-offs on both ledgers.
+
+- Parties: Retailer, Supplier
+- Business owner: Customer service, trade finance and accounts receivable
+- Measures: Return rate, Return authorization cycle time, Credit memo cycle time, Days deductions outstanding (DDO), Dispute recovery rate
+- Documents, North America: 180, 812, 810, 889, 820
+- Documents, Europe and international: RETANN, RETINS, INVOIC, COMDIS, REMADV
+
+### Steps
+1. **Return request** (180 / RETANN, from retailer)
+   - What happens: The retailer asks to return goods, by item and quantity, with a reason code (defective, damaged, overstock, recalled, wrong item) and the original order or invoice reference.
+   - Rules that bite: Returns need prior authorization under the vendor agreement unless it allows return without authorization or substitutes a flat allowance. Reason codes decide disposition and who pays freight, and items must carry GTIN and the original order.
+   - EDI team work: Maps the request into the returns system, checks item and order references against the original sale, routes it to customer service with the agreement's rules for that reason code, and tracks the response window.
+   - If it fails: Goods come back unannounced or the retailer deducts the value anyway, and the supplier has nothing to match it to.
+   - Work areas: Map build and maintenance, Cross-references and master data, Missing documents
+2. **Authorize and dispose** (180 / RETINS, from supplier)
+   - What happens: The supplier approves or refuses, assigns the authorization number, and states the disposition: ship to a named return center, destroy in field, or keep with credit.
+   - Rules that bite: The response is due within the agreement's window and the authorization carries a deadline. The authorization number must appear on the return shipment and on the retailer's debit, or the credit cannot be matched later.
+   - EDI team work: Generates the authorization with disposition and reason codes from the returns system, cross-references it to the retailer's request number, and tells the return center what to expect and when.
+   - If it fails: The retailer ships to the wrong place or debits without an authorization, and the return cannot be matched to a credit.
+   - Work areas: Rejections, Partner follow-up, Reporting and documentation
+3. **Return and debit** (812, from retailer)
+   - What happens: The retailer ships the goods under the authorization and takes the value at once as a debit memo, with its reason code, handling charge and the original invoice reference.
+   - Rules that bite: The debit usually arrives before the goods and nets against the next remittance whether or not the supplier agrees. Handling fees and return freight follow the agreement, and the dispute window runs from the debit date.
+   - EDI team work: Loads the debit memo, maps the retailer's reason codes, matches it to the authorization number and original invoice, and opens a deductions case that waits for the receipt.
+   - If it fails: The deduction sits unmatched in cash application and ages past the dispute window.
+   - Work areas: Chargebacks and deductions management, Map build and maintenance, Monitoring
+4. **Receive and grade** (WMS, from supplier)
+   - What happens: The return center receives the goods against the authorization, counts them, and grades each unit: resalable, rework, destroy, or not the supplier's product.
+   - Rules that bite: Receipt must be matched to the authorization and the debit, not just put away. Shortages against the debit, wrong or competitor product and expired authorizations are the grounds for disputing the debit, and they need receiving evidence.
+   - EDI team work: Feeds the receipt and grading from the warehouse system into the returns record, flags quantity and item differences against the debit, and attaches count sheets and photos to the deductions case.
+   - If it fails: Credits go out for goods never returned, or valid disputes fail for lack of evidence.
+   - Work areas: Cross-references and master data, Reporting and documentation, Chargebacks and deductions management
+5. **Credit memo** (812 / INVOIC, from supplier)
+   - What happens: The supplier credits the accepted quantities at the original invoice price less agreed handling, referencing the retailer's debit memo and authorization number.
+   - Rules that bite: Agree per retailer whether it deducts on its debit or waits for the supplier's credit. Where it has deducted, the credit only closes that debit and must cite its number and amount, or the value is credited twice.
+   - EDI team work: Generates the credit from the graded receipt, maps it to the retailer's required form (adjustment or credit invoice), carries the debit and authorization numbers, and closes or disputes the deductions case with the difference.
+   - If it fails: Both ledgers carry an open item that ages, and the retailer's debit stands as a deduction the supplier never recovers.
+   - Work areas: Chargebacks and deductions management, Rejections, Map build and maintenance
+6. **Allowances and settlement** (812, 820 / REMADV, from retailer)
+   - What happens: The retailer bills back promotional allowances, markdown money and co-op after the event, claims shortages and price differences, and nets everything with debits and credits in the remittance.
+   - Rules that bite: Every allowance must trace to a promotion authorization and proof of performance, and an allowance already taken off-invoice cannot be billed back again. Dispute windows run from the deduction date, and post audits arrive long after the period.
+   - EDI team work: Loads adjustments and remittance detail, maps the retailer's reason codes to deduction types, matches billbacks to the trade promotion record by reference and flags duplicates, and routes unsupported items to trade finance for dispute inside the window.
+   - If it fails: Allowances are paid twice, accruals never clear, and deductions age past the window into write-offs.
+   - Work areas: Chargebacks and deductions management, Reporting and documentation, Business programs
+
+### Variants
+- **Destroy in field** (180, 812): No goods move. The supplier authorizes field destruction and credits on the authorization and the retailer's count, or the agreement replaces returns with a flat defective allowance on every invoice.
+- **Consumer returns in drop ship** (180, 812): The retailer takes the consumer's return and notifies the vendor of each one with the original order, item, reason and disposition, then debits the value, or keeps a flat return allowance instead. See Drop ship and marketplaces.
+- **Returns into a 3PL** (943, 944): The supplier authorizes its 3PL to accept the retailer's return with a transfer shipment advice, and receipt and condition come back on the receipt advice.
+- **Grocery promotions** (889, 812, 880): The supplier announces promotions, allowances and performance terms on the promotion announcement; the retailer bills back after the period with adjustments against grocery invoices.
+- **Credit on the invoice** (810): Some retailers take credit memos as an invoice with a credit indicator rather than as an adjustment, and reject the adjustment form.
+
+### Penalties and disputes
+- Unauthorized return: goods shipped back without an authorization number. The supplier may refuse the receipt, but the retailer's debit stands until the supplier disputes it with receiving evidence.
+- Handling and freight: a handling fee per return and return freight added to the debit memo unless the agreement puts them on the retailer.
+- Defective or return allowance: a fixed share of every invoice taken in place of physical returns, with goods destroyed in field. Contractual, so disputes are limited to how it was applied.
+- Markdown money and price protection: markdown money funds the retailer's markdowns under the trade agreement; price protection credits the retailer for a supplier cost decrease on inventory on hand. Both arrive as deductions.
+- Billbacks and co-op: debited after the promotion with a promotion reference. Unsupported, duplicate (already taken off-invoice) or out-of-period billbacks are the main dispute class.
+- Post audit: deductions issued long after the period by the retailer's auditors. The dispute window runs from the deduction, and the promotion agreement, proof of performance, credit memo and proof of delivery must still be retrievable.
+
+### Watch for
+- The retailer's debit memo number must appear on the supplier's credit. A credit on account without it is useless to the retailer's matching and leaves two open items.
+- Check which form the retailer wants for credits before building the map: adjustment or credit invoice. Sending the wrong one gets a rejection, not a payment.
+- Off-invoice and billback are the same money in different places. An allowance on the invoice and a billback for the same promotion is the most common double payment, and the trade promotion record is the only place to catch it.
+- Reason codes move cost between the parties. Defective, damaged in transit and overstock follow different freight and disposition rules, so a wrong code is worth challenging at authorization, not at credit.
+- Reconcile receipts to open debits, not debits to receipts. The debit arrives first and the goods may never come.
+- Many retailers run return authorization in their portal, not on the 180, and only the debit arrives by EDI. Map the portal's authorization number into the returns record, or the debit cannot be matched.
+
+### Europe and international
+- RETANN announces goods for return and may request credit or replacement; RETINS answers whether and how they return (repair, destroy, dispose), the carrier, who bears the cost and the deadline, with a reason if refused.
+- Credit and debit notes are INVOIC messages with the credit note or debit note document code, not separate message types. Some retailers send COMDIS to dispute an invoice before paying rather than deducting afterwards.
+- The receiving advice (RECADV) reports accepted and rejected quantities at the dock, so shortage and damage are settled before the invoice rather than deducted after it.
+- Consumers have 14 days from delivery to withdraw from a distance purchase under the EU Consumer Rights Directive, which makes consumer returns structural in e-commerce.
+- Credit notes fall under the national e-invoicing mandates in the same way as invoices, so the mandated format and archiving apply to them too.
+
+## 11. Sales and inventory reporting
+Outcome: Give suppliers store-level sales and inventory so they can plan supply, measure promotions and catch out-of-stocks early.
+
+Many retailers share point-of-sale and inventory data with suppliers outside any VMI program. The retailer sends product activity by item, store and period (units sold, on hand, on order and received), and the supplier loads it into demand planning and category analytics. Suppliers use it to plan production, measure promotion lift, find stores trending to an out-of-stock and prepare for buyer reviews. The hard part is keeping a very large feed complete and on schedule, and keeping the retailer's store and item keys mapped.
+
+- Parties: Retailer, Supplier
+- Business owner: Sales, category management and demand planning
+- Measures: Feed timeliness and completeness, Store-level in-stock, Sell-through and weeks of supply, Promotion lift
+- Documents, North America: 852, 997
+- Documents, Europe and international: SLSRPT, INVRPT, CONTRL
+
+### Steps
+1. **Record sales** (Store systems, from retailer)
+   - What happens: Store point-of-sale systems record unit sales by item and store, and the retailer's systems add on-hand, on-order and received quantities by location.
+   - Rules that bite: The retailer decides the period (daily or weekly), the item identifier (retailer item number, GTIN or UPC) and which stores and distribution centers are included. Returns and markdowns may be netted or reported separately.
+   - EDI team work: Keeps the retailer's store list, item numbers and GTINs cross-referenced to the supplier's records, so sales land on the right product and location.
+   - If it fails: Sales post against the wrong items or stores, and planning decisions rest on misattributed demand.
+   - Work areas: Cross-references and master data
+2. **Send activity** (852 / SLSRPT, INVRPT, from retailer)
+   - What happens: On schedule, the retailer sends product activity by item and location: quantity sold, on hand, on order and received, each tagged with an activity code and the reporting period.
+   - Rules that bite: Each quantity carries a qualifier, and the retailer's guide defines which ones it sends. National retailers send thousands of stores in one feed, so files are large and often split. Europe sends sales and stock as separate messages.
+   - EDI team work: Watches each feed against its schedule, alerts on a missing, late or partial file, and compares store and item counts with the prior period.
+   - If it fails: The supplier works from last week's numbers without knowing it, and decisions lag the shelf.
+   - Work areas: Monitoring, Missing documents, Map build and maintenance
+3. **Acknowledge** (997 / CONTRL, from supplier)
+   - What happens: The supplier's system returns a functional acknowledgment confirming the file was received and passed syntax checks.
+   - Rules that bite: Some retailers require the acknowledgment within a set time and flag the supplier when it is missing. The acknowledgment confirms syntax only, not that the data loaded.
+   - EDI team work: Sends acknowledgments automatically and reconciles them against received files, so a rejected or unacknowledged feed is caught the same day.
+   - If it fails: The retailer flags missing acknowledgments, and syntax-rejected files go unseen.
+   - Work areas: Rejections, Monitoring
+4. **Load and validate** (Analytics, from supplier)
+   - What happens: The supplier maps the feed into its demand planning or category analytics system, converts retailer item and store keys, and checks totals against prior periods.
+   - Rules that bite: Qualifier mapping decides whether a quantity counts as sold, on hand or on order. A store missing from the feed reads as zero sales unless the load checks for it.
+   - EDI team work: Maintains qualifier and location mappings, flags stores or items missing from the period, and holds a load that falls outside expected volume.
+   - If it fails: Silent gaps read as collapsing demand, or on-order stock reads as on hand, and the analytics mislead planners.
+   - Work areas: Map build and maintenance, Cross-references and master data
+5. **Analyze sell-through** (Analytics, from supplier)
+   - What happens: Planners and category managers review sell-through, weeks of supply, in-stock rate and promotion lift by store and item, and find stores trending to an out-of-stock.
+   - Rules that bite: Retailer and supplier often define in-stock and weeks of supply differently. Promotion analysis needs the promotion calendar, which the feed does not carry.
+   - EDI team work: Delivers the activity data on time and in a consistent shape, so analysts spend their time on the numbers rather than repairing the feed.
+   - If it fails: Out-of-stocks and slow movers surface weeks late, after the sales are lost.
+   - Work areas: Reporting and documentation
+6. **Act on findings** (ERP, from supplier)
+   - What happens: The supplier adjusts production and shipment plans, raises out-of-stock risks with the buyer, and brings sell-through evidence to category reviews and promotion planning.
+   - Rules that bite: In VMI programs the same data drives replenishment orders directly. Outside VMI, the supplier influences orders through the buyer.
+   - EDI team work: Links activity data to orders, shipments and deductions, so the supplier can show the buyer what sold, what shipped and what was charged back.
+   - If it fails: The supplier negotiates without evidence and carries the cost of stock in the wrong place.
+   - Work areas: Business programs
+
+### Variants
+- **Portal delivery** (Portal): Some retailers publish sales and inventory in a supplier portal or as flat files instead of EDI. The data is the same; collection becomes a scheduled download or an API call.
+- **Scan-based trading** (852, 810): The supplier owns the stock until it scans at the register, so the sales report also drives the invoice and payment.
+- **Vendor-managed inventory** (852, 855): The same feed becomes the input to supplier-built replenishment orders.
+- **Distributor reporting** (852, 867): Wholesalers and distributors report sell-through and inventory to manufacturers, often for rebate and chargeback claims as well as planning.
+
+### Penalties and disputes
+- Missing acknowledgments: some retailers flag or score suppliers that do not acknowledge the activity feed within the required time.
+- Lost sales: there is usually no fee for ignoring the data. The cost is out-of-stocks and excess stock the supplier could have seen coming.
+- Scorecard impact: in-stock and weeks-of-supply measures on the retailer's supplier scorecard are calculated from the same data.
+
+### Watch for
+- A missing feed is an incident. Planning and analytics keep running on the last file they received.
+- Qualifier mapping decides meaning. On-order stock mapped as on hand overstates inventory for weeks.
+- Store lists change. New, closed and remodeled stores must be added to the cross-reference or their sales disappear.
+- Volume is large. Store-by-item files from national retailers run to millions of lines, so plan load windows and storage.
+- Retailers increasingly share this data through portals and APIs as well as EDI. Collect both into one view.
+
+### Europe and international
+- Sales and stock travel as separate messages: SLSRPT for sales by location, period and item, and INVRPT for stock positions.
+- GS1 EANCOM defines both messages, and many European retailers also publish point-of-sale data through supplier portals.
+- SLSFCT carries sales forecasts where retailer and supplier plan collaboratively.
+
+## 12. Vendor onboarding and certification
+Outcome: Get each new vendor exchanging the documents the retailer requires, tested and certified, before its first production order.
+
+The flow that brings a new vendor from an approved vendor setup to live document exchange. The retailer publishes its requirements, the vendor completes a profile, the connection is tested, and test documents run until each one passes the retailer's rules. Many later compliance problems trace back to what was or was not tested here, so onboarding speed and test coverage decide both time to first order and the vendor's error rate after go-live.
+
+- Parties: Retailer, Supplier
+- Business owner: Vendor onboarding, EDI operations and vendor compliance
+- Measures: Time to go-live, Test cycles per document, Required documents certified, Error rate in the first month live
+- Documents, North America: 997, 824, 850, 855, 856, 810
+- Documents, Europe and international: CONTRL, APERAK, ORDERS, ORDRSP, DESADV, INVOIC
+
+### Steps
+1. **Publish requirements** (Portal, from retailer)
+   - What happens: The retailer publishes its implementation guides, routing guide, label specifications and vendor compliance manual, with the document sets each vendor type must exchange.
+   - Rules that bite: Requirements differ by vendor type: domestic, import, drop ship and DSD vendors run different document sets. Guides change on a release cycle, and vendors build to the version in force when they test.
+   - EDI team work: Hosts the retailer's guides and test rules, keeps each version on record, and tells vendors in testing when a guide they are building to changes.
+   - If it fails: Vendors build maps to outdated or incomplete specifications, and the errors surface as rejections in production.
+   - Work areas: Document and version changes, Business programs
+2. **Collect vendor profile** (Portal, from supplier)
+   - What happens: The vendor completes the retailer's onboarding survey: company and vendor numbers, EDI contacts, interchange IDs and qualifiers, connection method, and the network or provider it uses.
+   - Rules that bite: Interchange IDs and qualifiers must be unique and match what the vendor will send. Vendor numbers come from the retailer's merchandising system, so the survey waits on the buyer's vendor setup.
+   - EDI team work: Collects the survey, checks IDs and qualifiers against the existing community, and returns incomplete profiles to the vendor with the missing fields named.
+   - If it fails: Test files arrive under IDs nobody recognizes, and the first production order goes to the wrong mailbox or not at all.
+   - Work areas: Partner onboarding, Cross-references and master data
+3. **Test connection** (997 / CONTRL, from supplier)
+   - What happens: The vendor's connection is set up and a test interchange runs in each direction to confirm addressing, envelopes, transport and functional acknowledgments.
+   - Rules that bite: Each direction needs a returned functional acknowledgment before document testing starts. Certificates, endpoints and network routing must match the profile.
+   - EDI team work: Configures routing and the connection on the network, confirms acknowledgments flow both ways, and resolves addressing errors before document testing begins.
+   - If it fails: Document testing stalls on transport errors, and vendors miss their go-live date for reasons unrelated to their documents.
+   - Work areas: Connections and protocols, Fix routing
+4. **Exchange test documents** (850, 855, 856, 810 / ORDERS, ORDRSP, DESADV, INVOIC, from supplier)
+   - What happens: The retailer sends test orders, and the vendor returns acknowledgments, ship notices with label data, and invoices built to the retailer's guides.
+   - Rules that bite: Test scenarios cover each order type the vendor will receive. Ship notices are checked for pack hierarchy and SSCC data, and many retailers require sample labels to pass a scan test.
+   - EDI team work: Validates each test document against the retailer's rules as it arrives, explains failures in business terms, and lets vendors retest without opening a support ticket.
+   - If it fails: Testing runs for weeks through email and tickets, and vendors certify on scenarios that do not match the orders they will receive.
+   - Work areas: Rejections, Map build and maintenance
+5. **Review and certify** (997, 824 / CONTRL, APERAK, from retailer)
+   - What happens: The retailer reviews test results by document and scenario, records each failure and correction, and certifies the vendor for production when every required document passes.
+   - Rules that bite: Certification is per document set. A vendor certified for orders and invoices is not certified for ship notices, and testing is repeated when the vendor changes provider or rebuilds its maps.
+   - EDI team work: Tracks each vendor's progress through the test plan, with the tasks assigned and the errors encountered, so onboarding teams see who is stalled and why.
+   - If it fails: Vendors go live with documents that were never certified, or wait for review while their first orders are already due.
+   - Work areas: Reporting and documentation, Partner follow-up
+6. **Go live** (850 / ORDERS, from retailer)
+   - What happens: The retailer switches the vendor to production and the first live orders flow. The first orders, ship notices and invoices are watched until they complete without errors.
+   - Rules that bite: Some retailers reduce compliance chargebacks for a short period after go-live, then apply the full program. Go-live is coordinated with the buyer's first order.
+   - EDI team work: Monitors the vendor's first production documents against the rules used in testing, and flags missing acknowledgments, rejected ship notices and invoice errors early.
+   - If it fails: Errors that testing did not catch become chargebacks under the full compliance program.
+   - Work areas: Monitoring, Missing documents
+
+### Variants
+- **Web-based vendors**: Vendors without EDI use a web portal to receive orders and send acknowledgments, ship notices, labels and invoices. Testing reduces to account setup and a label check.
+- **Provider change** (997, 850, 856, 810): An existing vendor that moves to a new EDI provider or rebuilds its maps repeats connection and document testing, while production continues on the old setup until cutover.
+- **Carrier onboarding** (204, 990, 214): Carriers follow the same steps for load tenders, tender responses and shipment status, tested against the retailer's transportation requirements.
+
+### Penalties and disputes
+- Delayed first order: the buyer holds the vendor's first order until certification completes, or places it through a manual process.
+- Chargebacks after go-live: errors not caught in testing are charged under the compliance program once the vendor is live.
+- Recertification: a provider or map change without retesting leads to rejected documents and a return to testing.
+
+### Watch for
+- Test what will be ordered. Certify every order type the vendor will receive, such as cross-dock, store-direct and drop ship, not only a standard order.
+- Labels are part of certification. A ship notice that passes while the label does not scan still produces receiving chargebacks.
+- IDs are hard to change. Changing an interchange ID after go-live means retesting and updating every trading partner.
+- Track stalled vendors. Onboarding delay is often a vendor waiting on a survey answer or a retest, not a failing document.
+
+### Europe and international
+- The same test cycle runs on EANCOM messages: ORDERS, ORDRSP, DESADV and INVOIC, with CONTRL and APERAK as the feedback messages.
+- Connection testing commonly covers AS2 or a network provider, and PEPPOL access points where invoices travel on that network.
+- Where electronic invoicing is mandated, invoice testing covers the national format and clearance platform as well as the retailer's guide.

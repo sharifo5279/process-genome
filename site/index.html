@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Business Network Process Genome</title><meta name="description" content="A reference model of B2B operations by industry: the work, the business processes, and the documents that connect trading partners."><meta property="og:type" content="website"><meta property="og:site_name" content="Business Network Process Genome"><meta property="og:title" content="Business Network Process Genome"><meta property="og:description" content="A reference model of B2B operations by industry: the work, the business processes, and the documents that connect trading partners."><meta property="og:url" content="https://process-genome.onrender.com/"><meta name="twitter:card" content="summary"><link rel="icon" href="img/favicon/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="img/favicon/apple-touch-icon.png">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Business Network Process Genome</title><meta name="description" content="A reference model of B2B operations by industry: the work, the business processes, and the documents that connect trading partners."><meta property="og:type" content="website"><meta property="og:site_name" content="Business Network Process Genome"><meta property="og:title" content="Business Network Process Genome"><meta property="og:description" content="A reference model of B2B operations by industry: the work, the business processes, and the documents that connect trading partners."><meta property="og:url" content="https://process-genome.onrender.com/"><meta name="twitter:card" content="summary"><link rel="alternate" type="text/markdown" href="llms.txt" title="Agent-readable version"><link rel="icon" href="img/favicon/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="img/favicon/apple-touch-icon.png">
 </head><body><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32.01 32.01'%3E%3Cdefs%3E%3ClinearGradient id='ot-logo-gradient-background' x1='24.3932' y1='26.6681' x2='5.13458' y2='2.17824' gradientUnits='userSpaceOnUse'%3E%0A      %3Cstop offset='0' stop-color='%2300008B'%3E%3C/stop%3E%0A      %3Cstop offset='1' stop-color='%231A6AFF'%3E%3C/stop%3E%0A    %3C/linearGradient%3E%3C/defs%3E%3Cpath d='M26.7376 0H5.27017C2.36148 0 0.00390625 2.35757 0.00390625 5.26627V26.7381C0.00390625 29.6468 2.36148 32.0044 5.27017 32.0044H26.742C29.6507 32.0044 32.0083 29.6468 32.0083 26.7381V5.26627C32.0083 2.35757 29.6507 0 26.742 0H26.7376Z' fill='url%28%23ot-logo-gradient-background%29'%3E%3C/path%3E%3Cpath d='M22.4778 13.6466C22.4778 13.4629 22.6309 13.3098 22.8146 13.3098H24.5861C24.6998 13.3098 24.8048 13.253 24.8704 13.1567L26.2176 11.0747C26.3663 10.8517 26.2045 10.5542 25.9333 10.5542H22.8409C22.6528 10.5542 22.5041 10.4011 22.5041 10.2174V8.09605C22.5041 7.90797 22.351 7.75488 22.1673 7.75488H18.9393C18.7512 7.75488 18.6025 7.90797 18.6025 8.09168V13.9965C17.4653 11.8139 15.182 10.318 12.5533 10.318C8.78729 10.318 5.73425 13.3711 5.73425 17.1371C5.73425 20.9031 8.78729 23.9561 12.5533 23.9561C15.1908 23.9561 17.474 22.4602 18.6112 20.2688C18.6287 21.2311 18.725 21.9878 19.1667 22.6395C20.0065 23.8642 21.4849 23.9386 22.8365 23.9386C23.4663 23.9386 23.9344 23.8817 24.6123 23.7768C24.7785 23.7505 24.901 23.6062 24.901 23.44V21.0211C24.901 20.8287 24.7435 20.6756 24.5511 20.6844L23.5013 20.7237C22.456 20.7237 22.4822 20.037 22.4822 19.2191V13.6466H22.4778ZM12.5533 20.1988C10.8649 20.1988 9.4915 18.8298 9.4915 17.1371C9.4915 15.4443 10.8606 14.0753 12.5533 14.0753C14.246 14.0753 15.6151 15.4443 15.6151 17.1371C15.6151 18.8298 14.246 20.1988 12.5533 20.1988Z' fill='%23fff'%3E%3C/path%3E%3C/svg%3E">
 
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1109,6 +1109,17 @@
   [data-ccwip] { cursor: pointer; }
   .ccwip { position: fixed; left: 50%; bottom: 24px; z-index: 1000; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 2px solid var(--blue, #0066FF); border-radius: 12px; background: var(--card, #FFFFFF); color: var(--fg, #0B1220); font: 600 14px/20px var(--font, Inter, sans-serif); box-shadow: 0 8px 24px rgba(0, 24, 137, 0.10); }
   .ccwip[hidden] { display: none; }
+
+  .fagent { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px 24px; margin: 8px 0 24px; padding: 16px 18px; border: 2px solid var(--blue); border-radius: 14px; background: var(--card); }
+  .fagent .fag-t p { margin: 0; } .fagent .fag-t p + p { margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--muted); }
+  .fagent pre { margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--cloud); color: var(--fg); font: 500 13px/20px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .fagent .fag-a { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 10px; }
+  .fagent .fag-c { min-height: 40px; padding: 0 14px; border: 2px solid var(--blue); border-radius: 8px; background: var(--card); color: var(--blue-ink); font: 700 14px/20px var(--font); cursor: pointer; }
+  .fagent .fag-c:hover { background: var(--cloud); }
+  .fagent .fag-a a { font-size: 14px; font-weight: 700; color: var(--blue-ink); }
+  .fagent .fag-s { font-size: 13px; color: var(--muted); }
+  .fagent :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  @media (max-width: 760px) { .fagent { grid-template-columns: 1fr; } }
 </style>
 
 <a class="skip" href="#content">Skip to content</a>
@@ -1499,6 +1510,11 @@
         <ul aria-labelledby="ftr-ind" id="find"></ul>
       </div>
     </nav>
+    <section class="fagent" aria-labelledby="fag-h">
+      <div class="fag-t"><p class="fh" id="fag-h">Use with your AI agent</p><p>Paste into Claude, ChatGPT or another agent with web access.</p></div>
+      <div class="fag-b"><pre id="fag-p">Read https://process-genome.onrender.com/llms.txt and the files it links before answering. Use them as the reference for OpenText Business Network solutions, business processes and EDI documents. The site is a concept preview: do not present its capabilities as generally available. Cite the file you used.</pre>
+        <div class="fag-a"><button type="button" class="fag-c" data-copy="fag-p">Copy instructions</button><a href="https://process-genome.onrender.com/llms.txt">Open llms.txt</a><span class="fag-s" role="status" aria-live="polite"></span></div></div>
+    </section>
     <div class="fbar">
       <p class="disc">Examples describe typical operating scenarios, not specific customer accounts. Standards, versions, and mandate dates vary by partner and region. Confirm requirements with each partner before building.</p>
       <div class="fmeta">
@@ -4077,5 +4093,16 @@ var TRANSLATE = [
   function wip() { var el = document.getElementById("ccwip"); if (!el) return; el.textContent = "Command Center prototype: work in progress."; el.hidden = false; clearTimeout(t); t = setTimeout(function () { el.hidden = true; }, 3200); }
   document.addEventListener("click", function (e) { var b = e.target.closest && e.target.closest("[data-ccwip]"); if (!b) return; e.preventDefault(); wip(); });
   document.addEventListener("keydown", function (e) { var b = e.target.closest && e.target.closest("a[data-ccwip]"); if (!b || (e.key !== "Enter" && e.key !== " ")) return; e.preventDefault(); wip(); });
+})();
+</script><script>
+(function () {
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-copy]"); if (!b) return;
+    var el = document.getElementById(b.getAttribute("data-copy")), st = b.parentNode.querySelector(".fag-s"), t = el ? el.textContent : "";
+    function say(m) { if (st) { st.textContent = m; clearTimeout(say.t); say.t = setTimeout(function () { st.textContent = ""; }, 3000); } }
+    function sel() { try { var r = document.createRange(); r.selectNodeContents(el); var x = window.getSelection(); x.removeAllRanges(); x.addRange(r); return document.execCommand("copy"); } catch (err) { return false; } }
+    function fall() { say(sel() ? "Copied to clipboard." : "Copy blocked. Select the text and copy it."); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { say("Copied to clipboard."); }, fall); else fall();
+  });
 })();
 </script></body></html>

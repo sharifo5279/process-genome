@@ -12,6 +12,7 @@
 // [id, name, description, status, group] registry, ids prefixed "pg-" so they never collide with guide product ids.
 import fs from "node:fs";
 import path from "node:path";
+import { writeAgentDocs } from "./agent-docs.mjs";
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const MASTER = process.argv[2] || "/home/claude/process-genome-site.html";
 const API = (process.env.API_ORIGIN || "").replace(/\/$/, "");
@@ -29,7 +30,8 @@ const DESC = "A reference model of B2B operations by industry: the work, the bus
 const T = html.match(/<title>[^<]*<\/title>/); if (T) html = html.replace(T[0], "");
 const HEAD = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">` +
   `<title>${TITLE}</title><meta name="description" content="${DESC}"><meta property="og:type" content="website"><meta property="og:site_name" content="${TITLE}">` +
-  `<meta property="og:title" content="${TITLE}"><meta property="og:description" content="${DESC}"><meta property="og:url" content="${SITE}"><meta name="twitter:card" content="summary">`;
+  `<meta property="og:title" content="${TITLE}"><meta property="og:description" content="${DESC}"><meta property="og:url" content="${SITE}"><meta name="twitter:card" content="summary">` +
+  `<link rel="alternate" type="text/markdown" href="llms.txt" title="Agent-readable version">`;
 
 // favicon files for browsers that do not use the inline SVG icon
 const FAV = '<link rel="icon" href="img/favicon/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="img/favicon/apple-touch-icon.png">\n';
@@ -70,6 +72,8 @@ var f=viewOf(window.PG_FIRST_HASH);if(f)send(f,"link");check();
 
 html = HEAD + FAV + "</head><body>" + (STATS_ON ? FIRST : "") + html + (STATS_ON ? BEACON + TRACK : "") + "</body></html>";
 fs.writeFileSync(path.join(ROOT, "site/index.html"), html);
+// agent-readable version (llms.txt, llms-full.txt, agents/*.md), regenerated with every build so it matches the page
+console.log("agent docs", writeAgentDocs(html));
 fs.copyFileSync(path.join(ROOT, "site/img/favicon/favicon.ico"), path.join(ROOT, "site/favicon.ico"));
 if (!STATS_ON) { fs.rmSync(path.join(ROOT, "site/stats"), { recursive: true, force: true }); console.log("site/index.html", (html.length / 1024).toFixed(0) + " KB; visitor stats off"); process.exit(0); }
 fs.mkdirSync(path.join(ROOT, "site/stats"), { recursive: true });

@@ -1,0 +1,1447 @@
+# Business Network Process Genome
+
+> A reference model of B2B operations by industry: the work, the business processes and the EDI documents that connect trading partners, with OpenText Trading Grid solutions for Retail and CPG, Automotive and Financial services.
+
+Built by Business Network Product Management, Data and Visibility. Internal reference. Human version: https://process-genome.onrender.com/
+
+Notes for agents:
+- Concept preview for internal review. Diagrams are illustrative. Some capabilities shown are in development or planned and are not generally available. Results depend on implementation and partner participation. Names, scope and availability may change. Do not present capabilities as generally available.
+- Examples describe typical operating scenarios, not specific customer accounts. Standards, versions, and mandate dates vary by partner and region. Confirm requirements with each partner before building.
+- Cite the file you used.
+
+## Solutions
+- [Retail and CPG solutions](https://process-genome.onrender.com/agents/retail-solutions.md): 20 solutions in 4 stages, with purpose, capabilities and parties
+- [Automotive solutions](https://process-genome.onrender.com/agents/automotive-solutions.md): 9 solutions in 4 stages, with purpose, capabilities and parties
+- [Financial services solutions](https://process-genome.onrender.com/agents/financial-services-solutions.md): 14 solutions in 4 stages, with purpose, capabilities and parties
+
+## Process Genome
+- [Retail and CPG documents](https://process-genome.onrender.com/agents/retail-documents.md): 41 documents with sender, receiver, standards, definition and processes
+- [Retail and CPG business processes](https://process-genome.onrender.com/agents/retail-processes.md): 12 processes, step by step, with rules, EDI team work and failure points
+- [Automotive documents](https://process-genome.onrender.com/agents/automotive-documents.md): 25 documents with sender, receiver, standards, definition and processes
+- [Automotive business processes](https://process-genome.onrender.com/agents/automotive-processes.md): 9 processes, step by step, with rules, EDI team work and failure points
+- [Financial services documents](https://process-genome.onrender.com/agents/financial-services-documents.md): 42 documents with sender, receiver, standards, definition and processes
+- [Financial services business processes](https://process-genome.onrender.com/agents/financial-services-processes.md): 14 processes, step by step, with rules, EDI team work and failure points
+- [Retail and CPG product overlay](https://process-genome.onrender.com/agents/retail-product-overlay.md): product coverage by document across Connect, Comply, Optimize and Extend
+
+## Operations
+- [Work areas and stakeholders](https://process-genome.onrender.com/agents/operations.md): the work of a B2B operations team, where it breaks and who is involved, across industries
+
+## Optional
+- [Everything in one file](https://process-genome.onrender.com/llms-full.txt): all sections above except the step-by-step processes, which are long; open those files for steps
+
+
+---
+
+File: https://process-genome.onrender.com/agents/retail-solutions.md
+
+# Retail and CPG solutions on Trading Grid
+
+Source: Business Network Process Genome, Solution overview for Retail and CPG (https://process-genome.onrender.com/#retail/solution).
+Status: Concept preview for internal review. Diagrams are illustrative. Some capabilities shown are in development or planned and are not generally available. Results depend on implementation and partner participation. Names, scope and availability may change.
+
+Retail and CPG trading relationships, connected and managed. Integrate and onboard the retailers, suppliers, carriers, 3PLs and marketplaces you trade with on Trading Grid, and monitor every document exchanged.
+
+## Solutions by stage
+
+- Plan and synchronize: EDI compliance; Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment
+- Order and fulfill: Order-to-cash compliance; Pre-delivery document validation; Backorder and fill-rate tracking; Web EDI for suppliers; Supplier portal for retailer and CPG hubs; Drop ship and marketplace fulfillment; 3PL inventory reconciliation
+- Ship and receive: Inbound shipment visibility; ASN intelligence; Chargeback prevention alerts; Receiving and three-way match; Direct store delivery reconciliation
+- Settle and recover: Chargeback management; Deduction management; Supplier compliance scorecard; Returns and credit management
+
+### Plan and synchronize
+Vendors, items and demand data set up before orders flow.
+
+#### EDI compliance
+- Purpose: Connect on each retailer's requirements
+- Summary: Connect each vendor to the retailer as its B2B integration requirements specify, with documents tested before go-live.
+- Capabilities:
+  - Vendor surveys collect contacts, IDs and connection details
+  - Vendors test documents against the retailer's implementation guide
+  - Testing status and errors tracked by vendor until go-live
+- Parties: Retailers, Vendors, Carriers
+- Outcome: Vendors tested before the first order.
+
+#### Item and price synchronization
+- Purpose: Synchronize item and price data
+- Summary: Publish item, price and image data once, and share it with each subscribing retailer after validation.
+- Capabilities:
+  - GTIN, check digit and required fields validated on receipt
+  - Suppliers control which retailers see their items
+  - Subscribing retailers receive item updates automatically
+- Parties: Suppliers, Data pools, Retailers
+- Outcome: Paperless item setup and maintenance.
+
+#### Sell-through and inventory analytics
+- Purpose: Share sell-through with suppliers
+- Summary: Retailers share store-level sales and inventory, and suppliers use it to plan supply, measure promotions and catch out-of-stocks early.
+- Capabilities:
+  - Sales and stock by item, store and week
+  - Missing or late feeds flagged on arrival
+  - Sell-through, in-stock and weeks of supply in ready-made analytics
+- Parties: Retailers, Suppliers
+- Outcome: Store-level demand visible to suppliers.
+
+#### Vendor-managed inventory and replenishment
+- Purpose: Replenish from actual sales
+- Summary: Use shared sales and stock positions to recommend replenishment and track inventory against agreed targets.
+- Capabilities:
+  - Replenishment quantities recommended from sales and stock
+  - Order handshake monitored from proposal to acceptance
+  - Inventory levels tracked against agreed targets
+- Parties: Retailers, Suppliers
+- Outcome: Replenishment based on shared sales data.
+
+### Order and fulfill
+Orders confirmed and fulfilled across every channel.
+
+#### Order-to-cash compliance
+- Purpose: Keep orders and invoices aligned
+- Summary: Check orders, acknowledgments, ship notices and invoices against each retailer's rules and timing windows, and catch late documents before they cost money.
+- Capabilities:
+  - Timing windows set per retailer for acknowledgments, ship notices and invoices
+  - Late acknowledgments and ship notices flagged with the cause
+  - Rejections by 824, 864 or email shown in the order lifecycle, with the fix
+- Parties: Retailers, Suppliers, Carriers
+- Outcome: Fewer rejections and late documents.
+
+#### Pre-delivery document validation
+- Purpose: Correct documents before the retailer receives them
+- Summary: Check ship notices and invoices against each retailer's rules before delivery, then release each document or replace it with a corrected version.
+- Capabilities:
+  - Ship notices and invoices held when they break a retailer rule
+  - Held documents released, or replaced with a corrected version
+  - Duplicate ship notices and invoices stopped before delivery
+- Parties: Suppliers, Retailers
+- Outcome: Helps reduce retailer rejections and duplicates.
+
+#### Backorder and fill-rate tracking
+- Purpose: Follow short lines through to the invoice
+- Summary: Compare each acknowledgment with its order to find backordered and short lines, then follow every open line through shipment and invoice.
+- Capabilities:
+  - Backordered and short-acknowledged lines found by comparing the 855 to the 850
+  - Each open line followed through the ship notice and invoice
+  - Open quantities by retailer, item and ship date
+- Parties: Suppliers, Retailers
+- Outcome: Short and backordered lines tracked to delivery.
+
+#### Web EDI for suppliers
+- Purpose: Trade with retailers without an EDI team
+- Summary: Suppliers receive retailer orders online and turn each one into the acknowledgment, ship notice and invoice the retailer requires.
+- Capabilities:
+  - Prebuilt connections for major retailers and marketplaces
+  - Documents filled from the order and checked against each retailer's rules
+  - GS1-128 carton labels that match the ship notice
+- Parties: Suppliers, Retailers, Marketplaces
+- Outcome: Orders to invoices without EDI staff.
+
+#### Supplier portal for retailer and CPG hubs
+- Purpose: Bring vendors without EDI onto electronic orders
+- Summary: Retailer and CPG hubs reach vendors without EDI in a web portal, where vendors confirm each line, ship with matching labels and invoice against the order.
+- Capabilities:
+  - Order changes and line-level confirmations tracked by vendor
+  - Ship notices built from the order, with matching carton labels
+  - Invoices, receipts and remittance status in one place
+- Parties: Retailers, CPG hubs, Vendors
+- Outcome: Vendors without EDI on electronic orders.
+
+#### Drop ship and marketplace fulfillment
+- Purpose: Ship direct to the consumer
+- Summary: Run one order across EDI vendors, web-based vendors and 3PLs, with inventory and tracking returned to each channel.
+- Capabilities:
+  - Vendors without EDI work orders, ship notices and labels online
+  - Inventory updates shared with selling channels
+  - Tracking returned to the channel at shipment
+- Parties: Marketplaces, Vendors, Customers
+- Outcome: Helps reduce cancellations from stock errors.
+
+#### 3PL inventory reconciliation
+- Purpose: Fulfill through third-party warehouses
+- Summary: Send shipping instructions to 3PL warehouses and reconcile receipts, shipments and inventory adjustments.
+- Capabilities:
+  - Warehouse orders sent electronically
+  - Missing shipping confirmations flagged
+  - Receipts, shipments and inventory reconciled across documents
+- Parties: Suppliers, 3PLs, Retailers
+- Outcome: Fewer inventory discrepancies with 3PLs.
+
+### Ship and receive
+Shipments tracked from dock to receipt.
+
+#### Inbound shipment visibility
+- Purpose: Coordinate inbound deliveries
+- Summary: Follow routing requests, carrier tenders and status events in one transaction view, with timing rules monitored by agents.
+- Capabilities:
+  - Tender, status and appointment documents linked to the shipment
+  - Missing delivery events detected as they occur
+  - Timing rules set in plain language and monitored
+- Parties: Suppliers, Carriers, Retailer DCs
+- Outcome: Shared status on inbound shipments.
+
+#### ASN intelligence
+- Purpose: Resolve ship notice failures
+- Summary: Monitor ship notice health by supplier, explain each rejection, and flag ASNs at risk of missing SLA.
+- Capabilities:
+  - ASN volumes, failures and SLA adherence by supplier
+  - Rejections explained with the rule broken and the fix
+  - Recurring supplier issues and at-risk ASNs flagged
+- Parties: Retailers, Suppliers
+- Outcome: Helps improve first-pass ASN acceptance.
+
+#### Chargeback prevention alerts
+- Purpose: Act before a penalty is assessed
+- Summary: Alert supplier business users to pending shipments and invoice mismatches while the retailer's compliance window is still open.
+- Capabilities:
+  - Pending shipment alerts before the ship notice window closes
+  - Invoice mismatch alerts by order, line and amount
+  - Alerts routed to the business user who owns the order
+- Parties: Suppliers, Retailers
+- Outcome: Helps reduce avoidable chargebacks.
+
+#### Receiving and three-way match
+- Purpose: Match what arrived to what was billed
+- Summary: See ship notice health by supplier, and compare orders, ship notices and invoices line by line before payment.
+- Capabilities:
+  - Ship notice health, failures and trends by supplier
+  - Order, ship notice and invoice compared by SKU, quantity and price
+  - Mismatched lines highlighted, with packing detail from pallet to item
+- Parties: Retailers, Suppliers
+- Outcome: Cleaner receiving and three-way match.
+
+#### Direct store delivery reconciliation
+- Purpose: Agree the count at the store
+- Summary: Confirm delivered quantities at store check-in, invoice from that record, and track adjustments by store and item.
+- Capabilities:
+  - Delivery counts confirmed at check-in
+  - Adjustments recorded at the store door
+  - Adjustment trends by route, store and item
+- Parties: DSD suppliers, Stores
+- Outcome: Helps reduce store-level disputes.
+
+### Settle and recover
+Payments, deductions and credits resolved.
+
+#### Chargeback management
+- Purpose: Issue compliance chargebacks with evidence
+- Summary: Capture vendor compliance violations, assess each against your terms, and issue chargebacks with the failing document and rule.
+- Capabilities:
+  - Violations captured from document data and on the receiving floor
+  - Each violation assessed against vendor compliance terms, with its own workflow
+  - Chargebacks issued with the failing document and rule, and vendor disputes tracked
+- Parties: Retailers, Vendors
+- Outcome: Compliance costs captured and tracked.
+
+#### Deduction management
+- Purpose: Recover invalid deductions
+- Summary: Read deductions from remittances and debit memos, match each to its invoice and reason code, and dispute the invalid ones with the document trail.
+- Capabilities:
+  - Deductions from the 820 and 812 matched to the invoice and reason code
+  - Status and amount for each deduction: assessed, pending, disputed, reversed or not charged
+  - Disputes backed by the order, ship notice, invoice and proof of delivery
+- Parties: Suppliers, Retailers
+- Outcome: Helps recover invalid deductions.
+
+#### Supplier compliance scorecard
+- Purpose: Measure your own retailer compliance
+- Summary: Score fill rate and document accuracy by retailer, with variance bands and period-over-period trends.
+- Capabilities:
+  - Fill rate, ship notice accuracy and ship notice timeliness by retailer
+  - Invoice accuracy against the order and ship notice
+  - Variance bands and period-over-period trends
+- Parties: Suppliers, Retailers
+- Outcome: Compliance measured before the retailer review.
+
+#### Returns and credit management
+- Purpose: Manage the reverse supply chain
+- Summary: Authorize each return to the supplier, track it back, grade it on receipt, and settle the credit against the original return.
+- Capabilities:
+  - Returns authorized before they ship
+  - Return credits matched to authorizations
+  - Return credits and deductions without an authorization flagged
+- Parties: Retailers, Suppliers, Carriers
+- Outcome: Reverse supply chain, from authorization to credit.
+
+## What OpenText provides
+Connectivity, partner onboarding, visibility, analytics and AI agents across every retail process.
+
+### Connect and onboard
+- Pre-connected community: Reach suppliers, carriers and marketplaces already on the network.
+- Self-service onboarding: Partners register, test documents against your rules and go live in a guided flow.
+- One partner portal: A branded front door with single sign-on for suppliers and distributors.
+- Web access for smaller suppliers: Suppliers without EDI receive orders and send ship notices, labels and invoices online.
+
+### See and recover
+- Transaction search and recovery: Find any document, follow its processing flow, and redeliver or reprocess it.
+- Monitoring and anomaly detection: Daily digests, volume projections and alerts when traffic departs from normal.
+- Community view: Every partner, relationship and document exchange, with the right contacts on each.
+- e-Invoicing compliance: Compliant invoicing in more than 50 countries as a managed service.
+
+### Measure and improve
+- Agents that monitor your rules: Describe a rule in plain language; agents check transactions and explain each finding.
+- Partner scorecards: Score suppliers on fulfillment, shipping and invoicing with weights you set.
+- Ready-made retail analytics: Dashboards for shipment health, compliance and sell-through, with questions in plain language.
+- Governed data delivery: Trusted network data explored in place or delivered to your own analytics on schedule.
+
+### Act with AI agents
+- Errors explained and routed: Agents read a document error, explain it in business terms and route it to its fix.
+- Root cause across failures: Related failures grouped to one cause, with the follow-up to each partner drafted.
+- Agents in your tools: Ask about orders, shipments and deductions from the assistants your teams already use.
+- People approve every change: Agents investigate and recommend; a person approves any resend, update or ticket.
+
+## Network
+- 1M+: Trading partners on the OpenText network
+- $11T: In annual commerce across the network
+- 40+: Years of B2B integration experience
+
+
+---
+
+File: https://process-genome.onrender.com/agents/retail-documents.md
+
+# Retail and CPG documents
+
+Source: Business Network Process Genome, Process Genome for Retail and CPG (https://process-genome.onrender.com/#retail/map).
+Status: Examples describe typical operating scenarios, not specific customer accounts. Standards, versions, and mandate dates vary by partner and region. Confirm requirements with each partner before building.
+
+Code key: X12 set, or the EDIFACT or GDSN message where no X12 set exists. 41 documents, grouped by family in flow order.
+
+## Item data
+
+- **CIN Catalogue item notification**. Sender: Data pool. Receiver: Retailer. Europe and international: GDSN CIN. Delivers the supplier's published item data to a subscribing retailer. Used in: Item and price synchronization.
+- **CIC Catalogue item confirmation**. Sender: Retailer. Receiver: Supplier, through the data pool. Europe and international: GDSN CIC. Retailer's response to an item notification: synchronized, accepted, review or rejected. Used in: Item and price synchronization.
+- **832 Price and sales catalog**. Sender: Supplier. Receiver: Retailer. Europe and international: PRICAT. Item list with identifiers, descriptions and costs, sent at setup and on change. Used in: Item and price synchronization; Drop ship and marketplaces.
+- **888 Item maintenance**. Sender: Supplier. Receiver: Retailer. Europe and international: PRODAT. Adds or changes item records. Used for DSD and grocery item authorization. Used in: Item and price synchronization; Direct store delivery.
+- **879 Price information**. Sender: Supplier. Receiver: Retailer. Europe and international: PRICAT. Penalty-prone. Cost changes with effective dates. Late changes cause invoice price mismatches. Used in: Item and price synchronization; Direct store delivery.
+- **889 Promotion announcement**. Sender: Supplier. Receiver: Retailer. No EDIFACT equivalent. Promotion terms, allowances and dates used later to settle deals. Used in: Item and price synchronization; Returns, credits and allowances.
+
+## Plan
+
+- **852 Product activity data**. Sender: Retailer. Receiver: Supplier. Europe and international: SLSRPT, INVRPT. Sales and on-hand inventory by item and location. The input to replenishment and sales analytics. Used in: Direct store delivery; Vendor-managed inventory and CPFR; Sales and inventory reporting.
+- **830 Planning schedule**. Sender: Retailer. Receiver: Supplier. Europe and international: SLSFCT. Forecast quantities by item and period for supply planning. Used in: Vendor-managed inventory and CPFR.
+- **846 Inventory advice**. Sender: Supplier or 3PL. Receiver: Retailer or supplier. Europe and international: INVRPT. Penalty-prone. Available quantity by item. In drop ship it decides what the retailer can sell. Used in: Drop ship and marketplaces; 3PL fulfillment.
+
+## Order
+
+- **850 Purchase order**. Sender: Retailer. Receiver: Supplier. Europe and international: ORDERS. Items, quantities, cost, ship window and ship-to location. Used in: Order to cash; Item and price synchronization; Drop ship and marketplaces; 3PL fulfillment; Vendor onboarding and certification.
+- **855 Order acknowledgment**. Sender: Supplier. Receiver: Retailer. Europe and international: ORDRSP. Penalty-prone. Accepts, changes or rejects each order line before shipment. Used in: Order to cash; Vendor-managed inventory and CPFR; Drop ship and marketplaces; Vendor onboarding and certification.
+- **860 Order change**. Sender: Retailer. Receiver: Supplier. Europe and international: ORDCHG. Changes quantities, dates or lines on an open order. Used in: Order to cash; Drop ship and marketplaces.
+- **865 Change acknowledgment**. Sender: Supplier. Receiver: Retailer. Europe and international: ORDRSP. Accepts or rejects the retailer's order change. Used in: Order to cash; Drop ship and marketplaces.
+- **870 Order status**. Sender: Supplier. Receiver: Retailer. No EDIFACT equivalent. Status of open orders. Used in drop ship for backorders and cancellations. Used in: Drop ship and marketplaces.
+
+## Move
+
+- **753 Routing request**. Sender: Supplier. Receiver: Retailer. No EDIFACT equivalent. Penalty-prone. Ready-to-ship details (cartons, weight and cube) with a request for a carrier. Used in: Routing and delivery.
+- **754 Routing instructions**. Sender: Retailer. Receiver: Supplier. No EDIFACT equivalent. Assigned carrier, load and pickup details for the shipment. Used in: Routing and delivery.
+- **204 Load tender**. Sender: Retailer. Receiver: Carrier. Europe and international: IFTMIN. Offers a load to a carrier with stops, dates and references. Used in: Routing and delivery.
+- **990 Tender response**. Sender: Carrier. Receiver: Retailer. No EDIFACT equivalent. Carrier accepts or declines the tendered load. Used in: Routing and delivery.
+- **211 Bill of lading**. Sender: Supplier. Receiver: Carrier. Europe and international: IFTMIN. Electronic bill of lading for the shipment. Used in: Routing and delivery.
+- **214 Shipment status**. Sender: Carrier. Receiver: Retailer. Europe and international: IFTSTA. Penalty-prone. Pickup, in-transit, appointment and delivery events. Used in: Routing and delivery.
+
+## Ship and confirm
+
+- **856 Ship notice**. Sender: Supplier. Receiver: Retailer. Europe and international: DESADV. Penalty-prone. Shipment, order, carton and item detail with SSCC labels, sent before arrival. Used in: Order to cash; Receive, match and pay; Routing and delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; 3PL fulfillment; Vendor onboarding and certification.
+- **997 Functional acknowledgment**. Sender: Either party. Receiver: Either party. Europe and international: CONTRL. Confirms receipt and syntax. It does not confirm business acceptance. Used in: Order to cash; Receive, match and pay; Drop ship and marketplaces; Sales and inventory reporting; Vendor onboarding and certification.
+- **824 Application advice**. Sender: Retailer. Receiver: Supplier. Europe and international: APERAK. Penalty-prone. Accepts or rejects a received document, with reason codes. Used in: Order to cash; Receive, match and pay; Direct store delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; Vendor onboarding and certification.
+- **864 Text message**. Sender: Retailer. Receiver: Supplier. Europe and international: GENRAL. Free-form notice from the retailer, such as a document rejection, compliance notice or chargeback notice. Used in: Order to cash; Receive, match and pay; Deductions, chargebacks and disputes.
+- **861 Receiving advice**. Sender: Retailer. Receiver: Supplier. Europe and international: RECADV. Accepted and rejected quantities after receipt, with reasons. Sent by some retailers only. Used in: Receive, match and pay.
+
+## Settle
+
+- **810 Invoice**. Sender: Supplier. Receiver: Retailer. Europe and international: INVOIC. Penalty-prone. Bills shipped quantities at the agreed cost and terms. Used in: Order to cash; Receive, match and pay; Deductions, chargebacks and disputes; Direct store delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; 3PL fulfillment; Returns, credits and allowances; Vendor onboarding and certification.
+- **820 Remittance**. Sender: Retailer. Receiver: Supplier. Europe and international: REMADV. Penalty-prone. Payment detail by invoice, including deductions with reason codes. Used in: Order to cash; Receive, match and pay; Deductions, chargebacks and disputes; Direct store delivery; Drop ship and marketplaces; Returns, credits and allowances.
+- **812 Credit or debit memo**. Sender: Retailer for debits, supplier for credits. Receiver: The other party. Europe and international: COMDIS. Penalty-prone. Debits or credits against invoices for shortages, violations, returns and allowances. Used in: Receive, match and pay; Deductions, chargebacks and disputes; Returns, credits and allowances.
+- **210 Freight invoice**. Sender: Carrier. Receiver: Retailer. Europe and international: INVOIC. Carrier bill for a delivered load. Used in: Routing and delivery.
+
+## Return
+
+- **180 Return authorization**. Sender: Retailer requests, supplier authorizes. Receiver: The other party. Europe and international: RETANN, RETINS. Requests and authorizes a return, with disposition instructions. Used in: Returns, credits and allowances.
+
+## Grocery and DSD series
+
+- **875 Grocery order**. Sender: Retailer. Receiver: Supplier. Europe and international: ORDERS. Purchase order format used in grocery and foodservice. Used in: Order to cash.
+- **876 Grocery order change**. Sender: Retailer. Receiver: Supplier. Europe and international: ORDCHG. Changes an open grocery order. Used in: Order to cash.
+- **880 Grocery invoice**. Sender: Supplier. Receiver: Retailer. Europe and international: INVOIC. Penalty-prone. Invoice format used in grocery and foodservice. Used in: Order to cash; Receive, match and pay.
+- **894 DSD delivery record**. Sender: DSD supplier. Receiver: Store. No EDIFACT equivalent. Penalty-prone. Itemized delivery the store checks at the back door. Used in: Direct store delivery.
+- **895 DSD adjustment**. Sender: Store. Receiver: DSD supplier. No EDIFACT equivalent. Store accepts or adjusts the delivery record. Used in: Direct store delivery.
+- **882 DSD summary**. Sender: DSD supplier. Receiver: Retailer. No EDIFACT equivalent. Summary of store deliveries for settlement. Used in: Direct store delivery.
+
+## Warehouse series
+
+- **940 Warehouse shipping order**. Sender: Supplier. Receiver: 3PL. Europe and international: INSDES. Instructs the 3PL to pick and ship an order. Used in: 3PL fulfillment.
+- **945 Warehouse shipping advice**. Sender: 3PL. Receiver: Supplier. Europe and international: DESADV. Penalty-prone. Confirms what the 3PL shipped. Used in: 3PL fulfillment.
+- **943 Stock transfer advice**. Sender: Supplier. Receiver: 3PL. Europe and international: DESADV. Tells the 3PL that inbound stock is on the way. Used in: 3PL fulfillment.
+- **944 Stock transfer receipt**. Sender: 3PL. Receiver: Supplier. Europe and international: RECADV. Confirms the stock the 3PL received. Used in: 3PL fulfillment.
+- **947 Inventory adjustment**. Sender: 3PL. Receiver: Supplier. Europe and international: INVRPT. Reports damage, count and status changes to 3PL stock. Used in: 3PL fulfillment.
+
+
+---
+
+File: https://process-genome.onrender.com/agents/automotive-solutions.md
+
+# Automotive solutions on Trading Grid
+
+Source: Business Network Process Genome, Solution overview for Automotive (https://process-genome.onrender.com/#automotive/solution).
+Status: Concept preview for internal review. Diagrams are illustrative. Some capabilities shown are in development or planned and are not generally available. Results depend on implementation and partner participation. Names, scope and availability may change.
+
+OEM and supplier trading relationships, connected and managed. Integrate and onboard the OEMs, supplier tiers and logistics providers you trade with on Trading Grid, and monitor every release, ship notice and settlement.
+
+## Solutions by stage
+
+- Plan and release: Release management; Sub-tier supplier collaboration
+- Ship and deliver: ASN and label compliance; Just-in-sequence monitoring; Inbound freight visibility
+- Receive and settle: Cumulative quantity reconciliation; Self-billing and debit memo management
+- Assets and aftermarket: Returnable container management; Aftermarket parts data and order management
+
+### Plan and release
+Schedules and sub-tier releases aligned before parts ship.
+
+#### Release management
+- Purpose: Act on every release change
+- Summary: Load planning and shipping schedules as they arrive, compare each release with the last, and flag changes inside firm periods.
+- Capabilities:
+  - Release changes compared release over release, by part and plant
+  - Changes inside firm periods or above agreed limits flagged
+  - Missing or late schedules detected before the shipping window
+- Parties: OEMs, Suppliers
+- Outcome: Release changes visible before parts ship.
+
+#### Sub-tier supplier collaboration
+- Purpose: Extend release discipline to sub-tiers
+- Summary: Issue your own releases to sub-tier suppliers as OEM demand changes, and hold them to the ship notice and settlement rules the OEM applies to you.
+- Capabilities:
+  - Releases issued to sub-tier suppliers as OEM demand changes
+  - Web access for sub-tier suppliers without EDI
+  - Sub-tier scorecards on timeliness and accuracy
+- Parties: Tier 1 suppliers, Sub-tier suppliers
+- Outcome: Sub-tier suppliers on the same rules.
+
+### Ship and deliver
+Ship notices, sequences and freight tracked to the plant.
+
+#### ASN and label compliance
+- Purpose: Send an accepted ship notice for every shipment
+- Summary: Check each ship notice against the customer's guide before it leaves, match it to labels and the carrier pickup, and act on rejections quickly.
+- Capabilities:
+  - Ship notices validated against each customer's guide
+  - Notices matched to labels and the carrier pickup
+  - Rejections explained with the field to correct
+- Parties: Suppliers, Carriers, OEM plants
+- Outcome: Fewer ship notice debits.
+
+#### Just-in-sequence monitoring
+- Purpose: Deliver parts in build order
+- Summary: Receive sequence messages as vehicles pass the broadcast point, track each build against its delivery window, and alert on gaps in the sequence.
+- Capabilities:
+  - Sequence messages monitored for gaps and delays
+  - Sequence ship notices matched to the vehicles they supply
+  - Plant-critical alerts routed to on-call teams
+- Parties: Sequencing suppliers, Assembly plants
+- Outcome: Earlier warning of sequence gaps.
+
+#### Inbound freight visibility
+- Purpose: Collect parts in the planned window
+- Summary: Follow routing instructions, tenders and status events for each inbound shipment, and flag the risks that lead to premium freight.
+- Capabilities:
+  - Tenders, status events and freight bills linked to the shipment
+  - Missed pickup windows flagged as they occur
+  - Freight bills compared with tendered rates
+- Parties: Suppliers, Logistics providers, Carriers
+- Outcome: Earlier warning of premium freight.
+
+### Receive and settle
+Receipts, cums and payments reconciled.
+
+#### Cumulative quantity reconciliation
+- Purpose: Keep cum totals in agreement
+- Summary: Compare shipped and received cumulative quantities by part, and resolve differences before they reach payment or balance-out.
+- Capabilities:
+  - Supplier and OEM cums compared from ship notices, receipts and the cum on each release
+  - Differences traced to the ship notices and receipts behind them
+  - Cum resets and balance-out claims supported with history
+- Parties: Suppliers, OEMs
+- Outcome: Fewer quantity disputes at reconciliation.
+
+#### Self-billing and debit memo management
+- Purpose: Get paid for every receipt
+- Summary: Match receipts, self-billed invoices and remittances to shipments, and work debit memos inside their dispute windows.
+- Capabilities:
+  - Receipts and settlements matched to ship notices
+  - Short payments and debit memos linked to the shipment
+  - Dispute windows tracked with evidence attached
+- Parties: OEMs, Suppliers
+- Outcome: Fewer debits left open past their dispute window.
+
+### Assets and aftermarket
+Container balances reconciled and aftermarket product data kept current.
+
+#### Returnable container management
+- Purpose: Keep the container account in balance
+- Summary: Track returnable container shipments, receipts and balances by type and site, and reconcile them before the periodic count.
+- Capabilities:
+  - Container movements tracked from ship notices
+  - Balances by container type and site
+  - Differences flagged before the periodic count
+- Parties: OEMs, Suppliers
+- Outcome: Container balances you can reconcile.
+
+#### Aftermarket parts data and order management
+- Purpose: Ship the right part with the right data
+- Summary: Keep product and fitment data current with distributors, retailers and dealers, confirm orders, and reduce deductions.
+- Capabilities:
+  - Product and fitment data checked before it is published
+  - Orders, acknowledgments and ship notices monitored by customer
+  - Deductions linked to the order and shipment
+- Parties: Parts suppliers, Distributors, Dealers
+- Outcome: Cleaner orders from current product data.
+
+## What OpenText provides
+Connectivity, supplier onboarding, visibility, analytics and AI agents across automotive processes.
+
+### Connect and onboard
+- Automotive connectivity: OFTP2, AS2 and VAN connections to OEMs and suppliers, with certificates managed.
+- Pre-connected community: Reach OEMs, suppliers and carriers already on the network.
+- Guided supplier onboarding: Pre-built templates and APIs, with documents tested against each customer's guide.
+- Web access for smaller suppliers: Suppliers without EDI receive schedules, send ship notices and invoices, and print labels online.
+
+### See and recover
+- Transaction search and recovery: Find any document, follow its processing flow, and redeliver or reprocess it.
+- Plant-critical monitoring: Alerts when an expected schedule or ship notice is late for a plant's cutoff.
+- Part traceability: Search lot and serial numbers from ship notices to support recall and quality investigations.
+- E-invoicing compliance: Invoices issued in the formats tax authorities require in supported countries, as a managed service.
+
+### Measure and improve
+- Agents that monitor your rules: Describe a rule in plain language; agents check transactions and explain each finding.
+- Supplier delivery scorecards: Score suppliers on release adherence, ship notice accuracy and on-time delivery.
+- Ready-made automotive analytics: Dashboards for release volatility, cum differences and ship notice health.
+- Governed data delivery: Network data explored in place or delivered to your own analytics on a schedule.
+
+### Act with AI agents
+- Errors explained and routed: Agents read a document error, explain it in business terms and route it to the team that fixes it.
+- Root cause across failures: Related failures grouped to one cause, with the follow-up to each partner drafted.
+- Agents in your tools: Ask about releases, shipments and debits from the assistants your teams already use.
+- People approve every change: Agents investigate and recommend; a person approves any resend, update or ticket.
+
+## Network
+- 1M+: Trading partners on the OpenText network
+- $11T: In annual commerce across the network
+- 40+: Years of B2B integration experience
+
+
+---
+
+File: https://process-genome.onrender.com/agents/automotive-documents.md
+
+# Automotive documents
+
+Source: Business Network Process Genome, Process Genome for Automotive (https://process-genome.onrender.com/#automotive/map).
+Status: Examples describe typical operating scenarios, not specific customer accounts. Standards, versions, and mandate dates vary by partner and region. Confirm requirements with each partner before building.
+
+Code key: X12 set, or the EDIFACT or VDA message where no X12 set exists. 25 documents, grouped by family in flow order.
+
+## Catalog
+
+- **832 Price and sales catalog**. Sender: Supplier. Receiver: Aftermarket buyer. Europe and international: PRICAT. Part list with identifiers, descriptions and prices, sent at setup and on change. Fitment and attribute data travel separately as files. Used in: Aftermarket order to cash.
+
+## Order
+
+- **850 Purchase order**. Sender: Customer. Receiver: Supplier. Europe and international: ORDERS. Blanket order setting price, terms and ship-to per part, or a spot order in the aftermarket. Used in: Forecast and release; Sub-tier procurement; Aftermarket order to cash.
+- **860 Purchase order change**. Sender: Customer. Receiver: Supplier. Europe and international: ORDCHG. Changes price, part, engineering level or terms on an open blanket order. Used in: Forecast and release; Sub-tier procurement.
+- **855 Order acknowledgment**. Sender: Supplier. Receiver: Customer. Europe and international: ORDRSP. Confirms each order line, with substitutions for superseded parts and ship dates. Used in: Aftermarket order to cash.
+
+## Plan and release
+
+- **830 Planning schedule**. Sender: Customer. Receiver: Supplier. Europe and international: DELFOR. Odette DELINS. VDA 4984, replacing VDA 4905. Forecast by part and ship-to with firm and planning periods, cum received, and fabrication and material authorizations. Used in: Forecast and release; Cumulative reconciliation and balance-out; Just in sequence; Sub-tier procurement.
+- **862 Shipping schedule**. Sender: Customer. Receiver: Supplier. Europe and international: DELJIT. Odette CALDEL. VDA 4985, which with VDA 4984 replaces VDA 4915. Penalty-prone. Near-term ship or delivery quantities and dates that supersede the forecast's near-term ship data. Used in: Forecast and release; Sub-tier procurement.
+- **866 Production sequence**. Sender: Customer. Receiver: Sequencing supplier. Europe and international: DELJIT. Odette SYNCRO. VDA 4986, replacing VDA 4916. Penalty-prone. Build sequence by vehicle: identifier, sequence number, variant, assembly point and time of use. Used in: Just in sequence.
+- **846 Inventory advice**. Sender: Supplier. Receiver: Customer. Europe and international: INVRPT. Available quantity by part. In aftermarket drop ship it sets what the buyer can promise. Used in: Aftermarket order to cash.
+
+## Ship and confirm
+
+- **856 Ship notice**. Sender: Supplier. Receiver: Customer. Europe and international: DESADV. Odette AVIEXP. VDA 4987, replacing VDA 4913. Penalty-prone. Shipment, bill of lading, parts, quantities, cum shipped, packaging and container serials that match the labels. Used in: Forecast and release; Cumulative reconciliation and balance-out; Ship notice and labels; Just in sequence; Receipt and settlement; Inbound transport; Sub-tier procurement; Aftermarket order to cash; Returnable containers.
+- **997 Functional acknowledgment**. Sender: Either party. Receiver: Either party. Europe and international: CONTRL. Confirms receipt and syntax. It does not confirm business acceptance. Used in: Forecast and release; Ship notice and labels; Sub-tier procurement.
+- **824 Application advice**. Sender: Customer. Receiver: Supplier. Europe and international: APERAK. VDA 4937. Penalty-prone. Accepts or rejects a ship notice or invoice, with error detail. Used in: Ship notice and labels; Receipt and settlement.
+
+## Move
+
+- **204 Load tender**. Sender: Lead logistics provider. Receiver: Carrier. Europe and international: IFTMIN. VDA 4933. Offers a planned load to a carrier with stops, windows and load number. Used in: Inbound transport.
+- **990 Tender response**. Sender: Carrier. Receiver: Lead logistics provider. Europe and international: VDA 4933 covers the transport order confirmation. Carrier accepts or declines the tendered load. Used in: Inbound transport.
+- **214 Shipment status**. Sender: Carrier. Receiver: Lead logistics provider or booking party. Europe and international: IFTSTA. VDA 4945. Penalty-prone. Pickup, in-transit and delivery events against the load and bill of lading. Used in: Ship notice and labels; Inbound transport.
+- **210 Freight invoice**. Sender: Carrier. Receiver: Bill-to party. Europe and international: INVOIC. VDA 4938 part 4 covers the freight invoice. Carrier bill for a delivered load, audited against the tender. Used in: Inbound transport.
+
+## Receive and settle
+
+- **861 Receiving advice**. Sender: Customer. Receiver: Supplier. Europe and international: RECADV. VDA 4989 uses it as the entry certificate for intra-EU deliveries. Penalty-prone. Reports receipt differences: over, short, no notice, returns, scrap and cum adjustments. Used in: Cumulative reconciliation and balance-out; Receipt and settlement.
+- **810 Invoice**. Sender: Supplier. Receiver: Customer. Europe and international: INVOIC. VDA 4938, replacing VDA 4906. Penalty-prone. Bills a shipment where the customer does not pay from receipts. Used in: Receipt and settlement; Sub-tier procurement; Aftermarket order to cash.
+- **INVOIC Self-billing invoice**. Sender: Customer. Receiver: Supplier. Europe and international: EDIFACT INVOIC. VDA 4938, replacing VDA 4908. No X12 set. Penalty-prone. The customer's invoice for the supply, built from its receipts and agreed price; the supplier's tax record. Used in: Receipt and settlement; Sub-tier procurement.
+- **820 Remittance advice**. Sender: Customer. Receiver: Supplier. Europe and international: REMADV. VDA 4988, replacing VDA 4907. Penalty-prone. Payment detail by receipt or invoice, net of debits, with reason codes. Used in: Receipt and settlement; Sub-tier procurement; Aftermarket order to cash.
+
+## Return
+
+- **180 Return authorization**. Sender: Buyer requests, supplier authorizes. Receiver: The other party. Europe and international: RETANN, RETINS. Requests and authorizes a parts return, with disposition. Used in: Aftermarket order to cash.
+
+## Container series
+
+- **4946 Container order**. Sender: Supplier or container owner. Receiver: The other party. Europe and international: VDA 4946. No X12 set. Orders empty returnable containers and confirms the order. Used in: Returnable containers.
+- **4943 Empties despatch advice**. Sender: Container owner. Receiver: Supplier. Europe and international: VDA 4943. No X12 set. Forecasts and announces empty container shipments to the supplier. Used in: Returnable containers.
+- **4947 Container movement**. Sender: Supplier. Receiver: Container owner. Europe and international: VDA 4947. No X12 set. Penalty-prone. Confirms empties received and books container movements. Used in: Returnable containers.
+- **4941 Container account statement**. Sender: Container owner. Receiver: Supplier. Europe and international: VDA 4941. No X12 set. Penalty-prone. Periodic statement of bookings and closing balance per container type. Used in: Returnable containers.
+- **4942 Container inventory**. Sender: Supplier. Receiver: Container owner. Europe and international: VDA 4942. No X12 set. Penalty-prone. Container count on hand by type and site, usually at year end, with any differences. Used in: Returnable containers.
+
+
+---
+
+File: https://process-genome.onrender.com/agents/financial-services-solutions.md
+
+# Financial services solutions on Trading Grid
+
+Source: Business Network Process Genome, Solution overview for Financial services (https://process-genome.onrender.com/#banking/solution).
+Status: Concept preview for internal review. Diagrams are illustrative. Some capabilities shown are in development or planned and are not generally available. Results depend on implementation and partner participation. Figures are as published by OpenText. Names, scope and availability may change.
+
+Bank and corporate relationships, connected and managed. Connect the banks, corporate clients, payment networks and market participants you work with on Trading Grid, and monitor every payment, statement and confirmation.
+
+## Solutions by stage
+
+- Connect and pay: Corporate onboarding and connectivity; Corporate payment initiation; Instant payments and request to pay; Supplier payment and remittance delivery
+- Collect and report: Direct debit collection management; Receivables and cash application; Statement and cash reporting
+- Screen and resolve: Sanctions screening and fraud controls; Payment status and returns management; Payment tracking and investigations
+- Cross-border and markets: Cross-border payments and ISO 20022 transformation; Trade finance and FX confirmation; Fund order processing; Securities settlement and custody messaging
+
+### Connect and pay
+Clients connected and payments initiated on every channel.
+
+#### Corporate onboarding and connectivity
+- Purpose: Bring each client live on its channel
+- Summary: Set up Swift, EBICS, host-to-host or API channels for each corporate client, build maps, and test files before go-live.
+- Capabilities:
+  - Channel, keys and certificates set up per client
+  - Test files validated against the bank's formats
+  - Onboarding status tracked from request to first live file
+- Parties: Banks, Corporate clients
+- Outcome: Shorter onboarding for corporate clients.
+
+#### Corporate payment initiation
+- Purpose: Catch payment file errors before the bank does
+- Summary: Validate payment files against schema and bank rules before release, and track each file to its status report.
+- Capabilities:
+  - Files checked against ISO 20022, Nacha and bank-specific rules
+  - Cutoffs monitored by payment method and value date
+  - Rejected files explained with the field to correct
+- Parties: Corporates, Banks
+- Outcome: Fewer rejected payment files.
+
+#### Instant payments and request to pay
+- Purpose: Know instant payment status in seconds
+- Summary: Route instant credit transfers and request-to-pay messages, and track each one to its final status within scheme time limits.
+- Capabilities:
+  - Instant transfers tracked to accept or reject
+  - Request-to-pay responses matched to the request
+  - Timeouts and rejects flagged as they occur
+- Parties: Banks, Instant schemes
+- Outcome: Instant payment status in real time.
+
+#### Supplier payment and remittance delivery
+- Purpose: Send remittance detail with every payment
+- Summary: Carry structured remittance with supplier payments, and deliver remittance advice that suppliers can apply automatically.
+- Capabilities:
+  - Structured remittance carried in the payment
+  - Remittance advice delivered in each supplier's format
+  - Unapplied supplier payments traced to the remittance
+- Parties: Corporates, Banks, Suppliers
+- Outcome: Fewer supplier payment inquiries.
+
+### Collect and report
+Collections, receipts and balances reported and applied.
+
+#### Direct debit collection management
+- Purpose: Collect on the due date
+- Summary: Submit collections against valid mandates, and handle returns and rejections inside scheme timelines.
+- Capabilities:
+  - Collections checked against mandates before submission
+  - Returns and rejects matched to the original collection
+  - Return reasons reported by debtor and reason
+- Parties: Creditors, Banks, Debtors
+- Outcome: Fewer returned collections.
+
+#### Receivables and cash application
+- Purpose: Apply incoming cash to open invoices
+- Summary: Combine lockbox, remittance and credit notifications, and match payments to open receivables.
+- Capabilities:
+  - Lockbox, remittance and credit notifications combined
+  - Payments matched to open invoices by reference
+  - Unapplied cash flagged with the missing detail
+- Parties: Corporates, Banks
+- Outcome: Less unapplied cash.
+
+#### Statement and cash reporting
+- Purpose: Deliver balances before treasury needs them
+- Summary: Collect prior-day and intraday statements from every bank, convert them to one format, and flag missing reports.
+- Capabilities:
+  - Statements in BAI2, camt and MT formats normalized
+  - Missing or late statements flagged by bank and account
+  - Balances available for daily cash positioning
+- Parties: Banks, Corporate treasury
+- Outcome: Complete daily cash position.
+
+### Screen and resolve
+Payments screened, rejected items returned and cases closed.
+
+#### Sanctions screening and fraud controls
+- Purpose: Screen payments inside the flow
+- Summary: Screen payments against sanctions lists before release, hold matches for review, and monitor for fraud patterns.
+- Capabilities:
+  - Screening embedded before payment release
+  - Held payments routed for review and decision
+  - Unusual payment patterns flagged for investigation
+- Parties: Banks, Corporates
+- Outcome: Screening without leaving the payment flow.
+
+#### Payment status and returns management
+- Purpose: Know the status of every payment
+- Summary: Collect status reports, returns and change notifications, and link each one to the original payment.
+- Capabilities:
+  - Status reports linked to the original payment
+  - Returns and notifications of change routed to the owner
+  - Return trends by reason and beneficiary bank
+- Parties: Banks, Corporates
+- Outcome: Rejected payments found the same day.
+
+#### Payment tracking and investigations
+- Purpose: Close payment cases faster
+- Summary: Track cross-border payments end to end, and manage cancellation requests and inquiries with their responses.
+- Capabilities:
+  - Payment progress tracked across banks
+  - Cancellation requests matched to their resolution
+  - Open cases aged by bank and reason
+- Parties: Banks, Correspondents
+- Outcome: Fewer open payment investigations.
+
+### Cross-border and markets
+Correspondent, trade, fund and securities flows.
+
+#### Cross-border payments and ISO 20022 transformation
+- Purpose: Send cross-border payments in ISO 20022
+- Summary: Transform between MT and ISO 20022 formats, validate rich data, and route payments through correspondents.
+- Capabilities:
+  - MT and ISO 20022 messages transformed and validated
+  - Truncation and data loss flagged before sending
+  - Payment progress followed across correspondents
+- Parties: Banks, Correspondents
+- Outcome: Truncation risk flagged before payments leave.
+
+#### Trade finance and FX confirmation
+- Purpose: Exchange trade and FX messages with banks
+- Summary: Send and receive letters of credit, guarantees and amendments, and match FX confirmations to trades.
+- Capabilities:
+  - Letter of credit and guarantee messages exchanged with banks
+  - Amendments linked to the original instrument
+  - FX confirmations matched to the trade
+- Parties: Corporates, Banks
+- Outcome: Trade and FX messages in one view.
+
+#### Fund order processing
+- Purpose: Process fund orders to confirmation
+- Summary: Route subscription, redemption and switch orders to transfer agents, and match each order to its confirmation.
+- Capabilities:
+  - Orders validated before cutoff
+  - Confirmations matched to the original order
+  - Unconfirmed orders flagged by fund and agent
+- Parties: Distributors, Transfer agents
+- Outcome: Fewer unconfirmed fund orders.
+
+#### Securities settlement and custody messaging
+- Purpose: Settle trades on the intended date
+- Summary: Send settlement instructions to custodians, follow their status, and reconcile confirmations and holdings.
+- Capabilities:
+  - Settlement instructions validated before sending
+  - Status and confirmations linked to each instruction
+  - Holdings statements reconciled to internal positions
+- Parties: Investment managers, Custodians
+- Outcome: Fewer failed settlements.
+
+## What OpenText provides
+Bank connectivity, message transformation, controls, visibility and AI agents across financial services flows.
+
+### Connect and onboard
+- Bank connectivity: Swift, EBICS, host-to-host and API channels, with keys and certificates managed.
+- Managed Swift access: Swift connectivity as a managed service, without in-house infrastructure.
+- Corporate client onboarding: Connectivity setup, map development and end-to-end testing for each new client.
+- Large file exchange: Managed file transfer for high-volume and large files.
+
+### Transform and control
+- ISO 20022 transformation: Conversion between MT, ISO 20022, Nacha, BAI2 and ERP formats, with validation.
+- Embedded sanctions screening: Screening inside the payment flow, with alerts on held payments.
+- Fraud monitoring: Payment patterns monitored for anomalies before release.
+- Release controls: Value limits and multilevel approval on payment release.
+
+### See and measure
+- Transaction lifecycle tracking: Payments and statements traced from file receipt to final status.
+- Payments portal: Clients submit instructions and follow status in a web portal.
+- Bank and client scorecards: Acceptance rates, reject reasons and cutoff adherence by bank and client.
+- Governed data delivery: Network data explored in place or delivered to your own analytics on a schedule.
+
+### Act with AI agents
+- Errors explained and routed: Agents read a reject or return, explain it in business terms and route it to the team that fixes it.
+- Root cause across failures: Related rejects grouped to one cause, with the follow-up to each bank or client drafted.
+- Agents in your tools: Ask about payment status, returns and statements from the assistants your teams already use.
+- Approval before change: Agents investigate and recommend; a person approves resends, releases and updates.
+
+## Network
+- 30+: Years supporting financial services
+- 14 of 15: Largest North American banks run transactions on the network
+- 31B+: Transactions processed each year
+
+
+---
+
+File: https://process-genome.onrender.com/agents/financial-services-documents.md
+
+# Financial services documents
+
+Source: Business Network Process Genome, Process Genome for Financial services (https://process-genome.onrender.com/#banking/map).
+Status: Examples describe typical operating scenarios, not specific customer accounts. Standards, versions, and mandate dates vary by partner and region. Confirm requirements with each partner before building.
+
+Code key: ISO 20022 message, or the SWIFT MT, Nacha, BAI2 or X12 format where ISO 20022 is not used. 42 documents, grouped by family in flow order.
+
+## Initiate
+
+- **pain.001 Credit transfer initiation**. Sender: Corporate. Receiver: Bank. ISO 20022: pain.001; SWIFT MT: MT101; Other: Nacha CCD, CTX and PPD in the US. Penalty-prone. Payment instructions from a corporate to its bank: debtor account, beneficiaries, amounts, value date and remittance. Used in: Corporate client onboarding; Payment initiation; Sanctions screening and fraud controls; Cross-border payments; Instant payments; Supplier payment and remittance.
+- **Nacha ACH entry file**. Sender: Corporate. Receiver: Originating bank. Other: US domestic ACH format with CCD, CTX and PPD entries. pain.001 where the bank supports it. Penalty-prone. US ACH batch file of credit or debit entries under a standard entry class code. Used in: Payment initiation; Receivables and cash application; Direct debit collections; Supplier payment and remittance.
+- **pain.008 Direct debit initiation**. Sender: Creditor. Receiver: Creditor bank. ISO 20022: pain.008; SWIFT MT: MT104, rarely used; Other: Nacha PPD and CCD debit entries in the US. Penalty-prone. Collection instructions from a creditor to its bank, each referencing the debtor mandate. Used in: Direct debit collections.
+- **pain.013 Request to pay**. Sender: Payee. Receiver: Payer. ISO 20022: pain.013. Asks the payer to approve and initiate a payment for a stated amount. Used in: Instant payments.
+- **820 Payment order and remittance advice**. Sender: Payer. Receiver: Bank or payee. Other: X12 820. REMADV in EDIFACT. Payment order to a bank or remittance detail to a payee, by invoice and amount. Used in: Receivables and cash application; Supplier payment and remittance.
+
+## Acknowledge
+
+- **pain.002 Payment status report**. Sender: Bank. Receiver: Corporate. ISO 20022: pain.002; Other: Bank-specific acknowledgment files. Penalty-prone. Accepts or rejects a payment file, batch or transaction, with reason codes. Used in: Corporate client onboarding; Payment initiation; Payment status and returns; Sanctions screening and fraud controls; Instant payments; Direct debit collections; Supplier payment and remittance.
+- **pain.014 Request to pay response**. Sender: Payer. Receiver: Payee. ISO 20022: pain.014. Accepts or refuses a request to pay. Used in: Instant payments.
+- **997 Functional acknowledgment**. Sender: Bank. Receiver: Corporate. Other: X12 997. CONTRL in EDIFACT. Confirms receipt and syntax of an X12 file. It does not confirm payment. Used in: Supplier payment and remittance.
+- **824 Application advice**. Sender: Bank. Receiver: Corporate. Other: X12 824. APERAK in EDIFACT. Penalty-prone. Accepts or rejects an X12 payment file on business rules, with error detail. Used in: Supplier payment and remittance.
+
+## Clear and settle
+
+- **pacs.008 Customer credit transfer**. Sender: Debtor bank. Receiver: Creditor bank or correspondent. ISO 20022: pacs.008; SWIFT MT: MT103. Penalty-prone. Interbank customer payment with debtor, creditor, agents, amount and remittance. Used in: Payment initiation; Sanctions screening and fraud controls; Cross-border payments; Instant payments; Fund order processing.
+- **pacs.009 Financial institution transfer**. Sender: Bank. Receiver: Bank. ISO 20022: pacs.009; SWIFT MT: MT202, MT202 COV. Bank-to-bank transfer, including the cover leg of a customer payment. Used in: Cross-border payments.
+- **pacs.003 Interbank direct debit**. Sender: Creditor bank. Receiver: Debtor bank. ISO 20022: pacs.003; Other: Nacha debit entries in the US. Collection exchanged between banks through the clearing scheme. Used in: Direct debit collections.
+- **pacs.002 Interbank payment status**. Sender: Receiving bank or scheme. Receiver: Sending bank. ISO 20022: pacs.002. Penalty-prone. Accepts or rejects an interbank payment. Final status is mandatory in instant schemes. Used in: Payment status and returns; Cross-border payments; Instant payments.
+
+## Report
+
+- **camt.052 Intraday account report**. Sender: Bank. Receiver: Corporate. ISO 20022: camt.052; SWIFT MT: MT942; Other: BAI2 intraday. Intraday balances and entries for cash positioning. Used in: Statements and cash reporting.
+- **camt.053 Account statement**. Sender: Bank. Receiver: Corporate. ISO 20022: camt.053; SWIFT MT: MT940; Other: BAI2 prior day. Penalty-prone. End-of-day statement with opening and closing balances and every booked entry. Used in: Corporate client onboarding; Statements and cash reporting; Trade finance and FX confirmations.
+- **camt.054 Debit and credit notification**. Sender: Bank. Receiver: Corporate. ISO 20022: camt.054; SWIFT MT: MT900, MT910; Other: BAI2 detail records. Reports individual debits and credits, with remittance, as they post. Used in: Payment initiation; Payment status and returns; Cross-border payments; Instant payments; Statements and cash reporting; Receivables and cash application; Direct debit collections; Supplier payment and remittance; Investigations and payment tracking.
+- **BAI2 Balance and transaction report**. Sender: Bank. Receiver: Corporate. Other: US format. camt.052 and camt.053 where the bank supports them. US prior-day and intraday balance and transaction reporting. Used in: Corporate client onboarding; Payment initiation; Payment status and returns; Cross-border payments; Statements and cash reporting; Receivables and cash application; Direct debit collections; Investigations and payment tracking; Trade finance and FX confirmations.
+- **823 Lockbox**. Sender: Bank. Receiver: Corporate. Other: X12 823. US only. Check payments received at the bank lockbox, with remittance detail. Used in: Receivables and cash application.
+
+## Return and investigate
+
+- **pacs.004 Payment return**. Sender: Receiving bank. Receiver: Sending bank. ISO 20022: pacs.004; SWIFT MT: MT103 or MT202 return; Other: Nacha return entries (R codes) in the US. Penalty-prone. Returns funds of a settled payment with a reason code. Used in: Payment status and returns; Cross-border payments; Direct debit collections; Investigations and payment tracking.
+- **COR Notification of change**. Sender: Receiving bank. Receiver: Originator. Other: Nacha COR entry. US only. Reports corrected account or routing data for future ACH entries. Used in: Payment status and returns.
+- **camt.055 Customer cancellation request**. Sender: Corporate. Receiver: Bank. ISO 20022: camt.055; SWIFT MT: MT192, from the corporate. Asks the bank to cancel a payment the corporate instructed. Used in: Investigations and payment tracking.
+- **camt.056 Interbank cancellation request**. Sender: Sending bank. Receiver: Receiving bank. ISO 20022: camt.056; SWIFT MT: MT192, MT292. Requests cancellation or recall of a payment between banks. Used in: Investigations and payment tracking.
+- **camt.029 Resolution of investigation**. Sender: Receiving bank. Receiver: Requesting bank. ISO 20022: camt.029; SWIFT MT: MT196, MT296. Answers a cancellation request or inquiry. Used in: Investigations and payment tracking.
+- **camt.027 Claim non receipt**. Sender: Corporate or bank. Receiver: Bank. ISO 20022: camt.027; SWIFT MT: MT199 free format. Reports that an expected payment was not received. Used in: Investigations and payment tracking.
+- **camt.110 Investigation request**. Sender: Bank. Receiver: Bank. ISO 20022: camt.110; SWIFT MT: MT199 free format. Structured inquiry about a payment between banks, replacing free-format queries. Used in: Investigations and payment tracking.
+
+## Trade and FX
+
+- **MT798 Corporate trade envelope**. Sender: Corporate or bank. Receiver: The other party. SWIFT MT: MT798; Other: No ISO 20022 trade message in wide use. Carries trade applications and notifications between a corporate and its bank. Used in: Trade finance and FX confirmations.
+- **MT700 Documentary credit issue**. Sender: Issuing bank. Receiver: Advising bank. SWIFT MT: MT700; Other: No ISO 20022 trade message in wide use. Penalty-prone. Issues a letter of credit with terms, documents and expiry. Used in: Trade finance and FX confirmations.
+- **MT707 Documentary credit amendment**. Sender: Issuing bank. Receiver: Advising bank. SWIFT MT: MT707; Other: No ISO 20022 trade message in wide use. Amends the terms of an issued letter of credit. Used in: Trade finance and FX confirmations.
+- **MT760 Guarantee or standby credit**. Sender: Issuing bank. Receiver: Advising bank. SWIFT MT: MT760; Other: No ISO 20022 trade message in wide use. Issues a demand guarantee or standby letter of credit. Used in: Trade finance and FX confirmations.
+- **MT300 FX confirmation**. Sender: Either party. Receiver: The other party. ISO 20022: fxtr.014, fxtr.017; SWIFT MT: MT300. Penalty-prone. Confirms a foreign exchange trade: rate, amounts, value date and settlement instructions. Used in: Trade finance and FX confirmations.
+
+## Securities
+
+- **sese.023 Settlement instruction**. Sender: Investment manager. Receiver: Custodian. ISO 20022: sese.023; SWIFT MT: MT540 to MT543. Penalty-prone. Instructs receipt or delivery of securities, free or against payment. Used in: Securities settlement and custody.
+- **sese.024 Settlement status**. Sender: Custodian. Receiver: Investment manager. ISO 20022: sese.024; SWIFT MT: MT548. Penalty-prone. Reports matching status, pending reasons and fails for an instruction. Used in: Securities settlement and custody.
+- **sese.025 Settlement confirmation**. Sender: Custodian. Receiver: Investment manager. ISO 20022: sese.025; SWIFT MT: MT544 to MT547. Confirms settled quantity, amount and date. Used in: Securities settlement and custody.
+- **semt.002 Statement of holdings**. Sender: Custodian or transfer agent. Receiver: Investment manager or distributor. ISO 20022: semt.002; SWIFT MT: MT535. Positions held by account and security at a statement date. Used in: Fund order processing; Securities settlement and custody.
+- **semt.017 Statement of transactions**. Sender: Custodian. Receiver: Investment manager. ISO 20022: semt.017; SWIFT MT: MT536. Settled movements by security over a period. Used in: Securities settlement and custody.
+
+## Funds
+
+- **acmt.001 Account opening**. Sender: Distributor. Receiver: Transfer agent. ISO 20022: acmt.001. Opens an investor account at the transfer agent before orders are placed. Used in: Fund order processing.
+- **setr.010 Subscription order**. Sender: Distributor. Receiver: Transfer agent. ISO 20022: setr.010; SWIFT MT: MT502; Other: Clearing utility order files in the US. Penalty-prone. Buys fund units by amount or quantity, before the dealing cutoff. Used in: Fund order processing.
+- **setr.004 Redemption order**. Sender: Distributor. Receiver: Transfer agent. ISO 20022: setr.004; SWIFT MT: MT502; Other: Clearing utility order files in the US. Penalty-prone. Sells fund units by amount or quantity, before the dealing cutoff. Used in: Fund order processing.
+- **setr.013 Switch order**. Sender: Distributor. Receiver: Transfer agent. ISO 20022: setr.013. Redeems from one fund and subscribes to another in one order. Used in: Fund order processing.
+- **setr.016 Order status report**. Sender: Transfer agent. Receiver: Distributor. ISO 20022: setr.016; SWIFT MT: MT509. Reports the status of an order: received, accepted, rejected or pending. Used in: Fund order processing.
+- **setr.012 Subscription confirmation**. Sender: Transfer agent. Receiver: Distributor. ISO 20022: setr.012; SWIFT MT: MT515. Confirms an executed subscription with price, units and settlement amount. Used in: Fund order processing.
+- **setr.006 Redemption confirmation**. Sender: Transfer agent. Receiver: Distributor. ISO 20022: setr.006; SWIFT MT: MT515. Confirms an executed redemption with price, units and settlement amount. Used in: Fund order processing.
+
+
+---
+
+File: https://process-genome.onrender.com/agents/operations.md
+
+# B2B operations work areas and stakeholders
+
+Source: Business Network Process Genome, Operations map, common to all industries (https://process-genome.onrender.com/#all/opsmap).
+Status: Examples describe typical operating scenarios, not specific customer accounts. Standards, versions, and mandate dates vary by partner and region. Confirm requirements with each partner before building.
+
+The work an EDI and B2B operations team does, where each area breaks, and the internal and external stakeholders involved. Roles: owner, contributor, affected.
+
+## Daily operations
+
+### Monitoring
+Watch every document flow and scheduled job for failures.
+
+- What the work involves:
+  - Review error queues and failed ERP interface records
+  - Check communication sessions and scheduled jobs
+  - Report open issues to business owners each morning
+- Where it breaks: Breaks at the EDI team. Failures found late delay orders, shipments, payments, and claims.
+- Who is involved: Customer service, operations, finance
+- Examples:
+  - Retail and CPG: Overnight purchase orders (850) from a retailer fail a mapping step and sit unnoticed, so they miss the warehouse pick cutoff. The EDI team finds them in the morning error queue review, fixes the cause, and reloads the orders.
+  - Automotive: The early-morning job that loads an OEM's shipping schedules (862) into the ERP fails silently, so the plant ships to yesterday's quantities. The EDI team catches the failed job, reruns the load, and confirms quantities match the OEM's file.
+  - Financial services: The job that transfers the day's supplier payment file to the bank fails silently, putting the bank cutoff and value date at risk. The EDI team's afternoon check finds no bank receipt, resends the file, and confirms acceptance before cutoff.
+- Stakeholders:
+  - Customer service (internal, affected): Stuck orders and acknowledgments miss customer order cutoffs
+  - Supply chain (internal, affected): Failed releases and ship notices delay plant and warehouse work
+  - Finance and treasury (internal, affected): Failed invoices and payment files delay cash and miss bank cutoffs
+  - IT and ERP (internal, contributor): Runs the ERP interface jobs whose failed records the EDI team reviews
+  - EDI service providers (external, contributor): Reports network, mailbox, and translator status and delivery failures
+
+### Support desk and on-call
+Answer partners and colleagues through the EDI mailbox, phone, and tickets.
+
+- What the work involves:
+  - Triage requests against service levels
+  - Route each request to the right owner
+  - Cover nights and weekends by rotation
+- Where it breaks: Breaks at the EDI team. Support work pulls the same people off onboarding and map changes.
+- Who is involved: Trading partners, internal teams, provider help desks
+- Examples:
+  - Retail and CPG: A retailer, a sales rep, and the warehouse each open tickets about the same unshipped promotional order. The EDI desk merges the tickets, finds the order on credit hold, and routes it to order management that morning.
+  - Automotive: A supplier plant calls on-call overnight because no shipping schedule (862) arrived for the morning truck, and the OEM line could run short. On-call confirms the OEM sent nothing, calls the OEM help desk, and gets a confirmed schedule.
+  - Financial services: Treasury calls at midday: the bank rejected this morning's payment file, and suppliers miss today's value date unless it is resent before cutoff. The EDI desk pulls the bank's rejection report, works the bank help desk, and updates treasury hourly.
+- Stakeholders:
+  - Customer service (internal, contributor): Passes customer EDI questions to the desk and relays answers back
+  - Supply chain (internal, affected): Plants and warehouses need overnight answers on missing releases
+  - IT and ERP (internal, contributor): Shares on-call coverage for ERP, servers, and network issues
+  - Customers (external, contributor): Raise document issues through the EDI mailbox and partner contacts
+  - Suppliers (external, contributor): Report missing orders and failed documents to the desk
+  - EDI service providers (external, contributor): Provider help desk takes network and translator tickets
+
+### Rejections
+Find why a document failed and explain it in business terms.
+
+- What the work involves:
+  - Read the 997, 999, or 824 acknowledgment
+  - Locate the failing segment and value
+  - Write the cause and the fix for the owner
+- Where it breaks: Breaks at the partner. Unclear rejections lead to guessing and repeat failures.
+- Who is involved: Business users, partner EDI teams
+- Examples:
+  - Retail and CPG: A retailer rejects an invoice (810) because the unit price differs from the purchase order, and the invoice goes unpaid. The EDI team reads the rejection message (824), finds the line, and shows billing the ordered versus invoiced price.
+  - Automotive: An OEM rejects a ship notice (856) because a part number does not match its current schedule, so the parts cannot be received and a debit memo may follow. The EDI team finds the bad value and tells shipping.
+  - Financial services: The bank rejects a payment file (pain.001) because several supplier account numbers fail its IBAN check, and those payments miss their value date. The EDI team reads the bank's status report and gives accounts payable each failing payment and field.
+- Stakeholders:
+  - Customer service (internal, affected): Needs rejected orders and acknowledgments explained in business terms
+  - Finance and treasury (internal, affected): Needs invoice and payment rejections explained to correct them
+  - Supply chain (internal, affected): Needs ship notice rejections explained before the next shipment
+  - Customers (external, contributor): Return 997, 999, and 824 acknowledgments with the rejection detail
+  - Suppliers (external, affected): Need our rejection of their documents explained to resend correctly
+  - Banks (external, contributor): Return payment status reports that state why a file was rejected
+  - Web and portal partners (external, contributor): Correct and resend documents in web forms after a partner rejection
+
+### Fix routing
+Get the right owner to fix the cause and resend.
+
+- What the work involves:
+  - Assign the fix to master data, order entry, finance, or the partner
+  - Back out and resend the corrected document
+  - Track it until the partner accepts
+- Where it breaks: Breaks inside the company. Fixes stall when nobody owns them.
+- Who is involved: Master data, order entry, finance, partners
+- Examples:
+  - Retail and CPG: Invoices to a retailer keep rejecting because a cost change agreed by sales never reached the ERP, delaying cash. The EDI team assigns the update to sales operations, resends the invoices once fixed, and tracks them to acceptance.
+  - Automotive: An OEM schedule fails to post because master data has not loaded a new engineering change level, so the plant ships to an old schedule. The EDI team routes the fix to master data, then reprocesses the schedule.
+  - Financial services: A supplier payment fails because the supplier changed banks and accounts payable never updated the vendor record, so the supplier goes unpaid. The EDI team assigns the update to accounts payable with callback verification, then regenerates and resends the payment.
+- Stakeholders:
+  - Master data (internal, contributor): Corrects item, location, and account records at the source
+  - Customer service (internal, contributor): Corrects order entry errors so documents can be resent
+  - Finance and treasury (internal, contributor): Corrects prices, invoice data, and vendor bank details
+  - Supply chain (internal, contributor): Corrects shipment, lot, and carton data on ship notices
+  - Customers (external, contributor): Fix and resend when the error is on the customer side
+  - Suppliers (external, contributor): Fix and resend ship notices and invoices that failed our checks
+
+### Missing documents
+Catch documents and acknowledgments that never arrived.
+
+- What the work involves:
+  - Watch for overdue acknowledgments
+  - Flag orders without confirmations and shipments without ship notices
+  - Chase the partner or internal owner
+- Where it breaks: Silent gap with the partner. No error fires, so the gap surfaces later as a penalty or delay.
+- Who is involved: Partners, operations, finance
+- Examples:
+  - Retail and CPG: A supplier sends a ship notice (856), but the retailer's acknowledgment (997) never returns, and no error fires. The EDI team's overdue acknowledgment check flags it, confirms delivery in network logs, and resends before the truck arrives.
+  - Automotive: A truck leaves a supplier plant without its ship notice because shipping skipped a confirm step, so the OEM issues a debit memo. The EDI team matches shipments to sent notices hourly and sends the missing one before arrival.
+  - Financial services: One bank's prior-day statement (BAI2 or camt.053) does not arrive, so treasury positions cash without that bank's balances. The EDI team flags the file at its expected time, checks the connection, requests a resend, and alerts treasury.
+- Stakeholders:
+  - Supply chain (internal, affected): Shipments without ship notices slow receiving and cause penalties
+  - Customer service (internal, affected): Orders without acknowledgments leave order status unconfirmed
+  - Finance and treasury (internal, affected): Missing remittance and bank statements block cash application
+  - Customers (external, contributor): Asked to resend missing orders and acknowledgments
+  - Suppliers (external, contributor): Asked to send overdue ship notices and invoices
+  - Carriers and 3PLs (external, contributor): Asked to send overdue shipment status updates
+  - Web and portal partners (external, contributor): Key ship notices and invoices from the order online; late keying shows up as missing documents
+
+### Cross-references and master data
+Keep partner codes matched to internal records.
+
+- What the work involves:
+  - Map partner item, location, and account codes
+  - Update tables when partners or products change
+  - Fix mismatches that block documents
+- Where it breaks: Breaks inside the company. One wrong code rejects every document that uses it.
+- Who is involved: Master data, sales, finance
+- Examples:
+  - Retail and CPG: A retailer orders a new item using its own item number, which is missing from the cross-reference table, so orders fail before launch. The EDI team maps the retailer's number to the internal SKU and reprocesses held orders.
+  - Automotive: An OEM issues a new part number for a revised component, but the supplier's cross-reference still points to the old one, so demand goes unseen. The EDI team adds the new mapping with its effective date and reprocesses the schedules.
+  - Financial services: A customer pays several invoices with one remittance (820) that uses its own reference numbers, so cash cannot be applied. The EDI team maps the customer's references to invoice numbers in the matching rules and reruns cash application.
+- Stakeholders:
+  - Master data (internal, owner): Owns the item, customer, vendor, and location records behind each code
+  - Sales and key accounts (internal, contributor): Supplies customer item numbers, ship-to lists, and agreed pricing
+  - Finance and treasury (internal, contributor): Supplies account, remit-to, and payment reference data
+  - Customers (external, contributor): Send item catalogs, location lists, and code changes
+  - Suppliers (external, contributor): Send part number, item, and location changes
+
+## Partner lifecycle
+
+### Partner onboarding
+Take a new partner from questionnaire to first live document.
+
+- What the work involves:
+  - Collect capabilities, IDs, and contacts
+  - Set up connections and maps from the partner's guide
+  - Test, certify, and cut over to production
+- Where it breaks: Breaks at the partner. Testing needs both sides at the same time, and missing data stalls mapping.
+- Who is involved: Partner EDI team, provider, business owners
+- Examples:
+  - Retail and CPG: A new retailer requires orders, ship notices, carton labels, and invoices to pass certification before the first order ships. The EDI team collects IDs and guides, builds maps, tests in the retailer's portal, and goes live after sign-off.
+  - Automotive: A supplier wins parts on a new vehicle program, and the OEM requires schedules, ship notices, and labels working before launch. The EDI team maps the OEM's specifications, tests with the OEM's EDI coordinator, and goes live on time.
+  - Financial services: A company opens accounts at a new bank, and payments stay manual in the bank portal until files are connected. The EDI team completes the bank's setup forms, exchanges security keys, maps the bank's formats, and sends test payments.
+- Stakeholders:
+  - Sales and key accounts (internal, owner): Drives customer onboarding to start orders on a won account
+  - Procurement (internal, owner): Drives supplier onboarding under purchasing and supply terms
+  - Master data (internal, contributor): Creates partner, item, and location records needed for mapping
+  - IT and ERP (internal, contributor): Configures ERP partner settings and joins integration testing
+  - Customers (external, contributor): Provide guides, IDs, and test windows, then certify the setup
+  - Suppliers (external, contributor): Complete questionnaires, connections, and test documents
+  - EDI service providers (external, contributor): Set up connections and maps and run testing under a service plan
+  - Web and portal partners (external, contributor): Register online and start on web forms or a portal instead of a full EDI setup
+
+### Map build and maintenance
+Build and change the maps between partner formats and the ERP.
+
+- What the work involves:
+  - Build maps for new partners and documents
+  - Update maps when a partner or the ERP changes
+  - Retest before each change reaches production
+- Where it breaks: Breaks at the EDI team. Changes arrive on the partner's schedule, and every change needs retesting.
+- Who is involved: Partners, provider, ERP team
+- Examples:
+  - Retail and CPG: A grocer now requires promotional allowances on each invoice line, which the current invoice map does not carry, so invoices get short-paid. The EDI team maps the ERP's promotion fields into the invoice, tests with samples, and releases the change.
+  - Automotive: An OEM introduces a production sequence (866) for a new seat module, and without it the supplier cannot build modules in vehicle order. The EDI team builds the map into the sequencing system and tests with the OEM's sample files.
+  - Financial services: Treasury adds same-day ACH as a payment type, and urgent payments stay manual in the bank portal until the map supports it. The EDI team adds the payment codes and cutoff logic, tests with the bank, and releases.
+- Stakeholders:
+  - IT and ERP (internal, contributor): Owns ERP interface fields and tables that maps read and write
+  - Customers (external, contributor): Publish implementation guides that define map content
+  - EDI service providers (external, contributor): Builds and changes maps when mapping is a managed service
+
+### Partner follow-up
+Chase test files, sign-offs, certificates, and overdue responses.
+
+- What the work involves:
+  - Send reminders and escalate by phone
+  - Raise tickets in partner portals
+  - Track open items for each partner
+- Where it breaks: Breaks at the partner. Unresponsive partners delay go-lives and cutovers.
+- Who is involved: Partner contacts, provider, internal owners
+- Examples:
+  - Retail and CPG: A new retailer has not approved test ship notices sent weeks ago, and missing the peak-season freeze pushes go-live past holiday orders. The EDI team sends dated reminders, opens a portal ticket, and escalates through the sales account manager.
+  - Automotive: A tier 2 supplier keeps sending test ship notices with errors, so the tier 1 still receives parts without notice and keys receipts by hand. The EDI team sends a specific error list and tracks each retest.
+  - Financial services: A bank has not returned its signed certificate for a new payment connection, blocking production testing and delaying treasury's migration. The EDI team opens a case with the bank's implementation manager, escalates through the relationship manager, and logs each contact.
+- Stakeholders:
+  - Sales and key accounts (internal, contributor): Escalates through the account relationship when a customer stalls
+  - Procurement (internal, contributor): Escalates through the buyer relationship when a supplier stalls
+  - Customers (external, contributor): Owe test approvals, sign-offs, and responses
+  - Suppliers (external, contributor): Owe test files, corrections, and connection details
+  - EDI service providers (external, contributor): Holds open setup tickets that need chasing
+  - Web and portal partners (external, affected): Reached through portal alerts and email when documents are late
+
+### Connections and protocols
+Set up and maintain the transport connections to each partner.
+
+- What the work involves:
+  - Configure AS2, AS4, OFTP2, SFTP, VAN, and API connections
+  - Test connectivity and acknowledgments with each partner
+  - Move partners when they change protocols or networks
+- Where it breaks: Breaks on the connection. A partner changes its endpoint or protocol, and documents stop without a clear error.
+- Who is involved: Partner technical contacts, networks, security, IT
+- Examples:
+  - Retail and CPG: A European retailer requires suppliers to send EANCOM messages over AS2 and stops accepting files through its old VAN mailbox. The EDI team sets up the AS2 connection, exchanges certificates, and tests EANCOM orders and invoices before the cutover date.
+  - Automotive: A European OEM requires suppliers to connect over OFTP2 with an Odette-issued certificate before it switches off its legacy connection. The EDI team obtains the certificate, configures the OFTP2 link, and confirms schedules arrive before the switch-off.
+  - Financial services: A corporate client connects to a European bank over EBICS while keeping its SWIFT connection for other banks. The EDI team sets up the EBICS keys and bank parameters, tests payment and statement files, and confirms both channels run in parallel.
+- Stakeholders:
+  - IT and ERP (internal, contributor): Provides servers, firewall rules, and network routes for connections
+  - Information security (internal, contributor): Approves protocols, encryption, and inbound access
+  - EDI service providers (external, contributor): Runs VAN interconnects and hosted connections
+  - Customers (external, contributor): Share endpoints and test connectivity, and announce changes
+  - Banks (external, contributor): Require host-to-host or network connections with strict onboarding
+
+### Certificate management
+Track, renew, and exchange the certificates that secure partner connections.
+
+- What the work involves:
+  - Keep a register of certificates by partner and expiry date
+  - Renew 60 to 90 days ahead and exchange with each partner
+  - Cut over together and confirm traffic after the change
+- Where it breaks: Breaks on the connection. An expired certificate stops one partner completely while other flows keep working.
+- Who is involved: Partner security contacts, security team, banks, networks
+- Examples:
+  - Retail and CPG: A retailer emails notice of its security certificate change to a former employee's inbox, and on the change date all its orders would stop. The EDI team routes partner notices to a shared mailbox, loads the certificate, and tests.
+  - Automotive: The company's own OFTP2 certificate from the Odette CA is due to expire, and every OEM connection depends on it. The EDI team renews the certificate, distributes it to each OEM, and confirms schedules on every connection after the change.
+  - Financial services: A bank renews the certificate on its host-to-host connection, and files signed for the old certificate will be refused. The EDI team exchanges the new certificate with the bank, sends a test payment file, and confirms the status report before releasing live payments.
+- Stakeholders:
+  - Information security (internal, contributor): Sets key policy and issues or approves certificates
+  - Customers (external, contributor): Exchange certificates and cut over on an agreed date
+  - Banks (external, contributor): Require formal certificate exchange before payments resume
+  - EDI service providers (external, contributor): Renews certificates on hosted connections and notifies partners
+
+### Document and version changes
+Implement new versions, documents, and rules from partners.
+
+- What the work involves:
+  - Review the partner's revised guide
+  - Remap, retest, and run mixed versions
+  - For hub programs, publish guides and track adoption
+- Where it breaks: Breaks at the partner. Notice periods are short, and penalties start on the compliance date.
+- Who is involved: Partners, provider, business owners
+- Examples:
+  - Retail and CPG: A retailer revises its ship notice guide with a sixty-day compliance date, after which every nonconforming notice draws a chargeback. The EDI team compares old and new guides, updates the map, tests with the retailer, and goes live early.
+  - Automotive: An OEM replaces its delivery schedule format with a newer EDIFACT version, and suppliers on the old format stop receiving schedules at cutover. The EDI team maps the new version, runs both in parallel, and confirms quantities match.
+  - Financial services: A bank moves daily statements from BAI2 to camt.053 and sets a date to stop BAI2, after which cash reconciliation would stop. The EDI team maps the new format into the treasury system and runs both until balances match.
+- Stakeholders:
+  - Sales and key accounts (internal, affected): Carries compliance penalties when customer changes miss the date
+  - Supply chain (internal, affected): Changes labeling, packing, or shipping steps to meet new rules
+  - IT and ERP (internal, contributor): Adds ERP fields and data the new version requires
+  - Customers (external, owner): Issue revised guides and set the compliance date
+  - Suppliers (external, affected): Adopt the guides we publish when we run a supplier program
+  - EDI service providers (external, contributor): Supplies updated standards and maps for new versions
+  - Web and portal partners (external, affected): Receive updated forms when a partner changes its requirements, with no map to change
+
+## Programs and compliance
+
+### Business programs
+Set up the documents for programs other teams own.
+
+- What the work involves:
+  - Gather requirements from the program owner
+  - Build and test the new document flows
+  - Support the launch and early volume
+- Where it breaks: Breaks inside the company. Each partner's version of a program differs.
+- Who is involved: Program owners, partners, provider
+- Examples:
+  - Retail and CPG: Merchandising launches drop ship with an online retailer, and without daily inventory feeds (846) the site sells stock the supplier lacks. The EDI team builds the order, ship notice, invoice, and inventory flows and tests with the retailer.
+  - Automotive: An OEM moves a supplier to pay on receipt, paying from its own receiving records instead of supplier invoices, so receipt errors leave parts unpaid. The EDI team maps the OEM's receipt and self-billing documents and reconciles them to shipments.
+  - Financial services: Treasury launches supply chain finance, where the bank offers suppliers early payment based on approved invoices the company sends. The EDI team builds the approved invoice file in the bank's format, tests matching with the bank, and monitors daily files.
+- Stakeholders:
+  - Sales and key accounts (internal, owner): Owns customer programs such as drop ship, inventory feeds, and rebates
+  - Supply chain (internal, contributor): Runs the inventory, sequencing, and fulfillment behind the program
+  - Finance and treasury (internal, contributor): Owns payment programs such as early pay and supply chain finance
+  - IT and ERP (internal, contributor): Builds the ERP side of new program flows
+  - Customers (external, contributor): Define their version of the program and test it
+  - Carriers and 3PLs (external, contributor): Exchange warehouse and shipment documents for logistics programs
+  - Banks (external, contributor): Exchange files for payment and financing programs
+  - Web and portal partners (external, contributor): Print carton labels and follow partner rules that web forms check before sending
+
+### Regulatory mandates
+Deliver changes required by law or regulation.
+
+- What the work involves:
+  - Track mandates and their effective dates
+  - Change maps and data to comply
+  - Test with partners before the deadline
+- Where it breaks: Breaks at the partner. Requirements differ by country and change late.
+- Who is involved: Compliance, tax, finance, partners
+- Examples:
+  - Retail and CPG: A country where the company sells adopts real-time e-invoicing, so the tax authority must clear each invoice before customers can pay it. The EDI team works with tax to map invoices to the national format and tests clearance.
+  - Automotive: Mexico requires a digital bill of lading supplement (Carta Porte) for goods on federal roads, and trucks without it can be held at inspection. The EDI team adds the required data with tax and logistics and tests before enforcement.
+  - Financial services: Banks begin rejecting cross-border payments without structured payer and payee addresses under ISO 20022 rules, so international supplier payments would fail. The EDI team reviews vendor addresses with accounts payable, maps the structured fields, and tests with each bank.
+- Stakeholders:
+  - Compliance and legal (internal, owner): Tracks mandates, interprets requirements, and signs off compliance
+  - Finance and treasury (internal, contributor): Owns tax, e-invoicing, and payment format requirements
+  - IT and ERP (internal, contributor): Changes ERP data and systems to produce mandated content
+  - Supply chain (internal, contributor): Supplies traceability and customs data from operations
+  - Regulators (external, owner): Set the mandated formats, data, and effective dates
+  - EDI service providers (external, contributor): Provides certified access points, clearinghouses, and formats
+
+### Chargebacks and deductions management
+Issue, reconcile, and dispute chargebacks and deductions between trading partners.
+
+- What the work involves:
+  - Track partner error, timeliness, and accuracy rates behind each chargeback
+  - Issue chargebacks with the failing document and rule
+  - Dispute chargebacks and deductions received with documents and timestamps
+- Where it breaks: Breaks at the partner. Chargebacks without clear error detail or archived evidence become disputes instead of fixes.
+- Who is involved: Finance, deductions team, vendor compliance, partners
+- Examples:
+  - Retail and CPG: A retailer's scorecard shows a supplier sending ship notices (856) after trucks arrive, and a chargeback comes out of the next payment. The retailer's EDI team shares the late notices by date, and the supplier's EDI team checks its send timestamps and disputes any notice that arrived on time.
+  - Automotive: An OEM issues a debit memo to a supplier for a ship notice (856) with quantities that did not match the release. The OEM's EDI team supplies the failing notice and the schedule in force, and the supplier's EDI team checks both against the OEM's acceptance before agreeing or disputing.
+  - Financial services: A customer pays a corporate client short and lists deduction codes in its remittance (820), which the bank's lockbox passes through. The client's EDI team maps deduction codes to open invoices for the deductions team, and the bank's integration team fixes lockbox files that drop remittance detail.
+- Stakeholders:
+  - Finance and treasury (internal, owner): Deductions staff match each deduction to its invoice and dispute invalid ones with the document trail
+  - Supply chain (internal, contributor): Acts on pending shipment alerts, supplies proof of shipment, and fixes labeling and timing causes
+  - Sales and key accounts (internal, contributor): Negotiates disputed deductions with the customer buyer
+  - Procurement (internal, contributor): Issues supplier chargebacks under vendor compliance terms
+  - Customers (external, contributor): Issue chargebacks under their compliance terms and deduct them from payments
+  - Suppliers (external, affected): Receive chargebacks we issue for late or noncompliant documents
+  - Carriers and 3PLs (external, contributor): Supply proof of delivery for carrier and delivery disputes
+
+## Change and continuity
+
+### Outages and recovery
+Restore flow after a provider, network, or system outage.
+
+- What the work involves:
+  - Notify partners and business owners
+  - Separate received, failed, and unsent documents
+  - Replay the backlog and review the root cause
+- Where it breaks: Breaks on the connection. Document status is unclear after recovery.
+- Who is involved: Provider, infrastructure, partners
+- Examples:
+  - Retail and CPG: The EDI provider's network goes down for most of a day before a major holiday, and orders pile up against ship windows. The EDI team notifies retailers, sorts sent, received, and failed documents, and replays the backlog without duplicates.
+  - Automotive: A supplier's translator server fails overnight and no schedules or ship notices flow, so plants lose current demand. The EDI team runs the contingency plan, pulls schedules from OEM web portals, ships to them, and replays messages after recovery.
+  - Financial services: The bank connection fails mid-transfer, and treasury cannot tell whether the morning payment file arrived; resending risks paying twice. The EDI team confirms receipt with the bank first, checks its status report, and resends only payments the bank lacks.
+- Stakeholders:
+  - IT and ERP (internal, contributor): Restores infrastructure and ERP interfaces
+  - Customer service (internal, affected): Takes customer calls and manual orders during the outage
+  - Supply chain (internal, affected): Plants and warehouses run on held releases and ship notices
+  - EDI service providers (external, contributor): Restores the network or translator and helps replay the backlog
+  - Customers (external, affected): Receive outage notices and replayed documents
+  - Suppliers (external, affected): Receive outage notices and are asked to resend documents
+
+### Platform and ERP upgrades
+Keep translators, gateways, and ERP interfaces current.
+
+- What the work involves:
+  - Plan upgrades and patches
+  - Regression-test every active partner flow
+  - Support cutover and the weeks after go-live
+- Where it breaks: Breaks at the EDI team. A flow missed in testing fails after go-live.
+- Who is involved: IT, ERP team, provider, partners
+- Examples:
+  - Retail and CPG: The company upgrades its ERP, which changes how orders, ship notices, and invoices reach EDI, and any flow missed in testing draws chargebacks. The EDI team regression-tests every retailer and document against the new ERP and staffs support after go-live.
+  - Automotive: A supplier moves its plants to a new ERP, and a broken schedule flow after cutover can stop shipments to OEM lines. The EDI team runs schedules in parallel, compares cumulative quantities, and cuts plants over one at a time.
+  - Financial services: Treasury replaces the system that creates payment files and loads bank statements, and a format error could stop all outbound payments. The EDI team retests every bank's files in bank test environments and runs statements in parallel before cutover.
+- Stakeholders:
+  - IT and ERP (internal, owner): Owns the ERP and platform upgrade plan, budget, and cutover
+  - Customer service (internal, contributor): Business users test order and acknowledgment flows
+  - Finance and treasury (internal, contributor): Business users test invoice and payment flows
+  - EDI service providers (external, contributor): Upgrades the translator or network and supports regression tests
+  - Customers (external, contributor): Retest with us when a change touches their flows
+
+### Mergers and consolidations
+Absorb acquisitions, divestitures, and consolidations on either side of a relationship.
+
+- What the work involves:
+  - Track partner mergers, renamed entities, and ID changes
+  - Consolidate or split connections, IDs, and maps
+  - Migrate in waves and confirm routing after each change
+- Where it breaks: Breaks at the partner. Unannounced ID or connection changes send documents to the wrong place.
+- Who is involved: Partners, corporate development, IT, finance
+- Examples:
+  - Retail and CPG: A retailer acquires a regional chain and moves its stores onto the retailer's EDI IDs and ordering system, so orders start arriving from new IDs. The EDI team updates IDs and store cross-references, tests the flow, and retires the old connection.
+  - Automotive: A customer divests a plant to another company, which starts sending releases (830) under a new identity and payment terms. The EDI team sets up the new trading relationship, carries over the plant's open releases, and confirms invoices route to the new owner.
+  - Financial services: A company's bank is acquired and moves clients to the acquiring bank's file formats and connection on a fixed date. The EDI team remaps payment and statement files, tests with the new bank, and runs both connections until cutover.
+- Stakeholders:
+  - Compliance and legal (internal, contributor): Confirms legal entity changes and deal dates
+  - Master data (internal, contributor): Merges or splits customer, vendor, and entity records
+  - IT and ERP (internal, contributor): Consolidates or separates ERP instances and interfaces
+  - Finance and treasury (internal, contributor): Updates remit-to, bank, and tax details for changed entities
+  - Customers (external, contributor): Announce merged entities, new IDs, and connection changes
+  - Suppliers (external, contributor): Announce merged entities, new IDs, and connection changes
+  - EDI service providers (external, contributor): Moves mailboxes, IDs, and connections between accounts
+
+### Provider management
+Manage the EDI provider's service levels and billing.
+
+- What the work involves:
+  - Escalate tickets and track service levels
+  - Oversee managed services and contractors
+  - Reconcile charges against activity
+- Where it breaks: Breaks on the connection. Charges vary with volume and are hard to verify.
+- Who is involved: Provider, procurement, finance
+- Examples:
+  - Retail and CPG: During peak season, the EDI provider takes days to fix a mailbox issue blocking one retailer's orders, and ship windows slip. The EDI team escalates through the provider's account manager, documents the delay against the service agreement, and tracks closure.
+  - Automotive: A managed services provider owns map changes, and an OEM change must be live before a plant launch or parts cannot ship. The EDI team sets the deadline in the work order, reviews progress weekly, and enforces plant-critical response times.
+  - Financial services: The provider manages direct bank connections, and a bank key change falls on a month-end weekend, when failure would stop payments during close. The EDI team reviews the provider's change plan, staffs a joint test, and agrees a rollback.
+- Stakeholders:
+  - Procurement (internal, owner): Owns the provider contract, service levels, and renewals
+  - Finance and treasury (internal, contributor): Pays provider invoices and checks charges against budget
+  - EDI service providers (external, contributor): Delivers the contracted service and reports levels and usage
+
+### Governance and change control
+Control access, changes, archives, and contingency plans.
+
+- What the work involves:
+  - Move changes through release windows
+  - Maintain access roles and audit evidence
+  - Keep archives and outage plans current
+- Where it breaks: Breaks at the EDI team. Urgent partner deadlines collide with release controls.
+- Who is involved: Security, audit, IT change board
+- Examples:
+  - Retail and CPG: A retailer requires a ship notice change during the company's peak-season change freeze: breaking the freeze risks outages, waiting risks chargebacks. The EDI team brings test evidence to the change board and gets an exception or negotiates a later date.
+  - Automotive: An OEM requires each supplier to keep a documented, tested EDI contingency plan, and a missing plan fails audits. The EDI team maintains the plan with portal fallbacks and contacts and tests it with plant operations on a set schedule.
+  - Financial services: One user can both edit payment files and release them to the bank, which breaks segregation of duties and invites fraud. The EDI team splits the roles, requires dual approval to release files, and logs who released each file.
+- Stakeholders:
+  - IT and ERP (internal, owner): Runs the change board and release windows
+  - Information security (internal, contributor): Sets access roles and reviews privileged access
+  - Compliance and legal (internal, contributor): Sets retention rules and collects audit evidence
+  - Customers (external, contributor): Some require contingency plans and archived records on request
+  - Regulators (external, contributor): Set retention, privacy, and access rules that audits check
+
+### Reporting and documentation
+Report EDI health and keep operating knowledge current.
+
+- What the work involves:
+  - Produce error, volume, and onboarding reports
+  - Maintain partner catalogs, procedures, and runbooks
+  - Train business users on EDI requests
+- Where it breaks: Breaks at the EDI team. Knowledge stays with long-tenured staff.
+- Who is involved: Leadership, business users, team members
+- Examples:
+  - Retail and CPG: Sales leadership asks why a key retailer's compliance scorecard dropped, since low scores bring fines and weaken the relationship. The EDI team breaks chargebacks down by cause and site, reports the top issues, and tracks fixes monthly.
+  - Automotive: Plant managers learn about late or wrong ship notices only when the OEM scorecard drops. The EDI team publishes weekly ship notice timeliness and accuracy by plant and OEM, with a runbook for each recurring failure.
+  - Financial services: The only analyst who knows the bank connection setup is leaving, and the next key change or failure would have no owner. The EDI team documents each bank's connection, formats, contacts, and recovery steps and trains a second analyst.
+- Stakeholders:
+  - Sales and key accounts (internal, affected): Uses error reports and its own compliance scorecard in customer reviews
+  - Supply chain (internal, affected): Uses delivery and ship notice performance by site or partner
+  - Finance and treasury (internal, affected): Uses invoice and payment exception reports
+  - Customer service (internal, contributor): Business users trained to raise EDI requests correctly
+
+## Stakeholders
+
+### Internal
+- Customer service: Order entry and customer inquiries; first to feel order and ship notice failures
+- Finance and treasury: Billing, payables, deductions, and treasury; owns invoices, payments, bank files
+- Supply chain: Planning, plants, warehouses, and shipping; depends on releases and ship notices
+- Master data: Item, customer, vendor, and location records that partner codes must match
+- IT and ERP: ERP, interfaces, infrastructure, and the change board
+- Information security: Key and certificate policy, encryption, access, and connection approval
+- Compliance and legal: Regulatory, tax, audit, and contract obligations, including entity changes
+- Sales and key accounts: Owns customer relationships, programs, scorecards, and escalations
+- Procurement: Owns supplier relationships, vendor compliance terms, and provider contracts
+
+### External
+- Customers: Buyers such as retailers, OEMs, distributors, and payers that set EDI rules
+- Suppliers: Vendors that receive orders and send acknowledgments, ship notices, and invoices
+- Web and portal partners: Smaller suppliers and vendors without EDI that answer orders through web forms or a buyer's portal
+- Carriers and 3PLs: Carriers and logistics providers exchanging tenders, status, and freight bills
+- Banks: Banks exchanging payment files, remittance, statements, and status reports
+- EDI service providers: VANs, networks, clearinghouses, managed services, and translator vendors
+- Regulators: Tax, health, drug, customs, and payment authorities that mandate formats
+
+
+---
+
+File: https://process-genome.onrender.com/agents/retail-product-overlay.md
+
+# Retail and CPG product overlay
+
+Source: Business Network Process Genome, Product overlay on the Retail and CPG Process Genome (https://process-genome.onrender.com/#retail/map).
+Status: Concept preview for internal review. Diagrams are illustrative. Some capabilities shown are in development or planned and are not generally available. Results depend on implementation and partner participation. Names, scope and availability may change.
+
+The Product overlay maps product coverage onto the retail documents in four steps: Connect, Comply, Optimize and Extend. Document codes follow each capability.
+
+## Connect: partner connectivity
+Brings partners without EDI teams onto electronic documents, on either side of the relationship. Web EDI lets suppliers answer retailer orders online. The supplier portal lets retailer and CPG hubs trade with vendors that have no EDI.
+
+### Web EDI for suppliers
+- Orders received and acknowledged online (850, 855)
+- Order changes received and answered (860, 865)
+- Ship notices with GS1-128 carton labels (856)
+- Invoices filled from the order (810)
+- Warehouse orders and shipping advice with 3PLs (940, 945)
+- Remittance received (820)
+
+### Supplier portal for retailer and CPG hubs
+- Orders and changes tracked by vendor (850, 860)
+- Line-level confirmations and counteroffers (855, 865)
+- Ship notices built from the order, with matching labels (856)
+- Goods receipt as proof of delivery (861)
+- Invoices matched to the order (810)
+- Remittance status (820)
+- Carrier shipment status (214)
+
+## Comply: retail compliance for suppliers
+A separate product, not part of Command Center. Checks documents before delivery, alerts business users before a penalty, and scores compliance by retailer.
+
+### Pre-delivery document validation
+- Ship notices held when they break a retailer rule (856)
+- Invoices held when they break a retailer rule (810)
+- Held documents released, or replaced with a corrected version (856, 810)
+- Duplicate ship notices and invoices stopped (856, 810)
+
+### Order lifecycle and chargeback alerts
+- Acknowledgment window set per retailer (855)
+- Pending shipment alert before the ship notice window closes (850, 856)
+- Invoice mismatch alert, with order, ship notice and invoice compared by SKU, quantity and price (810, 856, 850)
+- Rejections by 824, 864 or email in the order lifecycle (824, 864)
+- Deduction status and amount, with document evidence for disputes (820, 812)
+
+### Fill rate and scorecard
+- Fill rate by retailer, from order and acknowledgment (850, 855)
+- Backordered and short lines followed to shipment and invoice (855, 856, 810)
+- Ship notice accuracy and timeliness against variance bands (856)
+- Invoice accuracy against the order and ship notice (810)
+
+## Optimize: Command Center
+Monitors each business process on the network and recommends the next action. Integration Monitor watches volume, timing and acknowledgments. Performance Monitor checks business rules across documents. ASN Intelligence monitors ship notice health by supplier.
+
+### Integration Monitor
+- Order volume against projection (850)
+- Functional acknowledgments returned (997)
+- Application advice rejections (824)
+- Inventory feed on schedule (846)
+- Sales feed on schedule (852)
+- Remittance volume against projection (820)
+
+### Performance Monitor rules
+- Acknowledgment within 24 hours (855)
+- Ship notice within 1 hour of pickup (856)
+- Invoice matches order price and quantity (810)
+- Item confirmed before the first order (CIC, CIN)
+- Cost change loaded before invoicing (832, 879)
+- Delivery events for every tendered load (214, 204)
+- Shipping advice for every warehouse order (945, 940)
+- Deduction backup inside the dispute window (812)
+- Return credit matches an authorization (180)
+
+### ASN Intelligence (in development)
+- ASN health, failures and SLA adherence by supplier (856)
+- Rejections explained with the rule and the fix (824)
+- Missing acknowledgments on ship notices (997)
+
+## Extend: agents at decision points
+Agents predict a problem at a decision point, recommend an action and wait for a person to approve it.
+
+1. **Cost change before invoicing** (879, 832, 810; value at stake: medium). Predicts invoice price mismatches before the invoice is sent. Where: Item sync into order to cash. Recommended action: Hold invoices and correct the cost on open orders. Approved by: Pricing analyst.
+2. **Shipment at risk** (856; value at stake: high). Predicts a late or missing ship notice before arrival and recommends an action. Where: Ship notice interchange. Recommended action: Alert shipping to send the ship notices; track each 856 until accepted. Approved by: EDI operations lead.
+3. **Dispute or accept a deduction** (820, 812; value at stake: high). Classifies the deduction, assembles backup and recommends dispute or accept. Where: Deductions. Recommended action: Dispute with backup attached, or accept. Approved by: Deductions analyst.
+4. **Replenishment quantity** (852, 846; value at stake: medium). Recommends order quantities and flags out-of-stock risk from sales and stock. Where: VMI, drop ship and sales reporting. Recommended action: Adjust the proposed order quantity. Approved by: Demand planner.
+5. **Repeat rejection** (824; value at stake: low). Traces the root cause and suggests the correction. Where: Application advice. Recommended action: Correct master data and resend. Approved by: Master data analyst.
+6. **Carrier delay** (214, 204; value at stake: medium). Predicts a missed delivery appointment and recommends rebooking or retendering. Where: Routing and delivery. Recommended action: Rebook the appointment or retender the load. Approved by: Transportation planner.
+7. **Store delivery dispute** (894, 895; value at stake: low). Flags adjustments likely to be disputed at check-in and the items behind them. Where: Direct store delivery. Recommended action: Flag items for check-in review. Approved by: Route sales manager.
+8. **Inventory mismatch** (947; value at stake: low). Finds gaps between warehouse stock and supplier records before they hit fill rate. Where: 3PL fulfillment. Recommended action: Open a reconciliation with the 3PL. Approved by: Logistics coordinator.
+9. **Return credit match** (180; value at stake: medium). Matches return credits to authorizations and flags unmatched deductions. Where: Returns. Recommended action: Match the credit or dispute the deduction. Approved by: Accounts receivable.
+
+## Strategy overlay
+How a hub grows its trading community, shown on the same documents.
+
+- **Connect: Reach**. Bring trading partners onto the network so their documents flow. Question: Who is on the line? Measure: Active relationships, net new partners, and reach gap against the hub's supplier list.
+- **Activate: Completeness**. Run every document each hub requires, so whole processes complete across the community. Question: Is each relationship running what its hub requires? Measure: Required documents live out of required, whole-line completion, and opportunity where a required document is not live.
+- **Optimize: Performance**. Monitor every flow, catch exceptions and late documents, and fix them before they cost money. Question: Where does flow break or arrive late? Measure: Exceptions per 1,000 documents with volume, and timeliness against each hub's window.
+- **Extend: Intelligence**. Use network data and intelligence to predict, recommend and act inside the process. Question: Where can intelligence decide or act? Measure: Decision points covered and value influenced, such as deductions recovered or chargebacks avoided.

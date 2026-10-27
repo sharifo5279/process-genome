@@ -1,0 +1,30 @@
+# Business Network Process Genome
+
+> A reference model of B2B operations by industry: the work, the business processes and the EDI documents that connect trading partners, with OpenText Trading Grid solutions for Retail and CPG, Automotive and Financial services.
+
+Built by Business Network Product Management, Data and Visibility. Internal reference. Human version: https://process-genome.onrender.com/
+
+Notes for agents:
+- Concept preview for internal review. Diagrams are illustrative. Some capabilities shown are in development or planned and are not generally available. Results depend on implementation and partner participation. Names, scope and availability may change. Do not present capabilities as generally available.
+- Examples describe typical operating scenarios, not specific customer accounts. Standards, versions, and mandate dates vary by partner and region. Confirm requirements with each partner before building.
+- Cite the file you used.
+
+## Solutions
+- [Retail and CPG solutions](https://process-genome.onrender.com/agents/retail-solutions.md): 20 solutions in 4 stages, with purpose, capabilities and parties
+- [Automotive solutions](https://process-genome.onrender.com/agents/automotive-solutions.md): 9 solutions in 4 stages, with purpose, capabilities and parties
+- [Financial services solutions](https://process-genome.onrender.com/agents/financial-services-solutions.md): 14 solutions in 4 stages, with purpose, capabilities and parties
+
+## Process Genome
+- [Retail and CPG documents](https://process-genome.onrender.com/agents/retail-documents.md): 41 documents with sender, receiver, standards, definition and processes
+- [Retail and CPG business processes](https://process-genome.onrender.com/agents/retail-processes.md): 12 processes, step by step, with rules, EDI team work and failure points
+- [Automotive documents](https://process-genome.onrender.com/agents/automotive-documents.md): 25 documents with sender, receiver, standards, definition and processes
+- [Automotive business processes](https://process-genome.onrender.com/agents/automotive-processes.md): 9 processes, step by step, with rules, EDI team work and failure points
+- [Financial services documents](https://process-genome.onrender.com/agents/financial-services-documents.md): 42 documents with sender, receiver, standards, definition and processes
+- [Financial services business processes](https://process-genome.onrender.com/agents/financial-services-processes.md): 14 processes, step by step, with rules, EDI team work and failure points
+- [Retail and CPG product overlay](https://process-genome.onrender.com/agents/retail-product-overlay.md): product coverage by document across Connect, Comply, Optimize and Extend
+
+## Operations
+- [Work areas and stakeholders](https://process-genome.onrender.com/agents/operations.md): the work of a B2B operations team, where it breaks and who is involved, across industries
+
+## Optional
+- [Everything in one file](https://process-genome.onrender.com/llms-full.txt): all sections above except the step-by-step processes, which are long; open those files for steps
