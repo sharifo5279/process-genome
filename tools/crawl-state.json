@@ -1,6 +1,6 @@
 {
  "index.html": {
-  "sha256": "31e1ab86d591929d78c4405f74327ec0aa9ec22a270f22efe81f0810c29c0f87",
+  "sha256": "c23b87657e66e93b41bac24841fd97ac5b61af6efc0f21fb6a43375aed356b0c",
   "lastmod": "2026-10-27"
  },
  "llms.txt": {
@@ -8,7 +8,7 @@
   "lastmod": "2026-10-27"
  },
  "llms-full.txt": {
-  "sha256": "aa280875bc44cc23ef8401a543bdef4aee1a5f29186902b9c4e4c7fe24388b50",
+  "sha256": "8069632793445b9c97fa27e0ae9cc26bf58787f99d7f34e109396325451fa1a3",
   "lastmod": "2026-10-27"
  },
  "command-center/index.html": {
@@ -28,7 +28,7 @@
   "lastmod": "2026-10-27"
  },
  "agents/retail-solutions.txt": {
-  "sha256": "34c9b265b438f1a7cff50aa5525f0d62661b28ffd207b5ac32998673958b50d9",
+  "sha256": "cad4ef6b1985d7e2eabb50c84df3a3ec9269be3b6396c6fd5467200c160412b2",
   "lastmod": "2026-10-27"
  },
  "agents/automotive-documents.txt": {

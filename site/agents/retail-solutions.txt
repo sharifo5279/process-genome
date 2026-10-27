@@ -23,9 +23,9 @@ Use network data and agents to predict problems and recommend actions, with a pe
 ## Solutions by stage
 
 - Plan and synchronize: EDI compliance; Trading partner visibility; Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment
-- Order and fulfill: Order-to-cash compliance; Pre-delivery document validation; Backorder and fill-rate tracking; Web EDI for suppliers; Supplier portal for retailer and CPG hubs; Drop ship and marketplace fulfillment; 3PL inventory reconciliation
-- Ship and receive: Inbound shipment visibility; ASN intelligence; Chargeback prevention alerts; Receiving and three-way match; Direct store delivery reconciliation
-- Settle and recover: Chargeback management; Deduction management; Supplier compliance scorecard; Returns and credit management
+- Order and fulfill: Order-to-cash compliance; Pre-delivery document validation; Backorder and fill-rate tracking; Web EDI for suppliers; Supplier portal for retailer and CPG hubs; Drop ship and marketplace fulfillment
+- Ship and receive: ASN intelligence; Inbound shipment visibility; Receiving and three-way match; Direct store delivery reconciliation; 3PL inventory reconciliation
+- Settle and recover: Returns and credit management; Supplier compliance scorecard; Deduction management; Chargeback management; Chargeback prevention alerts
 
 ### Plan and synchronize
 Partners, items and demand data ready before orders flow.
@@ -143,28 +143,8 @@ Orders confirmed and fulfilled across every channel.
 - Parties: Marketplaces, Vendors, Customers
 - Outcome: Helps reduce cancellations from stock errors.
 
-#### 3PL inventory reconciliation
-- Purpose: Fulfill through third-party warehouses
-- Summary: Send shipping instructions to 3PL warehouses and reconcile receipts, shipments and inventory adjustments.
-- Capabilities:
-  - Warehouse orders sent electronically
-  - Missing shipping confirmations flagged
-  - Receipts, shipments and inventory reconciled across documents
-- Parties: Suppliers, 3PLs, Retailers
-- Outcome: Fewer inventory discrepancies with 3PLs.
-
 ### Ship and receive
 Shipments tracked from dock to receipt.
-
-#### Inbound shipment visibility
-- Purpose: Coordinate inbound deliveries
-- Summary: Follow routing requests, carrier tenders and status events in one transaction view, with timing rules monitored by agents.
-- Capabilities:
-  - Tender, status and appointment documents linked to the shipment
-  - Missing delivery events detected as they occur
-  - Timing rules set in plain language and monitored
-- Parties: Suppliers, Carriers, Retailer DCs
-- Outcome: Shared status on inbound shipments.
 
 #### ASN intelligence
 - Purpose: Resolve ship notice failures
@@ -176,15 +156,15 @@ Shipments tracked from dock to receipt.
 - Parties: Retailers, Suppliers
 - Outcome: Helps improve first-pass ASN acceptance.
 
-#### Chargeback prevention alerts
-- Purpose: Act before a penalty is assessed
-- Summary: Alert supplier business users to pending shipments and invoice mismatches while the retailer's compliance window is still open.
+#### Inbound shipment visibility
+- Purpose: Coordinate inbound deliveries
+- Summary: Follow routing requests, carrier tenders and status events in one transaction view, with timing rules monitored by agents.
 - Capabilities:
-  - Pending shipment alerts before the ship notice window closes
-  - Invoice mismatch alerts by order, line and amount
-  - Alerts routed to the business user who owns the order
-- Parties: Suppliers, Retailers
-- Outcome: Helps reduce avoidable chargebacks.
+  - Tender, status and appointment documents linked to the shipment
+  - Missing delivery events detected as they occur
+  - Timing rules set in plain language and monitored
+- Parties: Suppliers, Carriers, Retailer DCs
+- Outcome: Shared status on inbound shipments.
 
 #### Receiving and three-way match
 - Purpose: Match what arrived to what was billed
@@ -206,28 +186,28 @@ Shipments tracked from dock to receipt.
 - Parties: DSD suppliers, Stores
 - Outcome: Helps reduce store-level disputes.
 
+#### 3PL inventory reconciliation
+- Purpose: Fulfill through third-party warehouses
+- Summary: Send shipping instructions to 3PL warehouses and reconcile receipts, shipments and inventory adjustments.
+- Capabilities:
+  - Warehouse orders sent electronically
+  - Missing shipping confirmations flagged
+  - Receipts, shipments and inventory reconciled across documents
+- Parties: Suppliers, 3PLs, Retailers
+- Outcome: Fewer inventory discrepancies with 3PLs.
+
 ### Settle and recover
 Payments, deductions and credits resolved.
 
-#### Chargeback management
-- Purpose: Issue compliance chargebacks with evidence
-- Summary: Capture vendor compliance violations, assess each against your terms, and issue chargebacks with the failing document and rule.
+#### Returns and credit management
+- Purpose: Manage the reverse supply chain
+- Summary: Authorize each return to the supplier, track it back, grade it on receipt, and settle the credit against the original return.
 - Capabilities:
-  - Violations captured from document data and on the receiving floor
-  - Each violation assessed against vendor compliance terms, with its own workflow
-  - Chargebacks issued with the failing document and rule, and vendor disputes tracked
-- Parties: Retailers, Vendors
-- Outcome: Compliance costs captured and tracked.
-
-#### Deduction management
-- Purpose: Recover invalid deductions
-- Summary: Read deductions from remittances and debit memos, match each to its invoice and reason code, and dispute the invalid ones with the document trail.
-- Capabilities:
-  - Deductions from the 820 and 812 matched to the invoice and reason code
-  - Status and amount for each deduction: assessed, pending, disputed, reversed or not charged
-  - Disputes backed by the order, ship notice, invoice and proof of delivery
-- Parties: Suppliers, Retailers
-- Outcome: Helps recover invalid deductions.
+  - Returns authorized before they ship
+  - Return credits matched to authorizations
+  - Return credits and deductions without an authorization flagged
+- Parties: Retailers, Suppliers, Carriers
+- Outcome: Reverse supply chain, from authorization to credit.
 
 #### Supplier compliance scorecard
 - Purpose: Measure your own retailer compliance
@@ -239,15 +219,35 @@ Payments, deductions and credits resolved.
 - Parties: Suppliers, Retailers
 - Outcome: Compliance measured before the retailer review.
 
-#### Returns and credit management
-- Purpose: Manage the reverse supply chain
-- Summary: Authorize each return to the supplier, track it back, grade it on receipt, and settle the credit against the original return.
+#### Deduction management
+- Purpose: Recover invalid deductions
+- Summary: Read deductions from remittances and debit memos, match each to its invoice and reason code, and dispute the invalid ones with the document trail.
 - Capabilities:
-  - Returns authorized before they ship
-  - Return credits matched to authorizations
-  - Return credits and deductions without an authorization flagged
-- Parties: Retailers, Suppliers, Carriers
-- Outcome: Reverse supply chain, from authorization to credit.
+  - Deductions from the 820 and 812 matched to the invoice and reason code
+  - Status and amount for each deduction: assessed, pending, disputed, reversed or not charged
+  - Disputes backed by the order, ship notice, invoice and proof of delivery
+- Parties: Suppliers, Retailers
+- Outcome: Helps recover invalid deductions.
+
+#### Chargeback management
+- Purpose: Issue compliance chargebacks with evidence
+- Summary: Capture vendor compliance violations, assess each against your terms, and issue chargebacks with the failing document and rule.
+- Capabilities:
+  - Violations captured from document data and on the receiving floor
+  - Each violation assessed against vendor compliance terms, with its own workflow
+  - Chargebacks issued with the failing document and rule, and vendor disputes tracked
+- Parties: Retailers, Vendors
+- Outcome: Compliance costs captured and tracked.
+
+#### Chargeback prevention alerts
+- Purpose: Act before a penalty is assessed
+- Summary: Alert supplier business users to pending shipments and invoice mismatches while the retailer's compliance window is still open.
+- Capabilities:
+  - Pending shipment alerts before the ship notice window closes
+  - Invoice mismatch alerts by order, line and amount
+  - Alerts routed to the business user who owns the order
+- Parties: Suppliers, Retailers
+- Outcome: Helps reduce avoidable chargebacks.
 
 ## What OpenText provides
 Connectivity, partner onboarding, visibility, analytics and AI agents across every retail process.
