@@ -4796,8 +4796,8 @@ var TRANSLATE = [
 .tgr .opx-c .rf { stroke: var(--faint); stroke-width: 1.5; stroke-dasharray: 6 5; }
 .tgr .opx-c .rft { font-size: 12px; font-weight: 600; fill: var(--muted); }
 .tgr .opx-c .lv .t { fill: var(--muted); }
-.tgr .opx-lg i.f.b { background: none; border: 1.5px dashed var(--opp); opacity: 1; }
-.tgr .opx-c .cf { fill: var(--opp); fill-opacity: .08; stroke: var(--opp); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.tgr .opx-lg i.f.b { background: color-mix(in srgb, var(--opp) 20%, transparent); border: 1.5px dashed var(--opp); opacity: 1; }
+.tgr .opx-c .cf { fill: var(--opp); fill-opacity: .2; stroke: var(--opp); stroke-width: 1.5; stroke-dasharray: 5 4; }
 .tgr .opx-c .cfl { font-size: 13px; font-weight: 700; fill: var(--opp-ink); }
 </style>
 <script>
@@ -4808,14 +4808,15 @@ var TRANSLATE = [
   // each stage: letter, name, and the lever that lifts client value at that stage (two lines)
   // letter, name, lever (two lines), today's client value, retail opportunity on top, growth over time above that
   // (illustrative units). Today's value is highest at Connect and falls through Extend. The opportunity is small at
-  // Connect, largest at Activate, smaller at Optimize and smaller again at Extend; Optimize and Extend grow over time.
+  // Connect, largest at Activate, smaller at Optimize and smaller again at Extend. Growth over time is least at Connect,
+  // medium at Activate and Optimize, and largest at Extend, with AI.
   var LEVERS = [
-    ["C", "Connect", "Faster onboarding,", "better partner processes", 100, 10, 0],
-    ["A", "Activate", "More business processes", "running per partner", 45, 120, 0],
-    ["O", "Optimize", "Exceptions caught", "before chargebacks", 20, 55, 45],
-    ["E", "Extend", "Agents that predict", "and recommend actions", 6, 30, 60]
+    ["C", "Connect", "Faster onboarding,", "better partner processes", 100, 10, 8, "Opportunity"],
+    ["A", "Activate", "More business processes", "running per partner", 45, 120, 40, "Largest opportunity"],
+    ["O", "Optimize", "Exceptions caught", "before chargebacks", 20, 55, 45, "Grows over time"],
+    ["E", "Extend", "Agents that predict", "and recommend actions", 6, 30, 92, "Most growth, with AI"]
   ];
-  var X0 = 70, X1 = 980, YB = 350, ZW = (X1 - X0) / 4, K = 1.65, CW = 112;
+  var X0 = 70, X1 = 980, YB = 350, ZW = (X1 - X0) / 4, K = 1.4, CW = 112;
   function cx(i) { return X0 + ZW * i + ZW / 2; }
 
   function letters() {
@@ -4839,12 +4840,12 @@ var TRANSLATE = [
     var sec = document.createElement("section");
     sec.className = "opx"; sec.id = "mk-opp"; sec.setAttribute("aria-labelledby", "mk-h-opp");
     sec.innerHTML = '<div class="wrap"><p class="mk-eb">Retail opportunity</p><h2 id="mk-h-opp">Retail adoption opportunity</h2>' +
-      '<p class="opx-sub">Today most client value comes from Connect. A retail focus adds value at every stage, the most at Activate. Optimize and Extend grow over time.</p>' +
+      '<p class="opx-sub">Today most client value comes from Connect. A retail focus adds value at every stage, the most at Activate. Over time, Extend grows the most, with AI.</p>' +
       '<div class="opx-box"><div class="opx-bar"><ul class="opx-lg"><li><i class="b"></i>Today&#39;s client value</li><li><i class="g b"></i>Retail opportunity</li><li><i class="f b"></i>Growth over time</li></ul>' +
       '<div class="opx-acts"><span class="opx-ill">Illustrative</span><button type="button" class="opx-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Replay animation</span></button></div></div>' +
       '<div class="opx-cw"></div></div><p class="opx-nt">Shape is illustrative, not measured data. Some capabilities shown are in development or planned.</p></div>';
     var svg = el("svg", { "class": "opx-c", viewBox: "0 0 1000 470", role: "img",
-      "aria-label": "Client value by stage. Today's value is highest at Connect and lower at Activate, Optimize and Extend. A retail focus adds value at every stage: a little at Connect, the most at Activate, less at Optimize and less again at Extend, where value grows over time." });
+      "aria-label": "Client value by stage. Today's value is highest at Connect and lower at Activate, Optimize and Extend. A retail focus adds value at every stage: a little at Connect, the most at Activate, less at Optimize and less again at Extend, and value grows over time at every stage, the most at Extend with AI." });
     // zones and axis
     for (var i = 1; i < 4; i++) svg.appendChild(el("line", { "class": "zl", x1: X0 + i * ZW, y1: 30, x2: X0 + i * ZW, y2: YB + 112 }));
     svg.appendChild(el("path", { "class": "ax", d: "M" + X0 + " 24V" + YB + "H" + X1 }));
@@ -4856,7 +4857,7 @@ var TRANSLATE = [
         g = el("rect", { "class": "cg", x: x, y: YB - L[4] * K, width: CW, height: "0" }),
         top = YB - (L[4] + L[5] + L[6]) * K,
         f = L[6] ? el("rect", { "class": "cf fd", x: x + 1, y: top, width: CW - 2, height: (L[6] * K).toFixed(1) }) : null,
-        lab = el("text", { "class": (L[6] ? "cfl" : "cgl") + " fd", x: cx(i), y: top - 10, "text-anchor": "middle" }, L[6] ? "Grows over time" : i === 1 ? "Largest opportunity" : "Opportunity");
+        lab = el("text", { "class": (L[6] ? "cfl" : "cgl") + " fd", x: cx(i), y: top - 10, "text-anchor": "middle" }, L[7]);
       svg.appendChild(t); svg.appendChild(g); if (f) svg.appendChild(f); svg.appendChild(lab);
       return { t: t, g: g, f: f, lab: lab, L: L };
     });
@@ -4877,7 +4878,7 @@ var TRANSLATE = [
     var cl = el("g", { "class": "cl fd" });
     cl.appendChild(el("rect", { x: "84", y: "26", width: "330", height: "58", rx: "12" }));
     cl.appendChild(el("text", { "class": "h", x: "102", y: "50", "data-dx": 18 }, "Retail opportunity"));
-    cl.appendChild(el("text", { "class": "s", x: "102", y: "71", "data-dx": 18 }, "Largest at Activate. Optimize and Extend grow over time."));
+    cl.appendChild(el("text", { "class": "s", x: "102", y: "71", "data-dx": 18 }, "Largest at Activate today. Extend grows the most over time, with AI."));
     svg.appendChild(cl);
     sec.querySelector(".opx-cw").appendChild(svg);
     return { sec: sec, svg: svg, cols: cols, levs: levs, cl: cl };

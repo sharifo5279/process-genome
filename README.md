@@ -34,7 +34,8 @@ agent instructions that point to `llms-full.txt` and `llms.txt`, and `<head>` li
 `tools/adoption-path/` adds a managed block (between `adoption-path:start` and `adoption-path:end` markers) that shows the
 adoption path steps as large C, A, O and E letters, and adds the Retail adoption opportunity animation after them: stacked
 columns of client value by stage. Today's value (gray) is highest at Connect; the retail opportunity (green) stacks on top at
-every stage, largest at Activate, smaller at Optimize and Extend, with dashed outlines for their growth over time. `build-site.mjs` installs it on every
+every stage, largest at Activate, smaller at Optimize and Extend. Light green dashed outlines show growth over time: least at
+Connect, medium at Activate and Optimize, largest at Extend with AI. `build-site.mjs` installs it on every
 master build; `node tools/adoption-path/inject.mjs site/index.html` applies a change to the current page. Retail only.
 
 ## Crawling: robots.txt and sitemap.xml

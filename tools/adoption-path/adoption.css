@@ -60,6 +60,6 @@
 .tgr .opx-c .rf { stroke: var(--faint); stroke-width: 1.5; stroke-dasharray: 6 5; }
 .tgr .opx-c .rft { font-size: 12px; font-weight: 600; fill: var(--muted); }
 .tgr .opx-c .lv .t { fill: var(--muted); }
-.tgr .opx-lg i.f.b { background: none; border: 1.5px dashed var(--opp); opacity: 1; }
-.tgr .opx-c .cf { fill: var(--opp); fill-opacity: .08; stroke: var(--opp); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.tgr .opx-lg i.f.b { background: color-mix(in srgb, var(--opp) 20%, transparent); border: 1.5px dashed var(--opp); opacity: 1; }
+.tgr .opx-c .cf { fill: var(--opp); fill-opacity: .2; stroke: var(--opp); stroke-width: 1.5; stroke-dasharray: 5 4; }
 .tgr .opx-c .cfl { font-size: 13px; font-weight: 700; fill: var(--opp-ink); }
