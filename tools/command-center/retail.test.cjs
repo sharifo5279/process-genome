@@ -14,7 +14,8 @@ const source = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
 const textOf = html => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 const PROCESS_STUB = Array.from({ length: 11 }, (_, i) => ({
   n: `Reference process ${i}`, owner: 'Process owner', outcome: 'Reference outcome', measures: ['Measure A', 'Measure B', 'Measure C'],
-  steps: Array.from({ length: 6 }, (_, k) => [`Reference step ${k}`, '850, 856'])
+  // Order to cash has seven steps (goods receipt at index 4); the others have six
+  steps: Array.from({ length: i === 0 ? 7 : 6 }, (_, k) => [`Reference step ${k}`, '850, 856'])
 }));
 
 // Loads the four console modules in page order against a minimal DOM.

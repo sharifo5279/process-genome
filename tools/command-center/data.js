@@ -21,28 +21,28 @@
       cause: "Only these 37 orders lack an 855 while other orders are acknowledged, which points to an order hold before acknowledgment.",
       act: "Ask order management to release the 37 orders or acknowledge them with a hold status.", appr: "Customer service lead",
       area: "Fix routing", who: ["Customer service", "Finance and treasury"] },
-    { id: "f4", p: 0, st: 4, sev: "c", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Northfield Stores", n: 112, val: 46200, at: "04:20",
+    { id: "f4", p: 0, st: 5, sev: "c", mod: "Performance Monitor", how: "Rule", pil: "Optimize", partner: "Northfield Stores", n: 112, val: 46200, at: "04:20",
       ot: "112 invoices rejected on unit price", os: "824 application advice cites a price mismatch on 9 items since Monday's cost change.",
       bt: "$46,200 in invoices held for price mismatch", bs: "Northfield Stores will not pay the invoices until prices match the order.",
       ev: [["Monday", "New costs sent in the 832 price catalog"], ["04:20", "First 824 rejection on unit price"], ["07:30", "112 rejections on the same 9 items"]],
       cause: "Northfield Stores' purchase orders still carry the pre-Monday cost; the invoices bill the new 832 cost.",
       act: "Ask billing to rebill the 112 invoices at the PO cost, or ask Northfield Stores for 860 changes with the new cost.", appr: "Billing and pricing",
       area: "Rejections", who: ["Finance and treasury", "Master data"] },
-    { id: "f7", p: 0, st: 5, sev: "w", mod: "Integration Monitor", how: "Missing document", pil: "Optimize", partner: "Harbor Grocers", n: 1, val: 0, at: "06:00",
+    { id: "f7", p: 0, st: 6, sev: "w", mod: "Integration Monitor", how: "Missing document", pil: "Optimize", partner: "Harbor Grocers", n: 1, val: 0, at: "06:00",
       ot: "Remittance advice not received", os: "The weekly 820 from Harbor Grocers was due at 06:00. The last remittance arrived 7 days ago.",
       bt: "Harbor Grocers payments cannot be applied", bs: "Cash received without remittance detail stays unapplied until the 820 arrives.",
       ev: [["Last Saturday 05:40", "Last 820 received"], ["06:00", "Expected remittance window closed"]],
       cause: "Same certificate change as the order volume finding for Harbor Grocers.",
       act: "Ask Harbor Grocers to resend the 820 once its certificate is loaded.", appr: "EDI operations lead",
       area: "Missing documents", who: ["Accounts receivable", "Sales and key accounts"] },
-    { id: "f9", p: 0, st: 4, sev: "w", mod: "Performance Monitor", how: "Prediction", pil: "Extend", dp: 1, partner: "Northfield Stores", n: 61, val: 28400, at: "07:50",
+    { id: "f9", p: 0, st: 5, sev: "w", mod: "Performance Monitor", how: "Prediction", pil: "Extend", dp: 1, partner: "Northfield Stores", n: 61, val: 28400, at: "07:50",
       ot: "Cost change not applied to 61 open orders", os: "Open orders still carry the old cost for 9 items. Invoices from these orders will reject.",
       bt: "$28,400 in invoices likely to reject", bs: "The same price mismatch will hit 61 orders that have not been invoiced yet.",
       ev: [["Monday", "832 cost change sent for 9 items"], ["07:50", "61 open orders found with the old cost"]],
       cause: "Purchase orders received after Monday's 832 still carry the old cost.",
       act: "Ask pricing to invoice the 61 open orders at the PO cost, or ask Northfield Stores for 860 changes.", appr: "Pricing analyst",
       area: "Cross-references and master data", who: ["Master data", "Finance and treasury"] },
-    { id: "f10", p: 0, st: 4, sev: "w", mod: "Integration Monitor", how: "Anomaly", pil: "Optimize", partner: "Brightway Marketplace", n: 52, val: 0, at: "08:10",
+    { id: "f10", p: 0, st: 5, sev: "w", mod: "Integration Monitor", how: "Anomaly", pil: "Optimize", partner: "Brightway Marketplace", n: 52, val: 0, at: "08:10",
       ot: "Functional acknowledgments missing for 52 invoices", os: "Brightway Marketplace has returned no 997 for invoices sent since 05:00. Its 997s for ship notices and its purchase orders arrive normally.",
       bt: "52 invoices without confirmed receipt", bs: "Invoices without a 997 may not have reached Brightway Marketplace.",
       ev: [["05:00", "Last 997 received for an invoice"], ["06:00", "Acknowledgment volume fell below the projected band"], ["08:10", "52 invoices unacknowledged"]],
@@ -131,7 +131,7 @@
   /* Client view of each process: steps the retailer adds in front (its own orders), steps hidden because another process in the solution already counts them,
      and 824 and 997 shown on the step they answer rather than as steps of their own */
   var CCVIEW = {
-    supplier: { 0: { hide: [3], add: [["Order change", "860, 865 / ORDCHG, ORDRSP", 1]], order: [0, 1, 6, 2, 3, 4, 5] },
+    supplier: { 0: { hide: [3, 4], add: [["Order change", "860, 865 / ORDCHG, ORDRSP", 1]], order: [0, 1, 7, 2, 3, 4, 5, 6] },
       8: { hide: [1, 4], add: [["Routing request", "753", 0], ["Routing instructions", "754", 1]], order: [0, 2, 6, 7, 3, 1, 4, 5] } },
     retailer: { 1: { n: "Purchase to pay", short: "Purchase to pay", owner: "Buying, receiving and accounts payable", pre: [["Purchase order", "850 / ORDERS", 0], ["Order acknowledgment", "855 / ORDRSP", 1], ["Order change", "860, 865 / ORDCHG, ORDRSP", 0]] },
       2: { hide: [3] }, 3: { n: "Chargebacks and deductions", short: "Chargebacks", owner: "Vendor compliance and accounts payable" } }
@@ -140,7 +140,7 @@
      Breached = past SLA + 824 rejects; at risk = 997 overdue + predicted (pred). Illustrative. */
   var CCFLOW = {
     supplier: {
-      0: { pred: 61, steps: [["In", 310, 0, 0, 0, "4 h 30 m"], ["Out", 262, 37, 3, 0, "28 h"], ["Out", 248, 14, 4, 9, "3 h 40 m"], null, ["Out", 226, 0, 52, 112, "2 d"], ["In", 146, 1, 0, 0, "7 d"], ["In", 38, 0, 0, 0, "1 d"]] },
+      0: { pred: 61, steps: [["In", 310, 0, 0, 0, "4 h 30 m"], ["Out", 262, 37, 3, 0, "28 h"], ["Out", 248, 14, 4, 9, "3 h 40 m"], null, null, ["Out", 226, 0, 52, 112, "2 d"], ["In", 146, 1, 0, 0, "7 d"], ["In", 38, 0, 0, 0, "1 d"]] },
       8: { pred: 0, steps: [["In", 18, 0, 0, 0, "1 d"], null, ["Out", 64, 0, 0, 0, "1 h 10 m"], ["In", 57, 1, 0, 0, "50 m"], null, ["In", 12, 0, 1, 0, "1 d"], ["Out", 24, 0, 0, 0, "2 h"], ["In", 22, 1, 0, 0, "1 h 50 m"]] },
       3: { pred: 0, steps: [null, ["In", 46, 0, 0, 0, "12 d"], ["In", 38, 2, 0, 0, "2 d"], null, null, ["Out / In", 16, 0, 0, 0, "9 d"]] }
     },

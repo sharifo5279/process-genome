@@ -43,7 +43,7 @@ Code key: X12 set, or the EDIFACT or GDSN message where no X12 set exists. 41 do
 - **997 Functional acknowledgment**. Sender: Either party. Receiver: Either party. Europe and international: CONTRL. Confirms receipt and syntax. It does not confirm business acceptance. Used in: Order to cash; Receive, match and pay; Drop ship and marketplaces; Sales and inventory reporting; Vendor onboarding and certification.
 - **824 Application advice**. Sender: Retailer. Receiver: Supplier. Europe and international: APERAK. Penalty-prone. Accepts or rejects a received document, with reason codes. Used in: Order to cash; Receive, match and pay; Direct store delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; Vendor onboarding and certification.
 - **864 Text message**. Sender: Retailer. Receiver: Supplier. Europe and international: GENRAL. Free-form notice from the retailer, such as a document rejection, compliance notice or chargeback notice. Used in: Order to cash; Receive, match and pay; Deductions and disputes; Compliance chargebacks.
-- **861 Receiving advice**. Sender: Retailer. Receiver: Supplier. Europe and international: RECADV. Accepted and rejected quantities after receipt, with reasons. Sent by some retailers only. Used in: Receive, match and pay; Compliance chargebacks.
+- **861 Receiving advice (goods receipt)**. Sender: Retailer. Receiver: Supplier. Europe and international: RECADV. Accepted and rejected quantities after receipt, with reasons. Sent by some retailers only. Used in: Order to cash; Receive, match and pay; Deductions and disputes; Compliance chargebacks.
 
 ## Settle
 

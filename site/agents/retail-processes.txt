@@ -11,7 +11,7 @@ The supplier's end-to-end flow from a retailer purchase order to the payment tha
 - Parties: Supplier, Retailer
 - Business owner: Customer operations and accounts receivable
 - Measures: Fill rate, On-time and in-full (OTIF), ASN timeliness and accuracy, First-time invoice match rate, Days sales outstanding (DSO)
-- Documents, North America: 850, 855, 860/865, 856, 997, 824, 810, 820
+- Documents, North America: 850, 855, 860/865, 856, 997, 824, 861, 810, 820
 - Documents, Europe and international: ORDERS, ORDRSP, ORDCHG, DESADV, CONTRL, APERAK, RECADV, INVOIC, REMADV
 
 ### Steps
@@ -39,13 +39,19 @@ The supplier's end-to-end flow from a retailer purchase order to the payment tha
    - EDI team work: Routes each reason code to the owner (warehouse, order entry, master data), tracks time to correct, and keeps the original and corrected documents as evidence for later disputes.
    - If it fails: Rejections go unseen, freight lands in the retailer's problem area, and the invoice is never paid.
    - Work areas: Rejections, Fix routing, Support desk and on-call
-5. **Invoice** (810 / INVOIC, from supplier)
+5. **Goods receipt** (861 / RECADV, from retailer)
+   - What happens: The retailer receives the shipment against the ship notice, scanning each SSCC. Where its program uses the receiving advice, it reports accepted and rejected quantities with reasons.
+   - Rules that bite: Received quantity is measured against the order and the notice; shorts, overs and damage count against fill rate. Many retailers record the receipt in their own systems and send no 861, so the supplier first sees a shortage on the remittance.
+   - EDI team work: Loads the receiving advice where the retailer sends it, compares received with shipped quantities by order and carton, and flags differences before the invoice is sent.
+   - If it fails: Shortages surface weeks later as deductions, when the evidence is harder to assemble.
+   - Work areas: Missing documents, Monitoring, Chargebacks and deductions management
+6. **Invoice** (810 / INVOIC, from supplier)
    - What happens: The supplier invoices per order and shipment with the order number, item identifiers, shipped quantities, cost and agreed allowances.
    - Rules that bite: Invoice only after shipment and after the ship notice. One invoice per order and shipment, cost equal to the order cost, allowances exactly as agreed, and no resends of an invoice already received.
    - EDI team work: Generates the invoice after the ship notice is accepted, validates order number, cost and terms against the order, and monitors acknowledgments so a rejected invoice is corrected rather than resent.
    - If it fails: Rejected or short-paid invoices delay cash and turn into pricing and billing deductions.
    - Work areas: Rejections, Cross-references and master data, Chargebacks and deductions management
-6. **Payment and remittance** (820 / REMADV, from retailer)
+7. **Payment and remittance** (820 / REMADV, from retailer)
    - What happens: The retailer pays one net amount across many invoices and lists each invoice, deduction and allowance with a reason code.
    - Rules that bite: Remittance detail may travel with the payment or separately. Dispute windows start when the deduction appears, not when the supplier finds it.
    - EDI team work: Loads the remittance into cash application, maps the retailer's reason codes, and routes each deduction to the deductions team with the matching order, notice and invoice records.
@@ -246,8 +252,8 @@ The supplier's side of retail settlement. Retailers short-pay rather than ask. S
 - Parties: Retailer AP, Supplier AR
 - Business owner: Accounts receivable and deductions management
 - Measures: Deduction rate, Days deductions outstanding (DDO), Dispute win and recovery rate, Days to deduction identification, Unapplied cash rate
-- Documents, North America: 812, 820, 810
-- Documents, Europe and international: COMDIS, INVOIC, REMADV
+- Documents, North America: 812, 820, 810, 861
+- Documents, Europe and international: COMDIS, INVOIC, REMADV, RECADV
 
 ### Steps
 1. **Violation posted** (Portal, from retailer AP)
@@ -268,9 +274,9 @@ The supplier's side of retail settlement. Retailers short-pay rather than ask. S
    - EDI team work: Loads the remittance into cash application, auto-matches paid invoices, and opens a deduction case per adjustment line with retailer, reason, amount and references attached.
    - If it fails: Cash sits unapplied, nobody knows how many deductions are open, and the window runs down while someone reconciles the bank statement.
    - Work areas: Chargebacks and deductions management, Missing documents, Monitoring
-4. **Research and classify** (ERP, from supplier AR)
+4. **Research and classify** (861, ERP / RECADV, from supplier AR)
    - What happens: The deductions team matches each case to order, ship notice, bill of lading, proof of delivery and invoice, and decides: valid, invalid, or a promotion to check against its authorization.
-   - Rules that bite: The burden of proof sits with the supplier. Shortage claims need the signed bill of lading, proof of delivery and the notice listing the cartons; pricing claims need the order cost; promotional claims need the authorization and proof of performance.
+   - Rules that bite: The burden of proof sits with the supplier. Shortage claims need the signed bill of lading, proof of delivery, the notice listing the cartons and, where the retailer sends one, the receiving advice; pricing claims need the order cost; promotional claims need the authorization and proof of performance.
    - EDI team work: Keeps every document and acknowledgment per order retrievable for the dispute window and the post-audit period, and gives the deductions team one view linking order, notice, invoice, memo and remittance line.
    - If it fails: Evidence cannot be found in time, recoverable deductions are written off, and the same cause recurs because nobody traced it.
    - Work areas: Reporting and documentation, Chargebacks and deductions management, Cross-references and master data

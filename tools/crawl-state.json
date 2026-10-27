@@ -1,6 +1,6 @@
 {
  "index.html": {
-  "sha256": "e4febcedf23d70d512abc8529606b89d2186a78db45477130a8f6583533ee937",
+  "sha256": "da51e6982defc0c2d070cc4e58fdfdbe065c5e2a20f3455e7d50c1308882a894",
   "lastmod": "2026-10-27"
  },
  "llms.txt": {
@@ -8,11 +8,11 @@
   "lastmod": "2026-10-27"
  },
  "llms-full.txt": {
-  "sha256": "8069632793445b9c97fa27e0ae9cc26bf58787f99d7f34e109396325451fa1a3",
+  "sha256": "fcd87a1261be3c233997cdf4a3d5c3039d764873ce7b271fecb48dcca497b694",
   "lastmod": "2026-10-27"
  },
  "command-center/index.html": {
-  "sha256": "730c4d63027162777e833388ae3b5cdf38535a2cb6856423adaf3f09b4649be7",
+  "sha256": "eb25a4b15892420109ebf722899bc8d7abf29686b519d1a0444bad7039345e5e",
   "lastmod": "2026-10-27"
  },
  "agents/operations.txt": {
@@ -20,11 +20,11 @@
   "lastmod": "2026-10-27"
  },
  "agents/retail-documents.txt": {
-  "sha256": "6f733e33d9b54b4e1729b110cc3965f78e410d0c29ffa8b4f72485df36684c39",
+  "sha256": "fa900e046525c624308fda93e1fac06d7da48890ac55b5363f66eb86d3bdf954",
   "lastmod": "2026-10-27"
  },
  "agents/retail-processes.txt": {
-  "sha256": "69906310171ff2e86a092a300cbf547ef1f4a37e256de2cd85bce11527e115e4",
+  "sha256": "9755f5860a68bb82622aaaf75ffb4e1d9fdc19d7667db9a0dbace490e2f9215b",
   "lastmod": "2026-10-27"
  },
  "agents/retail-solutions.txt": {
