@@ -18,7 +18,7 @@ Start with https://process-genome.onrender.com/llms-full.txt: solutions, documen
 
 ## Process Genome
 - [Retail and CPG documents](https://process-genome.onrender.com/agents/retail-documents.txt): 41 documents with sender, receiver, standards, definition and processes
-- [Retail and CPG business processes](https://process-genome.onrender.com/agents/retail-processes.txt): 12 processes, step by step, with rules, EDI team work and failure points
+- [Retail and CPG business processes](https://process-genome.onrender.com/agents/retail-processes.txt): 13 processes, step by step, with rules, EDI team work and failure points
 - [Automotive documents](https://process-genome.onrender.com/agents/automotive-documents.txt): 25 documents with sender, receiver, standards, definition and processes
 - [Automotive business processes](https://process-genome.onrender.com/agents/automotive-processes.txt): 9 processes, step by step, with rules, EDI team work and failure points
 - [Financial services documents](https://process-genome.onrender.com/agents/financial-services-documents.txt): 42 documents with sender, receiver, standards, definition and processes
@@ -47,25 +47,16 @@ Retail and CPG trading relationships, connected and managed. Integrate and onboa
 Each step builds on the one before. Open a step on the Process Genome to see it across the retail documents.
 
 ### 1. Connect (Reach)
-Bring trading partners onto the network so their documents flow.
-- Measure: Active relationships, net new partners and reach gap against the hub's supplier list.
-- Solutions: EDI compliance; Web EDI for suppliers; Supplier portal for retailer and CPG hubs
+Bring retailers, suppliers, carriers, 3PLs and marketplaces onto the network, including vendors without EDI.
 
 ### 2. Activate (Completeness)
-Run every document each hub requires, so whole processes complete across the community.
-- Measure: Required documents live, whole-line completion, and required documents not yet live.
-- Solutions: Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment; Drop ship and marketplace fulfillment; 3PL inventory reconciliation; Direct store delivery reconciliation; Returns and credit management
+Run every document each retailer requires, from item data and orders to ship notices, invoices and sales feeds.
 
 ### 3. Optimize (Performance)
-Monitor every flow, catch exceptions and late documents, and fix them before they cost money.
-- Measure: Exceptions per 1,000 documents, and timeliness against each hub's window.
-- Solutions: Order-to-cash compliance; Pre-delivery document validation; Backorder and fill-rate tracking; Inbound shipment visibility; ASN intelligence; Chargeback prevention alerts; Receiving and three-way match; Chargeback management; Deduction management; Supplier compliance scorecard
+Catch late, rejected and mismatched documents before they turn into chargebacks, deductions or lost sales.
 
 ### 4. Extend (Intelligence)
-Use network data and intelligence to predict, recommend and act inside the process.
-- Measure: Decision points covered and value influenced, such as deductions recovered or chargebacks avoided.
-- Agent decision points: Cost change before invoicing (Item and price synchronization); Shipment at risk (ASN intelligence); Dispute or accept a deduction (Deduction management); Replenishment quantity (Vendor-managed inventory and replenishment); Repeat rejection (Order-to-cash compliance); Carrier delay (Inbound shipment visibility); Store delivery dispute (Direct store delivery reconciliation); Inventory mismatch (3PL inventory reconciliation); Return credit match (Returns and credit management)
-- Agents recommend an action; a person approves it.
+Use network data and agents to predict problems and recommend actions, with a person approving each one.
 
 ### Across every step
 - Order lifecycle correlation: 850, 855, 856, 824, 810 and 820 linked by order, so each solution works from the whole transaction.
@@ -368,17 +359,17 @@ Code key: X12 set, or the EDIFACT or GDSN message where no X12 set exists. 41 do
 
 ## Ship and confirm
 
-- **856 Ship notice**. Sender: Supplier. Receiver: Retailer. Europe and international: DESADV. Penalty-prone. Shipment, order, carton and item detail with SSCC labels, sent before arrival. Used in: Order to cash; Receive, match and pay; Routing and delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; 3PL fulfillment; Vendor onboarding and certification.
+- **856 Ship notice**. Sender: Supplier. Receiver: Retailer. Europe and international: DESADV. Penalty-prone. Shipment, order, carton and item detail with SSCC labels, sent before arrival. Used in: Order to cash; Receive, match and pay; Routing and delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; 3PL fulfillment; Vendor onboarding and certification; Compliance chargebacks.
 - **997 Functional acknowledgment**. Sender: Either party. Receiver: Either party. Europe and international: CONTRL. Confirms receipt and syntax. It does not confirm business acceptance. Used in: Order to cash; Receive, match and pay; Drop ship and marketplaces; Sales and inventory reporting; Vendor onboarding and certification.
 - **824 Application advice**. Sender: Retailer. Receiver: Supplier. Europe and international: APERAK. Penalty-prone. Accepts or rejects a received document, with reason codes. Used in: Order to cash; Receive, match and pay; Direct store delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; Vendor onboarding and certification.
-- **864 Text message**. Sender: Retailer. Receiver: Supplier. Europe and international: GENRAL. Free-form notice from the retailer, such as a document rejection, compliance notice or chargeback notice. Used in: Order to cash; Receive, match and pay; Deductions, chargebacks and disputes.
-- **861 Receiving advice**. Sender: Retailer. Receiver: Supplier. Europe and international: RECADV. Accepted and rejected quantities after receipt, with reasons. Sent by some retailers only. Used in: Receive, match and pay.
+- **864 Text message**. Sender: Retailer. Receiver: Supplier. Europe and international: GENRAL. Free-form notice from the retailer, such as a document rejection, compliance notice or chargeback notice. Used in: Order to cash; Receive, match and pay; Deductions and disputes; Compliance chargebacks.
+- **861 Receiving advice**. Sender: Retailer. Receiver: Supplier. Europe and international: RECADV. Accepted and rejected quantities after receipt, with reasons. Sent by some retailers only. Used in: Receive, match and pay; Compliance chargebacks.
 
 ## Settle
 
-- **810 Invoice**. Sender: Supplier. Receiver: Retailer. Europe and international: INVOIC. Penalty-prone. Bills shipped quantities at the agreed cost and terms. Used in: Order to cash; Receive, match and pay; Deductions, chargebacks and disputes; Direct store delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; 3PL fulfillment; Returns, credits and allowances; Vendor onboarding and certification.
-- **820 Remittance**. Sender: Retailer. Receiver: Supplier. Europe and international: REMADV. Penalty-prone. Payment detail by invoice, including deductions with reason codes. Used in: Order to cash; Receive, match and pay; Deductions, chargebacks and disputes; Direct store delivery; Drop ship and marketplaces; Returns, credits and allowances.
-- **812 Credit or debit memo**. Sender: Retailer for debits, supplier for credits. Receiver: The other party. Europe and international: COMDIS. Penalty-prone. Debits or credits against invoices for shortages, violations, returns and allowances. Used in: Receive, match and pay; Deductions, chargebacks and disputes; Returns, credits and allowances.
+- **810 Invoice**. Sender: Supplier. Receiver: Retailer. Europe and international: INVOIC. Penalty-prone. Bills shipped quantities at the agreed cost and terms. Used in: Order to cash; Receive, match and pay; Deductions and disputes; Direct store delivery; Vendor-managed inventory and CPFR; Drop ship and marketplaces; 3PL fulfillment; Returns, credits and allowances; Vendor onboarding and certification.
+- **820 Remittance**. Sender: Retailer. Receiver: Supplier. Europe and international: REMADV. Penalty-prone. Payment detail by invoice, including deductions with reason codes. Used in: Order to cash; Receive, match and pay; Deductions and disputes; Direct store delivery; Drop ship and marketplaces; Returns, credits and allowances; Compliance chargebacks.
+- **812 Credit or debit memo**. Sender: Retailer for debits, supplier for credits. Receiver: The other party. Europe and international: COMDIS. Penalty-prone. Debits or credits against invoices for shortages, violations, returns and allowances. Used in: Receive, match and pay; Deductions and disputes; Returns, credits and allowances; Compliance chargebacks.
 - **210 Freight invoice**. Sender: Carrier. Receiver: Retailer. Europe and international: INVOIC. Carrier bill for a delivered load. Used in: Routing and delivery.
 
 ## Return

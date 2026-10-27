@@ -48,9 +48,7 @@ function solutions(k, slug, name, C, rows) {
     const M = C.model;
     out.push(`## ${M.eyebrow}: ${M.heading}`, M.sub, "");
     M.steps.forEach((st, i) => {
-      out.push(`### ${i + 1}. ${st.title} (${st.focus})`, st.desc, `- Measure: ${st.measure}`,
-        st.ids ? `- Solutions: ${st.ids.map((id) => P[id].name).join("; ")}` : `- Agent decision points: ${st.dp.map((d) => `${d[0]} (${P[d[1]].name})`).join("; ")}`,
-        st.note ? `- ${st.note}` : null, "");
+      out.push(`### ${i + 1}. ${st.title} (${st.focus})`, st.desc, "");
     });
     if (M.foundations) out.push(`### ${M.foundations_title}`, ...M.foundations.map((f) => `- ${f[0]}: ${f[1]}`), "");
   }

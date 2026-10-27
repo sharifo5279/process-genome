@@ -18,7 +18,7 @@ Start with https://process-genome.onrender.com/llms-full.txt: solutions, documen
 
 ## Process Genome
 - [Retail and CPG documents](https://process-genome.onrender.com/agents/retail-documents.txt): 41 documents with sender, receiver, standards, definition and processes
-- [Retail and CPG business processes](https://process-genome.onrender.com/agents/retail-processes.txt): 12 processes, step by step, with rules, EDI team work and failure points
+- [Retail and CPG business processes](https://process-genome.onrender.com/agents/retail-processes.txt): 13 processes, step by step, with rules, EDI team work and failure points
 - [Automotive documents](https://process-genome.onrender.com/agents/automotive-documents.txt): 25 documents with sender, receiver, standards, definition and processes
 - [Automotive business processes](https://process-genome.onrender.com/agents/automotive-processes.txt): 9 processes, step by step, with rules, EDI team work and failure points
 - [Financial services documents](https://process-genome.onrender.com/agents/financial-services-documents.txt): 42 documents with sender, receiver, standards, definition and processes

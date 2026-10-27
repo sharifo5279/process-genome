@@ -238,10 +238,10 @@ How freight moves from the supplier's dock to the retailer's DC when the retaile
 - European retailers also publish logistics manuals and apply delivery penalties, but regulation constrains them: France caps logistics penalties and requires the retailer to prove the breach. North American practice differs in published chargeback schedules deducted automatically from remittance, which European suppliers entering the US meet for the first time.
 - The legal road transport document is the CMR consignment note, and electronic CMR is replacing paper; the 211 has no role.
 
-## 4. Deductions, chargebacks and disputes
+## 4. Deductions and disputes
 Outcome: Resolve every deduction inside its dispute window: recover the invalid ones, clear the valid ones, and remove the causes.
 
-Retailers short-pay rather than ask. Shortages, pricing differences, allowances and compliance chargebacks are netted off the remittance with a reason code, and a debit memo or a portal entry explains them, sometimes. The supplier's deductions team must match each one to the order, ship notice, receipt and invoice, decide whether it is valid, and dispute it inside a window that started when the retailer posted it. Volume, thin reason codes and short windows are what make it hard.
+The supplier's side of retail settlement. Retailers short-pay rather than ask. Shortages, pricing differences, allowances and compliance chargebacks are netted off the remittance with a reason code, and a debit memo or a portal entry explains them, sometimes. The supplier's deductions team must match each one to the order, ship notice, receipt and invoice, decide whether it is valid, and dispute it inside a window that started when the retailer posted it. Volume, thin reason codes and short windows are what make it hard. The retailer's side of compliance fees is Compliance chargebacks.
 
 - Parties: Retailer AP, Supplier AR
 - Business owner: Accounts receivable and deductions management
@@ -910,3 +910,74 @@ The flow that brings a new vendor from an approved vendor setup to live document
 - The same test cycle runs on EANCOM messages: ORDERS, ORDRSP, DESADV and INVOIC, with CONTRL and APERAK as the feedback messages.
 - Connection testing commonly covers AS2 or a network provider, and PEPPOL access points where invoices travel on that network.
 - Where electronic invoicing is mandated, invoice testing covers the national format and clearance platform as well as the retailer's guide.
+
+## 13. Compliance chargebacks
+Outcome: Hold vendors to the published terms with chargebacks that cite the failing document, hold up in a dispute and change vendor behavior.
+
+The retailer's side of compliance. Each retailer publishes routing, labeling, ship notice and fill rate terms with a fee schedule, measures every inbound shipment and invoice against them, and bills violations as chargebacks netted from payment. A chargeback that cites the order, ship notice and rule is upheld; one built on a receiving scan error, or on a ship notice that arrived but failed to load, is reversed and weakens the program. The supplier's side of the same money is Deductions and disputes.
+
+- Parties: Retailer, Supplier
+- Business owner: Vendor compliance and accounts payable
+- Measures: Violations per 1,000 shipments, Chargebacks by vendor and violation type, Dispute and reversal rate, Vendor compliance score, Repeat violation rate
+- Documents, North America: 856, 861, 864, 812, 820
+- Documents, Europe and international: DESADV, RECADV, GENRAL, COMDIS, REMADV
+
+### Steps
+1. **Terms published** (Vendor guide, from retailer)
+   - What happens: The retailer publishes its vendor compliance terms: routing, carton labels, ship notice timing, fill rate and appointment rules, each with a fee per occurrence, per carton or as a share of cost.
+   - Rules that bite: Terms differ by program, ship-to type and region, and change with notice. Vendors are bound from the effective date whether or not their maps have changed.
+   - EDI team work: Loads each program's rules and timing windows into the checks that measure vendors, and keeps the effective date with each rule.
+   - If it fails: Violations are measured against the wrong version of the terms, and disputes over the rule replace fixes to the cause.
+   - Work areas: Document and version changes, Business programs, Chargebacks and deductions management
+2. **Violation detected** (856, 861 / DESADV, RECADV, from retailer)
+   - What happens: Receiving and invoice match compare each ship notice, receipt and invoice with the terms: missing or late ship notice, cartons that do not match, label failures, short or over shipment, early or late arrival.
+   - Rules that bite: Ship notice timing is measured against pickup or arrival, and carton accuracy against the SSCC scan at the dock. A ship notice that arrived but failed to load looks the same as a missing one.
+   - EDI team work: Monitors inbound ship notice volume and timeliness by vendor and DC, and confirms a missing ship notice was not received, rejected or held in a queue before a violation posts.
+   - If it fails: Vendors are charged for the retailer's own processing failures, and reversals erode the program.
+   - Work areas: Monitoring, Missing documents, Rejections
+3. **Violation notice** (864, Portal, from retailer)
+   - What happens: The vendor is told what failed, on which order and shipment, through the vendor portal, email or an 864 text message, and a review period opens.
+   - Rules that bite: Some programs accept an exemption request inside the review period; after it closes the charge issues. A notice that does not cite the order and shipment cannot be researched.
+   - EDI team work: Sends notices with order, ship notice and rule references, and tracks which vendors acknowledge and act on them.
+   - If it fails: Vendors learn about violations only from the deduction, and the same failure repeats on every shipment.
+   - Work areas: Partner follow-up, Chargebacks and deductions management
+4. **Chargeback issued** (812, 820 / COMDIS, REMADV, from retailer)
+   - What happens: The fee is billed as a debit memo or netted from the next payment with a chargeback reason code and a reference to the violation.
+   - Rules that bite: The memo, the remittance line and the portal entry describe one event. Fees can escalate after repeat violations in a period.
+   - EDI team work: Maps internal violation types to the adjustment reason codes vendors receive, and links memo, remittance line and violation so each event is billed once.
+   - If it fails: Vendors cannot match the deduction to a violation and dispute everything, and the retailer works the same event twice.
+   - Work areas: Map build and maintenance, Cross-references and master data, Chargebacks and deductions management
+5. **Vendor dispute** (Portal, from supplier)
+   - What happens: The vendor disputes inside the window with the order, ship notice, bill of lading and proof of delivery, and the retailer reviews the evidence.
+   - Rules that bite: Windows run from the posting date, and some fees cannot be disputed. Most disputes turn on whether the ship notice arrived on time and matched the receipt.
+   - EDI team work: Retrieves the transaction trail for the disputed shipment: when each document arrived, was acknowledged and was loaded.
+   - If it fails: Valid disputes are denied for lack of evidence or invalid ones are upheld, and vendor relationships strain.
+   - Work areas: Chargebacks and deductions management, Support desk and on-call, Reporting and documentation
+6. **Resolve and report** (812, 820 / REMADV, from retailer)
+   - What happens: The retailer upholds or reverses each chargeback. Reversals are repaid as a credit or a later remittance line, and results feed vendor scorecards.
+   - Rules that bite: A reversal must reference the original charge so the vendor can close its case. Scorecard grades can move a vendor to a different fee schedule.
+   - EDI team work: Reports violations, chargebacks, disputes and reversals by vendor, DC and document type, and sends repeat causes back to the vendor and to receiving.
+   - If it fails: The program collects fees without changing behavior, and the same violations recur.
+   - Work areas: Reporting and documentation, Chargebacks and deductions management, Partner follow-up
+
+### Variants
+- **Fee schedules**: Flat fees per occurrence or per carton, or a share of the cost of goods, escalating after repeat violations in a period.
+- **On-time, in-full programs** (855, 856, 861): Fill rate and arrival window measured per order line, with fines as a share of the cost of goods not delivered on time and in full.
+- **Vendor scorecards**: Periodic scorecards grade each vendor's compliance and can move it to a higher or lower fee schedule.
+
+### Penalties and disputes
+- Ship notice: missing, late or not matching the receipt, charged per shipment or per carton.
+- Labels: missing or unreadable carton labels, or labels that do not match the ship notice.
+- Routing and arrival: wrong carrier, no routing request, or early or late arrival against the appointment.
+- Fill rate: lines short, substituted or late against the order.
+- Invoice: duplicate or mismatched invoices, billed as administrative fees.
+
+### Watch for
+- Confirm a missing ship notice was not received, rejected or held in a queue before charging for it.
+- Cite the order, ship notice and rule on every chargeback. Uncited charges are the ones vendors win.
+- One violation should produce one charge: link the portal entry, the memo and the remittance line.
+- Track the reversal rate by violation type. A high rate points to a measurement problem, not a vendor problem.
+
+### Europe and international
+- European retailers apply logistics penalties less often, and law restricts them: some countries cap them and require proof, and the EU Unfair Trading Practices Directive bans certain unilateral deductions in agri-food supply.
+- Where RECADV is used, quantity differences are settled before invoicing rather than charged afterwards.
