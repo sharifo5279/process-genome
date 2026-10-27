@@ -6,7 +6,8 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "start": "node server/index.mjs",
-    "test": "node --test server/visits.test.mjs"
+    "test": "node --test server/visits.test.mjs && node tools/crawl-files.mjs --check",
+    "crawl": "node tools/crawl-files.mjs"
   },
   "dependencies": {
     "@ip-location-db/dbip-city-mmdb": "2.3.2026060513",

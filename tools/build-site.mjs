@@ -13,6 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { writeAgentDocs } from "./agent-docs.mjs";
+import { run as writeCrawlFiles } from "./crawl-files.mjs";
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const MASTER = process.argv[2] || "/home/claude/process-genome-site.html";
 const API = (process.env.API_ORIGIN || "").replace(/\/$/, "");
@@ -75,6 +76,8 @@ fs.writeFileSync(path.join(ROOT, "site/index.html"), html);
 // agent-readable version (llms.txt, llms-full.txt, agents/*.md), regenerated with every build so it matches the page
 console.log("agent docs", writeAgentDocs(html));
 fs.copyFileSync(path.join(ROOT, "site/img/favicon/favicon.ico"), path.join(ROOT, "site/favicon.ico"));
+// robots.txt and sitemap.xml for search engines and agents (tools/crawl-files.mjs)
+console.log("crawl files", writeCrawlFiles({ write: true }).files.length, "URLs");
 if (!STATS_ON) { fs.rmSync(path.join(ROOT, "site/stats"), { recursive: true, force: true }); console.log("site/index.html", (html.length / 1024).toFixed(0) + " KB; visitor stats off"); process.exit(0); }
 fs.mkdirSync(path.join(ROOT, "site/stats"), { recursive: true });
 

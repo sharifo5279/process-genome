@@ -29,6 +29,13 @@ Industries: `retail`, `automotive`, `financial-services`. Files are markdown wit
 `text/plain`: agent fetchers read `llms.txt` but refused the same content as `text/markdown`. The page footer carries copyable
 agent instructions that point to `llms-full.txt` and `llms.txt`, and `<head>` links `llms-full.txt` as an alternate. Do not hand-edit these files; rebuild instead.
 
+## Crawling: robots.txt and sitemap.xml
+
+`site/robots.txt` allows every crawler (except `/stats/`) and points to `site/sitemap.xml`, which lists the pages and every
+agent file with the date its content last changed. Assistants that read the web through Bing search, such as Copilot,
+can only open pages Bing has indexed. Both builds regenerate these files with `tools/crawl-files.mjs` (content hashes and
+dates in `tools/crawl-state.json`); `npm test` fails when they are out of date. Agent rules: `AGENTS.md`.
+
 ## Command Center source and generation
 
 Command Center is a clickable prototype on a page of its own, `site/command-center/index.html`

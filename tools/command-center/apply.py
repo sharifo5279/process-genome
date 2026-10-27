@@ -15,6 +15,7 @@ All validation completes before anything is written.
 
 import argparse
 import json
+import subprocess
 import re
 from pathlib import Path
 import sys
@@ -212,8 +213,12 @@ def main(argv=None):
         output = args.output or args.input
         write(output, result)
         write(output.parent / "command-center" / "index.html", page)
+        # robots.txt and sitemap.xml follow the pages they list (tools/crawl-files.mjs); only for this repo's site
+        tools = Path(__file__).resolve().parents[1]
+        if output.resolve().parent == tools.parent / "site":
+            subprocess.run(["node", str(tools / "crawl-files.mjs")], check=True)
         return 0
-    except (OSError, UnicodeError, ValueError, GenerationError) as error:
+    except (OSError, UnicodeError, ValueError, GenerationError, subprocess.CalledProcessError) as error:
         parser.exit(1, f"error: {error}\n")
 
 
