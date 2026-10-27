@@ -42,9 +42,9 @@ Partners, items and demand data ready before orders flow.
 
 #### Trading partner visibility
 - Purpose: Show partners the status of what you exchange
-- Summary: Give the suppliers and retailers you trade with a limited view of the documents you exchange on Trading Grid, so both sides see the same status.
+- Summary: Either side of a trading relationship can grant a limited view of the documents it exchanges on Trading Grid: a retailer to its suppliers, or a supplier to its retailers.
 - Capabilities:
-  - A limited view you grant to each trading partner
+  - A limited view each side can grant to its trading partners
   - Documents exchanged with you, with delivery, acknowledgment and rejection status
   - Search by order, ship notice or invoice number
 - Parties: Retailers, Suppliers, 3PLs

@@ -80,9 +80,9 @@ Partners, items and demand data ready before orders flow.
 
 #### Trading partner visibility
 - Purpose: Show partners the status of what you exchange
-- Summary: Give the suppliers and retailers you trade with a limited view of the documents you exchange on Trading Grid, so both sides see the same status.
+- Summary: Either side of a trading relationship can grant a limited view of the documents it exchanges on Trading Grid: a retailer to its suppliers, or a supplier to its retailers.
 - Capabilities:
-  - A limited view you grant to each trading partner
+  - A limited view each side can grant to its trading partners
   - Documents exchanged with you, with delivery, acknowledgment and rejection status
   - Search by order, ship notice or invoice number
 - Parties: Retailers, Suppliers, 3PLs
@@ -1384,7 +1384,7 @@ Status: Concept preview for internal review. Diagrams are illustrative. Some cap
 The Product overlay maps product coverage onto the retail documents in four steps: Connect, Comply, Optimize and Extend. Document codes follow each capability.
 
 ## Connect: partner connectivity
-Brings partners without EDI teams onto electronic documents, on either side of the relationship. Web EDI lets suppliers answer retailer orders online. The supplier portal lets retailer and CPG hubs trade with vendors that have no EDI. Partner visibility shows each partner the documents it exchanges with the hub.
+Brings partners without EDI teams onto electronic documents, on either side of the relationship. Web EDI lets suppliers answer retailer orders online. The supplier portal lets retailer and CPG hubs trade with vendors that have no EDI. Partner visibility lets a retailer or a supplier show each partner the documents they exchange.
 
 ### Web EDI for suppliers
 - Orders received and acknowledged online (850, 855)

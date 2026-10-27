@@ -65,7 +65,7 @@
       ["Invoices filled from the order", ["810"]], ["Warehouse orders and shipping advice with 3PLs", ["940", "945"]], ["Remittance received", ["820"]]],
     sp: [["Orders and changes tracked by vendor", ["850", "860"]], ["Line-level confirmations and counteroffers", ["855", "865"]], ["Ship notices built from the order, with matching labels", ["856"]],
       ["Goods receipt as proof of delivery", ["861"]], ["Invoices matched to the order", ["810"]], ["Remittance status", ["820"]], ["Carrier shipment status", ["214"]]],
-    /* Trading partner visibility (planned): a limited, read-only view of the documents a partner exchanges with the hub */
+    /* Trading partner visibility (planned): a limited, read-only view of exchanged documents, granted by a retailer to its suppliers or by a supplier to its retailers */
     pv: [["Orders and acknowledgments, with delivery status", ["850", "855"]], ["Ship notices, with delivery and acknowledgment status", ["856", "997"]],
       ["Invoices, with delivery and rejection status", ["810", "824"]]],
     /* Retail compliance for suppliers: documents validated before delivery, alerts before a penalty, fill rate and scorecards (separate product, not part of Command Center) */
