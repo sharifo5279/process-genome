@@ -22,13 +22,13 @@ Use network data and agents to predict problems and recommend actions, with a pe
 
 ## Solutions by stage
 
-- Plan and synchronize: EDI compliance; Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment
+- Plan and synchronize: EDI compliance; Trading partner visibility; Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment
 - Order and fulfill: Order-to-cash compliance; Pre-delivery document validation; Backorder and fill-rate tracking; Web EDI for suppliers; Supplier portal for retailer and CPG hubs; Drop ship and marketplace fulfillment; 3PL inventory reconciliation
 - Ship and receive: Inbound shipment visibility; ASN intelligence; Chargeback prevention alerts; Receiving and three-way match; Direct store delivery reconciliation
 - Settle and recover: Chargeback management; Deduction management; Supplier compliance scorecard; Returns and credit management
 
 ### Plan and synchronize
-Vendors, items and demand data set up before orders flow.
+Partners, items and demand data ready before orders flow.
 
 #### EDI compliance
 - Purpose: Connect on each retailer's requirements
@@ -39,6 +39,16 @@ Vendors, items and demand data set up before orders flow.
   - Testing status and errors tracked by vendor until go-live
 - Parties: Retailers, Vendors, Carriers
 - Outcome: Vendors tested before the first order.
+
+#### Trading partner visibility
+- Purpose: Show partners the status of what you exchange
+- Summary: Give the suppliers and retailers you trade with a limited view of the documents you exchange on Trading Grid, so both sides see the same status.
+- Capabilities:
+  - A limited view you grant to each trading partner
+  - Documents exchanged with you, with delivery, acknowledgment and rejection status
+  - Search by order, ship notice or invoice number
+- Parties: Retailers, Suppliers, 3PLs
+- Outcome: Both sides see the same document status.
 
 #### Item and price synchronization
 - Purpose: Synchronize item and price data

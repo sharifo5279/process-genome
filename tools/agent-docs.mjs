@@ -139,8 +139,8 @@ function overlay(PV, OV, DEF, COPY) {
   const band = { h: "high", m: "medium", l: "low" };
   const out = [head("Retail and CPG product overlay", `Product overlay on the Retail and CPG Process Genome (${SITE}#retail/map)`, COPY.footer_disclaimer)];
   out.push("The Product overlay maps product coverage onto the retail documents in four steps: Connect, Comply, Optimize and Extend. Document codes follow each capability.", "");
-  out.push("## Connect: partner connectivity", "Brings partners without EDI teams onto electronic documents, on either side of the relationship. Web EDI lets suppliers answer retailer orders online. The supplier portal lets retailer and CPG hubs trade with vendors that have no EDI.", "",
-    "### Web EDI for suppliers", ...L(PV.web), "", "### Supplier portal for retailer and CPG hubs", ...L(PV.sp), "");
+  out.push("## Connect: partner connectivity", "Brings partners without EDI teams onto electronic documents, on either side of the relationship. Web EDI lets suppliers answer retailer orders online. The supplier portal lets retailer and CPG hubs trade with vendors that have no EDI. Partner visibility shows each partner the documents it exchanges with the hub.", "",
+    "### Web EDI for suppliers", ...L(PV.web), "", "### Supplier portal for retailer and CPG hubs", ...L(PV.sp), "", ...(PV.pv ? ["### Trading partner visibility (planned)", ...L(PV.pv), ""] : []));
   out.push("## Comply: retail compliance for suppliers", "A separate product, not part of Command Center. Checks documents before delivery, alerts business users before a penalty, and scores compliance by retailer.", "",
     "### Pre-delivery document validation", ...L(PV.val), "", "### Order lifecycle and chargeback alerts", ...L(PV.alr), "", "### Fill rate and scorecard", ...L(PV.sc), "");
   out.push("## Optimize: Command Center", "Monitors each business process on the network and recommends the next action. Integration Monitor watches volume, timing and acknowledgments. Performance Monitor checks business rules across documents. ASN Intelligence monitors ship notice health by supplier.", "",

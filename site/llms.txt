@@ -12,7 +12,7 @@ Notes for agents:
 Start with https://process-genome.onrender.com/llms-full.txt: solutions, documents, product overlay and operations in one file. Open the process files below for step-by-step business processes.
 
 ## Solutions
-- [Retail and CPG solutions](https://process-genome.onrender.com/agents/retail-solutions.txt): 20 solutions in 4 stages, with purpose, capabilities and parties
+- [Retail and CPG solutions](https://process-genome.onrender.com/agents/retail-solutions.txt): 21 solutions in 4 stages, with purpose, capabilities and parties
 - [Automotive solutions](https://process-genome.onrender.com/agents/automotive-solutions.txt): 9 solutions in 4 stages, with purpose, capabilities and parties
 - [Financial services solutions](https://process-genome.onrender.com/agents/financial-services-solutions.txt): 14 solutions in 4 stages, with purpose, capabilities and parties
 

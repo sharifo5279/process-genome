@@ -6,7 +6,7 @@ Status: Concept preview for internal review. Diagrams are illustrative. Some cap
 The Product overlay maps product coverage onto the retail documents in four steps: Connect, Comply, Optimize and Extend. Document codes follow each capability.
 
 ## Connect: partner connectivity
-Brings partners without EDI teams onto electronic documents, on either side of the relationship. Web EDI lets suppliers answer retailer orders online. The supplier portal lets retailer and CPG hubs trade with vendors that have no EDI.
+Brings partners without EDI teams onto electronic documents, on either side of the relationship. Web EDI lets suppliers answer retailer orders online. The supplier portal lets retailer and CPG hubs trade with vendors that have no EDI. Partner visibility shows each partner the documents it exchanges with the hub.
 
 ### Web EDI for suppliers
 - Orders received and acknowledged online (850, 855)
@@ -24,6 +24,11 @@ Brings partners without EDI teams onto electronic documents, on either side of t
 - Invoices matched to the order (810)
 - Remittance status (820)
 - Carrier shipment status (214)
+
+### Trading partner visibility (planned)
+- Orders and acknowledgments, with delivery status (850, 855)
+- Ship notices, with delivery and acknowledgment status (856, 997)
+- Invoices, with delivery and rejection status (810, 824)
 
 ## Comply: retail compliance for suppliers
 A separate product, not part of Command Center. Checks documents before delivery, alerts business users before a penalty, and scores compliance by retailer.
