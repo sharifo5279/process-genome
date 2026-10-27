@@ -11,10 +11,19 @@
     ["E", "Extend", "Agents that predict", "and recommend actions", 0.25]
   ];
   var X0 = 70, X1 = 980, YB = 350, ZW = (X1 - X0) / 4;
-  // client value rises left to right on both motions; the gap is moderate in Connect, largest in Activate,
-  // smaller in Optimize and smallest in Extend
-  var TODAY = "M70 330 C140 322 220 300 300 278 C380 256 460 234 530 214 C610 190 690 160 760 136 C840 110 910 96 980 86";
-  var RETAIL = "M70 326 C140 316 210 268 300 206 C360 164 440 124 530 114 C610 106 690 104 760 98 C840 90 910 76 980 64";
+  // client value delivered at each stage. Today: highest at Connect, less at Activate, less again at Optimize, little at
+  // Extend. Retail focus adds value at every stage: moderate at Connect, largest at Activate, smaller at Optimize and Extend.
+  function smooth(pts) {
+    var d = "M" + pts[0][0] + " " + pts[0][1];
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      d += " C" + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + " " + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + " " +
+        (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + " " + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + " " + p2[0] + " " + p2[1];
+    }
+    return d;
+  }
+  var TODAY = smooth([[70, 92], [185, 97], [300, 150], [415, 235], [530, 268], [645, 299], [760, 322], [870, 336], [980, 341]]);
+  var RETAIL = smooth([[70, 60], [185, 56], [300, 85], [415, 120], [530, 185], [645, 244], [760, 285], [870, 309], [980, 316]]);
 
   function letters() {
     var sec = document.getElementById("mk-model");
@@ -37,12 +46,12 @@
     var sec = document.createElement("section");
     sec.className = "opx"; sec.id = "mk-opp"; sec.setAttribute("aria-labelledby", "mk-h-opp");
     sec.innerHTML = '<div class="wrap"><p class="mk-eb">Retail opportunity</p><h2 id="mk-h-opp">Retail adoption opportunity</h2>' +
-      '<p class="opx-sub">A retail focus adds client value at every stage: a moderate opportunity in Connect, the largest in Activate, and smaller ones in Optimize and Extend.</p>' +
+      '<p class="opx-sub">Today most client value comes from Connect. A retail focus adds value at every stage: moderate in Connect, largest in Activate, smaller in Optimize and Extend.</p>' +
       '<div class="opx-box"><div class="opx-bar"><ul class="opx-lg"><li><i></i>Today&#39;s go-to-market motion</li><li><i class="g"></i>Retail-focused motion</li><li><i class="a"></i>Opportunity</li></ul>' +
       '<div class="opx-acts"><span class="opx-ill">Illustrative</span><button type="button" class="opx-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Replay animation</span></button></div></div>' +
       '<div class="opx-cw"></div></div><p class="opx-nt">Shape is illustrative, not measured data. Some capabilities shown are in development or planned.</p></div>';
     var svg = el("svg", { "class": "opx-c", viewBox: "0 0 1000 470", role: "img",
-      "aria-label": "Client value rises across Connect, Activate, Optimize and Extend on both motions. A retail-focused motion adds value at every stage: a moderate opportunity in Connect, the largest in Activate, and smaller opportunities in Optimize and Extend." });
+      "aria-label": "Client value by stage. Today most value comes from Connect, less from Activate, less again from Optimize and little from Extend. A retail-focused motion adds value at every stage: a moderate opportunity in Connect, the largest in Activate, and smaller opportunities in Optimize and Extend." });
     var defs = el("defs", {});
     var pat = el("pattern", { id: "opx-hatch", width: "8", height: "8", patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
     pat.appendChild(el("rect", { width: "8", height: "8", style: "fill: var(--opp); opacity: .10" }));
@@ -54,7 +63,7 @@
     for (var i = 1; i < 4; i++) svg.appendChild(el("line", { "class": "zl", x1: X0 + i * ZW, y1: 30, x2: X0 + i * ZW, y2: YB + 112 }));
     svg.appendChild(el("path", { "class": "ax", d: "M" + X0 + " 24V" + YB + "H" + X1 }));
     svg.appendChild(el("path", { "class": "ax", d: "M" + (X0 - 6) + " 32L" + X0 + " 22L" + (X0 + 6) + " 32" }));
-    svg.appendChild(el("text", { "class": "yl", x: "0", y: "0", transform: "translate(40 " + (YB - 4) + ") rotate(-90)" }, "Client value"));
+    svg.appendChild(el("text", { "class": "yl", x: "0", y: "0", transform: "translate(40 " + (YB - 4) + ") rotate(-90)" }, "Client value by stage"));
     // stage labels under the axis: big letter, name, and the lever (revealed by the sweep)
     var levs = LEVERS.map(function (L, i) {
       var zl = X0 + ZW * i;
@@ -75,10 +84,10 @@
     svg.appendChild(lt); svg.appendChild(lg);
     var dots = el("g", {});
     svg.appendChild(dots);
-    var tt = el("text", { "class": "tag t fd", x: X1, y: "110", "text-anchor": "end" }, "Today");
-    var tg = el("text", { "class": "tag g fd", x: X1, y: "48", "text-anchor": "end" }, "Retail focus");
+    var tt = el("text", { "class": "tag t fd", x: "92", y: "124" }, "Today");
+    var tg = el("text", { "class": "tag g fd", x: "200", y: "40" }, "Retail focus");
     svg.appendChild(tt); svg.appendChild(tg);
-    // closing callout, top left above the lines
+    // closing callout, top right above the lines
     var cl = el("g", { "class": "cl fd" });
     cl.appendChild(el("rect", { x: "84", y: "34", width: "330", height: "58", rx: "12" }));
     cl.appendChild(el("text", { "class": "h", x: "102", y: "58", "data-dx": 18 }, "Retail opportunity"));
@@ -99,10 +108,10 @@
   function geometry() {
     function pts(p, n) { var L = p.getTotalLength(), a = []; for (var i = 0; i <= n; i++) { var q = p.getPointAtLength(L * i / n); a.push(q.x.toFixed(1) + "," + q.y.toFixed(1)); } return a; }
     V.gap.setAttribute("points", pts(V.lg, 120).concat(pts(V.lt, 160).reverse()).join(" "));
-    // size the callout to its text, left edge fixed
+    // size the callout to its text, right edge at the plot edge
     var ts = V.cl.querySelectorAll("text"), r = V.cl.querySelector("rect"), w = 0;
     ts.forEach(function (t) { var l = 0; try { l = t.getComputedTextLength(); } catch (e) {} w = Math.max(w, l || t.textContent.length * 7.1); });
-    w = Math.ceil(w + 36); var x = 84; r.setAttribute("width", w); r.setAttribute("x", x);
+    w = Math.ceil(w + 36); var x = X1 - 4 - w; r.setAttribute("width", w); r.setAttribute("x", x);
     ts.forEach(function (t) { t.setAttribute("x", x + (+t.getAttribute("data-dx"))); });
     // a dot on the retail line at each zone centre, shown with that zone's lever
     if (!V.dots.firstChild) LEVERS.forEach(function (L, i) {
