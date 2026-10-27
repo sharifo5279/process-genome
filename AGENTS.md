@@ -10,9 +10,11 @@ and several sessions push to `main`, so follow these steps on every change. READ
 | `site/index.html` | `node tools/build-site.mjs /path/to/master.html` (master = the claude.ai artifact build) |
 | `site/llms.txt`, `site/llms-full.txt`, `site/agents/*.txt` | `tools/agent-docs.mjs`, called by `build-site.mjs` |
 | `site/command-center/index.html`, the Command Center block in `site/index.html` | `python3 tools/command-center/apply.py site/index.html` |
+| The adoption path block in `site/index.html` (C, A, O, E letters and the retail opportunity animation) | `tools/adoption-path/inject.mjs` from `adoption.css` and `adoption.js`, called by `build-site.mjs` |
 | `site/robots.txt`, `site/sitemap.xml`, `tools/crawl-state.json` | `node tools/crawl-files.mjs`, called by both builds above |
 
-Change the source (master, `tools/agent-docs.mjs`, `tools/command-center/*`), then rebuild.
+Change the source (master, `tools/agent-docs.mjs`, `tools/command-center/*`, `tools/adoption-path/*`), then rebuild. To apply
+an adoption path change without a master rebuild: `node tools/adoption-path/inject.mjs site/index.html`.
 
 ## Build order
 

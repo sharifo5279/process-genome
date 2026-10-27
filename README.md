@@ -29,6 +29,13 @@ Industries: `retail`, `automotive`, `financial-services`. Files are markdown wit
 `text/plain`: agent fetchers read `llms.txt` but refused the same content as `text/markdown`. The page footer carries copyable
 agent instructions that point to `llms-full.txt` and `llms.txt`, and `<head>` links `llms-full.txt` as an alternate. Do not hand-edit these files; rebuild instead.
 
+## Adoption path on the retail solution page
+
+`tools/adoption-path/` adds a managed block (between `adoption-path:start` and `adoption-path:end` markers) that shows the
+adoption path steps as large C, A, O and E letters, and adds the Retail adoption opportunity animation after them: today's
+go-to-market motion against a retail-focused motion, with the gap as the opportunity. `build-site.mjs` installs it on every
+master build; `node tools/adoption-path/inject.mjs site/index.html` applies a change to the current page. Retail only.
+
 ## Crawling: robots.txt and sitemap.xml
 
 `site/robots.txt` allows every crawler (except `/stats/`) and points to `site/sitemap.xml`, which lists the pages and every

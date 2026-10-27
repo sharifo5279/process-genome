@@ -14,6 +14,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { writeAgentDocs } from "./agent-docs.mjs";
 import { run as writeCrawlFiles } from "./crawl-files.mjs";
+import { applyAdoption } from "./adoption-path/inject.mjs";
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const MASTER = process.argv[2] || "/home/claude/process-genome-site.html";
 const API = (process.env.API_ORIGIN || "").replace(/\/$/, "");
@@ -72,6 +73,8 @@ var f=viewOf(window.PG_FIRST_HASH);if(f)send(f,"link");check();
 }catch(e){}})();</script>`;
 
 html = HEAD + FAV + "</head><body>" + (STATS_ON ? FIRST : "") + html + (STATS_ON ? BEACON + TRACK : "") + "</body></html>";
+// C, A, O, E adoption path letters and the retail opportunity animation (tools/adoption-path)
+html = applyAdoption(html);
 fs.writeFileSync(path.join(ROOT, "site/index.html"), html);
 // agent-readable version (llms.txt, llms-full.txt, agents/*.md), regenerated with every build so it matches the page
 console.log("agent docs", writeAgentDocs(html));

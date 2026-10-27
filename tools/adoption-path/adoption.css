@@ -1,0 +1,53 @@
+/* Adoption path: C, A, O, E as a framework, and the retail opportunity animation */
+.tgr .mdl.mdl-x .mdl-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; border: 0; background: none; }
+.tgr .mdl.mdl-x .mdl-c, .tgr .mdl.mdl-x .mdl-c + .mdl-c { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 20px 20px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.tgr .mdl.mdl-x .mdl-c:hover { border: 2px solid var(--accent); padding: 19px 19px 17px; }
+.tgr .mdl.mdl-x .mdl-h { flex-direction: column; align-items: flex-start; gap: 4px; }
+.tgr .mdl.mdl-x .mdl-h b { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 20px; }
+.tgr .mdl.mdl-x .mdl-h b span { width: auto; height: auto; border: 0; border-radius: 0; font-size: 96px; line-height: .86; font-weight: 800; letter-spacing: -.05em; color: var(--accent); }
+.tgr .mdl.mdl-x .mdl-go { margin-top: auto; padding-top: 6px; }
+@media (max-width: 900px) { .tgr .mdl.mdl-x .mdl-g { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .tgr .mdl.mdl-x .mdl-g { grid-template-columns: 1fr; } .tgr .mdl.mdl-x .mdl-h b span { font-size: 72px; } }
+
+.tgr .opx { --opp: #12A16B; --opp-ink: #0B6E49; padding-block: 48px 0; }
+:root[data-theme="dark"] .tgr .opx { --opp: #38E0A1; --opp-ink: #6EEDBD; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) .tgr .opx { --opp: #38E0A1; --opp-ink: #6EEDBD; } }
+.tgr .opx h2 { margin: 0; font-size: clamp(26px, 2.4vw, 32px); }
+.tgr .opx-sub { margin: 8px 0 0; max-width: 60em; font-size: 15px; line-height: 1.5; color: var(--muted); }
+.tgr .opx-box { margin-top: 18px; padding: 18px 20px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.tgr .opx-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; }
+.tgr .opx-lg { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0; padding: 0; list-style: none; font-size: 13px; font-weight: 600; color: var(--fg); }
+.tgr .opx-lg li { display: flex; align-items: center; gap: 8px; }
+.tgr .opx-lg i { width: 22px; height: 0; border-top: 3px solid var(--fg); border-radius: 2px; }
+.tgr .opx-lg i.g { border-color: var(--opp); }
+.tgr .opx-lg i.a { height: 12px; border: 0; border-radius: 3px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--opp) 45%, transparent) 0 2px, color-mix(in srgb, var(--opp) 14%, transparent) 2px 6px); }
+.tgr .opx-acts { display: flex; align-items: center; gap: 12px; }
+.tgr .opx-ill { padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 11px; line-height: 18px; font-weight: 600; color: var(--muted); }
+.tgr .opx-play { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border: 1px solid var(--accent); border-radius: 8px; background: var(--card); color: var(--accent-ink); font: 600 13px var(--font); cursor: pointer; }
+.tgr .opx-play:hover { background: var(--tint); }
+.tgr .opx-play svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tgr .opx svg.opx-c { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; font-family: var(--font); }
+.tgr .opx-c .ax { stroke: var(--line-2); stroke-width: 1.5; fill: none; }
+.tgr .opx-c .zl { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 5; }
+.tgr .opx-c .zL { font-size: 76px; font-weight: 800; letter-spacing: -3px; fill: var(--accent); opacity: .12; text-anchor: middle; }
+.tgr .opx-c .zn { font-size: 14px; font-weight: 700; fill: var(--fg); text-anchor: middle; }
+.tgr .opx-c .yl { font-size: 12px; font-weight: 600; fill: var(--muted); }
+.tgr .opx-c .ln { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.tgr .opx-c .ln.t { stroke: var(--fg); }
+.tgr .opx-c .ln.g { stroke: var(--opp); }
+.tgr .opx-c .gap { fill: url(#opx-hatch); }
+.tgr .opx-c .tag { font-size: 13px; font-weight: 700; }
+.tgr .opx-c .tag.t { fill: var(--fg); }
+.tgr .opx-c .tag.g { fill: var(--opp-ink); }
+.tgr .opx-c .lv { opacity: 0; transition: opacity .5s ease, transform .5s ease; transform: translateY(6px); }
+.tgr .opx-c .lv.on { opacity: 1; transform: none; }
+.tgr .opx-c .lv rect { fill: var(--card); stroke: var(--opp); stroke-width: 1.5; }
+.tgr .opx-c .lv .k { font-size: 12.5px; font-weight: 800; fill: var(--opp-ink); }
+.tgr .opx-c .lv .d { font-size: 12.5px; font-weight: 500; fill: var(--fg); }
+.tgr .opx-c .lv circle { fill: var(--opp); }
+.tgr .opx-c .fd { opacity: 0; transition: opacity .6s ease; }
+.tgr .opx-c .fd.on { opacity: 1; }
+.tgr .opx-c .cl rect { fill: var(--card); stroke: var(--opp); stroke-width: 2; }
+.tgr .opx-c .cl .h { font-size: 15px; font-weight: 800; fill: var(--fg); }
+.tgr .opx-c .cl .s { font-size: 12.5px; font-weight: 500; fill: var(--muted); }
+.tgr .opx-nt { margin: 8px 0 0; font-size: 12px; color: var(--faint); }

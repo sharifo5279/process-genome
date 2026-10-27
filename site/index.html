@@ -4312,4 +4312,235 @@ var TRANSLATE = [
     }
   });
 })();
-</script></body></html>
+</script><!-- adoption-path:start (tools/adoption-path; do not hand-edit) -->
+<style>
+/* Adoption path: C, A, O, E as a framework, and the retail opportunity animation */
+.tgr .mdl.mdl-x .mdl-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; border: 0; background: none; }
+.tgr .mdl.mdl-x .mdl-c, .tgr .mdl.mdl-x .mdl-c + .mdl-c { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 20px 20px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.tgr .mdl.mdl-x .mdl-c:hover { border: 2px solid var(--accent); padding: 19px 19px 17px; }
+.tgr .mdl.mdl-x .mdl-h { flex-direction: column; align-items: flex-start; gap: 4px; }
+.tgr .mdl.mdl-x .mdl-h b { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 20px; }
+.tgr .mdl.mdl-x .mdl-h b span { width: auto; height: auto; border: 0; border-radius: 0; font-size: 96px; line-height: .86; font-weight: 800; letter-spacing: -.05em; color: var(--accent); }
+.tgr .mdl.mdl-x .mdl-go { margin-top: auto; padding-top: 6px; }
+@media (max-width: 900px) { .tgr .mdl.mdl-x .mdl-g { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .tgr .mdl.mdl-x .mdl-g { grid-template-columns: 1fr; } .tgr .mdl.mdl-x .mdl-h b span { font-size: 72px; } }
+
+.tgr .opx { --opp: #12A16B; --opp-ink: #0B6E49; padding-block: 48px 0; }
+:root[data-theme="dark"] .tgr .opx { --opp: #38E0A1; --opp-ink: #6EEDBD; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) .tgr .opx { --opp: #38E0A1; --opp-ink: #6EEDBD; } }
+.tgr .opx h2 { margin: 0; font-size: clamp(26px, 2.4vw, 32px); }
+.tgr .opx-sub { margin: 8px 0 0; max-width: 60em; font-size: 15px; line-height: 1.5; color: var(--muted); }
+.tgr .opx-box { margin-top: 18px; padding: 18px 20px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.tgr .opx-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; }
+.tgr .opx-lg { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0; padding: 0; list-style: none; font-size: 13px; font-weight: 600; color: var(--fg); }
+.tgr .opx-lg li { display: flex; align-items: center; gap: 8px; }
+.tgr .opx-lg i { width: 22px; height: 0; border-top: 3px solid var(--fg); border-radius: 2px; }
+.tgr .opx-lg i.g { border-color: var(--opp); }
+.tgr .opx-lg i.a { height: 12px; border: 0; border-radius: 3px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--opp) 45%, transparent) 0 2px, color-mix(in srgb, var(--opp) 14%, transparent) 2px 6px); }
+.tgr .opx-acts { display: flex; align-items: center; gap: 12px; }
+.tgr .opx-ill { padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 11px; line-height: 18px; font-weight: 600; color: var(--muted); }
+.tgr .opx-play { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border: 1px solid var(--accent); border-radius: 8px; background: var(--card); color: var(--accent-ink); font: 600 13px var(--font); cursor: pointer; }
+.tgr .opx-play:hover { background: var(--tint); }
+.tgr .opx-play svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tgr .opx svg.opx-c { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; font-family: var(--font); }
+.tgr .opx-c .ax { stroke: var(--line-2); stroke-width: 1.5; fill: none; }
+.tgr .opx-c .zl { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 5; }
+.tgr .opx-c .zL { font-size: 76px; font-weight: 800; letter-spacing: -3px; fill: var(--accent); opacity: .12; text-anchor: middle; }
+.tgr .opx-c .zn { font-size: 14px; font-weight: 700; fill: var(--fg); text-anchor: middle; }
+.tgr .opx-c .yl { font-size: 12px; font-weight: 600; fill: var(--muted); }
+.tgr .opx-c .ln { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.tgr .opx-c .ln.t { stroke: var(--fg); }
+.tgr .opx-c .ln.g { stroke: var(--opp); }
+.tgr .opx-c .gap { fill: url(#opx-hatch); }
+.tgr .opx-c .tag { font-size: 13px; font-weight: 700; }
+.tgr .opx-c .tag.t { fill: var(--fg); }
+.tgr .opx-c .tag.g { fill: var(--opp-ink); }
+.tgr .opx-c .lv { opacity: 0; transition: opacity .5s ease, transform .5s ease; transform: translateY(6px); }
+.tgr .opx-c .lv.on { opacity: 1; transform: none; }
+.tgr .opx-c .lv rect { fill: var(--card); stroke: var(--opp); stroke-width: 1.5; }
+.tgr .opx-c .lv .k { font-size: 12.5px; font-weight: 800; fill: var(--opp-ink); }
+.tgr .opx-c .lv .d { font-size: 12.5px; font-weight: 500; fill: var(--fg); }
+.tgr .opx-c .lv circle { fill: var(--opp); }
+.tgr .opx-c .fd { opacity: 0; transition: opacity .6s ease; }
+.tgr .opx-c .fd.on { opacity: 1; }
+.tgr .opx-c .cl rect { fill: var(--card); stroke: var(--opp); stroke-width: 2; }
+.tgr .opx-c .cl .h { font-size: 15px; font-weight: 800; fill: var(--fg); }
+.tgr .opx-c .cl .s { font-size: 12.5px; font-weight: 500; fill: var(--muted); }
+.tgr .opx-nt { margin: 8px 0 0; font-size: 12px; color: var(--faint); }
+</style>
+<script>
+/* Adoption path: C, A, O, E letters on the steps, and the retail opportunity animation after them.
+   Runs after the solution page renders (wraps window.TGR_RENDER); retail only, where the adoption path exists. */
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var LEVERS = [
+    ["C", "Connect", "Faster onboarding, better partner processes"],
+    ["A", "Activate", "More processes running per partner"],
+    ["O", "Optimize", "Exceptions caught before chargebacks"],
+    ["E", "Extend", "Agents that predict and recommend actions"]
+  ];
+  var X0 = 70, X1 = 980, YB = 350, ZW = (X1 - X0) / 4;
+  var TODAY = "M70 96 C150 100 230 112 282 140 C312 156 330 230 348 268 C366 300 420 300 520 304 C580 306 610 322 650 326 C700 330 740 334 780 336 C860 340 920 342 980 344";
+  var RETAIL = "M70 76 C200 90 300 112 420 140 C520 162 620 190 720 210 C820 228 900 236 980 240";
+  // lever label boxes: x, y, width; the dot sits on the retail line at the zone centre
+  var BOX = [[84, 18, 236], [352, 196, 236], [540, 252, 236], [664, 148, 236]];
+
+  function letters() {
+    var sec = document.getElementById("mk-model");
+    if (!sec) return;
+    sec.classList.add("mdl-x");
+    sec.querySelectorAll(".mdl-h b").forEach(function (b) {
+      var sp = b.querySelector("span"), t = b.textContent.replace(sp ? sp.textContent : "", "").trim();
+      if (sp && t) { sp.textContent = t.charAt(0).toUpperCase(); sp.setAttribute("aria-hidden", "true"); }
+    });
+  }
+
+  function el(tag, attrs, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function build() {
+    var sec = document.createElement("section");
+    sec.className = "opx"; sec.id = "mk-opp"; sec.setAttribute("aria-labelledby", "mk-h-opp");
+    sec.innerHTML = '<div class="wrap"><p class="mk-eb">Retail opportunity</p><h2 id="mk-h-opp">Retail adoption opportunity</h2>' +
+      '<p class="opx-sub">Today most clients stop after Connect. A retail focus moves more of them through Activate, Optimize and Extend, where client value grows.</p>' +
+      '<div class="opx-box"><div class="opx-bar"><ul class="opx-lg"><li><i></i>Today&#39;s go-to-market motion</li><li><i class="g"></i>Retail-focused motion</li><li><i class="a"></i>Opportunity</li></ul>' +
+      '<div class="opx-acts"><span class="opx-ill">Illustrative</span><button type="button" class="opx-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Replay animation</span></button></div></div>' +
+      '<div class="opx-cw"></div></div><p class="opx-nt">Shape is illustrative, not measured data. Some capabilities shown are in development or planned.</p></div>';
+    var svg = el("svg", { "class": "opx-c", viewBox: "0 0 1000 432", role: "img",
+      "aria-label": "Today's go-to-market motion falls steeply after Connect. A retail-focused motion keeps more clients moving through Activate, Optimize and Extend; the gap between the two lines is the opportunity." });
+    var defs = el("defs", {});
+    var pat = el("pattern", { id: "opx-hatch", width: "8", height: "8", patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+    pat.appendChild(el("rect", { width: "8", height: "8", style: "fill: var(--opp); opacity: .10" }));
+    pat.appendChild(el("line", { x1: "0", y1: "0", x2: "0", y2: "8", style: "stroke: var(--opp); stroke-width: 2.5; opacity: .45" }));
+    defs.appendChild(pat);
+    var clip = el("clipPath", { id: "opx-clip" }), crect = el("rect", { x: X0, y: "0", width: "0", height: "432" });
+    clip.appendChild(crect); defs.appendChild(clip); svg.appendChild(defs);
+    // zones and axis
+    for (var i = 1; i < 4; i++) svg.appendChild(el("line", { "class": "zl", x1: X0 + i * ZW, y1: 30, x2: X0 + i * ZW, y2: YB }));
+    svg.appendChild(el("path", { "class": "ax", d: "M" + X0 + " 24V" + YB + "H" + X1 }));
+    var yl = el("text", { "class": "yl", x: "0", y: "0", transform: "translate(40 " + (YB - 4) + ") rotate(-90)" }, "Clients reaching each stage");
+    svg.appendChild(yl);
+    LEVERS.forEach(function (L, i) {
+      var cx = X0 + ZW * i + ZW / 2;
+      svg.appendChild(el("text", { "class": "zL", x: cx - 40, y: YB + 72 }, L[0]));
+      svg.appendChild(el("text", { "class": "zn", x: cx + 20, y: YB + 50 }, L[1]));
+    });
+    // gap, then lines on top
+    var gap = el("polygon", { "class": "gap", "clip-path": "url(#opx-clip)" });
+    svg.appendChild(gap);
+    var lt = el("path", { "class": "ln t", d: TODAY }), lg = el("path", { "class": "ln g", d: RETAIL });
+    svg.appendChild(lt); svg.appendChild(lg);
+    var tt = el("text", { "class": "tag t fd", x: "92", y: "136" }, "Today");
+    var tg = el("text", { "class": "tag g fd", x: X1, y: "226", "text-anchor": "end" }, "Retail focus");
+    svg.appendChild(tt); svg.appendChild(tg);
+    // levers
+    var levs = LEVERS.map(function (L, i) {
+      var b = BOX[i], g = el("g", { "class": "lv" });
+      g.appendChild(el("rect", { x: b[0], y: b[1], width: b[2], height: "46", rx: "10" }));
+      g.appendChild(el("text", { "class": "k", x: b[0] + 14, y: b[1] + 19, "data-dx": 14 }, L[0] + " · " + L[1]));
+      g.appendChild(el("text", { "class": "d", x: b[0] + 14, y: b[1] + 36, "data-dx": 14 }, L[2]));
+      svg.appendChild(g);
+      return g;
+    });
+    // closing callout
+    var cl = el("g", { "class": "cl fd" });
+    cl.appendChild(el("rect", { x: "590", y: "36", width: "380", height: "62", rx: "12" }));
+    cl.appendChild(el("text", { "class": "h", x: "608", y: "62", "data-dx": 18 }, "Retail opportunity"));
+    cl.appendChild(el("text", { "class": "s", x: "608", y: "84", "data-dx": 18 }, "More clients reach Optimize and Extend, where value compounds."));
+    svg.appendChild(cl);
+    sec.querySelector(".opx-cw").appendChild(svg);
+    return { sec: sec, svg: svg, gap: gap, crect: crect, lt: lt, lg: lg, tt: tt, tg: tg, levs: levs, cl: cl };
+  }
+
+  var V = null, timers = [], raf = 0, played = false;
+  function stop() { timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf); }
+  function draw(path, ms, done) {
+    var L = path.getTotalLength(), t0 = null;
+    path.style.strokeDasharray = L; path.style.strokeDashoffset = L;
+    (function step(ts) { if (t0 == null) t0 = ts; var p = Math.min(1, (ts - t0) / ms), e = 1 - Math.pow(1 - p, 3);
+      path.style.strokeDashoffset = L * (1 - e); if (p < 1) raf = requestAnimationFrame(step); else if (done) done(); })(performance.now());
+  }
+  function geometry() {
+    function pts(p, n) { var L = p.getTotalLength(), a = []; for (var i = 0; i <= n; i++) { var q = p.getPointAtLength(L * i / n); a.push(q.x.toFixed(1) + "," + q.y.toFixed(1)); } return a; }
+    V.gap.setAttribute("points", pts(V.lg, 120).concat(pts(V.lt, 160).reverse()).join(" "));
+    // size each label box to its text; the Extend box and the callout keep their right edge at the plot edge
+    function fit(g, right) {
+      var ts = g.querySelectorAll("text"), r = g.querySelector("rect"), w = 0;
+      ts.forEach(function (t) { var l = 0; try { l = t.getComputedTextLength(); } catch (e) {} w = Math.max(w, l || t.textContent.length * 7.1); });
+      w = Math.ceil(w + 28); r.setAttribute("width", w);
+      if (right) { var x = right - w; r.setAttribute("x", x); ts.forEach(function (t) { t.setAttribute("x", x + (+t.getAttribute("data-dx"))); }); }
+    }
+    V.levs.forEach(function (g, i) { fit(g, i === 3 ? X1 - 4 : 0); });
+    fit(V.cl, X1 - 4);
+    // pin a dot from each lever box to the retail line at its zone centre
+    V.levs.forEach(function (g, i) {
+      if (g.querySelector("circle")) return;
+      var cx = X0 + ZW * i + ZW / 2, L = V.lg.getTotalLength(), lo = 0, hi = L;
+      for (var k = 0; k < 30; k++) { var m = (lo + hi) / 2; if (V.lg.getPointAtLength(m).x < cx) lo = m; else hi = m; }
+      var q = V.lg.getPointAtLength(lo), b = BOX[i], by = q.y < b[1] ? b[1] : b[1] + 46;
+      g.insertBefore(el("line", { x1: cx, y1: q.y, x2: cx, y2: by, style: "stroke: var(--opp); stroke-width: 1.5" }), g.firstChild);
+      g.appendChild(el("circle", { cx: cx, cy: q.y, r: "5" }));
+    });
+  }
+  function finalState() {
+    stop();
+    [V.lt, V.lg].forEach(function (p) { p.style.strokeDasharray = ""; p.style.strokeDashoffset = ""; });
+    V.crect.setAttribute("width", X1 - X0);
+    V.levs.concat([V.tt, V.tg, V.cl]).forEach(function (g) { g.classList.add("on"); });
+  }
+  function play() {
+    stop(); geometry();
+    V.crect.setAttribute("width", "0");
+    V.levs.concat([V.tt, V.tg, V.cl]).forEach(function (g) { g.classList.remove("on"); });
+    if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) { finalState(); return; }
+    draw(V.lt, 1300, function () {
+      V.tt.classList.add("on");
+      timers.push(setTimeout(function () {
+        draw(V.lg, 1300, function () {
+          V.tg.classList.add("on");
+          var t0 = null, ms = 3200, shown = 0;
+          (function sweep(ts) {
+            if (t0 == null) t0 = ts;
+            var p = Math.min(1, (ts - t0) / ms), w = (X1 - X0) * p;
+            V.crect.setAttribute("width", w.toFixed(1));
+            while (shown < 4 && w >= ZW * shown + ZW * 0.35) V.levs[shown++].classList.add("on");
+            if (p < 1) raf = requestAnimationFrame(sweep);
+            else timers.push(setTimeout(function () { V.cl.classList.add("on"); }, 300));
+          })(performance.now());
+        });
+      }, 350));
+    });
+  }
+
+  function opportunity(k) {
+    var model = document.getElementById("mk-model");
+    if (!model) return;
+    if (!V) {
+      V = build();
+      model.parentNode.insertBefore(V.sec, model.nextSibling);
+      geometry();
+      [V.lt, V.lg].forEach(function (p) { var L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });
+      V.sec.querySelector(".opx-play").addEventListener("click", function () { played = true; play(); });
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (es, ob) {
+          es.forEach(function (e) { if (e.isIntersecting && !played && !V.sec.hidden) { played = true; ob.disconnect(); play(); } });
+        }, { threshold: 0.45 }).observe(V.sec.querySelector(".opx-box"));
+      } else { played = true; geometry(); finalState(); }
+    }
+    V.sec.hidden = k !== "retail" || model.hidden;
+  }
+
+  function enhance(k) { try { letters(); opportunity(k); } catch (e) { if (window.console) console.error("adoption path", e); } }
+  var orig = window.TGR_RENDER;
+  if (typeof orig === "function") {
+    window.TGR_RENDER = function (k) { var r = orig.apply(this, arguments); enhance(k); return r; };
+    if (window.TGR_K) enhance(window.TGR_K);
+  }
+})();
+</script>
+<!-- adoption-path:end -->
+</body></html>
