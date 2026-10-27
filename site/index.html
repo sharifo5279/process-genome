@@ -936,7 +936,7 @@
   .tgr .wheel.is-net { container: rnc / inline-size; border: 0; box-shadow: none; overflow: visible; background: transparent; }
   .tgr .rnc { --rnc-line: #2C7BF2; --rnc-dot: #0A2580; --rnc-pulse: #1873F5; --rnc-bokeh: #8FC2FF; --rnc-core: #FFFFFF;
     --rnc-rim1: #6CC0FF; --rnc-rim2: #2A8DFF; --rnc-rim3: #0B5BE0; --rnc-navy: #062A8C; --rnc-navy2: #0947B2; --rnc-navy3: #0D5CD2; --rnc-ink: #0A1A5C; --rnc-brand: #0B4DDB;
-    --rnc-glow: rgba(58, 145, 255, 0.40); --rnc-edge: #FFFFFF; --rnc-inset: rgba(255, 255, 255, 0.6); --rnc-disc1: #FFFFFF; --rnc-disc2: #EAF1FF; --rnc-pb: rgba(31, 102, 255, 0.24);
+    --rnc-glow: rgba(58, 145, 255, 0.40); --rnc-edge: #FFFFFF; --rnc-alert: #E5004C; --rnc-alert2: #FF5C66; --rnc-inset: rgba(255, 255, 255, 0.6); --rnc-disc1: #FFFFFF; --rnc-disc2: #EAF1FF; --rnc-pb: rgba(31, 102, 255, 0.24);
     position: relative; width: 100%; aspect-ratio: 640 / 560; font-family: var(--font); }
   :root[data-theme="dark"] .tgr .rnc { --rnc-line: #4C8FF0; --rnc-dot: #A9C9FF; --rnc-pulse: #72A7FF; --rnc-bokeh: #3D66B8; --rnc-core: #0E1726;
     --rnc-ink: #F5F8FF; --rnc-brand: #8DB8FF; --rnc-glow: rgba(64, 128, 255, 0.42); --rnc-edge: #1B2B4A; --rnc-inset: rgba(114, 167, 255, 0.10); --rnc-disc1: #13213C; --rnc-disc2: #0E1830; --rnc-pb: rgba(114, 167, 255, 0.30); }
@@ -4354,24 +4354,28 @@ var TRANSLATE = [
       var dpr = Math.min(window.devicePixelRatio || 1, 2); R.setPixelRatio(dpr); R.setClearColor(0x000000, 0);
       var scene = new T.Scene(), cam = new T.OrthographicCamera(-1, 1, 1, -1, -2000, 2000), objs = [], geos = [], mats = [];
       var raf = 0, on = false, vis = true, last = 0, clock = 0, focusK = null, W = 0, H = 0;
-      var arcs = [], links = null, sph = null, ring = null, ring2 = null, bokeh = null, pulses = null, movers = [], spin = 0, cx = 0, cy = 0, Rs = 1;
+      var arcs = [], links = null, sph = null, ring = null, ring2 = null, bokeh = null, alerts = null, pulses = null, movers = [], spin = 0, cx = 0, cy = 0, Rs = 1;
 
       /* one point shader for every node type: 0 solid dot, 1 ringed node, 2 soft bokeh, 3 transaction pulse with a small glow */
       var PV = "attribute float aSize; attribute float aAlpha; attribute float aType; uniform float uDpr; varying float vA; varying float vT;" +
         "void main(){ vA = aAlpha; vT = aType; gl_PointSize = aSize * uDpr; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }";
-      var PF = "uniform vec3 uBlue; uniform vec3 uNavy; uniform vec3 uPale; uniform vec3 uCore; varying float vA; varying float vT;" +
+      var PF = "uniform vec3 uBlue; uniform vec3 uNavy; uniform vec3 uPale; uniform vec3 uCore; uniform vec3 uRed; uniform vec3 uRed2; varying float vA; varying float vT;" +
         "void main(){ vec2 p = gl_PointCoord * 2.0 - 1.0; float d = length(p); if (d > 1.0) discard; vec4 c;" +
         " if (vT < 0.5) { c = vec4(uBlue, 1.0 - smoothstep(0.72, 1.0, d)); }" +
         " else if (vT < 1.5) { float k = 1.0 - smoothstep(0.27, 0.34, d); float w = 1.0 - smoothstep(0.40, 0.47, d); float r = 1.0 - smoothstep(0.78, 0.86, d);" +
         "   vec3 col = mix(mix(uBlue, uCore, w), uNavy, k); c = vec4(col, max(r, (1.0 - smoothstep(0.86, 1.0, d)) * 0.3)); }" +
         " else if (vT < 2.5) { c = vec4(uPale, exp(-d * d * 2.6) * (1.0 - smoothstep(0.85, 1.0, d))); }" +
-        " else { float k = 1.0 - smoothstep(0.2, 0.32, d); float g = exp(-d * d * 4.5) * 0.6; c = vec4(mix(uBlue, uCore, k * 0.45), max(k, g)); }" +
+        " else if (vT < 3.5) { float k = 1.0 - smoothstep(0.2, 0.32, d); float g = exp(-d * d * 4.5) * 0.6; c = vec4(mix(uBlue, uCore, k * 0.45), max(k, g)); }" +
+        " else if (vT < 4.5) { float k = 1.0 - smoothstep(0.27, 0.33, d); float h = 1.0 - smoothstep(0.05, 0.13, d); float g = exp(-d * d * 3.2) * 0.5 * (1.0 - smoothstep(0.8, 1.0, d));" +
+        "   c = vec4(mix(mix(uRed2, uRed, k), uCore, h * 0.55), max(k, g)); }" +
+        " else { float r = 1.0 - smoothstep(0.0, 0.06, abs(d - 0.88)); c = vec4(uRed, r); }" +
         " gl_FragColor = vec4(c.rgb, c.a * vA); }";
       function css(n, d) { var v = getComputedStyle(root).getPropertyValue(n).trim(); return v || d; }
       function pointMat() {
         var m = new T.ShaderMaterial({ vertexShader: PV, fragmentShader: PF, transparent: true, depthTest: false, depthWrite: false,
           uniforms: { uDpr: { value: dpr }, uBlue: { value: new T.Color(css("--rnc-pulse", "#1F5BEA")) }, uNavy: { value: new T.Color(css("--rnc-dot", "#0A2BA8")) },
-            uPale: { value: new T.Color(css("--rnc-bokeh", "#A9C7FF")) }, uCore: { value: new T.Color(css("--rnc-core", "#FFFFFF")) } } });
+            uPale: { value: new T.Color(css("--rnc-bokeh", "#A9C7FF")) }, uCore: { value: new T.Color(css("--rnc-core", "#FFFFFF")) },
+            uRed: { value: new T.Color(css("--rnc-alert", "#E5004C")) }, uRed2: { value: new T.Color(css("--rnc-alert2", "#FF5C66")) } } });
         mats.push(m); return m;
       }
       function pointSet(n) {
@@ -4396,7 +4400,7 @@ var TRANSLATE = [
       }
       function clear() {
         objs.forEach(function (o) { scene.remove(o); }); geos.forEach(function (g) { g.dispose(); }); mats.forEach(function (m) { m.dispose(); });
-        objs = []; geos = []; mats = []; arcs = []; movers = []; links = sph = ring = ring2 = bokeh = pulses = null;
+        objs = []; geos = []; mats = []; arcs = []; movers = []; links = sph = ring = ring2 = bokeh = alerts = pulses = null;
       }
       /* rotate a globe point about the vertical axis, then tilt it toward the viewer */
       var TILT = -0.32;
@@ -4469,6 +4473,12 @@ var TRANSLATE = [
         }
         bokeh = pointSet(BK); bokeh.userData.pts = bk;
 
+        // exceptions: one or two red signals in the network, each a glowing dot with a slow ripple
+        var AL = (small ? [[0.25, 0.80]] : [[-0.25, 0.70], [0.75, 0.62]]).map(function (a, i) {
+          var t = a[0] * Math.PI; return { x: cx + Math.cos(t) * Rs * a[1], y: cy + Math.sin(t) * Rs * a[1], ph: i * 1.3 };
+        });
+        alerts = pointSet(AL.length * 2); alerts.userData.pts = AL;
+
         // transactions: pulses along the spokes into Trading Grid and along the globe's inclined orbits and equator
         N.forEach(function (n, i) {
           var a = new T.Vector3(n.x - W / 2, H / 2 - n.y, 0), c = new T.Vector3(cx, cy, 0), u = c.clone().sub(a).normalize();
@@ -4520,6 +4530,15 @@ var TRANSLATE = [
           bg.aSize.array[i] = b.s; bg.aAlpha.array[i] = b.al; bg.aType.array[i] = 2;
         });
         bg.position.needsUpdate = bg.aSize.needsUpdate = bg.aAlpha.needsUpdate = bg.aType.needsUpdate = true;
+        var ag = alerts.geometry.attributes;
+        alerts.userData.pts.forEach(function (a, i) {
+          var cyc = still ? 0.35 : ((now + a.ph) % 2.8) / 2.8, br = still ? 1 : 1 + 0.08 * Math.sin((now + a.ph) * 2.2);
+          [[a.x, a.y, 4, 34 * br, 1], [a.x, a.y, 5, 16 + 34 * cyc, 0.6 * (1 - cyc)]].forEach(function (v, j) {
+            var k = i * 2 + j; ag.position.array[k * 3] = v[0]; ag.position.array[k * 3 + 1] = v[1]; ag.position.array[k * 3 + 2] = 0;
+            ag.aType.array[k] = v[2]; ag.aSize.array[k] = v[3]; ag.aAlpha.array[k] = v[4];
+          });
+        });
+        ag.position.needsUpdate = ag.aSize.needsUpdate = ag.aAlpha.needsUpdate = ag.aType.needsUpdate = true;
         var pg = pulses.geometry.attributes;
         movers.forEach(function (m, i) {
           var x = 0, y = 0, al = 0, sz = 11;
