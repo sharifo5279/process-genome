@@ -44,6 +44,16 @@ const join = (a) => a.filter((x) => x != null).join("\n");
 function solutions(k, slug, name, C, rows) {
   const P = Object.fromEntries(C.processes.map((p) => [p.id, p])), R = Object.fromEntries(rows.map((r) => [r[0], r]));
   const out = [head(`${name} solutions on Trading Grid`, `Solution overview for ${name} (${SITE}#${k}/solution)`, C.footer_disclaimer), `${C.hero.headline}. ${C.hero.lead}`, ""];
+  if (C.model) {
+    const M = C.model;
+    out.push(`## ${M.eyebrow}: ${M.heading}`, M.sub, "");
+    M.steps.forEach((st, i) => {
+      out.push(`### ${i + 1}. ${st.title} (${st.focus})`, st.desc, `- Measure: ${st.measure}`,
+        st.ids ? `- Solutions: ${st.ids.map((id) => P[id].name).join("; ")}` : `- Agent decision points: ${st.dp.map((d) => `${d[0]} (${P[d[1]].name})`).join("; ")}`,
+        st.note ? `- ${st.note}` : null, "");
+    });
+    if (M.foundations) out.push(`### ${M.foundations_title}`, ...M.foundations.map((f) => `- ${f[0]}: ${f[1]}`), "");
+  }
   out.push("## Solutions by stage", "");
   out.push(C.index.stages.map((s) => `- ${s.title}: ${s.ids.map((i) => P[i].name).join("; ")}`).join("\n"), "");
   for (const s of C.index.stages) {

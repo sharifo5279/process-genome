@@ -43,6 +43,34 @@ Status: Concept preview for internal review. Diagrams are illustrative. Some cap
 
 Retail and CPG trading relationships, connected and managed. Integrate and onboard the retailers, suppliers, carriers, 3PLs and marketplaces you trade with on Trading Grid, and monitor every document exchanged.
 
+## Adoption path: Connect, activate, optimize, extend
+Each step builds on the one before. Open a step on the Process Genome to see it across the retail documents.
+
+### 1. Connect (Reach)
+Bring trading partners onto the network so their documents flow.
+- Measure: Active relationships, net new partners and reach gap against the hub's supplier list.
+- Solutions: EDI compliance; Web EDI for suppliers; Supplier portal for retailer and CPG hubs
+
+### 2. Activate (Completeness)
+Run every document each hub requires, so whole processes complete across the community.
+- Measure: Required documents live, whole-line completion, and required documents not yet live.
+- Solutions: Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment; Drop ship and marketplace fulfillment; 3PL inventory reconciliation; Direct store delivery reconciliation; Returns and credit management
+
+### 3. Optimize (Performance)
+Monitor every flow, catch exceptions and late documents, and fix them before they cost money.
+- Measure: Exceptions per 1,000 documents, and timeliness against each hub's window.
+- Solutions: Order-to-cash compliance; Pre-delivery document validation; Backorder and fill-rate tracking; Inbound shipment visibility; ASN intelligence; Chargeback prevention alerts; Receiving and three-way match; Chargeback management; Deduction management; Supplier compliance scorecard
+
+### 4. Extend (Intelligence)
+Use network data and intelligence to predict, recommend and act inside the process.
+- Measure: Decision points covered and value influenced, such as deductions recovered or chargebacks avoided.
+- Agent decision points: Cost change before invoicing (Item and price synchronization); Shipment at risk (ASN intelligence); Dispute or accept a deduction (Deduction management); Replenishment quantity (Vendor-managed inventory and replenishment); Repeat rejection (Order-to-cash compliance); Carrier delay (Inbound shipment visibility); Store delivery dispute (Direct store delivery reconciliation); Inventory mismatch (3PL inventory reconciliation); Return credit match (Returns and credit management)
+- Agents recommend an action; a person approves it.
+
+### Across every step
+- Order lifecycle correlation: 850, 855, 856, 824, 810 and 820 linked by order, so each solution works from the whole transaction.
+- Retailer-specific rules: Rules and timing windows set per retailer, document and order type.
+
 ## Solutions by stage
 
 - Plan and synchronize: EDI compliance; Item and price synchronization; Sell-through and inventory analytics; Vendor-managed inventory and replenishment
