@@ -31,7 +31,7 @@ const T = html.match(/<title>[^<]*<\/title>/); if (T) html = html.replace(T[0], 
 const HEAD = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">` +
   `<title>${TITLE}</title><meta name="description" content="${DESC}"><meta property="og:type" content="website"><meta property="og:site_name" content="${TITLE}">` +
   `<meta property="og:title" content="${TITLE}"><meta property="og:description" content="${DESC}"><meta property="og:url" content="${SITE}"><meta name="twitter:card" content="summary">` +
-  `<link rel="alternate" type="text/markdown" href="llms.txt" title="Agent-readable version">`;
+  `<link rel="alternate" type="text/plain" href="llms-full.txt" title="Agent-readable version">`;
 
 // favicon files for browsers that do not use the inline SVG icon
 const FAV = '<link rel="icon" href="img/favicon/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="img/favicon/apple-touch-icon.png">\n';

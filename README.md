@@ -19,14 +19,15 @@ plain-markdown version from the same data (`tools/agent-docs.mjs`), so it always
 |---|---|
 | `site/llms.txt` | Index in the llms.txt convention, with notes for agents and links to each file |
 | `site/llms-full.txt` | Every section except the step-by-step processes, in one file |
-| `site/agents/<industry>-solutions.md` | Solution overview: stages, solutions, purpose, capabilities, parties |
-| `site/agents/<industry>-documents.md` | Process Genome documents: sender, receiver, standards, definition, processes |
-| `site/agents/<industry>-processes.md` | Business processes step by step |
-| `site/agents/operations.md` | Work areas and stakeholders |
-| `site/agents/retail-product-overlay.md` | Product overlay: Connect, Comply, Optimize, Extend |
+| `site/agents/<industry>-solutions.txt` | Solution overview: stages, solutions, purpose, capabilities, parties |
+| `site/agents/<industry>-documents.txt` | Process Genome documents: sender, receiver, standards, definition, processes |
+| `site/agents/<industry>-processes.txt` | Business processes step by step |
+| `site/agents/operations.txt` | Work areas and stakeholders |
+| `site/agents/retail-product-overlay.txt` | Product overlay: Connect, Comply, Optimize, Extend |
 
-Industries: `retail`, `automotive`, `financial-services`. The page footer carries copyable agent instructions that point to
-`llms.txt`, and `<head>` links it as an alternate. Do not hand-edit these files; rebuild instead.
+Industries: `retail`, `automotive`, `financial-services`. Files are markdown with a `.txt` extension so they are served as
+`text/plain`: agent fetchers read `llms.txt` but refused the same content as `text/markdown`. The page footer carries copyable
+agent instructions that point to `llms-full.txt` and `llms.txt`, and `<head>` links `llms-full.txt` as an alternate. Do not hand-edit these files; rebuild instead.
 
 ## Command Center source and generation
 

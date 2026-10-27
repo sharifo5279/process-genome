@@ -2,7 +2,7 @@
 // without running the page's scripts. Written on every site build from the same data the page renders, so it never drifts:
 //   site/llms.txt                 index in the llms.txt convention (https://llmstxt.org)
 //   site/llms-full.txt            every section in one file
-//   site/agents/*.md              one file per section
+//   site/agents/*.txt             one file per section, markdown served as text/plain (agent fetchers often refuse text/markdown)
 // Run on its own: node tools/agent-docs.mjs [site/index.html]. tools/build-site.mjs calls writeAgentDocs() after it writes the page.
 import fs from "node:fs";
 import path from "node:path";
@@ -157,12 +157,12 @@ export function writeAgentDocs(html, root = ROOT) {
   const pmck = /var PMCODEKEY = "([^"]+)"/.exec(html); if (pmck) GEN.retail.codeKey = pmck[1];
   const files = {};
   for (const [k, slug, name] of IND) {
-    files[`agents/${slug}-solutions.md`] = solutions(k, slug, name, COPYS[k], PR[k] || []);
-    files[`agents/${slug}-documents.md`] = documents(k, slug, name, GEN[k], PROC[k]);
-    files[`agents/${slug}-processes.md`] = processes(k, slug, name, PROC[k]);
+    files[`agents/${slug}-solutions.txt`] = solutions(k, slug, name, COPYS[k], PR[k] || []);
+    files[`agents/${slug}-documents.txt`] = documents(k, slug, name, GEN[k], PROC[k]);
+    files[`agents/${slug}-processes.txt`] = processes(k, slug, name, PROC[k]);
   }
-  files["agents/operations.md"] = operations(val(html, "var AREAS = "), val(html, "var GROUPS = "), val(html, "var BREAKS = "), val(html, "var BREAK_TEXT = "), val(html, "var EXAMPLES = "), val(html, "var OMSTK = "));
-  files["agents/retail-product-overlay.md"] = overlay(val(dataJs, "var PMPV = ").retail, val(html, "var PMOV = "), val(html, "var PMDEF = "), COPYS.retail);
+  files["agents/operations.txt"] = operations(val(html, "var AREAS = "), val(html, "var GROUPS = "), val(html, "var BREAKS = "), val(html, "var BREAK_TEXT = "), val(html, "var EXAMPLES = "), val(html, "var OMSTK = "));
+  files["agents/retail-product-overlay.txt"] = overlay(val(dataJs, "var PMPV = ").retail, val(html, "var PMOV = "), val(html, "var PMDEF = "), COPYS.retail);
 
   const n = (k) => COPYS[k].processes.length, st = (k) => COPYS[k].index.stages.length;
   const idx = [
@@ -173,19 +173,20 @@ export function writeAgentDocs(html, root = ROOT) {
     "- " + COPYS.retail.footer_disclaimer + " Do not present capabilities as generally available.",
     "- " + GUIDE_DISC,
     "- Cite the file you used.", "",
+    `Start with ${SITE}llms-full.txt: solutions, documents, product overlay and operations in one file. Open the process files below for step-by-step business processes.`, "",
     "## Solutions",
-    ...IND.map(([k, slug, name]) => `- [${name} solutions](${SITE}agents/${slug}-solutions.md): ${n(k)} solutions in ${st(k)} stages, with purpose, capabilities and parties`), "",
+    ...IND.map(([k, slug, name]) => `- [${name} solutions](${SITE}agents/${slug}-solutions.txt): ${n(k)} solutions in ${st(k)} stages, with purpose, capabilities and parties`), "",
     "## Process Genome",
-    ...IND.flatMap(([k, slug, name]) => [`- [${name} documents](${SITE}agents/${slug}-documents.md): ${GEN[k].el.length} documents with sender, receiver, standards, definition and processes`,
-      `- [${name} business processes](${SITE}agents/${slug}-processes.md): ${PROC[k].length} processes, step by step, with rules, EDI team work and failure points`]),
-    `- [Retail and CPG product overlay](${SITE}agents/retail-product-overlay.md): product coverage by document across Connect, Comply, Optimize and Extend`, "",
+    ...IND.flatMap(([k, slug, name]) => [`- [${name} documents](${SITE}agents/${slug}-documents.txt): ${GEN[k].el.length} documents with sender, receiver, standards, definition and processes`,
+      `- [${name} business processes](${SITE}agents/${slug}-processes.txt): ${PROC[k].length} processes, step by step, with rules, EDI team work and failure points`]),
+    `- [Retail and CPG product overlay](${SITE}agents/retail-product-overlay.txt): product coverage by document across Connect, Comply, Optimize and Extend`, "",
     "## Operations",
-    `- [Work areas and stakeholders](${SITE}agents/operations.md): the work of a B2B operations team, where it breaks and who is involved, across industries`, "",
+    `- [Work areas and stakeholders](${SITE}agents/operations.txt): the work of a B2B operations team, where it breaks and who is involved, across industries`, "",
     "## Optional",
     `- [Everything in one file](${SITE}llms-full.txt): all sections above except the step-by-step processes, which are long; open those files for steps`, "",
   ].join("\n");
   const order = Object.keys(files);
-  const full = idx + "\n" + order.filter((f) => !/-processes\.md$/.test(f)).map((f) => `\n---\n\nFile: ${SITE}${f}\n\n${files[f]}`).join("\n");
+  const full = idx + "\n" + order.filter((f) => !/-processes\.txt$/.test(f)).map((f) => `\n---\n\nFile: ${SITE}${f}\n\n${files[f]}`).join("\n");
   fs.rmSync(path.join(root, "site/agents"), { recursive: true, force: true });
   fs.mkdirSync(path.join(root, "site/agents"), { recursive: true });
   for (const [f, t] of Object.entries(files)) fs.writeFileSync(path.join(root, "site", f), t);
